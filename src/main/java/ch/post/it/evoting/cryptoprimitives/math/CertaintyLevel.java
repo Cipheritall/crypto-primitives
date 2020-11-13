@@ -1,4 +1,4 @@
-package cryptoprimitives.math;
+package ch.post.it.evoting.cryptoprimitives.math;
 
 public final class CertaintyLevel {
 
