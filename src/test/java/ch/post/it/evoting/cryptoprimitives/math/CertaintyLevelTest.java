@@ -1,9 +1,11 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.math;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class CertaintyLevelTest {
@@ -15,8 +17,12 @@ class CertaintyLevelTest {
 	}
 
 	@Test
-	@DisplayName("with invalid bit length throws IllegalArgumentException")
+	void getCertaintyLevelSmallerLength() {
+		assertEquals(80, CertaintyLevel.getCertaintyLevel(1000));
+	}
+
+	@Test
 	void getCertaintyLevelInvalidLength() {
-		assertThrows(IllegalArgumentException.class, () -> CertaintyLevel.getCertaintyLevel(4000));
+		assertThrows(IllegalArgumentException.class, () -> CertaintyLevel.getCertaintyLevel(-1));
 	}
 }

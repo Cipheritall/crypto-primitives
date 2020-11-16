@@ -1,3 +1,6 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.math;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

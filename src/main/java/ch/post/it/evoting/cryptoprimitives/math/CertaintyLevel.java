@@ -1,24 +1,28 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.math;
 
-public final class CertaintyLevel {
+final class CertaintyLevel {
 
 	private CertaintyLevel() {
 	}
 
 	/**
-	 * Derive the certainty level from a bit length. The supported bit lengths are 2048 and 3072.
+	 * Derive the certainty level from a given bit length.
 	 *
-	 * @param bitLength The bit length from which to derive the certainty level.
+	 * @param bitLength The bit length from which to derive the certainty level. Must be a positive integer.
 	 * @return The certainty level corresponding to the given {@code bitLength}.
 	 */
-	public static short getCertaintyLevel(final int bitLength) {
-		switch (bitLength) {
-		case 2048:
-			return 112;
-		case 3072:
+	static short getCertaintyLevel(final int bitLength) {
+		if (bitLength >= 3072) {
 			return 128;
-		default:
-			throw new IllegalArgumentException("Bit length does not match a known certainty level.");
+		} else if (bitLength >= 2048) {
+			return 112;
+		} else if (bitLength >= 0) {
+			return 80;
+		} else {
+			throw new IllegalArgumentException("The bit length can not be negative.");
 		}
 	}
 
