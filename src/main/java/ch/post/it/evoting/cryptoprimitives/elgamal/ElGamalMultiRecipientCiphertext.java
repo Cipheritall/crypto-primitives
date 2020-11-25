@@ -6,7 +6,6 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -103,8 +102,6 @@ public final class ElGamalMultiRecipientCiphertext {
 	 */
 	static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
-		checkArgument(gamma.getValue().compareTo(BigInteger.ONE) != 0);
-		checkArgument(!gamma.equals(gamma.getGroup().getGenerator()), "Gamma cannot be equal to the generator.");
 
 		SameGroupVector<GqElement, GqGroup> phisVector = new SameGroupVector<>(phis);
 		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");

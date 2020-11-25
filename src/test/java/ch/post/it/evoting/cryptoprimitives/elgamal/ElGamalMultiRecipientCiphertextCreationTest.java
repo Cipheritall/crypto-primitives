@@ -34,6 +34,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	static private final int NUM_RECIPIENTS = 10;
 
 	static private GqGroup gqGroup;
+	static private GqElement gqIdentity;
 	static private RandomService randomService;
 	static private ZqGroup zqGroup;
 	static private GqGroupMemberGenerator gqGroupGenerator;
@@ -46,6 +47,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@BeforeAll
 	static void setUp() {
 		gqGroup = GqGroupTestData.getGroup();
+		gqIdentity = gqGroup.getIdentity();
 		gqGroupGenerator = new GqGroupMemberGenerator(gqGroup);
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		randomService = new RandomService();
@@ -59,7 +61,8 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 				Stream.generate(() -> gqGroupGenerator.genGqElementMember()).limit(NUM_RECIPIENTS).collect(Collectors.toList());
 		validMessage = new ElGamalMultiRecipientMessage(messageElements);
 
-		validExponent = ExponentGenerator.genRandomExponent(zqGroup, randomService);
+		// genRandomExponent excludes 0 and 1, for getCiphertext, all values in Z_p are allowed
+		validExponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 
 		validPK = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_RECIPIENTS, randomService).getPublicKey();
 	}
@@ -150,13 +153,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 			ZqElement zeroExponent = ZqElement.create(BigInteger.ZERO, zqGroup);
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(validMessage, zeroExponent, validPK);
 			assertEquals(validMessage.toList(), ciphertext.getPhis());
-			assertEquals(GqElement.create(BigInteger.ONE, gqGroup), ciphertext.getGamma());
-		}
-
-		@RepeatedTest(100)
-		void testCiphertextIsDifferentFromMessage() {
-			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(validMessage, validExponent, validPK);
-			assertNotEquals(validMessage.toList(), ciphertext.getPhis());
+			assertEquals(gqIdentity, ciphertext.getGamma());
 		}
 
 		@Test

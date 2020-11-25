@@ -24,8 +24,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.math.ExponentGenerator;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.random.RandomService;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
 
 @DisplayName("A ciphertext")
@@ -74,8 +79,6 @@ class ElGamalMultiRecipientCiphertextTest {
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createArgumentsProvider() {
 
-		final GqElement gammaOne = GqElement.create(BigInteger.ONE, group);
-		final GqElement gammaGenerator = group.getGenerator();
 		final List<GqElement> invalidPhis = Arrays.asList(GqElement.create(BigInteger.ONE, group), null);
 
 		final GqGroup differentGroup = new GqGroup(BigInteger.valueOf(7), BigInteger.valueOf(3), BigInteger.valueOf(2));
@@ -86,8 +89,6 @@ class ElGamalMultiRecipientCiphertextTest {
 
 		return Stream.of(
 				Arguments.of(null, validPhis, NullPointerException.class),
-				Arguments.of(gammaOne, validPhis, IllegalArgumentException.class),
-				Arguments.of(gammaGenerator, validPhis, IllegalArgumentException.class),
 				Arguments.of(validGamma, null, NullPointerException.class),
 				Arguments.of(validGamma, Collections.emptyList(), IllegalArgumentException.class),
 				Arguments.of(validGamma, invalidPhis, IllegalArgumentException.class),
@@ -203,6 +204,29 @@ class ElGamalMultiRecipientCiphertextTest {
 			final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
 
 			assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB));
+		}
+
+		@Test
+		@DisplayName("with an identity ciphertext (1, 1, 1) yields the same ciphertext")
+		void multiplyWithIdentityTest() {
+			final GqGroup group = GqGroupTestData.getGroup();
+			GqGroupMemberGenerator generator = new GqGroupMemberGenerator(group);
+			GqElement element1 = generator.genGqElementMember();
+			GqElement element2 = generator.genGqElementMember();
+
+			// Create first ciphertext.
+			ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
+			RandomService randomService = new RandomService();
+			ZqElement exponent = ExponentGenerator.genRandomExponent(ZqGroup.sameOrderAs(group), randomService);
+			ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
+			final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
+
+			// Create identity ciphertext.
+			final GqElement gammaB = group.getIdentity();
+			final List<GqElement> phisB = Arrays.asList(group.getIdentity(), group.getIdentity());
+			final ElGamalMultiRecipientCiphertext ciphertextIdentity = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
+
+			assertEquals(ciphertextA, ciphertextA.multiply(ciphertextIdentity));
 		}
 
 		@Test
