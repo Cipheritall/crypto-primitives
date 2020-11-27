@@ -8,6 +8,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -32,7 +34,7 @@ public final class ElGamalMultiRecipientPublicKey extends SameGroupVector<GqElem
 	 *                    <li>no element must be equal to the generator of the group they belong to</li></p>
 	 */
 	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
-		super(keyElements);
+		super(ImmutableList.copyOf(keyElements));
 		checkArgument(keyElements.stream().map(GqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
 				"An ElGamal public key cannot contain a 1 valued element.");
 		checkArgument(keyElements.stream().allMatch(element -> element.getValue().compareTo(element.getGroup().getGenerator().getValue()) != 0),

@@ -34,7 +34,7 @@ class PermutationTest {
 
 	@RepeatedTest(10)
 	void genPermutationContainsAllValuesInInputRange() {
-		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE);
+		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = Permutation.genPermutation(size);
 		TreeSet<Integer> values = computePermutationValues(permutation);
 
@@ -49,7 +49,7 @@ class PermutationTest {
 
 	@Test
 	void getThrowsForNegativeValue() {
-		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE);
+		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		int value = -random.nextInt();
 		Permutation permutation = Permutation.genPermutation(size);
 		assertThrows(IllegalArgumentException.class, () -> permutation.get(value));
@@ -57,7 +57,7 @@ class PermutationTest {
 
 	@Test
 	void getThrowsForValueAboveSize() {
-		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE);
+		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		int value = random.nextInt(Integer.MAX_VALUE - size) + size;
 		Permutation permutation = Permutation.genPermutation(size);
 		assertThrows(IllegalArgumentException.class, () -> permutation.get(value));
@@ -65,14 +65,14 @@ class PermutationTest {
 
 	@Test
 	void getThrowsForValueOfSize() {
-		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE);
+		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = Permutation.genPermutation(size);
 		assertThrows(IllegalArgumentException.class, () -> permutation.get(size));
 	}
 
 	@Test
 	void getSizeReturnsSize() {
-		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE);
+		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = Permutation.genPermutation(size);
 		assertEquals(size, permutation.getSize());
 	}

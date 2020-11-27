@@ -8,6 +8,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -28,7 +30,7 @@ public final class ElGamalMultiRecipientPrivateKey extends SameGroupVector<ZqEle
 	 *                    <li>no element must be equal to 1</li></p>
 	 */
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
-		super(keyElements);
+		super(ImmutableList.copyOf(keyElements));
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ZERO) != 0),
 				"An ElGamal private key cannot contain a 0 valued element.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),

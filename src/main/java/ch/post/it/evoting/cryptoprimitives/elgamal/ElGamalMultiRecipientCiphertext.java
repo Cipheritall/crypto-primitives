@@ -29,7 +29,7 @@ public final class ElGamalMultiRecipientCiphertext {
 	private final GqGroup group;
 
 	// Private constructor without input validation. Used only to internally construct new ciphertext whose elements have already been validated.
-	private ElGamalMultiRecipientCiphertext(final GqElement gamma, final List<GqElement> phis) {
+	private ElGamalMultiRecipientCiphertext(final GqElement gamma, final ImmutableList<GqElement> phis) {
 		this.gamma = gamma;
 		this.phis = new SameGroupVector<>(phis);
 		this.group = gamma.getGroup();
@@ -87,7 +87,7 @@ public final class ElGamalMultiRecipientCiphertext {
 			phis.add(compressedKey.exponentiate(exponent).multiply(message.get(n - 1)));
 		}
 
-		return new ElGamalMultiRecipientCiphertext(gamma, phis);
+		return new ElGamalMultiRecipientCiphertext(gamma, ImmutableList.copyOf(phis));
 	}
 
 	/**
@@ -106,7 +106,7 @@ public final class ElGamalMultiRecipientCiphertext {
 		SameGroupVector<GqElement, GqGroup> phisVector = new SameGroupVector<>(phis);
 		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");
 
-		return new ElGamalMultiRecipientCiphertext(gamma, phis);
+		return new ElGamalMultiRecipientCiphertext(gamma, ImmutableList.copyOf(phis));
 	}
 
 	/**
@@ -138,6 +138,10 @@ public final class ElGamalMultiRecipientCiphertext {
 
 	public final ImmutableList<GqElement> getPhis() {
 		return this.phis.toList();
+	}
+
+	public final GqGroup getGroup() {
+		return this.group;
 	}
 
 	@Override
