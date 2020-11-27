@@ -8,6 +8,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Base64;
+
+import com.google.common.io.BaseEncoding;
+
+import ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService;
 
 public final class RandomService {
 
@@ -56,6 +61,44 @@ public final class RandomService {
 
 		BigInteger r = genRandomInteger(upperbound.subtract(lowerBound));
 		return lowerBound.add(r);
+	}
+
+	/**
+	 * @see CryptoPrimitiveService#genRandomBase32String(int)
+	 */
+	public String genRandomBase32String(final int length) {
+		checkArgument(length > 0 && length < 1000);
+
+		// One char can be represented by 5 bits in Base32 encoding. Take advantage of integer truncate instead of ceiling function.
+		final int lengthInBytes = (length * 5 + (Byte.SIZE - 1)) / Byte.SIZE;
+
+		// Generate the random bytes, b.
+		final byte[] randomBytes = randomBytes(lengthInBytes);
+
+		// Encode to a Base32 String.
+		final String encodedString = BaseEncoding.base32().encode(randomBytes);
+
+		// Truncate to desired length.
+		return encodedString.substring(0, length);
+	}
+
+	/**
+	 * @see CryptoPrimitiveService#genRandomBase64String(int)
+	 */
+	public String genRandomBase64String(final int length) {
+		checkArgument(length > 0 && length < 1000);
+
+		// One char can be represented by 6 bits in Base64 encoding. Take advantage of integer truncate instead of ceiling function.
+		final int lengthInBytes = (length * 6 + (Byte.SIZE - 1)) / Byte.SIZE;
+
+		// Generate the random bytes, b.
+		final byte[] randomBytes = randomBytes(lengthInBytes);
+
+		// Encode to a Base64 String.
+		final String encodedString = Base64.getEncoder().encodeToString(randomBytes);
+
+		// Truncate to desired length.
+		return encodedString.substring(0, length);
 	}
 
 	/**
