@@ -14,6 +14,9 @@ import com.google.common.io.BaseEncoding;
 
 import ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService;
 
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+
 public final class RandomService {
 
 	private final SecureRandom secureRandom;
@@ -112,5 +115,18 @@ public final class RandomService {
 		secureRandom.nextBytes(randomBytes);
 
 		return randomBytes;
+	}
+
+	/**
+	 * Generates a uniformly distributed random exponent within a ZqGroup.
+	 *
+	 * @param group         a ZqGroup (not null)
+	 * @return a random element of the group, with value in [2, q).
+	 */
+	public ZqElement genRandomExponent(final ZqGroup group) {
+		checkNotNull(group);
+
+		BigInteger value = genRandomIntegerWithinBounds(BigInteger.valueOf(2), group.getQ());
+		return ZqElement.create(value, group);
 	}
 }

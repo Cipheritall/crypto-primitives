@@ -38,7 +38,7 @@ public class ElGamalMultiRecipientMessage extends SameGroupVector<GqElement, GqG
 		checkArgument(ciphertext.getGroup().getQ().equals(secretKey.getGroup().getQ()), "Ciphertext and secret key must be of the same order");
 
 		int n = ciphertext.getPhis().size();
-		int k = secretKey.length();
+		int k = secretKey.size();
 		// 0 < k is guaranteed by the checks performed during the construction of the ElGamalMultiRecipientCiphertext
 		checkArgument(n <= k, "There can not be more message elements than private key elements.");
 

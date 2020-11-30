@@ -19,8 +19,8 @@ import ch.post.it.evoting.cryptoprimitives.math.StreamlinedMathematicalGroup;
  *
  * <p>Instances of this class are immutable. </p>
  *
- * @param <E> the type of elements this actor contains.
- * @param <G> the group type the elements of the vector belong to.
+ * @param <E> the type of elements this list contains.
+ * @param <G> the group type the elements of the list belong to.
  */
 public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends StreamlinedMathematicalGroup<G>> {
 
@@ -28,13 +28,13 @@ public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends Str
 	private final ImmutableList<E> elements;
 
 	/**
-	 * @param elements the list of elements contained by this actor, which must respect the following:
+	 * @param elements the list of elements contained by this vector, which must respect the following:
 	 *                 <li>the list must be non-null</li>
 	 *                 <li>the list must not be empty</li>
 	 *                 <li>the list must not contain any nulls</li>
 	 *                 <li>all elements must be from the same {@link StreamlinedMathematicalGroup} </li>
 	 */
-	SameGroupVector(List<E> elements) {
+	public SameGroupVector(List<E> elements) {
 		checkNotNull(elements);
 		checkArgument(!elements.isEmpty(), "Elements must be non empty.");
 		checkArgument(elements.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
@@ -48,7 +48,7 @@ public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends Str
 	/**
 	 * @return the number of elements this vector contains.
 	 */
-	public int length() {
+	public int size() {
 		return elements.size();
 	}
 
@@ -68,7 +68,7 @@ public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends Str
 		return this.group;
 	}
 
-	ImmutableList<E> toList() {
+	public ImmutableList<E> toList() {
 		return this.elements;
 	}
 

@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.math.ExponentGenerator;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -51,7 +50,7 @@ public class ElGamalMultiRecipientKeyPair {
 
 		// Generate the private key as a list of random exponents
 		List<ZqElement> privateKeyElements =
-				Stream.generate(() -> ExponentGenerator.genRandomExponent(privateKeyGroup, randomService))
+				Stream.generate(() -> randomService.genRandomExponent(privateKeyGroup))
 						.limit(numElements)
 						.collect(Collectors.toList());
 		ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);

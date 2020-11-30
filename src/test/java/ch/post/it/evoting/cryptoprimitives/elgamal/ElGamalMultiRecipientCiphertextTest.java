@@ -24,7 +24,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.math.ExponentGenerator;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -217,7 +216,7 @@ class ElGamalMultiRecipientCiphertextTest {
 			// Create first ciphertext.
 			ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
 			RandomService randomService = new RandomService();
-			ZqElement exponent = ExponentGenerator.genRandomExponent(ZqGroup.sameOrderAs(group), randomService);
+			ZqElement exponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(group));
 			ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
 			final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
 

@@ -32,9 +32,7 @@ public final class GqElement extends StreamlinedGroupElement<GqGroup> {
 	public static GqElement create(final BigInteger value, final GqGroup group) {
 		checkNotNull(value);
 		checkNotNull(group);
-		Preconditions
-				.checkArgument(group.isGroupMember(value), "Cannot create a GroupElement with value %s as it is not an element of group %s", value,
-						group);
+		checkArgument(group.isGroupMember(value), "Cannot create a GroupElement with value %s as it is not an element of group %s", value, group);
 
 		return new GqElement(value, group);
 	}

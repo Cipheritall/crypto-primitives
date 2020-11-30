@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.math.ExponentGenerator;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -87,7 +86,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 		@Test
 		void testExponentFromDifferentQThrows() {
 			GqGroup otherGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-			ZqElement otherGroupExponent = ExponentGenerator.genRandomExponent(ZqGroup.sameOrderAs(otherGroup), randomService);
+			ZqElement otherGroupExponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(otherGroup));
 
 			assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 		}
@@ -104,7 +103,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 		@Test
 		void testPublicKeyAndExponentFromDifferentGroupsThrows() {
 			GqGroup otherGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-			ZqElement otherGroupExponent = ExponentGenerator.genRandomExponent(ZqGroup.sameOrderAs(otherGroup), randomService);
+			ZqElement otherGroupExponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(otherGroup));
 
 			assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 		}

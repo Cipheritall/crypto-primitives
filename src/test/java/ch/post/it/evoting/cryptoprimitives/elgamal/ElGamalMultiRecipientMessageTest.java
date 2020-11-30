@@ -18,7 +18,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.math.ExponentGenerator;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -96,7 +95,7 @@ class ElGamalMultiRecipientMessageTest {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		ElGamalMultiRecipientPrivateKey secretKey = keyPair.getPrivateKey();
 		ElGamalMultiRecipientPrivateKey tooShortSecretKey = new ElGamalMultiRecipientPrivateKey(secretKey.toList().subList(0, 1));
-		ZqElement exponent = ExponentGenerator.genRandomExponent(zqGroup, randomService);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup);
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 
 		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
@@ -121,7 +120,7 @@ class ElGamalMultiRecipientMessageTest {
 	@RepeatedTest(10)
 	void testMessageDifferentFromCiphertext() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
-		ZqElement exponent = ExponentGenerator.genRandomExponent(zqGroup, randomService);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup);
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientMessage newMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, keyPair.getPrivateKey());
 

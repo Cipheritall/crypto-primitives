@@ -72,7 +72,7 @@ class SameGroupVectorTest {
 						.generate(() -> new TestElement(group))
 						.limit(n)
 						.collect(Collectors.toList());
-		assertEquals(n, new SameGroupVector<>(elements).length());
+		assertEquals(n, new SameGroupVector<>(elements).size());
 	}
 
 	@Test

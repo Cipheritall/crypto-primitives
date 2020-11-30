@@ -6,6 +6,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +44,7 @@ public final class ElGamalMultiRecipientCiphertext {
 	 * @param publicKey pk, the public key to use to encrypt the message.
 	 * @return A ciphertext containing the encrypted message.
 	 */
-	static ElGamalMultiRecipientCiphertext getCiphertext(
+	public static ElGamalMultiRecipientCiphertext getCiphertext(
 			final ElGamalMultiRecipientMessage message,
 			final ZqElement exponent,
 			final ElGamalMultiRecipientPublicKey publicKey) {
@@ -56,10 +57,10 @@ public final class ElGamalMultiRecipientCiphertext {
 		checkArgument(message.getGroup().equals(publicKey.getGroup()), "Message and public key must belong to the same group. ");
 
 		//The message is guaranteed to be non empty by the checks performed during the construction of the ElGamalMultiRecipientMessage
-		checkArgument(message.length() <= publicKey.length(), "There can not be more message elements than public key elements.");
+		checkArgument(message.size() <= publicKey.size(), "There can not be more message elements than public key elements.");
 
-		int n = message.length();
-		int k = publicKey.length();
+		int n = message.size();
+		int k = publicKey.size();
 
 		GqElement generator = publicKey.getGroup().getGenerator();
 		GqElement gamma = generator.exponentiate(exponent);
@@ -100,7 +101,7 @@ public final class ElGamalMultiRecipientCiphertext {
 	 *              <li>The list must not contain any null.</li>
 	 *              <li>All elements must be from the same Gq group.</li>
 	 */
-	static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
+	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
 		SameGroupVector<GqElement, GqGroup> phisVector = new SameGroupVector<>(phis);
@@ -118,12 +119,12 @@ public final class ElGamalMultiRecipientCiphertext {
 	 */
 	public ElGamalMultiRecipientCiphertext multiply(final ElGamalMultiRecipientCiphertext other) {
 		checkNotNull(other);
-		checkArgument(this.phis.length() == other.phis.length());
+		checkArgument(this.phis.size() == other.phis.size());
 		checkArgument(this.group.equals(other.group));
 
 		final GqElement resultGamma = this.gamma.multiply(other.gamma);
 
-		final int n = this.phis.length();
+		final int n = this.phis.size();
 		final ImmutableList<GqElement> resultPhis =
 				IntStream.range(0, n)
 						.mapToObj(i -> this.phis.get(i).multiply(other.phis.get(i)))
@@ -140,8 +141,15 @@ public final class ElGamalMultiRecipientCiphertext {
 		return this.phis.toList();
 	}
 
-	public final GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return this.group;
+	}
+
+	/**
+	 * @return the number of phis in the ciphertext.
+	 */
+	public int size() {
+		return phis.size();
 	}
 
 	@Override
@@ -165,6 +173,8 @@ public final class ElGamalMultiRecipientCiphertext {
 
 	@Override
 	public String toString() {
-		return "ElGamalMultiRecipientCiphertext{" + "gamma=" + gamma + ", phis=" + phis + '}';
+		List<String> simplePhis = phis.toList().stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
+		return "ElGamalMultiRecipientCiphertext{" + "gamma=" + gamma + ", phis=" + simplePhis + '}';
 	}
 }
+
