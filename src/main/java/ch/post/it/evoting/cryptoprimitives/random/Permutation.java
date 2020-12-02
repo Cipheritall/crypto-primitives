@@ -5,8 +5,12 @@ package ch.post.it.evoting.cryptoprimitives.random;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Arrays;
+
 /**
  * Represents a permutation of integers in the range [0, N).
+ *
+ * Instances of this class are immutable.
  */
 public class Permutation {
 
@@ -15,8 +19,8 @@ public class Permutation {
 	private final int size;
 
 	Permutation(final int[] valueMapping) {
-		this.valueMapping = valueMapping;
 		this.size = valueMapping.length;
+		this.valueMapping = Arrays.copyOf(valueMapping, this.size);
 	}
 
 	/**

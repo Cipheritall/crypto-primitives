@@ -36,13 +36,15 @@ public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends Str
 	 */
 	public SameGroupVector(List<E> elements) {
 		checkNotNull(elements);
-		checkArgument(!elements.isEmpty(), "Elements must be non empty.");
 		checkArgument(elements.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
-		checkArgument(elements.stream().map(StreamlinedGroupElement::getGroup).allMatch(elements.get(0).getGroup()::equals),
+		ImmutableList<E> elementsCopy = ImmutableList.copyOf(elements);
+
+		checkArgument(!elementsCopy.isEmpty(), "Elements must be non empty.");
+		checkArgument(elementsCopy.stream().map(StreamlinedGroupElement::getGroup).allMatch(elementsCopy.get(0).getGroup()::equals),
 				"All elements must belong to the same group.");
 
-		this.elements = ImmutableList.copyOf(elements);
-		this.group = elements.get(0).getGroup();
+		this.elements = elementsCopy;
+		this.group = elementsCopy.get(0).getGroup();
 	}
 
 	/**

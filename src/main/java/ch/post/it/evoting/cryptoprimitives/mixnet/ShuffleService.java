@@ -76,8 +76,8 @@ public class ShuffleService {
 		List<GqElement> ones = Stream.generate(() -> identity).limit(n).collect(Collectors.toList());
 		ElGamalMultiRecipientMessage onesMessage = new ElGamalMultiRecipientMessage(ones);
 
-		ArrayList<ZqElement> exponents =
-				Stream.generate(() ->  randomService.genRandomExponent(exponentGroup)).limit(N).collect(Collectors.toCollection(ArrayList::new));
+		ImmutableList<ZqElement> exponents =
+				Stream.generate(() ->  randomService.genRandomExponent(exponentGroup)).limit(N).collect(ImmutableList.toImmutableList());
 		ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertexts =
 				IntStream.range(0, N)
 						.mapToObj(i -> getCiphertext(onesMessage, exponents.get(i), publicKey).multiply(ciphertextsCopy.get(psi.get(i))))
