@@ -12,8 +12,6 @@ import java.util.Base64;
 
 import com.google.common.io.BaseEncoding;
 
-import ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService;
-
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -67,7 +65,7 @@ public final class RandomService {
 	}
 
 	/**
-	 * @see CryptoPrimitiveService#genRandomBase32String(int)
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase32String(int)
 	 */
 	public String genRandomBase32String(final int length) {
 		checkArgument(length > 0 && length < 1000);
@@ -86,7 +84,7 @@ public final class RandomService {
 	}
 
 	/**
-	 * @see CryptoPrimitiveService#genRandomBase64String(int)
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase64String(int)
 	 */
 	public String genRandomBase64String(final int length) {
 		checkArgument(length > 0 && length < 1000);
@@ -120,7 +118,7 @@ public final class RandomService {
 	/**
 	 * Generates a uniformly distributed random exponent within a ZqGroup.
 	 *
-	 * @param group         a ZqGroup (not null)
+	 * @param group a ZqGroup (not null)
 	 * @return a random element of the group, with value in [2, q).
 	 */
 	public ZqElement genRandomExponent(final ZqGroup group) {

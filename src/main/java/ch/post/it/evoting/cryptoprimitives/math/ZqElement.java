@@ -13,7 +13,7 @@ import java.math.BigInteger;
  *
  * <p> Instances of this class are immutable.</p>
  */
-public class ZqElement extends StreamlinedGroupElement<ZqGroup> {
+public class ZqElement extends GroupElement<ZqGroup> {
 
 	// Private constructor without input validation. Used only for operations that provide a mathematical guarantee that the element is within the
 	// group (such as multiplying two elements of the same group).
@@ -85,6 +85,20 @@ public class ZqElement extends StreamlinedGroupElement<ZqGroup> {
 		checkArgument(this.group.equals(other.group));
 
 		BigInteger result = BigIntegerOperations.modMultiply(value, other.getValue(), this.group.getQ());
+		return new ZqElement(result, this.group);
+	}
+
+	/**
+	 * Returns a {@code ZqElement} whose value is {@code (this ^ exponent) mod q}.
+	 *
+	 * @param exponent the exponent. It must be non null and non negative.
+	 * @return {@code (this ^ exponent) mod q}.
+	 */
+	public ZqElement exponentiate(final BigInteger exponent) {
+		checkNotNull(exponent);
+		checkArgument(exponent.compareTo(BigInteger.ZERO) >= 0, "The exponent must be positive.");
+
+		final BigInteger result = BigIntegerOperations.modExponentiate(value, exponent, this.group.getQ());
 		return new ZqElement(result, this.group);
 	}
 

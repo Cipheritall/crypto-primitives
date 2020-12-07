@@ -11,12 +11,12 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,6 +30,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
 
 @DisplayName("A ciphertext")
@@ -174,92 +176,145 @@ class ElGamalMultiRecipientCiphertextTest {
 		return Arrays.asList(otherGroupGenerator.genGqElementMember(), otherGroupGenerator.genGqElementMember());
 	}
 
-	@Nested
-	@DisplayName("multiplied")
-	class WhenMultiplying {
+	// ===============================================================================================================================================
+	// Multiplication tests.
+	// ===============================================================================================================================================
 
-		// All the input/output values should later be read from a json file.
-		@Test
-		@DisplayName("with a valid other ciphertext gives expected result")
-		void multiplyTest() {
-			final GqGroup group = new GqGroup(BigInteger.valueOf(11), BigInteger.valueOf(5), BigInteger.valueOf(3));
+	// Provides parameters for the multiplyTest.
+	static Stream<Arguments> jsonFileArgumentProvider() {
 
-			// Create first ciphertext.
-			final GqElement gammaA = GqElement.create(BigInteger.valueOf(4), group);
-			final List<GqElement> phisA = Arrays
-					.asList(GqElement.create(BigInteger.valueOf(3), group), GqElement.create(BigInteger.valueOf(5), group));
-			final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.create(gammaA, phisA);
+		final List<TestParameters> parametersList = TestParameters.fromResource("/elgamal/get-ciphertext-product.json");
 
-			// Create second ciphertext.
-			final GqElement gammaB = GqElement.create(BigInteger.valueOf(5), group);
-			final List<GqElement> phisB = Arrays
-					.asList(GqElement.create(BigInteger.valueOf(9), group), GqElement.create(BigInteger.valueOf(1), group));
-			final ElGamalMultiRecipientCiphertext ciphertextB = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
+		return parametersList.stream().parallel().map(testParameters -> {
+			// Context.
+			final JsonData egJsonData = testParameters.getContext().getJsonData("eg");
+			final BigInteger p = egJsonData.get("p", BigInteger.class);
+			final BigInteger q = egJsonData.get("q", BigInteger.class);
+			final BigInteger g = testParameters.getContext().get("g", BigInteger.class);
 
-			// Expected multiplication result.
-			final GqElement gammaRes = GqElement.create(BigInteger.valueOf(9), group);
-			final List<GqElement> phisRes = Arrays.asList(GqElement.create(BigInteger.valueOf(5), group), GqElement.create(BigInteger.valueOf(5),
-					group));
-			final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
+			final GqGroup group = new GqGroup(p, q, g);
 
-			assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB));
-		}
+			// Parse first ciphertext parameters.
+			final JsonData upperCa = testParameters.getInput().getJsonData("upper_c_a");
 
-		@Test
-		@DisplayName("with an identity ciphertext (1, 1, 1) yields the same ciphertext")
-		void multiplyWithIdentityTest() {
-			final GqGroup group = GqGroupTestData.getGroup();
-			GqGroupMemberGenerator generator = new GqGroupMemberGenerator(group);
-			GqElement element1 = generator.genGqElementMember();
-			GqElement element2 = generator.genGqElementMember();
+			final GqElement gammaA = GqElement.create(upperCa.get("gamma", BigInteger.class), group);
+			final BigInteger[] phisAArray = upperCa.get("phis", BigInteger[].class);
+			final List<GqElement> phisA = Arrays.stream(phisAArray).map(phiA -> GqElement.create(phiA, group)).collect(Collectors.toList());
 
-			// Create first ciphertext.
-			ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
-			RandomService randomService = new RandomService();
-			ZqElement exponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(group));
-			ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
-			final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
+			// Parse second ciphertext parameters.
+			final JsonData upperCb = testParameters.getInput().getJsonData("upper_c_b");
 
-			// Create identity ciphertext.
-			final GqElement gammaB = group.getIdentity();
-			final List<GqElement> phisB = Arrays.asList(group.getIdentity(), group.getIdentity());
-			final ElGamalMultiRecipientCiphertext ciphertextIdentity = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
+			final GqElement gammaB = GqElement.create(upperCb.get("gamma", BigInteger.class), group);
+			final BigInteger[] phisBArray = upperCb.get("phis", BigInteger[].class);
+			final List<GqElement> phisB = Arrays.stream(phisBArray).map(phi -> GqElement.create(phi, group)).collect(Collectors.toList());
 
-			assertEquals(ciphertextA, ciphertextA.multiply(ciphertextIdentity));
-		}
+			// Parse multiplication result parameters.
+			final JsonData outputJsonData = testParameters.getOutput();
 
-		@Test
-		@DisplayName("with a null ciphertext throws NullPointerException")
-		void multiplyWithNullOtherShouldThrow() {
-			final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+			final GqElement gammaRes = GqElement.create(outputJsonData.get("gamma", BigInteger.class), group);
+			final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
+			final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElement.create(phi, group)).collect(Collectors.toList());
 
-			assertThrows(NullPointerException.class, () -> ciphertext.multiply(null));
-		}
+			return Arguments.of(gammaA, phisA, gammaB, phisB, gammaRes, phisRes, testParameters.getDescription());
+		});
+	}
 
-		@Test
-		@DisplayName("with a ciphertext from another group throws IllegalArgumentException")
-		void multiplyWithDifferentGroupOtherShouldThrow() {
-			final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+	@ParameterizedTest
+	@MethodSource("jsonFileArgumentProvider")
+	@DisplayName("with a valid other ciphertext gives expected result")
+	void multiplyWithRealValuesTest(final GqElement gammaA, final List<GqElement> phisA, final GqElement gammaB, final List<GqElement> phisB,
+			final GqElement gammaRes, final List<GqElement> phisRes, final String description) {
 
-			final GqGroup otherGroup = new GqGroup(BigInteger.valueOf(7), BigInteger.valueOf(3), BigInteger.valueOf(2));
-			final GqElement otherGroupGamma = genOtherGroupGamma(otherGroup);
-			final List<GqElement> otherGroupPhis = genOtherGroupPhis(otherGroup);
-			final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(otherGroupGamma, otherGroupPhis);
+		// Create first ciphertext.
+		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.create(gammaA, phisA);
 
-			assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));
-		}
+		// Create second ciphertext.
+		final ElGamalMultiRecipientCiphertext ciphertextB = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
 
-		@Test
-		@DisplayName("with a ciphertext with a different number of phis throws IllegalArgumentException")
-		void multiplyWithDifferentSizePhisShouldThrow() {
-			final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+		// Expected multiplication result.
+		final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
 
-			final ImmutableList<GqElement> differentSizePhis = ImmutableList.of(validPhis.get(0));
-			final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(validGamma, differentSizePhis);
+		assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB), String.format("assertion failed for: %s", description));
+	}
 
-			assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));
-		}
+	@Test
+	void multiplyTest() {
+		final GqGroup group = new GqGroup(BigInteger.valueOf(11), BigInteger.valueOf(5), BigInteger.valueOf(3));
 
+		// Create first ciphertext.
+		final GqElement gammaA = GqElement.create(BigInteger.valueOf(4), group);
+		final List<GqElement> phisA = Arrays
+				.asList(GqElement.create(BigInteger.valueOf(3), group), GqElement.create(BigInteger.valueOf(5), group));
+		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.create(gammaA, phisA);
+
+		// Create second ciphertext.
+		final GqElement gammaB = GqElement.create(BigInteger.valueOf(5), group);
+		final List<GqElement> phisB = Arrays
+				.asList(GqElement.create(BigInteger.valueOf(9), group), GqElement.create(BigInteger.valueOf(1), group));
+		final ElGamalMultiRecipientCiphertext ciphertextB = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
+
+		// Expected multiplication result.
+		final GqElement gammaRes = GqElement.create(BigInteger.valueOf(9), group);
+		final List<GqElement> phisRes = Arrays.asList(GqElement.create(BigInteger.valueOf(5), group), GqElement.create(BigInteger.valueOf(5),
+				group));
+		final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
+
+		assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB));
+	}
+
+	@Test
+	@DisplayName("with an identity ciphertext (1, 1, 1) yields the same ciphertext")
+	void multiplyWithIdentityTest() {
+		final GqGroup group = GqGroupTestData.getGroup();
+		GqGroupMemberGenerator generator = new GqGroupMemberGenerator(group);
+		GqElement element1 = generator.genGqElementMember();
+		GqElement element2 = generator.genGqElementMember();
+
+		// Create first ciphertext.
+		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
+		RandomService randomService = new RandomService();
+		ZqElement exponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(group));
+		ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
+		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
+
+		// Create identity ciphertext.
+		final GqElement gammaB = group.getIdentity();
+		final List<GqElement> phisB = Arrays.asList(group.getIdentity(), group.getIdentity());
+		final ElGamalMultiRecipientCiphertext ciphertextIdentity = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
+
+		assertEquals(ciphertextA, ciphertextA.multiply(ciphertextIdentity));
+	}
+
+	@Test
+	@DisplayName("with a null ciphertext throws NullPointerException")
+	void multiplyWithNullOtherShouldThrow() {
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+
+		assertThrows(NullPointerException.class, () -> ciphertext.multiply(null));
+	}
+
+	@Test
+	@DisplayName("with a ciphertext from another group throws IllegalArgumentException")
+	void multiplyWithDifferentGroupOtherShouldThrow() {
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+
+		final GqGroup otherGroup = new GqGroup(BigInteger.valueOf(7), BigInteger.valueOf(3), BigInteger.valueOf(2));
+		final GqElement otherGroupGamma = genOtherGroupGamma(otherGroup);
+		final List<GqElement> otherGroupPhis = genOtherGroupPhis(otherGroup);
+		final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(otherGroupGamma, otherGroupPhis);
+
+		assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));
+	}
+
+	@Test
+	@DisplayName("with a ciphertext with a different number of phis throws IllegalArgumentException")
+	void multiplyWithDifferentSizePhisShouldThrow() {
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+
+		final ImmutableList<GqElement> differentSizePhis = ImmutableList.of(validPhis.get(0));
+		final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(validGamma, differentSizePhis);
+
+		assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));
 	}
 
 }

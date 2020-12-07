@@ -13,12 +13,12 @@ import java.util.Objects;
  *
  * @param <G> the type of the mathematical group this group element belongs to.
  */
-public abstract class StreamlinedGroupElement<G extends StreamlinedMathematicalGroup<G>> {
+public abstract class GroupElement<G extends MathematicalGroup<G>> {
 
 	protected final BigInteger value;
 	protected final G group;
 
-	protected StreamlinedGroupElement(final BigInteger value, final G group) {
+	protected GroupElement(final BigInteger value, final G group) {
 		this.value = value;
 		this.group = group;
 	}
@@ -49,7 +49,7 @@ public abstract class StreamlinedGroupElement<G extends StreamlinedMathematicalG
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		StreamlinedGroupElement<?> that = (StreamlinedGroupElement<?>) o;
+		GroupElement<?> that = (GroupElement<?>) o;
 		return value.equals(that.value) && group.equals(that.group);
 	}
 

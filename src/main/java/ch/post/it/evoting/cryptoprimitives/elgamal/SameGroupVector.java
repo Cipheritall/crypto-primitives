@@ -11,18 +11,18 @@ import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.math.StreamlinedGroupElement;
-import ch.post.it.evoting.cryptoprimitives.math.StreamlinedMathematicalGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
+import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
- * Vector of {@link StreamlinedGroupElement} belonging to the same {@link StreamlinedMathematicalGroup}.
+ * Vector of {@link GroupElement} belonging to the same {@link MathematicalGroup}.
  *
  * <p>Instances of this class are immutable. </p>
  *
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */
-public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends StreamlinedMathematicalGroup<G>> {
+public class SameGroupVector<E extends GroupElement<G>, G extends MathematicalGroup<G>> {
 
 	final G group;
 	private final ImmutableList<E> elements;
@@ -32,7 +32,7 @@ public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends Str
 	 *                 <li>the list must be non-null</li>
 	 *                 <li>the list must not be empty</li>
 	 *                 <li>the list must not contain any nulls</li>
-	 *                 <li>all elements must be from the same {@link StreamlinedMathematicalGroup} </li>
+	 *                 <li>all elements must be from the same {@link MathematicalGroup} </li>
 	 */
 	public SameGroupVector(List<E> elements) {
 		checkNotNull(elements);
@@ -40,7 +40,7 @@ public class SameGroupVector<E extends StreamlinedGroupElement<G>, G extends Str
 		ImmutableList<E> elementsCopy = ImmutableList.copyOf(elements);
 
 		checkArgument(!elementsCopy.isEmpty(), "Elements must be non empty.");
-		checkArgument(elementsCopy.stream().map(StreamlinedGroupElement::getGroup).allMatch(elementsCopy.get(0).getGroup()::equals),
+		checkArgument(elementsCopy.stream().map(GroupElement::getGroup).allMatch(elementsCopy.get(0).getGroup()::equals),
 				"All elements must belong to the same group.");
 
 		this.elements = elementsCopy;
