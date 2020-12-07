@@ -16,11 +16,8 @@ import org.junit.jupiter.api.Test;
 class ZqElementTest {
 
 	private static ZqGroup smallQGroup;
-
 	private static ZqGroup largeQGroup;
-
 	private static BigInteger smallQGroupMember;
-
 	private static BigInteger largeQGoupMember;
 
 	@BeforeAll
@@ -249,6 +246,28 @@ class ZqElementTest {
 	}
 
 	@Test
+	void whenExponentiatedNullThenThrow() {
+		final ZqElement element = ZqElement.create(smallQGroupMember, smallQGroup);
+		assertThrows(NullPointerException.class, () -> element.exponentiate(null));
+	}
+
+	@Test
+	void whenExponentiatedNegativeThrow() {
+		final ZqElement element = ZqElement.create(smallQGroupMember, smallQGroup);
+		assertThrows(IllegalArgumentException.class, () -> element.exponentiate(BigInteger.valueOf(-1)));
+	}
+
+	@Test
+	void whenExponentiatedZeroThenResultIsOne() {
+		exponentiateAndAssert(smallQGroupMember, BigInteger.ZERO, BigInteger.ONE);
+	}
+
+	@Test
+	void whenExponentiatedSmallThenResultIsCorrect() {
+		exponentiateAndAssert(smallQGroupMember, BigInteger.valueOf(6), BigInteger.valueOf(9));
+	}
+
+	@Test
 	void testEquals() {
 		ZqGroup groupOrder11 = new ZqGroup(BigInteger.valueOf(11));
 		ZqGroup groupOrder12 = new ZqGroup(BigInteger.valueOf(12));
@@ -318,6 +337,22 @@ class ZqElementTest {
 		exponent1 = exponent1.multiply(exponent2);
 
 		assertEquals(expectedResult, exponent1.getValue(), "The operation result is invalid");
+	}
+
+	/**
+	 * Create the {@link ZqElement} with the given {@code elementValue}, and exponentiate it to {@code exponent}. Then assert that the result is the
+	 * expected value.
+	 *
+	 * @param elementValue   The base value.
+	 * @param exponent       The exponent.
+	 * @param expectedResult The expected value of the result of exponentiating the base with the exponent: {@code (element ^ exponent)}
+	 */
+	private void exponentiateAndAssert(final BigInteger elementValue, final BigInteger exponent, final BigInteger expectedResult) {
+		final ZqElement element = ZqElement.create(elementValue, smallQGroup);
+
+		final ZqElement result = element.exponentiate(exponent);
+
+		assertEquals(expectedResult, result.getValue(), "The exponentiate result is invalid");
 	}
 
 	/**

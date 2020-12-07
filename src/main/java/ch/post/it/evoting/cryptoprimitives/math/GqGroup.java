@@ -17,7 +17,7 @@ import java.util.Objects;
  *
  * <p>Instances of this class are immutable.
  */
-public final class GqGroup implements StreamlinedMathematicalGroup<GqGroup> {
+public final class GqGroup implements MathematicalGroup<GqGroup> {
 
 	private final BigInteger p;
 
@@ -82,7 +82,7 @@ public final class GqGroup implements StreamlinedMathematicalGroup<GqGroup> {
 		return value != null &&
 				value.compareTo(BigInteger.ZERO) > 0 &&
 				value.compareTo(p) < 0 &&
-				BigIntegerOperations.modPow(value, q, p).compareTo(BigInteger.ONE) == 0;
+				BigIntegerOperations.modExponentiate(value, q, p).compareTo(BigInteger.ONE) == 0;
 	}
 
 	public BigInteger getP() {

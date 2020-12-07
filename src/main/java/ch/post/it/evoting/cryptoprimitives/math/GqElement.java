@@ -8,14 +8,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 
-import com.google.common.base.Preconditions;
-
 /**
  * Class which defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
  *
  * <p>Instances of this class are immutable.
  */
-public final class GqElement extends StreamlinedGroupElement<GqGroup> {
+public final class GqElement extends GroupElement<GqGroup> {
 
 	// Private constructor without input validation. Used only for operations that provide a mathematical guarantee that the element is within the
 	// group (such as multiplying two elements of the same group).
@@ -62,7 +60,7 @@ public final class GqElement extends StreamlinedGroupElement<GqGroup> {
 		checkNotNull(exponent);
 		checkArgument(isOfSameOrderGroup(exponent));
 
-		BigInteger valueExponentiated = BigIntegerOperations.modPow(value, exponent.getValue(), this.group.getP());
+		BigInteger valueExponentiated = BigIntegerOperations.modExponentiate(value, exponent.getValue(), this.group.getP());
 		return new GqElement(valueExponentiated, this.group);
 	}
 

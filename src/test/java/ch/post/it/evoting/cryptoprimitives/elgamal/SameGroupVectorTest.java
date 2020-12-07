@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.math.StreamlinedGroupElement;
-import ch.post.it.evoting.cryptoprimitives.math.StreamlinedMathematicalGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
+import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 class SameGroupVectorTest {
 
@@ -128,7 +128,7 @@ class SameGroupVectorTest {
 		assertTrue(actor.toList() instanceof ImmutableList);
 	}
 
-	private static class TestElement extends StreamlinedGroupElement<TestGroup> {
+	private static class TestElement extends GroupElement<TestGroup> {
 		//Create a TestElement with a random value with the given group
 		private TestElement(TestGroup group) {
 			super(BigInteger.valueOf(random.nextLong()), group);
@@ -144,7 +144,7 @@ class SameGroupVectorTest {
 		}
 	}
 
-	private static class TestGroup implements StreamlinedMathematicalGroup<TestGroup> {
+	private static class TestGroup implements MathematicalGroup<TestGroup> {
 		@Override
 		public boolean isGroupMember(BigInteger value) {
 			return true;
