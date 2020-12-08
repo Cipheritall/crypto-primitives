@@ -8,8 +8,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 
-import com.google.common.base.Preconditions;
-
 /**
  * Class which defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
  *
