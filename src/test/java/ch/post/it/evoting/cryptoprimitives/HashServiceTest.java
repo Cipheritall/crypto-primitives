@@ -224,7 +224,7 @@ class HashServiceTest {
 
 	@RepeatedTest(10)
 	void testThatTwoInputsThatAreIdenticalWhenConcatenatedButDifferentWhenSplitDoNotCollide() {
-		int size = secureRandom.nextInt(50) + 1;
+		int size = secureRandom.nextInt(50) + 2;
 		byte[] concatenated = new byte[size];
 		secureRandom.nextBytes(concatenated);
 
