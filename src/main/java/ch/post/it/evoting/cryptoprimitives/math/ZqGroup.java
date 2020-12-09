@@ -14,7 +14,7 @@ import java.util.Objects;
  *
  * <p> Instances of this class are immutable.</p>
  */
-public class ZqGroup implements StreamlinedMathematicalGroup<ZqGroup> {
+public class ZqGroup implements MathematicalGroup<ZqGroup> {
 	private final BigInteger q;
 	private final ZqElement identity;
 

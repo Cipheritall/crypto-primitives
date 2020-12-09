@@ -12,7 +12,7 @@ import java.math.BigInteger;
  *
  * @param <G> self type.
  */
-public interface StreamlinedMathematicalGroup<G extends StreamlinedMathematicalGroup<G>> {
+public interface MathematicalGroup<G extends MathematicalGroup<G>> {
 
 	/**
 	 * Checks whether a given value is a member of this {@code MathematicalGroup}.
@@ -27,7 +27,7 @@ public interface StreamlinedMathematicalGroup<G extends StreamlinedMathematicalG
 	 *
 	 * @return the identity element.
 	 */
-	StreamlinedGroupElement<G> getIdentity();
+	GroupElement<G> getIdentity();
 
 	/**
 	 * Returns the q parameter, which is the order of the group.

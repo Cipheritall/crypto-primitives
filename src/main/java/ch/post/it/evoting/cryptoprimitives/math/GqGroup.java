@@ -17,7 +17,7 @@ import java.util.Objects;
  *
  * <p>Instances of this class are immutable.
  */
-public final class GqGroup implements StreamlinedMathematicalGroup<GqGroup> {
+public final class GqGroup implements MathematicalGroup<GqGroup> {
 
 	private final BigInteger p;
 

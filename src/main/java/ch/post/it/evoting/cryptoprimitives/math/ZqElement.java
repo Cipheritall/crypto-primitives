@@ -13,7 +13,7 @@ import java.math.BigInteger;
  *
  * <p> Instances of this class are immutable.</p>
  */
-public class ZqElement extends StreamlinedGroupElement<ZqGroup> {
+public class ZqElement extends GroupElement<ZqGroup> {
 
 	// Private constructor without input validation. Used only for operations that provide a mathematical guarantee that the element is within the
 	// group (such as multiplying two elements of the same group).

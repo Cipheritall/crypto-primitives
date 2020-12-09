@@ -13,7 +13,7 @@ import java.math.BigInteger;
  *
  * <p>Instances of this class are immutable.
  */
-public final class GqElement extends StreamlinedGroupElement<GqGroup> {
+public final class GqElement extends GroupElement<GqGroup> {
 
 	// Private constructor without input validation. Used only for operations that provide a mathematical guarantee that the element is within the
 	// group (such as multiplying two elements of the same group).
