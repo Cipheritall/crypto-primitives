@@ -3,9 +3,9 @@ package ch.post.it.evoting.cryptoprimitives;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.fromByteArray;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.toByteArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -26,30 +26,30 @@ public class ConversionServiceTest {
 
 	//Test BigInteger to ByteArray conversion
 	@Test
-	void testConversionOfNullBigIntegerToByteArrayThrows(){
+	void testConversionOfNullBigIntegerToByteArrayThrows() {
 		assertThrows(NullPointerException.class, () -> toByteArray((BigInteger) null));
 	}
 
 	@Test
 	void testConversionOfZeroBigIntegerIsOneZeroByte() {
 		BigInteger zero = BigInteger.ZERO;
-		byte[] expected = new byte[]{0};
+		byte[] expected = new byte[] { 0 };
 		byte[] converted = toByteArray(zero);
 		assertArrayEquals(expected, converted);
 	}
 
 	@Test
-	void testConversionOf256BigIntegerIsTwoBytes(){
+	void testConversionOf256BigIntegerIsTwoBytes() {
 		BigInteger value = BigInteger.valueOf(256);
-		byte[] expected = new byte[]{1, 0};
+		byte[] expected = new byte[] { 1, 0 };
 		byte[] converted = toByteArray(value);
 		assertArrayEquals(expected, converted);
 	}
 
 	@Test
-	void testConversionOfIntegerMaxValuePlusOneIsCorrect(){
+	void testConversionOfIntegerMaxValuePlusOneIsCorrect() {
 		BigInteger value = BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE);
-		byte[] expected = new byte[]{ (byte) 0b10000000, 0, 0, 0};
+		byte[] expected = new byte[] { (byte) 0b10000000, 0, 0, 0 };
 		byte[] converted = toByteArray(value);
 		assertArrayEquals(expected, converted);
 	}
@@ -67,17 +67,17 @@ public class ConversionServiceTest {
 	}
 
 	@Test
-	void testConversionOfByteArrayWithLeading1ToBigIntegerIsPositive(){
-		byte[] bytes = new byte[]{(byte) 0x80};
+	void testConversionOfByteArrayWithLeading1ToBigIntegerIsPositive() {
+		byte[] bytes = new byte[] { (byte) 0x80 };
 		BigInteger converted = fromByteArray(bytes);
 		assertTrue(converted.compareTo(BigInteger.ZERO) > 0);
 	}
 
 	@Test
 	void testConversionOf256ByteArrayRepresentationIs256() {
-		byte[] bytes = new byte[]{1, 0};
+		byte[] bytes = new byte[] { 1, 0 };
 		BigInteger converted = fromByteArray(bytes);
-		assertEquals(converted.compareTo(BigInteger.valueOf(256)), 0);
+		assertEquals(0, converted.compareTo(BigInteger.valueOf(256)));
 	}
 
 	//Cyclic test BigInteger to byte array and back

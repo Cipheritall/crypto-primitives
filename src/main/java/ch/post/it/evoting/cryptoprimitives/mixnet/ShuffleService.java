@@ -4,7 +4,6 @@ import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientC
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,7 +53,7 @@ public class ShuffleService {
 				"All ciphertexts must be from the same group.");
 		checkArgument(ciphertextsCopy.stream().map(ElGamalMultiRecipientCiphertext::size).allMatch(size -> size == ciphertextsCopy.get(0).size()),
 				"All ciphertexts must have the same size.");
-		@SuppressWarnings("java:S117")
+		@SuppressWarnings("squid:S00117")
 		int N = ciphertextsCopy.size();
 		int n = ciphertextsCopy.get(0).size();
 
