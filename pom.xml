@@ -18,8 +18,17 @@
 		<lombok.version>1.18.16</lombok.version>
 		<mockito.version>3.6.0</mockito.version>
 
+		<!-- Plugins versions -->
+		<jacoco.version>0.8.6</jacoco.version>
+
 		<!-- Project settings -->
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports/</sonar.junit.reportPaths>
+		<sonar.java.source>${maven.compiler.source}</sonar.java.source>
+		<sonar.java.target>${maven.compiler.target}</sonar.java.target>
 	</properties>
 
 	<dependencyManagement>
@@ -157,6 +166,27 @@
 					<artifactId>maven-enforcer-plugin</artifactId>
 					<version>3.0.0-M3</version>
 				</plugin>
+				<!-- JaCoCo -->
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+					<executions>
+						<execution>
+							<id>prepare-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>prepare-package</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -165,8 +195,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -189,6 +219,11 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- JaCoCo -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
