@@ -80,6 +80,14 @@ public class GqGroupMemberGenerator {
 		return nonIdentityMember;
 	}
 
+	public GqElement genValidPublicKeyGqElementMember() {
+		GqElement nonIdentityMember;
+		do {
+			nonIdentityMember = genGqElementMember();
+		} while (nonIdentityMember.equals(group.getIdentity()) || nonIdentityMember.equals(group.getGenerator()));
+		return nonIdentityMember;
+	}
+
 	private BigInteger randomBigInteger(int bitLength) {
 		return new BigInteger(bitLength, random);
 	}

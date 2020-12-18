@@ -82,7 +82,7 @@ public final class GqGroup implements MathematicalGroup<GqGroup> {
 		return value != null &&
 				value.compareTo(BigInteger.ZERO) > 0 &&
 				value.compareTo(p) < 0 &&
-				BigIntegerOperations.modPow(value, q, p).compareTo(BigInteger.ONE) == 0;
+				BigIntegerOperations.modExponentiate(value, q, p).compareTo(BigInteger.ONE) == 0;
 	}
 
 	public BigInteger getP() {

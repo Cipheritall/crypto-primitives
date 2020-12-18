@@ -60,7 +60,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		checkNotNull(exponent);
 		checkArgument(isOfSameOrderGroup(exponent));
 
-		BigInteger valueExponentiated = BigIntegerOperations.modPow(value, exponent.getValue(), this.group.getP());
+		BigInteger valueExponentiated = BigIntegerOperations.modExponentiate(value, exponent.getValue(), this.group.getP());
 		return new GqElement(valueExponentiated, this.group);
 	}
 
