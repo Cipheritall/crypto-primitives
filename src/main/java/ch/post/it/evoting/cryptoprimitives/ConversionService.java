@@ -26,12 +26,38 @@ public final class ConversionService {
 
 	/**
 	 * Convert a BigInteger to a byte array representation.
-	 * IntegerToByteArray algorithm implementation.
 	 *
 	 * @param x the positive BigInteger to convert.
 	 * @return the byte array representation of this BigInteger.
+	 *
+	 * NOTE: this depart from the specifications for performance reasons. Benchmarks show that this is orders of magnitude faster than the
+	 * pseudo-code implementation toByteArraySpec. These two implementations are equivalent.
 	 */
 	public static byte[] toByteArray(final BigInteger x) {
+		checkNotNull(x);
+		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
+
+		// BigInteger#toByteArray gives back a 2s complement representation of the value. Given that we work only with positive BigIntegers, this
+		// representation is equivalent to the binary representation, except for a potential extra leading zero byte. (The presence or not of the
+		// leading zero depends on the number of bits needed to represent this value).
+		byte[] twosComplement = x.toByteArray();
+		byte[] result;
+		if (twosComplement[0] == 0 && twosComplement.length > 1) {
+			result = new byte[twosComplement.length - 1];
+			System.arraycopy(twosComplement, 1, result, 0, twosComplement.length - 1);
+		} else {
+			result = twosComplement;
+		}
+		return result;
+	}
+
+	/**
+	 * Do not use.
+	 *
+	 * <p>This method implements the specification algorithm IntegerToByteArray algorithm implementation and is used in tests to show that it is
+	 * equivalent to the more performant method used. </p>
+	 **/
+	static byte[] toByteArraySpec(final BigInteger x) {
 		checkNotNull(x);
 		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
 
@@ -39,18 +65,13 @@ public final class ConversionService {
 			return new byte[1];
 		}
 
-		final BigInteger mask = BigInteger.valueOf(256);
-
 		int bitLength = x.bitLength();
 		int n = (bitLength + Byte.SIZE - 1) / Byte.SIZE;
 
 		byte[] output = new byte[n];
 		BigInteger current = x;
 		for(int i = 1; i <= n; i++){
-			// BigInteger operations represent values using the two's complement representation. Hence, for a value in the range [127, 256) we cannot
-			// use BigInteger.byteValueExact(). Since the value we are converting is positive and smaller than 256 (the mask), we can convert it to an
-			// int and then cast to a byte to get the binary representation.
-			output[n - i] = (byte) current.mod(mask).intValueExact();
+			output[n - i] = current.byteValue();
 			current = current.shiftRight(Byte.SIZE);
 		}
 

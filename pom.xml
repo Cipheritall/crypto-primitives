@@ -17,6 +17,7 @@
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<lombok.version>1.18.16</lombok.version>
 		<mockito.version>3.6.0</mockito.version>
+		<jmh.version>1.23</jmh.version>
 
 		<!-- Plugins versions -->
 		<jacoco.version>0.8.6</jacoco.version>
@@ -75,6 +76,16 @@
 				<artifactId>lombok</artifactId>
 				<version>${lombok.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-core</artifactId>
+				<version>${jmh.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-generator-annprocess</artifactId>
+				<version>${jmh.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -118,6 +129,16 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-generator-annprocess</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
