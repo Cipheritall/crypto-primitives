@@ -89,6 +89,20 @@ public class ZqElement extends GroupElement<ZqGroup> {
 	}
 
 	/**
+	 * Returns a {@code ZqElement} whose value is {@code (this ^ exponent) mod q}.
+	 *
+	 * @param exponent the exponent. It must be non null and non negative.
+	 * @return {@code (this ^ exponent) mod q}.
+	 */
+	public ZqElement exponentiate(final BigInteger exponent) {
+		checkNotNull(exponent);
+		checkArgument(exponent.compareTo(BigInteger.ZERO) >= 0, "The exponent must be positive.");
+
+		final BigInteger result = BigIntegerOperations.modExponentiate(value, exponent, this.group.getQ());
+		return new ZqElement(result, this.group);
+	}
+
+	/**
 	 * Returns an {@code ZqElement} whose value is {@code (-this) mod q}.
 	 *
 	 * @return {@code (-this mod q)}
