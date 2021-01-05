@@ -154,7 +154,7 @@ class CommitmentServiceTest {
 
 		@BeforeEach
 		void setup() {
-			m = secureRandom.nextInt(10) + 1;
+			m = secureRandom.nextInt(10) + 2;
 			n = NUM_ELEMENTS;
 			validMatrix = generateRandomZqElementMatrix(m, n, zqGroup);
 			validRandomValues = generateRandomZqElementList(m, zqGroup);
