@@ -1,6 +1,7 @@
 package ch.post.it.evoting.cryptoprimitives.random;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.util.stream.IntStream;
@@ -10,6 +11,7 @@ public class PermutationService {
 	private final RandomService randomService;
 
 	public PermutationService(final RandomService randomService) {
+		checkNotNull(randomService);
 		this.randomService = randomService;
 	}
 

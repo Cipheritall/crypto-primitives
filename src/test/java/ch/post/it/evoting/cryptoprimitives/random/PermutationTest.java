@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.random;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -71,5 +72,17 @@ class PermutationTest {
 		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = permutationService.genPermutation(size);
 		assertEquals(size, permutation.getSize());
+	}
+
+	@Test
+	void streamReturnsCorrectElements() {
+		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
+		Permutation permutation = permutationService.genPermutation(size);
+
+		final int[] expectedArray = IntStream.range(0, permutation.getSize())
+				.map(permutation::get)
+				.toArray();
+
+		assertArrayEquals(expectedArray, permutation.stream().toArray());
 	}
 }

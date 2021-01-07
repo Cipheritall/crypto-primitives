@@ -58,8 +58,8 @@ class ElGamalMultiRecipientKeyPairTest {
 
 	@Test
 	void testThatGeneratedKeysSizesAreTheExpectedValues() {
-		int numGeneratedPrivateKeys = keyPair.getPrivateKey().toList().size();
-		int numGeneratedPublicKeys = keyPair.getPublicKey().toList().size();
+		int numGeneratedPrivateKeys = keyPair.getPrivateKey().size();
+		int numGeneratedPublicKeys = keyPair.getPublicKey().size();
 
 		assertEquals(numKeys, numGeneratedPrivateKeys);
 		assertEquals(numKeys, numGeneratedPublicKeys);
@@ -74,8 +74,8 @@ class ElGamalMultiRecipientKeyPairTest {
 	@Test
 	void testThatPublicKeyCorrespondsToPrivateKey() {
 		assertTrue(Streams.zip(
-				keyPair.getPrivateKey().toList().stream(),
-				keyPair.getPublicKey().toList().stream(),
+				keyPair.getPrivateKey().stream(),
+				keyPair.getPublicKey().stream(),
 				(ske, pke) -> publicKeyGroup.getGenerator().exponentiate(ske).equals(pke))
 				.allMatch(Boolean::booleanValue));
 	}
@@ -91,7 +91,7 @@ class ElGamalMultiRecipientKeyPairTest {
 		BigInteger g = BigInteger.valueOf(3);
 		GqGroup smallGroup = new GqGroup(p, q, g);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(smallGroup, 10 * q.intValue(), randomSer);
-		keyPair.getPrivateKey().toList().forEach(sk -> {
+		keyPair.getPrivateKey().stream().forEach(sk -> {
 			assertTrue(sk.getValue().compareTo(BigInteger.valueOf(2)) >= 0);
 			assertTrue(sk.getValue().compareTo(q) < 0);
 		});

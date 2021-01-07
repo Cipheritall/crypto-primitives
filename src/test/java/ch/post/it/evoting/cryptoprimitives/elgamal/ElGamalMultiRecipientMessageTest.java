@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -23,8 +25,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class ElGamalMultiRecipientMessageTest {
 
@@ -32,7 +34,7 @@ class ElGamalMultiRecipientMessageTest {
 
 	private static RandomService randomService;
 	private static GqGroup gqGroup;
-	private static GqGroupMemberGenerator generator;
+	private static GqGroupGenerator generator;
 	private static ZqGroup zqGroup;
 
 	private static List<GqElement> validMessageElements;
@@ -41,15 +43,15 @@ class ElGamalMultiRecipientMessageTest {
 	@BeforeAll
 	static void setUpAll() {
 		randomService = new RandomService();
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		generator = new GqGroupMemberGenerator(gqGroup);
+		generator = new GqGroupGenerator(gqGroup);
 	}
 
 	@BeforeEach
 	void setUp() {
-		GqElement m1 = generator.genGqElementMember();
-		GqElement m2= generator.genGqElementMember();
+		GqElement m1 = generator.genMember();
+		GqElement m2 = generator.genMember();
 
 		validMessageElements = new LinkedList<>();
 		validMessageElements.add(m1);
@@ -62,43 +64,72 @@ class ElGamalMultiRecipientMessageTest {
 	void constructionTest() {
 		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(validMessageElements);
 
-		assertEquals(validMessageElements, message.toList());
+		assertEquals(validMessageElements, message.stream().collect(Collectors.toList()));
 	}
 
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createInvalidArgumentsProvider() {
 		List<GqElement> messageElementsFirstNull = new LinkedList<>();
 		messageElementsFirstNull.add(null);
-		messageElementsFirstNull.add(generator.genGqElementMember());
+		messageElementsFirstNull.add(generator.genMember());
 
 		List<GqElement> messageElementsSecondNull = new LinkedList<>();
-		messageElementsFirstNull.add(generator.genGqElementMember());
-		messageElementsFirstNull.add(null);
+		messageElementsSecondNull.add(generator.genMember());
+		messageElementsSecondNull.add(null);
+
+		List<GqElement> messageElementsDifferentGroups = new LinkedList<>();
+		messageElementsDifferentGroups.add(generator.genMember());
+		GqGroup other = GroupTestData.getDifferentGqGroup(gqGroup);
+		GqGroupGenerator otherGenerator = new GqGroupGenerator(other);
+		messageElementsDifferentGroups.add(otherGenerator.genMember());
 
 		return Stream.of(
-				Arguments.of(null, NullPointerException.class),
-				Arguments.of(Collections.EMPTY_LIST, IllegalArgumentException.class),
-				Arguments.of(messageElementsFirstNull, IllegalArgumentException.class),
-				Arguments.of(messageElementsSecondNull, IllegalArgumentException.class)
+				Arguments.of(null, NullPointerException.class, null),
+				Arguments.of(Collections.EMPTY_LIST, IllegalArgumentException.class, "An ElGamal message must not be empty."),
+				Arguments.of(messageElementsFirstNull, IllegalArgumentException.class, "Elements must not contain nulls"),
+				Arguments.of(messageElementsSecondNull, IllegalArgumentException.class, "Elements must not contain nulls"),
+				Arguments.of(messageElementsDifferentGroups, IllegalArgumentException.class, "All elements must belong to the same group.")
 		);
 	}
 
 	@ParameterizedTest(name = "message = {0} throws {1}")
 	@MethodSource("createInvalidArgumentsProvider")
 	@DisplayName("created with invalid parameters")
-	void constructionWithInvalidParametersTest(List<GqElement> messageElements, final Class<? extends RuntimeException> exceptionClass) {
-		assertThrows(exceptionClass, () -> new ElGamalMultiRecipientMessage(messageElements));
+	void constructionWithInvalidParametersTest(
+			List<GqElement> messageElements, final Class<? extends RuntimeException> exceptionClass, String errorMsg) {
+		Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientMessage(messageElements));
+		assertEquals(errorMsg, exception.getMessage());
+	}
+
+	@Test
+	@DisplayName("create from ones contains only 1s")
+	void onesTest() {
+		int n = new SecureRandom().nextInt(10) + 1;
+		ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(n, gqGroup);
+
+		List<GqElement> onesList = Stream.generate(gqGroup::getIdentity).limit(n).collect(Collectors.toList());
+
+		assertEquals(onesList, ones.stream().collect(Collectors.toList()));
+		assertEquals(n, ones.size());
+	}
+
+	@Test
+	@DisplayName("create from ones with bad input throws")
+	void onesWithBadInputTest() {
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientMessage.ones(1, null));
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientMessage.ones(0, gqGroup));
+		assertEquals("The message of ones' size must be strictly greater than 0.", exception.getMessage());
 	}
 
 	// Provides parameters for the invalid decryption parameters test.
 	static Stream<Arguments> createInvalidDecryptionArgumentsProvider() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		ElGamalMultiRecipientPrivateKey secretKey = keyPair.getPrivateKey();
-		ElGamalMultiRecipientPrivateKey tooShortSecretKey = new ElGamalMultiRecipientPrivateKey(secretKey.toList().subList(0, 1));
+		ElGamalMultiRecipientPrivateKey tooShortSecretKey = new ElGamalMultiRecipientPrivateKey(Collections.singletonList(secretKey.get(0)));
 		ZqElement exponent = randomService.genRandomExponent(zqGroup);
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 
-		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+		GqGroup differentGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 		ElGamalMultiRecipientKeyPair differentGroupKeyPair = ElGamalMultiRecipientKeyPair.genKeyPair(differentGroup, NUM_ELEMENTS, randomService);
 		ElGamalMultiRecipientPrivateKey differentGroupSecretKey = differentGroupKeyPair.getPrivateKey();
 
@@ -113,7 +144,8 @@ class ElGamalMultiRecipientMessageTest {
 	@ParameterizedTest(name = "ciphertext = {0} and secret key = {1} throws {2}")
 	@MethodSource("createInvalidDecryptionArgumentsProvider")
 	@DisplayName("get message with invalid parameters")
-	void whenGetMessageWithInvalidParametersTest(ElGamalMultiRecipientCiphertext c, ElGamalMultiRecipientPrivateKey sk, final Class<? extends RuntimeException> exceptionClass) {
+	void whenGetMessageWithInvalidParametersTest(ElGamalMultiRecipientCiphertext c, ElGamalMultiRecipientPrivateKey sk,
+			final Class<? extends RuntimeException> exceptionClass) {
 		assertThrows(exceptionClass, () -> ElGamalMultiRecipientMessage.getMessage(c, sk));
 	}
 
@@ -124,19 +156,15 @@ class ElGamalMultiRecipientMessageTest {
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientMessage newMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, keyPair.getPrivateKey());
 
-		assertNotEquals(ciphertext.getPhis(), newMessage.toList());
+		assertNotEquals(ciphertext.stream(), newMessage.stream());
 	}
 
 	@Test
 	void whenGetMessageFromUnityCiphertextTest() {
-		LinkedList<GqElement> ones = new LinkedList<>();
-		ones.add(gqGroup.getIdentity());
-		ones.add(gqGroup.getIdentity());
-
-		ElGamalMultiRecipientMessage unityMessage = new ElGamalMultiRecipientMessage(ones);
+		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(2, gqGroup);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		ZqElement zero = zqGroup.getIdentity();
-		ElGamalMultiRecipientCiphertext unityCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(unityMessage, zero, keyPair.getPublicKey());
-		assertEquals(unityMessage, ElGamalMultiRecipientMessage.getMessage(unityCiphertext, keyPair.getPrivateKey()));
+		ElGamalMultiRecipientCiphertext unityCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(onesMessage, zero, keyPair.getPublicKey());
+		assertEquals(onesMessage, ElGamalMultiRecipientMessage.getMessage(unityCiphertext, keyPair.getPrivateKey()));
 	}
 }

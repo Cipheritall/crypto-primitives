@@ -254,7 +254,8 @@ class ZqElementTest {
 	@Test
 	void whenExponentiatedNegativeThrow() {
 		final ZqElement element = ZqElement.create(smallQGroupMember, smallQGroup);
-		assertThrows(IllegalArgumentException.class, () -> element.exponentiate(BigInteger.valueOf(-1)));
+		final BigInteger minusOne = BigInteger.valueOf(-1);
+		assertThrows(IllegalArgumentException.class, () -> element.exponentiate(minusOne));
 	}
 
 	@Test

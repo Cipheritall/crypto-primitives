@@ -5,63 +5,68 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.HashableList;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
- * Represents a public key of {@link GqElement}s that is used for the calculation of a commitment.
- * Instances of this class are immutable.
+ * Represents a public key of {@link GqElement}s that is used for the calculation of a commitment. Instances of this class are immutable.
  *
  * <p>A commitment key is of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>)</p>
  */
-class CommitmentKey {
+class CommitmentKey implements HashableList {
 
 	private final GqGroup group;
 	private final GqElement h;
-	private final ImmutableList<GqElement> gElements;
+	private final SameGroupVector<GqElement, GqGroup> gElements;
 
 	/**
 	 * Creates a {@link CommitmentKey} object.
+	 * <p>
+	 * All elements of the commitment key have to comply with the following.
+	 * <ul>
+	 *     <li>be non-null</li>
+	 *     <li>be different from 1</li>
+	 *     <li>be different from the generator of the group they belong to</li>
+	 *     <li>belong to the same {@link GqGroup}</li>
+	 * </ul>
 	 *
-	 * @param h			the h element of this commitment key, which must respect the following:
-	 *                  	<li>h must be non-null</li>
-	 *                 		<li>h must be different from 1</li>
-	 *	                    <li>h must be different from the generator of the group it belongs to</li></p>
-	 * @param gElements the list of g elements contained by this commitment key, which must respect the following:
-	 *                 		<li>the list must be non-null</li>
-	 *                 		<li>the list must contain at least one element</li>
-	 *                 		<li>the list must not contain any nulls</li>
-	 *                 		<li>all elements must be from the same {@link MathematicalGroup} as h</li>
-	 *                 		<li>no element must be equal to 1</li>
-	 *	                    <li>no element must be equal to the generator of the group they belong to</li></p>
+	 * @param h         the h element of this commitment key
+	 * @param gElements the list of g elements contained by this commitment key
 	 */
 	CommitmentKey(GqElement h, List<GqElement> gElements) {
+		//Validate h
 		checkNotNull(h);
 		checkArgument(!h.equals(h.getGroup().getIdentity()), "h cannot be 1");
 		checkArgument(!h.equals(h.getGroup().getGenerator()), "h cannot be equal to the group generator");
-		this.h = h;
-		this.group = h.getGroup();
 
+		//Validate gElements
 		checkNotNull(gElements);
 		checkArgument(gElements.stream().noneMatch(Objects::isNull), "A commitment key cannot contain null elements");
-		this.gElements = ImmutableList.copyOf(gElements);
+		SameGroupVector<GqElement, GqGroup> gs = new SameGroupVector<>(gElements);
 
-		checkArgument(!this.gElements.isEmpty(), "No g element provided");
-		checkArgument(this.gElements.stream().map(GqElement::getGroup).allMatch(h.getGroup()::equals),
-				"All g elements must have the same group as h");
-		checkArgument(this.gElements.stream().noneMatch(element -> element.equals(group.getIdentity())),
-				"A commitment key cannot contain a 1 valued element.");
-		checkArgument(this.gElements.stream().noneMatch(element -> element.equals(group.getGenerator())),
+		checkArgument(!gs.isEmpty(), "No g element provided");
+		checkArgument(gs.getGroup().equals(h.getGroup()), "All g elements must have the same group as h");
+		checkArgument(gs.stream().noneMatch(element -> element.equals(element.getGroup().getIdentity())),
+				"A commitment key cannot contain an identity element.");
+		checkArgument(gs.stream().noneMatch(element -> element.equals(element.getGroup().getGenerator())),
 				"A commitment key cannot contain an element value equal to the group generator.");
+
+		this.h = h;
+		this.group = h.getGroup();
+		this.gElements = gs;
 	}
 
 	/**
@@ -79,17 +84,12 @@ class CommitmentKey {
 	}
 
 	/**
-	 * @return h
+	 * Creates a stream of the elements of the commitment key.
+	 *
+	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>k</sub> in that order
 	 */
-	GqElement getH() {
-		return h;
-	}
-
-	/**
-	 * @return the g elements
-	 */
-	List<GqElement> getGElements() {
-		return gElements;
+	public Stream<GqElement> stream() {
+		return Stream.concat(Stream.of(this.h), this.gElements.stream());
 	}
 
 	@Override
@@ -115,5 +115,10 @@ class CommitmentKey {
 	public String toString() {
 		List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
 		return "CommitmentKey{" + "h=" + h + ", g elements=" + simpleGElements + '}';
+	}
+
+	@Override
+	public ImmutableList<Hashable> toHashableForm() {
+		return this.stream().collect(toImmutableList());
 	}
 }
