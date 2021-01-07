@@ -7,9 +7,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -19,21 +20,66 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  *
  * <p>Instances of this class are immutable. </p>
  */
-public final class ElGamalMultiRecipientPrivateKey extends SameGroupVector<ZqElement, ZqGroup> {
+public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup> {
+
+	private final SameGroupVector<ZqElement, ZqGroup> privateKeyElements;
 
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPrivateKey} object.
 	 *
 	 * @param keyElements <p>the list of private key Zq keyElements, which must satisfy the conditions of a {@link SameGroupVector} and
 	 *                    the following:
+	 *                    <li>not be empty</li>
 	 *                    <li>no element must be equal to 0</li>
 	 *                    <li>no element must be equal to 1</li></p>
 	 */
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
-		super(ImmutableList.copyOf(keyElements));
+		this.privateKeyElements = new SameGroupVector<>(keyElements);
+		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ZERO) != 0),
 				"An ElGamal private key cannot contain a 0 valued element.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
 				"An ElGamal private key cannot contain a 1 valued element.");
+	}
+
+	@Override
+	public ZqGroup getGroup() {
+		//A private key cannot be empty
+		return this.privateKeyElements.getGroup();
+	}
+
+	@Override
+	public int size() {
+		return this.privateKeyElements.size();
+	}
+
+	/**
+	 * @return the ith element.
+	 */
+	@Override
+	public ZqElement get(int i) {
+		return this.privateKeyElements.get(i);
+	}
+
+	@Override
+	public Stream<ZqElement> stream() {
+		return this.privateKeyElements.stream();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ElGamalMultiRecipientPrivateKey that = (ElGamalMultiRecipientPrivateKey) o;
+		return privateKeyElements.equals(that.privateKeyElements);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(privateKeyElements);
 	}
 }

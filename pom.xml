@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.3.1.0</version>
+	<version>0.7.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -13,11 +13,12 @@
 	<properties>
 		<!-- Dependencies versions -->
 		<guava.version>30.0-jre</guava.version>
+		<slf4j-api.version>1.7.30</slf4j-api.version>
 		<jackson.version>2.11.3</jackson.version>
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<lombok.version>1.18.16</lombok.version>
-		<mockito.version>3.6.0</mockito.version>
-		<jmh.version>1.23</jmh.version>
+		<mockito.version>3.7.0</mockito.version>
+		<jmh.version>1.27</jmh.version>
 
 		<!-- Plugins versions -->
 		<jacoco.version>0.8.6</jacoco.version>
@@ -40,6 +41,13 @@
 				<version>${guava.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-api.version}</version>
+			</dependency>
+
+
 			<!-- Test dependencies -->
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
@@ -54,6 +62,11 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
 				<version>${mockito.version}</version>
 			</dependency>
 			<dependency>
@@ -95,6 +108,11 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -109,6 +127,11 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -245,6 +268,18 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.0.0-M1</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.0-M1</version>
+				<inherited>true</inherited>
+				<configuration>
+					<preparationGoals>clean install</preparationGoals>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

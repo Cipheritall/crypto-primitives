@@ -3,15 +3,16 @@
  */
 package ch.post.it.evoting.cryptoprimitives.random;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.doReturn;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -29,9 +30,10 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 class RandomServiceTest {
 
-	// RFC 4648 Table 1 and Table 3.
+	// RFC 4648 Table 1, Table 3 and Table 5.
 	private static final Pattern base64Alphabet = Pattern.compile("^[A-Za-z0-9+/=]+$");
 	private static final Pattern base32Alphabet = Pattern.compile("^[A-Z2-7=]+$");
+	private static final Pattern base16Alphabet = Pattern.compile("^[A-F0-9=]+$");
 
 	private final RandomService randomService = new RandomService();
 	private static ZqGroup smallGroup;
@@ -124,6 +126,32 @@ class RandomServiceTest {
 	}
 
 	@Test
+	void genRandomBase16StringTest() {
+		final String randomString1 = randomService.genRandomBase16String(6);
+		final String randomString2 = randomService.genRandomBase16String(8);
+		final String randomString3 = randomService.genRandomBase16String(1);
+
+		assertAll(
+				() -> assertEquals(6, randomString1.length()),
+				() -> assertEquals(8, randomString2.length()),
+				() -> assertEquals(1, randomString3.length())
+		);
+
+		// Check that the Strings chars are in the Base16 alphabet.
+		assertAll(
+				() -> assertTrue(base16Alphabet.matcher(randomString1).matches()),
+				() -> assertTrue(base16Alphabet.matcher(randomString2).matches()),
+				() -> assertTrue(base16Alphabet.matcher(randomString3).matches())
+		);
+	}
+
+	@Test
+	void genRandomBase16StringInvalidLengthShouldThrow() {
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase16String(0));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase16String(1200));
+	}
+
+	@Test
 	void genRandomBase32StringTest() {
 		final String randomString1 = randomService.genRandomBase32String(6);
 		final String randomString2 = randomService.genRandomBase32String(8);
@@ -173,5 +201,23 @@ class RandomServiceTest {
 	void genRandomBase64StringInvalidLengthShouldThrow() {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(-1));
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(4000));
+	}
+
+	@Test
+	void genRandomVector() {
+		BigInteger upperBound = BigInteger.valueOf(100);
+		int length = 20;
+		List<ZqElement> randomVector = randomService.genRandomVector(upperBound, length);
+
+		assertEquals(length, randomVector.size());
+		assertEquals(0, (int) randomVector.stream().filter(zq -> zq.getValue().compareTo(upperBound) >= 0).count());
+		assertEquals(1, randomVector.stream().map(ZqElement::getGroup).distinct().count());
+	}
+
+	@Test
+	void checkGenRandomVectorParameterChecks() {
+		assertThrows(NullPointerException.class, () -> randomService.genRandomVector(null, 1));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ZERO, 1));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ONE, 0));
 	}
 }

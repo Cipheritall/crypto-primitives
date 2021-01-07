@@ -1,7 +1,9 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.fromByteArray;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.toByteArray;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,14 +29,14 @@ class ConversionServiceTest {
 	//Test BigInteger to ByteArray conversion
 	@Test
 	void testConversionOfNullBigIntegerToByteArrayThrows() {
-		assertThrows(NullPointerException.class, () -> toByteArray((BigInteger) null));
+		assertThrows(NullPointerException.class, () -> ConversionService.integerToByteArray((BigInteger) null));
 	}
 
 	@Test
 	void testConversionOfZeroBigIntegerIsOneZeroByte() {
 		BigInteger zero = BigInteger.ZERO;
 		byte[] expected = new byte[] { 0 };
-		byte[] converted = toByteArray(zero);
+		byte[] converted = ConversionService.integerToByteArray(zero);
 		assertArrayEquals(expected, converted);
 	}
 
@@ -42,7 +44,7 @@ class ConversionServiceTest {
 	void testConversionOf256BigIntegerIsTwoBytes() {
 		BigInteger value = BigInteger.valueOf(256);
 		byte[] expected = new byte[] { 1, 0 };
-		byte[] converted = toByteArray(value);
+		byte[] converted = ConversionService.integerToByteArray(value);
 		assertArrayEquals(expected, converted);
 	}
 
@@ -50,33 +52,33 @@ class ConversionServiceTest {
 	void testConversionOfIntegerMaxValuePlusOneIsCorrect() {
 		BigInteger value = BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE);
 		byte[] expected = new byte[] { (byte) 0b10000000, 0, 0, 0 };
-		byte[] converted = toByteArray(value);
+		byte[] converted = ConversionService.integerToByteArray(value);
 		assertArrayEquals(expected, converted);
 	}
 
 	@Test
 	void testOfNegativeBigIntegerThrows() {
 		BigInteger value = BigInteger.valueOf(-1);
-		assertThrows(IllegalArgumentException.class, () -> toByteArray(value));
+		assertThrows(IllegalArgumentException.class, () -> ConversionService.integerToByteArray(value));
 	}
 
 	//Test byte array to BigInteger conversion
 	@Test
 	void testConversionOfNullToBigIntegerThrows() {
-		assertThrows(NullPointerException.class, () -> fromByteArray((byte[]) null));
+		assertThrows(NullPointerException.class, () -> byteArrayToInteger((byte[]) null));
 	}
 
 	@Test
 	void testConversionOfByteArrayWithLeading1ToBigIntegerIsPositive() {
 		byte[] bytes = new byte[] { (byte) 0x80 };
-		BigInteger converted = fromByteArray(bytes);
+		BigInteger converted = byteArrayToInteger(bytes);
 		assertTrue(converted.compareTo(BigInteger.ZERO) > 0);
 	}
 
 	@Test
 	void testConversionOf256ByteArrayRepresentationIs256() {
 		byte[] bytes = new byte[] { 1, 0 };
-		BigInteger converted = fromByteArray(bytes);
+		BigInteger converted = byteArrayToInteger(bytes);
 		assertEquals(0, converted.compareTo(BigInteger.valueOf(256)));
 	}
 
@@ -85,7 +87,7 @@ class ConversionServiceTest {
 	void testRandomBigIntegerToByteArrayAndBackIsOriginalValue() {
 		int size = random.nextInt(32);
 		BigInteger value = new BigInteger(size, random);
-		BigInteger cycledValue = fromByteArray(toByteArray(value));
+		BigInteger cycledValue = byteArrayToInteger(ConversionService.integerToByteArray(value));
 		assertEquals(value, cycledValue);
 	}
 }
