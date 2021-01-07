@@ -37,7 +37,7 @@ public class ConversionServiceBenchmark {
 	@Fork(value = 1)
 	@Measurement(iterations = 4, time = 5)
 	public byte[] bigIntegerToByteArrayUsingJdk(MyState state) {
-		return ConversionService.toByteArray(state.randomBigInteger);
+		return ConversionService.integerToByteArray(state.randomBigInteger);
 	}
 
 	@Benchmark
@@ -45,6 +45,6 @@ public class ConversionServiceBenchmark {
 	@Fork(value = 1)
 	@Measurement(iterations = 4, time = 5)
 	public byte[] bigIntegerToByteArray(MyState state) {
-		return ConversionService.toByteArraySpec(state.randomBigInteger);
+		return ConversionService.integerToByteArraySpec(state.randomBigInteger);
 	}
 }

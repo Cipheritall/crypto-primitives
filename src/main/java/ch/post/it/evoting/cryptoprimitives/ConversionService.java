@@ -1,3 +1,6 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -19,7 +22,7 @@ public final class ConversionService {
 	 * @param s the string to convert.
 	 * @return the byte array representation of the string.
 	 */
-	public static byte[] toByteArray(final String s) {
+	public static byte[] stringToByteArray(final String s) {
 		checkNotNull(s);
 		return s.getBytes(StandardCharsets.UTF_8);
 	}
@@ -30,10 +33,10 @@ public final class ConversionService {
 	 * @param x the positive BigInteger to convert.
 	 * @return the byte array representation of this BigInteger.
 	 *
-	 * NOTE: this depart from the specifications for performance reasons. Benchmarks show that this is orders of magnitude faster than the
-	 * pseudo-code implementation toByteArraySpec. These two implementations are equivalent.
+	 * NOTE: our implementation slightly deviates from the specifications for performance reasons. Benchmarks show that our implementation is orders of magnitude faster than the
+	 * pseudo-code implementation integerToByteArraySpec. Both implementations provide the same result.
 	 */
-	public static byte[] toByteArray(final BigInteger x) {
+	public static byte[] integerToByteArray(final BigInteger x) {
 		checkNotNull(x);
 		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
 
@@ -57,7 +60,7 @@ public final class ConversionService {
 	 * <p>This method implements the specification algorithm IntegerToByteArray algorithm implementation and is used in tests to show that it is
 	 * equivalent to the more performant method used. </p>
 	 **/
-	static byte[] toByteArraySpec(final BigInteger x) {
+	static byte[] integerToByteArraySpec(final BigInteger x) {
 		checkNotNull(x);
 		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
 
@@ -80,12 +83,11 @@ public final class ConversionService {
 
 	/**
 	 * Convert a byte array to it's BigInteger equivalent.
-	 * ByteArrayToInteger algorithm implementation.
 	 *
 	 * @param bytes the byte array to convert to it's BigInteger equivalent.
 	 * @return a BigInteger corresponding to the provided byte array representation.
 	 */
-	public static BigInteger fromByteArray(final byte[] bytes) {
+	public static BigInteger byteArrayToInteger(final byte[] bytes) {
 		checkNotNull(bytes);
 		return new BigInteger(1, bytes);
 	}
