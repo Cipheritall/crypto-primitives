@@ -27,12 +27,21 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class CommitmentService {
 
 	/**
-	 * <p>Computes a commitment to the given elements with the given commitment key.
-	 * The commitment key must be at least as long as the number of elements to be committed.</p>
+	 * Computes a commitment to the given elements with the given random element and <code>CommitmentKey</code>.
 	 *
-	 * @param elements 		a, the elements to be committed (a<sub>0</sub>, ..., a<sub>l</sub>)
-	 * @param randomElement r, the random value
-	 * @param commitmentKey	<b>ck</b>, a commitment key (h, g<sub>1</sub>, ..., g<sub>k</sub>)
+	 * <p>The input arguments must comply with the following:
+	 * 		<ul>
+	 * 		 	<li>be non null</li>
+	 * 		 	<li>all the elements to be committed to and the random element must belong to the same <code>ZqGroup</code></li>
+	 * 		 	<li>the <code>GqGroup</code> of the commitment key must have the same order <i>q</i> as the <code>ZqGroup</code> of the other inputs</li>
+	 * 		 	<li>the vector of elements to be committed to must be non empty</li>
+	 * 		 	<li>the commitment key must have at least the same size as the vector of elements to be committed to</li>
+	 * 		</ul>
+	 * </p>
+	 *
+	 * @param elements 		a, the {@link ZqElement}s to be committed (a<sub>0</sub>, ..., a<sub>l</sub>)
+	 * @param randomElement r, the random {@link ZqElement}
+	 * @param commitmentKey	<b>ck</b>, a {@link CommitmentKey} (h, g<sub>1</sub>, ..., g<sub>k</sub>)
 	 * @return	the commitment to the provided elements as a {@link GqElement}
 	 */
 	GqElement getCommitment(final List<ZqElement> elements, final ZqElement randomElement, final CommitmentKey commitmentKey) {
@@ -78,12 +87,22 @@ public class CommitmentService {
 	}
 
 	/**
-	 * <p>Computes a commitment to the given matrix with the given commitment key.
-	 * The commitment key must be at least as long as the number of columns in the matrix to be committed.</p>
+	 * Computes a commitment to the given matrix with the given random elements and {@link CommitmentKey}.
 	 *
-	 * @param elementsMatrix	A, the matrix of {@link ZqElement}s to be committed of <i>m</i> rows and <i>n</i> columns
-	 * @param randomElements	<b>r</b>, the vector of <i>m</i> randomly chosen {@link ZqElement}s to be used for the commitment
-	 * @param commitmentKey		<b>ck</b>, the commitment key of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>), k >= n
+	 * <p>The input arguments must comply with the following:
+	 * 		<ul>
+	 * 			<li>be non null</li>
+	 * 			<li>be non empty</li>
+	 * 			<li>all rows of the element matrix must have the same length</li>
+	 * 			<li>there must be as many random elements as rows in the matrix of elements to be committed</li>
+	 * 			<li>the commitment key must have at least as many g elements as columns in the matrix of elements to be committed</li>
+	 * 			<li>all inputs must have the same group order <i>q</i></li>
+	 * 		</ul>
+	 * </p>
+	 *
+	 * @param elementsMatrix	A, the non empty matrix of {@link ZqElement}s to be committed of <i>m</i> rows and <i>n</i> columns.
+	 * @param randomElements	<b>r</b>, the non empty vector of <i>m</i> randomly chosen {@link ZqElement}s to be used for the commitment.
+	 * @param commitmentKey		<b>ck</b>, the commitment key of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>), k >= n.
 	 * @return	the commitments (c<sub>0</sub>, ..., c<sub>m-1</sub>)
 	 */
 	List<GqElement> getCommitmentMatrix(final List<List<ZqElement>> elementsMatrix, final List<ZqElement> randomElements, final CommitmentKey commitmentKey) {
@@ -128,5 +147,58 @@ public class CommitmentService {
 		return IntStream.range(0, m)
 				.mapToObj(i -> getCommitment(elementsMatrixCopy.get(i), randomElementsCopy.get(i), commitmentKey))
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Computes a commitment to the given vector with the given random elements and {@link CommitmentKey}.
+	 *
+	 * <p>The input arguments must comply with the following:
+	 * 		<ul>
+	 * 			<li>be non null</li>
+	 * 			<li>be non empty</li>
+	 * 			<li>the vector of elements to be committed and the random elements vector must have the same size</li>
+	 * 			<li>all inputs must have the same group order <i>q</i></li>
+	 * 		</ul>
+	 * </p>
+	 *
+	 * @param elementsVector	<b>d</b>, the vector of <i>2m+1</i> {@link ZqElement}s to be committed to.
+	 * @param randomElements	<b>t</b>, the non empty vector of <i>2m+1</i> randomly chosen {@link ZqElement}s to be used for the commitment.
+	 * @param commitmentKey		<b>ck</b>, the {@link CommitmentKey} of size k &ge; 1.
+	 * @return	the commitment c = (c<sub>0</sub>, ..., c<sub>2m</sub>)
+	 */
+	List<GqElement> getCommitmentVector(final List<ZqElement> elementsVector, final List<ZqElement> randomElements, final CommitmentKey commitmentKey) {
+		checkNotNull(elementsVector);
+		checkNotNull(randomElements);
+		checkNotNull(commitmentKey);
+		// The size and the group of the commitment key are checked upon its construction
+		checkArgument(elementsVector.stream().allMatch(Objects::nonNull));
+
+		ImmutableList<List<ZqElement>> vector = elementsVector.stream()
+				.map(ImmutableList::of)
+				.collect(ImmutableList.toImmutableList());
+		checkArgument(!vector.isEmpty());
+		checkArgument(vector.stream().noneMatch(List::isEmpty));
+
+		ImmutableList<ZqElement> randomElementsCopy = ImmutableList.copyOf(randomElements);
+
+		// Dimension checking
+		checkArgument(vector.stream().allMatch(row -> row.size() == 1),
+				"All rows of the elements matrix must have the same size.");
+		checkArgument(vector.size() == randomElementsCopy.size(), "The elements vector and the random elements must be of equal length");
+
+
+		// Group checking.
+		final ZqGroup vectorZqGroup = vector.get(0).get(0).getGroup();
+		final ZqGroup randomZqGroup = randomElementsCopy.get(0).getGroup();
+		checkArgument(vector.stream().flatMap(Collection::stream).map(ZqElement::getGroup).allMatch(vectorZqGroup::equals),
+				"All elements to be committed must be in the same group.");
+		checkArgument(randomElementsCopy.stream().map(ZqElement::getGroup).allMatch(randomZqGroup::equals),
+				"All random elements must be in the same group.");
+		checkArgument(vectorZqGroup.equals(randomZqGroup), "The elements to be committed to and the random elements must be in the same group.");
+		checkArgument(vectorZqGroup.getQ().equals(commitmentKey.getGroup().getQ()),
+				"The commitment key must have the same order (q) than the elements to be committed to and the random values");
+
+
+		return getCommitmentMatrix(vector, randomElements, commitmentKey);
 	}
 }
