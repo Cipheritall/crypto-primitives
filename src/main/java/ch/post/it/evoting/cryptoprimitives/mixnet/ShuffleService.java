@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -46,13 +47,12 @@ public class ShuffleService {
 		//Verify ciphertext input
 		checkNotNull(ciphertexts);
 		checkArgument(ciphertexts.stream().allMatch(Objects::nonNull));
-		ImmutableList<ElGamalMultiRecipientCiphertext> ciphertextsCopy = ImmutableList.copyOf(ciphertexts);
+		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = new SameGroupVector<>(ciphertexts);
 
-		checkArgument(!ciphertextsCopy.isEmpty(), "There must be at least one ciphertext."); //This is equivalent to checking that 0 < N
-		checkArgument(ciphertextsCopy.stream().map(ElGamalMultiRecipientCiphertext::getGroup).allMatch(ciphertextsCopy.get(0).getGroup()::equals),
-				"All ciphertexts must be from the same group.");
-		checkArgument(ciphertextsCopy.stream().map(ElGamalMultiRecipientCiphertext::size).allMatch(size -> size == ciphertextsCopy.get(0).size()),
-				"All ciphertexts must have the same size.");
+		if (ciphertextsCopy.isEmpty()) {
+			return Shuffle.EMPTY;
+		}
+		checkArgument(ciphertextsCopy.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same size.");
 		@SuppressWarnings("squid:S00117")
 		int N = ciphertextsCopy.size();
 		int n = ciphertextsCopy.get(0).size();
@@ -64,12 +64,11 @@ public class ShuffleService {
 		//Verify combination of ciphertext and public key inputs
 		checkArgument(0 < n);
 		checkArgument(n <= k);
-		checkArgument(ciphertextsCopy.get(0).getGroup().equals(publicKey.getGroup()));
+		checkArgument(ciphertextsCopy.getGroup().equals(publicKey.getGroup()));
+		GqGroup group = ciphertextsCopy.getGroup();
 
 		//Generate shuffle
 		Permutation psi = this.permutationService.genPermutation(N);
-
-		GqGroup group = ciphertextsCopy.get(0).getGroup();
 		ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
 		GqElement identity = group.getIdentity();
 		List<GqElement> ones = Stream.generate(() -> identity).limit(n).collect(Collectors.toList());

@@ -15,6 +15,8 @@ import ch.post.it.evoting.cryptoprimitives.random.Permutation;
  * Instances of this class are immutable.
  */
 public class Shuffle {
+	static final Shuffle EMPTY = new Shuffle(ImmutableList.of(), Permutation.EMPTY, ImmutableList.of());
+
 	private final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts;
 	private final Permutation permutation;
 	private final ImmutableList<ZqElement> reEncryptionExponents;

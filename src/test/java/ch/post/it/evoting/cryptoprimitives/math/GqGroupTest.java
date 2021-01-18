@@ -14,7 +14,7 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
 
 class GqGroupTest {
 	private static BigInteger p;
@@ -55,7 +55,7 @@ class GqGroupTest {
 
 	@Test
 	void testCreateGroupWithNonMemberGeneratorFails() {
-		BigInteger nonMember = smallGroupGenerator.genNonMember();
+		BigInteger nonMember = smallGroupGenerator.genNonMemberValue();
 		assertThrows(IllegalArgumentException.class, () -> new GqGroup(p, q, nonMember));
 	}
 
@@ -63,13 +63,13 @@ class GqGroupTest {
 
 	@Test
 	void testGroupMemberReturnsTrueForGroupMember() {
-		BigInteger member = smallGroupGenerator.genMember();
+		BigInteger member = smallGroupGenerator.genMemberValue();
 		assertTrue(smallGroup.isGroupMember(member));
 	}
 
 	@Test
 	void testGroupMemberReturnsFalseForNonGroupMember() {
-		BigInteger nonMember = smallGroupGenerator.genNonMember();
+		BigInteger nonMember = smallGroupGenerator.genNonMemberValue();
 		assertFalse(smallGroup.isGroupMember(nonMember));
 	}
 

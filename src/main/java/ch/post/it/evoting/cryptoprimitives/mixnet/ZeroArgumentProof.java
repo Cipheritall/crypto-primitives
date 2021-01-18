@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import com.google.common.collect.ImmutableList;
-
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -51,51 +51,32 @@ final class ZeroArgumentProof {
 	 * @return the computed <b>d</b> vector.
 	 */
 	List<ZqElement> computeDVector(final List<List<ZqElement>> firstMatrix, final List<List<ZqElement>> secondMatrix) {
-		// Null checking and copies.
+		// Null checking
 		checkNotNull(firstMatrix);
 		checkNotNull(secondMatrix);
 		checkArgument(firstMatrix.stream().allMatch(Objects::nonNull), "First matrix rows must not be null.");
 		checkArgument(secondMatrix.stream().allMatch(Objects::nonNull), "Second matrix rows must not be null.");
 		checkArgument(firstMatrix.stream().flatMap(Collection::stream).allMatch(Objects::nonNull), "First matrix elements must be not be null.");
 		checkArgument(secondMatrix.stream().flatMap(Collection::stream).allMatch(Objects::nonNull), "Second matrix elements must be not be null.");
-		final ImmutableList<ImmutableList<ZqElement>> firstMatrixCopy = firstMatrix.stream()
-				.map(ImmutableList::copyOf)
-				.collect(ImmutableList.toImmutableList());
-		final ImmutableList<ImmutableList<ZqElement>> secondMatrixCopy = secondMatrix.stream()
-				.map(ImmutableList::copyOf)
-				.collect(ImmutableList.toImmutableList());
 
-		// Dimensions checking.
-		checkArgument(firstMatrixCopy.size() == secondMatrixCopy.size(), "The two matrices must have the same number of rows.");
+		//Immutable copies and individual matrix validation (group and size)
+		final SameGroupMatrix<ZqElement, ZqGroup> firstMatrixCopy = new SameGroupMatrix<>(firstMatrix);
+		final SameGroupMatrix<ZqElement, ZqGroup> secondMatrixCopy = new SameGroupMatrix<>(secondMatrix);
+
+		//Cross matrix dimensions checking.
+		checkArgument(firstMatrixCopy.rowSize() == secondMatrixCopy.rowSize(), "The two matrices must have the same number of rows.");
+		checkArgument(firstMatrixCopy.columnSize() == secondMatrixCopy.columnSize(), "The two matrices must have the same number of columns.");
 
 		if (firstMatrixCopy.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		checkArgument(firstMatrixCopy.stream().allMatch(row -> row.size() == firstMatrixCopy.get(0).size()),
-				"All rows of the first matrix must have the same number of columns.");
-		checkArgument(secondMatrixCopy.stream().allMatch(row -> row.size() == secondMatrixCopy.get(0).size()),
-				"All rows of the second matrix must have the same number of columns.");
-		checkArgument(firstMatrixCopy.get(0).size() == secondMatrixCopy.get(0).size(), "The two matrices must have the same number of columns.");
-
-		if (firstMatrixCopy.get(0).isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		// Group checking.
-		final ZqGroup firstZqGroup = firstMatrixCopy.get(0).get(0).getGroup();
-		final ZqGroup secondZqGroup = secondMatrixCopy.get(0).get(0).getGroup();
-		checkArgument(firstMatrixCopy.stream().flatMap(Collection::stream).map(ZqElement::getGroup).allMatch(firstZqGroup::equals),
-				"All elements of the first matrix must be in the same group.");
-		checkArgument(secondMatrixCopy.stream().flatMap(Collection::stream).map(ZqElement::getGroup).allMatch(secondZqGroup::equals),
-				"All elements of the second matrix must be in the same group.");
-		checkArgument(firstZqGroup.equals(secondZqGroup),
-				"The elements of both matrices must be in the same group.");
-		checkArgument(y.getGroup().equals(firstZqGroup),
-				"The value y must be in the same group as the elements of the matrices.");
+		//Cross matrix group checking.
+		checkArgument(firstMatrixCopy.getGroup().equals(secondMatrixCopy.getGroup()), "The elements of both matrices must be in the same group.");
+		checkArgument(y.getGroup().equals(firstMatrixCopy.getGroup()), "The value y must be in the same group as the elements of the matrices.");
 
 		// Computing the d vector.
-		final int m = firstMatrixCopy.size() - 1;
+		final int m = firstMatrixCopy.rowSize() - 1;
 		final LinkedList<ZqElement> d = new LinkedList<>();
 		final ZqGroup group = y.getGroup();
 		for (int k = 0; k <= 2 * m; k++) {
@@ -105,7 +86,7 @@ final class ZeroArgumentProof {
 				if (j > m) {
 					break;
 				}
-				dk = dk.add(starMap(firstMatrixCopy.get(i), secondMatrixCopy.get(j)));
+				dk = dk.add(starMap(firstMatrixCopy.getRow(i), secondMatrixCopy.getRow(j)));
 			}
 			d.add(dk);
 		}
@@ -125,32 +106,28 @@ final class ZeroArgumentProof {
 	 * @return The sum &sum;<sub>j=0</sub><sup>n-1</sup> a<sub>j</sub> &middot; b<sub>j</sub> &middot; y<sup>j</sup>
 	 */
 	ZqElement starMap(final List<ZqElement> firstVector, final List<ZqElement> secondVector) {
-		// Null checking and copies.
+		// Null checking
 		checkNotNull(firstVector);
 		checkNotNull(secondVector);
 		checkArgument(firstVector.stream().allMatch(Objects::nonNull), "The elements of the first vector must not be null.");
 		checkArgument(secondVector.stream().allMatch(Objects::nonNull), "The elements of the second vector must not be null.");
-		final ImmutableList<ZqElement> firstVectorCopy = ImmutableList.copyOf(firstVector);
-		final ImmutableList<ZqElement> secondVectorCopy = ImmutableList.copyOf(secondVector);
+
+		//Immutable copies and individual group check
+		final SameGroupVector<ZqElement, ZqGroup> firstVectorCopy = new SameGroupVector<>(firstVector);
+		final SameGroupVector<ZqElement, ZqGroup> secondVectorCopy = new SameGroupVector<>(secondVector);
 
 		// Dimensions checking.
 		checkArgument(firstVectorCopy.size() == secondVectorCopy.size(), "The provided vectors must have the same size.");
 
-		final ZqGroup group = y.getGroup();
+		//Handle empty vectors
 		if (firstVectorCopy.isEmpty()) {
-			return group.getIdentity();
+			return y.getGroup().getIdentity();
 		}
 
 		// Group checking.
-		final ZqGroup firstVectorGroup = firstVectorCopy.get(0).getGroup();
-		final ZqGroup secondVectorGroup = secondVectorCopy.get(0).getGroup();
-		checkArgument(firstVectorCopy.stream().map(ZqElement::getGroup).allMatch(firstVectorGroup::equals),
-				"All elements of the first vector must belong to the same group.");
-		checkArgument(secondVectorCopy.stream().map(ZqElement::getGroup).allMatch(secondVectorGroup::equals),
-				"All elements of the second vector must belong to the same group.");
-		checkArgument(firstVectorGroup.equals(secondVectorGroup),
-				"The elements of both vectors must be in the same group.");
-		checkArgument(firstVectorGroup.equals(group), "The value y must be in the same group as the vectors elements");
+		checkArgument(firstVectorCopy.getGroup().equals(secondVectorCopy.getGroup()), "The elements of both vectors must be in the same group.");
+		checkArgument(firstVectorCopy.getGroup().equals(y.getGroup()), "The value y must be in the same group as the vectors elements");
+		final ZqGroup group = y.getGroup();
 
 		// StarMap computing.
 		final int n = firstVectorCopy.size();

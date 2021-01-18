@@ -18,7 +18,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
 
 class ElGamalMultiRecipientEncryptionDecryptionTest {
 
@@ -41,7 +41,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 
 	@BeforeEach
 	void setUp() {
-		List<GqElement> validMessageElements = Stream.generate(generator::genGqElementMember).limit(NUM_ELEMENTS).collect(Collectors.toList());
+		List<GqElement> validMessageElements = Stream.generate(generator::genMember).limit(NUM_ELEMENTS).collect(Collectors.toList());
 		message = new ElGamalMultiRecipientMessage(validMessageElements);
 	}
 
@@ -97,7 +97,8 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	void testEncryptAndDecryptWithDifferentKeySizesGivesDifferentMessage() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS+1, randomService);
 		ZqElement exponent = randomService.genRandomExponent(zqGroup);
-		ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(keyPair.getPublicKey().toList().subList(0, NUM_ELEMENTS));
+		ElGamalMultiRecipientPublicKey publicKey =
+				new ElGamalMultiRecipientPublicKey(keyPair.getPublicKey().stream().limit(NUM_ELEMENTS).collect(Collectors.toList()));
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
 		ElGamalMultiRecipientPrivateKey longerPrivateKey = keyPair.getPrivateKey();
 		ElGamalMultiRecipientMessage differentMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, longerPrivateKey);

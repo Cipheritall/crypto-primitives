@@ -1,8 +1,8 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.data.TestDataGenerator.genRandomCiphertext;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.data.TestDataGenerator.genRandomCiphertexts;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.data.TestDataGenerator.genRandomPublicKey;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator.genRandomCiphertext;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator.genRandomCiphertexts;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator.genRandomPublicKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,7 +30,6 @@ import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.TestDataGenerator;
 
 class ShuffleServiceTest {
 
@@ -62,9 +61,9 @@ class ShuffleServiceTest {
 	}
 
 	@Test
-	void testNoCiphertextsThrows() {
+	void testNoCiphertextsReturnsEmptyShuffle() {
 		List<ElGamalMultiRecipientCiphertext> ciphertexts = Collections.emptyList();
-		assertThrows(IllegalArgumentException.class, () -> shuffleService.genShuffle(ciphertexts, randomPublicKey));
+		assertEquals(Shuffle.EMPTY, shuffleService.genShuffle(ciphertexts, randomPublicKey));
 	}
 
 	@Test

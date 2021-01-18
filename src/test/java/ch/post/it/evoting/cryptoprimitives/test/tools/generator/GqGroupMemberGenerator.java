@@ -1,11 +1,12 @@
 /*
  * HEADER_LICENSE_OPEN_SOURCE
  */
-package ch.post.it.evoting.cryptoprimitives.test.tools.utils;
+package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -27,31 +28,40 @@ public class GqGroupMemberGenerator {
 		this.random = new SecureRandom();
 	}
 
+	/**
+	 * Get all members of the group.
+	 */
 	public Set<BigInteger> getMembers() {
 		if (group.getP().compareTo(MAX_GROUP_SIZE) > 0) {
 			throw new IllegalArgumentException("It would take too much time to generate all the group members for such a large group.");
 		}
 
 		Set<BigInteger> members =
-				pIntegers()
+				integersModP()
 						.map(bi -> bi.modPow(BigInteger.valueOf(2), group.getP()))
 						.collect(Collectors.toSet());
 		members.remove(BigInteger.ZERO);
 		return members;
 	}
 
+	/**
+	 * Get all non members of the group smaller than p.
+	 */
 	public Set<BigInteger> getNonMembers() {
 		if (group.getP().compareTo(MAX_GROUP_SIZE) > 0) {
 			throw new IllegalArgumentException("It would take too much time to generate all the group members for such a large group.");
 		}
 
 		Set<BigInteger> members = getMembers();
-		Set<BigInteger> nonMembers = pIntegers().collect(Collectors.toSet());
+		Set<BigInteger> nonMembers = integersModP().collect(Collectors.toSet());
 		nonMembers.removeAll(members);
 		return nonMembers;
 	}
 
-	public BigInteger genMember() {
+	/**
+	 * Generate a BigInteger value that belongs to the group.
+	 */
+	public BigInteger genMemberValue() {
 		BigInteger member;
 		do {
 			BigInteger randomInteger = randomBigInteger(group.getP().bitLength());
@@ -60,11 +70,17 @@ public class GqGroupMemberGenerator {
 		return member;
 	}
 
-	public GqElement genGqElementMember() {
-		return GqElement.create(genMember(), group);
+	/**
+	 * Generate a GqElement belonging to the group.
+	 */
+	public GqElement genMember() {
+		return GqElement.create(genMemberValue(), group);
 	}
 
-	public BigInteger genNonMember() {
+	/**
+	 * Generate a BigInteger value that does not belong to the group.
+	 */
+	public BigInteger genNonMemberValue() {
 		BigInteger nonMember;
 		do {
 			nonMember = randomBigInteger(group.getP().bitLength());
@@ -72,27 +88,34 @@ public class GqGroupMemberGenerator {
 		return nonMember;
 	}
 
-	public GqElement genNonIdentityGqElementMember() {
-		GqElement nonIdentityMember;
-		do {
-			nonIdentityMember = genGqElementMember();
-		} while (nonIdentityMember.equals(group.getIdentity()));
-		return nonIdentityMember;
+	/**
+	 * Generate a non identity member of the group.
+	 */
+	public GqElement genNonIdentityMember() {
+		return genMember(member -> member.equals(group.getIdentity()));
 	}
 
-	public GqElement genValidPublicKeyGqElementMember() {
-		GqElement nonIdentityMember;
-		do {
-			nonIdentityMember = genGqElementMember();
-		} while (nonIdentityMember.equals(group.getIdentity()) || nonIdentityMember.equals(group.getGenerator()));
-		return nonIdentityMember;
+	/**
+	 * Generate a non identity, non generator member of the group.
+	 */
+	public GqElement genNonIdentityNonGeneratorMember() {
+		return genMember(member -> member.equals(group.getIdentity()) || member.equals(group.getGenerator()));
 	}
+
+	private GqElement genMember(Predicate<GqElement> invalid) {
+		GqElement member;
+		do {
+			member = genMember();
+		} while (invalid.test(member));
+		return member;
+	}
+
 
 	private BigInteger randomBigInteger(int bitLength) {
 		return new BigInteger(bitLength, random);
 	}
 
-	private Stream<BigInteger> pIntegers() {
+	private Stream<BigInteger> integersModP() {
 		return IntStream.range(1, group.getP().intValue()).mapToObj(BigInteger::valueOf);
 	}
 }

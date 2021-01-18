@@ -5,7 +5,6 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -26,7 +24,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
 
 class ElGamalMultiRecipientCiphertextCreationTest {
 
@@ -57,7 +55,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@BeforeEach
 	void setUpEach() {
 		List<GqElement> messageElements =
-				Stream.generate(() -> gqGroupGenerator.genGqElementMember()).limit(NUM_RECIPIENTS).collect(Collectors.toList());
+				Stream.generate(() -> gqGroupGenerator.genMember()).limit(NUM_RECIPIENTS).collect(Collectors.toList());
 		validMessage = new ElGamalMultiRecipientMessage(messageElements);
 
 		// genRandomExponent excludes 0 and 1, for getCiphertext, all values in Z_p are allowed
@@ -122,7 +120,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(onesMessage, one, validPK);
 
 			assertEquals(gqGroup.getGenerator(), ciphertext.getGamma());
-			assertEquals(validPK.toList(), ciphertext.getPhis());
+			assertEquals(validPK.stream().collect(Collectors.toList()), ciphertext.stream().collect(Collectors.toList()));
 		}
 
 		@Test
@@ -135,23 +133,23 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(smallOneMessage, oneExponent, validPK);
 
 			//With a exponent of one and message of ones, the ciphertext is just the public key
-			assertEquals(validPK.toList().subList(0, nMessages - 1), ciphertext.getPhis().subList(0, nMessages - 1));
+			assertEquals(validPK.stream().limit(nMessages - 1).collect(Collectors.toList()),
+					ciphertext.stream().limit(nMessages - 1).collect(Collectors.toList()));
 
 			GqElement compressedKey =
 					validPK
-							.toList()
-							.subList(nMessages - 1, NUM_RECIPIENTS)
 							.stream()
+							.skip(nMessages - 1)
 							.reduce(GqElement::multiply)
 							.orElseThrow(() -> new RuntimeException("Should not reach"));
-			assertEquals(compressedKey, ciphertext.getPhis().get(nMessages - 1));
+			assertEquals(compressedKey, ciphertext.get(nMessages - 1));
 		}
 
 		@Test
 		void testZeroExponentGivesMessage() {
 			ZqElement zeroExponent = ZqElement.create(BigInteger.ZERO, zqGroup);
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(validMessage, zeroExponent, validPK);
-			assertEquals(validMessage.toList(), ciphertext.getPhis());
+			assertEquals(validMessage.stream().collect(Collectors.toList()), ciphertext.stream().collect(Collectors.toList()));
 			assertEquals(gqIdentity, ciphertext.getGamma());
 		}
 

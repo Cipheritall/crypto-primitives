@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -44,35 +45,34 @@ public class CommitmentService {
 	 * @param commitmentKey	<b>ck</b>, a {@link CommitmentKey} (h, g<sub>1</sub>, ..., g<sub>k</sub>)
 	 * @return	the commitment to the provided elements as a {@link GqElement}
 	 */
-	GqElement getCommitment(final List<ZqElement> elements, final ZqElement randomElement, final CommitmentKey commitmentKey) {
-		checkNotNull(elements);
+	GqElement getCommitment(final List<ZqElement> values, final ZqElement randomElement, final CommitmentKey commitmentKey) {
+		//Null checks
+		checkNotNull(values);
 		checkNotNull(randomElement);
 		checkNotNull(commitmentKey);
+		checkArgument(values.stream().allMatch(Objects::nonNull), "Values to be committed to cannot be null");
 
-		checkArgument(elements.stream().allMatch(Objects::nonNull), "Elements to be committed to cannot be null");
-		ImmutableList<ZqElement> elementsCopy = ImmutableList.copyOf(elements);
-		checkArgument(!elementsCopy.isEmpty(), "There must be at least one element to commit to");
-		checkArgument(elementsCopy.stream().map(ZqElement::getGroup).allMatch(elementsCopy.get(0).getGroup()::equals),
-				"All elements must belong to the same group");
+		//Immutable copy and values group check
+		SameGroupVector<ZqElement, ZqGroup> valuesVector = new SameGroupVector<>(values);
 
 		// by construction, commitmentKey.size() > 1
-		checkArgument(elementsCopy.get(0).getGroup().equals(randomElement.getGroup()),
-				"The random value must belong to the same group as the commitment elements");
+		checkArgument(valuesVector.isEmpty() || valuesVector.getGroup().equals(randomElement.getGroup()),
+				"The random value must belong to the same group as the values to be committed to");
 		checkArgument(randomElement.getGroup().getQ().equals(commitmentKey.getGroup().getQ()),
 				"The commitment key must have the same order (q) as the elements to be committed to and the random value");
-		int l = elementsCopy.size();
+		int l = valuesVector.size();
 		int k = commitmentKey.size();
 		checkArgument(k >= l, "The commitment key must be equal to or longer than the list of elements to commit to");
 
 		List<BigInteger> commitmentKeyValues =
-				Stream.concat(Stream.of(commitmentKey.getH()), commitmentKey.getGElements().stream())
+				Stream.concat(Stream.of(commitmentKey.getH()), commitmentKey.stream())
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList());
 		GqGroup group = commitmentKey.getGroup();
 		BigInteger p = group.getP();
 
 		List<BigInteger> commitmentValues =
-				Stream.concat(Stream.of(randomElement), elementsCopy.stream())
+				Stream.concat(Stream.of(randomElement), valuesVector.stream())
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList());
 

@@ -20,14 +20,14 @@ import org.junit.jupiter.api.Test;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
 
 class CommitmentKeyTest {
 
 	private static GqGroupMemberGenerator generator;
 
 	private GqElement h;
-	private List<GqElement> g;
+	private List<GqElement> gs;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -37,25 +37,25 @@ class CommitmentKeyTest {
 
 	@BeforeEach
 	void setUp() {
-		h = generator.genValidPublicKeyGqElementMember();
-		g = Stream.generate(generator::genValidPublicKeyGqElementMember).limit(10).collect(Collectors.toList());
+		h = generator.genNonIdentityNonGeneratorMember();
+		gs = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(10).collect(Collectors.toList());
 	}
 
 	@Test
 	@DisplayName("contains the correct commitment key")
 	void constructionTest() {
-		CommitmentKey commitmentKey = new CommitmentKey(h, g);
+		CommitmentKey commitmentKey = new CommitmentKey(h, gs);
 
 		assertEquals(h, commitmentKey.getH());
-		assertEquals(g, commitmentKey.getGElements());
+		assertEquals(gs, commitmentKey.stream().collect(Collectors.toList()));
 	}
 
 	@Test
 	void constructionFromNullParameterTest() {
-		assertThrows(NullPointerException.class, () -> new CommitmentKey(null, g));
+		assertThrows(NullPointerException.class, () -> new CommitmentKey(null, gs));
 		assertThrows(NullPointerException.class, () -> new CommitmentKey(h, null));
 
-		List<GqElement> gList = new ArrayList<>(g);
+		List<GqElement> gList = new ArrayList<>(gs);
 		gList.add(null);
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, gList));
 	}
@@ -68,10 +68,10 @@ class CommitmentKeyTest {
 
 	@Test
 	void constructionWithElementsFromDifferentGroupsTest() {
-		List<GqElement> elements = new LinkedList<>(g);
+		List<GqElement> elements = new LinkedList<>(gs);
 		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(h.getGroup());
 		GqGroupMemberGenerator differentGroupGenerator = new GqGroupMemberGenerator(differentGroup);
-		elements.add(differentGroupGenerator.genValidPublicKeyGqElementMember());
+		elements.add(differentGroupGenerator.genNonIdentityNonGeneratorMember());
 
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, elements));
 	}
@@ -80,27 +80,27 @@ class CommitmentKeyTest {
 	void constructionWithHAndGFromDifferentGroupsTest() {
 		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(h.getGroup());
 		GqGroupMemberGenerator differentGroupGenerator = new GqGroupMemberGenerator(differentGroup);
-		List<GqElement> gList = Stream.generate(differentGroupGenerator::genValidPublicKeyGqElementMember).limit(3).collect(Collectors.toList());
+		List<GqElement> gList = Stream.generate(differentGroupGenerator::genNonIdentityNonGeneratorMember).limit(3).collect(Collectors.toList());
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, gList));
 	}
 
 	@Test
 	void constructionWithIdentityTest() {
 		GqElement identity = h.getGroup().getIdentity();
-		List<GqElement> elementsWithIdentity = new LinkedList<>(g);
+		List<GqElement> elementsWithIdentity = new LinkedList<>(gs);
 		elementsWithIdentity.add(identity);
 
-		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(identity, g));
+		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(identity, gs));
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, elementsWithIdentity));
 	}
 
 	@Test
 	void constructionWithGeneratorTest() {
 		GqElement generator = h.getGroup().getGenerator();
-		List<GqElement> elementsWithIdentity = new LinkedList<>(g);
+		List<GqElement> elementsWithIdentity = new LinkedList<>(gs);
 		elementsWithIdentity.add(generator);
 
-		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(generator, g));
+		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(generator, gs));
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, elementsWithIdentity));
 	}
 }

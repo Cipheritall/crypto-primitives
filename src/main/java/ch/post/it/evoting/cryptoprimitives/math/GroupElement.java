@@ -6,6 +6,8 @@ package ch.post.it.evoting.cryptoprimitives.math;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.HasGroup;
+
 /**
  * Representation of a mathematical group element.
  *
@@ -13,7 +15,7 @@ import java.util.Objects;
  *
  * @param <G> the type of the mathematical group this group element belongs to.
  */
-public abstract class GroupElement<G extends MathematicalGroup<G>> {
+public abstract class GroupElement<G extends MathematicalGroup<G>> implements HasGroup<G> {
 
 	protected final BigInteger value;
 	protected final G group;
@@ -32,11 +34,7 @@ public abstract class GroupElement<G extends MathematicalGroup<G>> {
 		return this.value;
 	}
 
-	/**
-	 * Returns the element's group.
-	 *
-	 * @return the group this element belongs to.
-	 */
+	@Override
 	public G getGroup() {
 		return this.group;
 	}

@@ -14,6 +14,8 @@ import java.util.Arrays;
  */
 public class Permutation {
 
+	public static final Permutation EMPTY = new Permutation(new int[]{});
+
 	//valueMapping[i] represents the permutation of value i
 	private final int[] valueMapping;
 	private final int size;

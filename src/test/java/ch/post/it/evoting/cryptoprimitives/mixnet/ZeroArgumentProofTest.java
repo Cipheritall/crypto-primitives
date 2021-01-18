@@ -3,6 +3,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,8 +14,6 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +27,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
 
-public class ZeroArgumentProofTest {
+class ZeroArgumentProofTest {
 
 	private static final BigInteger ZERO = BigInteger.valueOf(0);
 	private static final BigInteger ONE = BigInteger.valueOf(1);
@@ -174,7 +174,7 @@ public class ZeroArgumentProofTest {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.computeDVector(firstMatrix, secondMatrix));
-			assertEquals("All rows of the first matrix must have the same number of columns.", exception.getMessage());
+			assertEquals("All rows of the matrix must have the same number of columns.", exception.getMessage());
 		}
 
 		@Test
@@ -190,7 +190,7 @@ public class ZeroArgumentProofTest {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.computeDVector(firstMatrix, secondMatrix));
-			assertEquals("All rows of the second matrix must have the same number of columns.", exception.getMessage());
+			assertEquals("All rows of the matrix must have the same number of columns.", exception.getMessage());
 		}
 
 		@Test
@@ -220,7 +220,7 @@ public class ZeroArgumentProofTest {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.computeDVector(firstMatrix, secondMatrix));
-			assertEquals("All elements of the first matrix must be in the same group.", exception.getMessage());
+			assertEquals("All elements of the matrix must be in the same group.", exception.getMessage());
 		}
 
 		@Test
@@ -239,7 +239,7 @@ public class ZeroArgumentProofTest {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.computeDVector(firstMatrix, secondMatrix));
-			assertEquals("All elements of the second matrix must be in the same group.", exception.getMessage());
+			assertEquals("All elements of the matrix must be in the same group.", exception.getMessage());
 		}
 
 		@Test
@@ -402,7 +402,7 @@ public class ZeroArgumentProofTest {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.starMap(firstVector, secondVector));
-			assertEquals("All elements of the first vector must belong to the same group.", exception.getMessage());
+			assertEquals("All elements must belong to the same group.", exception.getMessage());
 		}
 
 		@Test
@@ -417,7 +417,7 @@ public class ZeroArgumentProofTest {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.starMap(firstVector, secondVector));
-			assertEquals("All elements of the second vector must belong to the same group.", exception.getMessage());
+			assertEquals("All elements must belong to the same group.", exception.getMessage());
 		}
 
 		@Test
@@ -473,8 +473,7 @@ public class ZeroArgumentProofTest {
 	 * @return a vector of {@code numElements} random {@link ZqElement}.
 	 */
 	private List<ZqElement> generateRandomZqElementList(final int numElements, final ZqGroup group) {
-		return Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(group.getQ()), group)).limit(numElements)
-				.collect(Collectors.toList());
+		return generateElementList(numElements, () -> ZqElement.create(randomService.genRandomInteger(group.getQ()), group));
 	}
 
 	/**
@@ -485,7 +484,7 @@ public class ZeroArgumentProofTest {
 	 * @return a m &times; n matrix of random {@link ZqElement}.
 	 */
 	private List<List<ZqElement>> generateRandomZqElementMatrix(final int m, final int n, final ZqGroup group) {
-		return Stream.generate(() -> generateRandomZqElementList(n, group)).limit(m).collect(Collectors.toList());
+		return generateElementMatrix(m, n, () -> ZqElement.create(randomService.genRandomInteger(group.getQ()), group));
 	}
 
 	/**

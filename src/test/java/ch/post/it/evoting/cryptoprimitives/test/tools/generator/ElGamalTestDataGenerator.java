@@ -1,4 +1,4 @@
-package ch.post.it.evoting.cryptoprimitives.test.tools.data;
+package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,14 +13,13 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.utils.GqGroupMemberGenerator;
 
-public class TestDataGenerator {
+public class ElGamalTestDataGenerator {
 
 	private static final RandomService randomService = new RandomService();
 
 	private static List<GqElement> genRandomMessageElements(GqGroupMemberGenerator groupGenerator, int size){
-		return Stream.generate(groupGenerator::genGqElementMember).limit(size).collect(Collectors.toList());
+		return Stream.generate(groupGenerator::genMember).limit(size).collect(Collectors.toList());
 	}
 
 	private static ElGamalMultiRecipientMessage genRandomMessage(GqGroupMemberGenerator groupGenerator, int size){
