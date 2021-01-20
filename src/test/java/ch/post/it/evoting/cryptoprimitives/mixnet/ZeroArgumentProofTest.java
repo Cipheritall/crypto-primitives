@@ -247,7 +247,7 @@ class ZeroArgumentProofTest {
 		void computeDVectorMatricesDifferentGroup() {
 			// Get a second matrix in a different ZqGroup.
 			final ZqGroup differentZqGroup = getDifferentZqGroup();
-			final List<List<ZqElement>> differentGroupSecondMatrix = generateRandomZqElementMatrix(n, m + cim1, differentZqGroup);
+			final List<List<ZqElement>> differentGroupSecondMatrix = generateRandomZqElementMatrix(n, m + 1, differentZqGroup);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.computeDVector(firstMatrix, differentGroupSecondMatrix));
