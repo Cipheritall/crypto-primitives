@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -173,15 +175,15 @@ class CommitmentServiceTest {
 		private int m;
 		private int n;
 
-		private List<List<ZqElement>> validMatrix;
-		private List<ZqElement> validRandomValues;
+		private SameGroupMatrix<ZqElement, ZqGroup> validMatrix;
+		private SameGroupVector<ZqElement, ZqGroup> validRandomValues;
 
 		@BeforeEach
 		void setup() {
 			m = secureRandom.nextInt(10) + 1;
 			n = KEY_LENGTH;
-			validMatrix = generateRandomZqElementMatrix(m, n, zqGroup);
-			validRandomValues = generateRandomZqElementList(m, zqGroup);
+			validMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(n, m, zqGroup));
+			validRandomValues = new SameGroupVector<>(generateRandomZqElementList(m, zqGroup));
 		}
 
 		@Test
@@ -193,69 +195,30 @@ class CommitmentServiceTest {
 		}
 
 		@Test
-		@DisplayName("with a null row in the element matrix throws IllegalArgumentException")
-		void getCommitmentMatrixWithNullRowInElementMatrix() {
-			List<List<ZqElement>> nullRowMatrix = generateRandomZqElementMatrix(m, n, zqGroup);
-			nullRowMatrix.set(m-1, null);
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(nullRowMatrix, validRandomValues, validCommitmentKey));
-			assertEquals("Rows must not be null", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with a null element in the element matrix throws IllegalArgumentException")
-		void getCommitmentMatrixWithNullElementInElementMatrix() {
-			List<List<ZqElement>> nullElementMatrix = generateRandomZqElementMatrix(m, n, zqGroup);
-			nullElementMatrix.get(m-1).set(0, null);
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(nullElementMatrix, validRandomValues, validCommitmentKey));
-			assertEquals("Elements must not be null", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with a null random element throws IllegalArgumentException")
-		void getCommitmentMatrixWithNullRandomElement() {
-			List<ZqElement> randomElementsWithNull = generateRandomZqElementList(m, zqGroup);
-			randomElementsWithNull.set(m-1, null);
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(validMatrix, randomElementsWithNull, validCommitmentKey));
-			assertEquals("Random elements must not be null", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with empty elements matrix throws IllegalArgumentException")
+		@DisplayName("with empty elements matrix returns empty list")
 		void getCommitmentMatrixWithEmptyElementsMatrix() {
-			List<List<ZqElement>> emptyMatrix = generateRandomZqElementMatrix(0, 0, zqGroup);
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(emptyMatrix, validRandomValues, validCommitmentKey));
-			assertEquals("The elements matrix must have at least one row", exception.getMessage());
+			SameGroupMatrix<ZqElement, ZqGroup> emptyMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(0, 0, zqGroup));
+
+			assertEquals(Collections.emptyList(),
+					commitmentService.getCommitmentMatrix(emptyMatrix, validRandomValues, validCommitmentKey));
 		}
 
 		@Test
-		@DisplayName("with empty rows in elements matrix throws IllegalArgumentException")
+		@DisplayName("with empty rows in elements matrix returns empty list")
 		void getCommitmentMatrixWithEmptyRowsInElementsMatrix() {
-			List<List<ZqElement>> emptyRowsMatrix = generateRandomZqElementMatrix(m, 0, zqGroup);
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(emptyRowsMatrix, validRandomValues, validCommitmentKey));
-			assertEquals("The elements matrix must not have any empty rows", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with empty random element list throws IllegalArgumentException")
-		void getCommitmentMatrixWithEmptyRandomElements() {
-			List<ZqElement> emptyRandomElements = generateRandomZqElementList(0, zqGroup);
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(validMatrix, emptyRandomElements, validCommitmentKey));
-			assertEquals("There must be as many random elements as there are rows in the element matrix", exception.getMessage());
+			SameGroupMatrix<ZqElement, ZqGroup> emptyRowsMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(0, m, zqGroup));
+			SameGroupVector<ZqElement, ZqGroup> emptyRandomElements = new SameGroupVector<>(generateRandomZqElementList(0, zqGroup));
+			assertEquals(Collections.emptyList(), commitmentService.getCommitmentMatrix(emptyRowsMatrix, emptyRandomElements, validCommitmentKey));
 		}
 
 		@Test
 		@DisplayName("with too large matrix throws IllegalArgumentException")
-		void getCommitmentMatrixWithTooManyColumns() {
-			List<List<ZqElement>> tooManyColumnsMatrix = generateRandomZqElementMatrix(m, n+1, zqGroup);
+		void getCommitmentMatrixWithTooManyRows() {
+			SameGroupMatrix<ZqElement, ZqGroup> tooManyRowsMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(n+1, m, zqGroup));
+
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(tooManyColumnsMatrix, validRandomValues, validCommitmentKey));
-			assertEquals("The commitment key must be longer than the number of columns of the elements matrix", exception.getMessage());
+					() -> commitmentService.getCommitmentMatrix(tooManyRowsMatrix, validRandomValues, validCommitmentKey));
+			assertEquals("The commitment key must be longer than the number of rows of the elements matrix", exception.getMessage());
 		}
 
 		@Test
@@ -272,33 +235,11 @@ class CommitmentServiceTest {
 		@DisplayName("with matrix group different from random values group throws IllegalArgumentException")
 		void getCommitmentWithRandomValueDifferentGroupThanValues() {
 			ZqGroup differentZqGroup = new ZqGroup(zqGroup.getQ().multiply(BigInteger.TEN));
-			List<ZqElement> differentRandomValues = generateRandomZqElementList(m, differentZqGroup);
+			SameGroupVector<ZqElement, ZqGroup> differentRandomValues = new SameGroupVector<>(generateRandomZqElementList(m, differentZqGroup));
+
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> commitmentService.getCommitmentMatrix(validMatrix, differentRandomValues, validCommitmentKey));
 			assertEquals("The elements to be committed to and the random elements must be in the same group.", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with elements of different groups to be committed to throws IllegalArgumentException")
-		void getCommitmentWithElementsFromDifferentGroups() {
-			List<List<ZqElement>> invalidMatrix = generateRandomZqElementMatrix(m, n, zqGroup);
-			ZqGroup differentZqGroup = getDifferentZqGroup();
-			invalidMatrix.get(0).set(0, differentZqGroup.getIdentity());
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(invalidMatrix, validRandomValues, validCommitmentKey));
-			assertEquals("All elements to be committed must be in the same group.", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with random values of different groups throws IllegalArgumentException")
-		void getCommitmentMatrixWithRandomValuesFromDifferentGroups() {
-			List<List<ZqElement>> validMatrix = generateRandomZqElementMatrix(m+1, n, zqGroup);
-			List<ZqElement> invalidRandomValues = generateRandomZqElementList(m+1, zqGroup);
-			ZqGroup differentZqGroup = getDifferentZqGroup();
-			invalidRandomValues.set(m, differentZqGroup.getIdentity());
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> commitmentService.getCommitmentMatrix(validMatrix, invalidRandomValues, validCommitmentKey));
-			assertEquals("All random elements must be in the same group.", exception.getMessage());
 		}
 
 		@RepeatedTest(100)
@@ -333,11 +274,12 @@ class CommitmentServiceTest {
 			a1.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
 			a1.add(ZqElement.create(BigInteger.valueOf(9), specificZqGroup));
 			// a = (a0, a1)
-			List<List<ZqElement>> a = Arrays.asList(a0, a1);
+			SameGroupMatrix<ZqElement, ZqGroup> a = SameGroupMatrix.fromColumns(Arrays.asList(a0, a1));
 			// r = (5, 8)
-			List<ZqElement> r = new ArrayList<>(2);
-			r.add(ZqElement.create(BigInteger.valueOf(5), specificZqGroup));
-			r.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
+			List<ZqElement> rValues = new ArrayList<>(2);
+			rValues.add(ZqElement.create(BigInteger.valueOf(5), specificZqGroup));
+			rValues.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
+			SameGroupVector<ZqElement, ZqGroup> r = new SameGroupVector<>(rValues);
 			// ck = (2, 3, 4)
 			List<GqElement> gElements = new ArrayList<>();
 			GqElement h = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
@@ -418,7 +360,7 @@ class CommitmentServiceTest {
 			invalidRandomValues.set(KEY_LENGTH, differentZqGroup.getIdentity());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> commitmentService.getCommitmentVector(validElements, invalidRandomValues, validCommitmentKey));
-			assertEquals("All random elements must be in the same group.", exception.getMessage());
+			assertEquals("All elements must belong to the same group.", exception.getMessage());
 		}
 
 		@RepeatedTest(100)

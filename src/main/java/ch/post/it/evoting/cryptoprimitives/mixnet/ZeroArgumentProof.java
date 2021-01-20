@@ -60,8 +60,8 @@ final class ZeroArgumentProof {
 		checkArgument(secondMatrix.stream().flatMap(Collection::stream).allMatch(Objects::nonNull), "Second matrix elements must be not be null.");
 
 		//Immutable copies and individual matrix validation (group and size)
-		final SameGroupMatrix<ZqElement, ZqGroup> firstMatrixCopy = new SameGroupMatrix<>(firstMatrix);
-		final SameGroupMatrix<ZqElement, ZqGroup> secondMatrixCopy = new SameGroupMatrix<>(secondMatrix);
+		final SameGroupMatrix<ZqElement, ZqGroup> firstMatrixCopy = SameGroupMatrix.fromRows(firstMatrix);
+		final SameGroupMatrix<ZqElement, ZqGroup> secondMatrixCopy = SameGroupMatrix.fromRows(secondMatrix);
 
 		//Cross matrix dimensions checking.
 		checkArgument(firstMatrixCopy.rowSize() == secondMatrixCopy.rowSize(), "The two matrices must have the same number of rows.");
@@ -76,7 +76,7 @@ final class ZeroArgumentProof {
 		checkArgument(y.getGroup().equals(firstMatrixCopy.getGroup()), "The value y must be in the same group as the elements of the matrices.");
 
 		// Computing the d vector.
-		final int m = firstMatrixCopy.rowSize() - 1;
+		final int m = firstMatrixCopy.columnSize() - 1;
 		final LinkedList<ZqElement> d = new LinkedList<>();
 		final ZqGroup group = y.getGroup();
 		for (int k = 0; k <= 2 * m; k++) {
@@ -86,7 +86,7 @@ final class ZeroArgumentProof {
 				if (j > m) {
 					break;
 				}
-				dk = dk.add(starMap(firstMatrixCopy.getRow(i), secondMatrixCopy.getRow(j)));
+				dk = dk.add(starMap(firstMatrixCopy.getColumn(i), secondMatrixCopy.getColumn(j)));
 			}
 			d.add(dk);
 		}

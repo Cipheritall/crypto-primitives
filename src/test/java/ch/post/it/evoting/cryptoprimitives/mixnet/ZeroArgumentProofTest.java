@@ -73,8 +73,8 @@ class ZeroArgumentProofTest {
 		void setUp() {
 			m = secureRandom.nextInt(10) + 1;
 			n = secureRandom.nextInt(10) + 1;
-			firstMatrix = generateRandomZqElementMatrix(m + 1, n, zqGroup);
-			secondMatrix = generateRandomZqElementMatrix(m + 1, n, zqGroup);
+			firstMatrix = generateRandomZqElementMatrix(n, m + 1, zqGroup);
+			secondMatrix = generateRandomZqElementMatrix(n, m + 1, zqGroup);
 		}
 
 		@Test
@@ -143,7 +143,7 @@ class ZeroArgumentProofTest {
 		@DisplayName("with matrices with not same number of lines throws IllegalArgumentException")
 		void computeDVectorDifferentSizeLines() {
 			// Add an additional line to first matrix.
-			final List<ZqElement> additionalLine = generateRandomZqElementList(n, zqGroup);
+			final List<ZqElement> additionalLine = generateRandomZqElementList(m + 1, zqGroup);
 			firstMatrix.add(additionalLine);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -211,11 +211,11 @@ class ZeroArgumentProofTest {
 			final ZqGroup otherZqGroup = getDifferentZqGroup();
 
 			// Add an additional line to first matrix with elements from a different group.
-			final List<ZqElement> differentGroupElements = generateRandomZqElementList(n, otherZqGroup);
+			final List<ZqElement> differentGroupElements = generateRandomZqElementList(m + 1, otherZqGroup);
 			firstMatrix.add(differentGroupElements);
 
 			// Also add additional line to second matrix but from same group.
-			final List<ZqElement> sameGroupElements = generateRandomZqElementList(n, zqGroup);
+			final List<ZqElement> sameGroupElements = generateRandomZqElementList(m + 1, zqGroup);
 			secondMatrix.add(sameGroupElements);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -230,11 +230,11 @@ class ZeroArgumentProofTest {
 			final ZqGroup otherZqGroup = getDifferentZqGroup();
 
 			// Add an additional line to second matrix with elements from a different group.
-			final List<ZqElement> differentGroupElements = generateRandomZqElementList(n, otherZqGroup);
+			final List<ZqElement> differentGroupElements = generateRandomZqElementList(m + 1, otherZqGroup);
 			secondMatrix.add(differentGroupElements);
 
 			// Also add additional line to fist matrix but from same group.
-			final List<ZqElement> sameGroupElements = generateRandomZqElementList(n, zqGroup);
+			final List<ZqElement> sameGroupElements = generateRandomZqElementList(m + 1, zqGroup);
 			firstMatrix.add(sameGroupElements);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -247,7 +247,7 @@ class ZeroArgumentProofTest {
 		void computeDVectorMatricesDifferentGroup() {
 			// Get a second matrix in a different ZqGroup.
 			final ZqGroup differentZqGroup = getDifferentZqGroup();
-			final List<List<ZqElement>> differentGroupSecondMatrix = generateRandomZqElementMatrix(m + 1, n, differentZqGroup);
+			final List<List<ZqElement>> differentGroupSecondMatrix = generateRandomZqElementMatrix(n, m + cim1, differentZqGroup);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentProof.computeDVector(firstMatrix, differentGroupSecondMatrix));
@@ -287,10 +287,10 @@ class ZeroArgumentProofTest {
 			final ZqGroup group = new ZqGroup(ELEVEN);
 
 			// Construct the two matrices and value y.
-			final List<ZqElement> a0 = Arrays.asList(ZqElement.create(ZERO, group), ZqElement.create(FOUR, group));
-			final List<ZqElement> a1 = Arrays.asList(ZqElement.create(TWO, group), ZqElement.create(SIX, group));
-			final List<ZqElement> b0 = Arrays.asList(ZqElement.create(ONE, group), ZqElement.create(FIVE, group));
-			final List<ZqElement> b1 = Arrays.asList(ZqElement.create(THREE, group), ZqElement.create(SEVEN, group));
+			final List<ZqElement> a0 = Arrays.asList(ZqElement.create(ZERO, group), ZqElement.create(TWO, group));
+			final List<ZqElement> a1 = Arrays.asList(ZqElement.create(FOUR, group), ZqElement.create(SIX, group));
+			final List<ZqElement> b0 = Arrays.asList(ZqElement.create(ONE, group), ZqElement.create(THREE, group));
+			final List<ZqElement> b1 = Arrays.asList(ZqElement.create(FIVE, group), ZqElement.create(SEVEN, group));
 			final List<List<ZqElement>> firstMatrix = Arrays.asList(a0, a1);
 			final List<List<ZqElement>> secondMatrix = Arrays.asList(b0, b1);
 			final ZqElement y = ZqElement.create(EIGHT, group);
