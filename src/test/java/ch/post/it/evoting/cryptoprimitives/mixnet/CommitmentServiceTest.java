@@ -32,7 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class CommitmentServiceTest {
 
@@ -442,7 +442,7 @@ class CommitmentServiceTest {
 	 * @return		a new commitment key of length k + 1.
 	 */
 	private CommitmentKey genCommitmentKey(GqGroup group, int k) {
-		GqGroupMemberGenerator generator = new GqGroupMemberGenerator(group);
+		GqGroupGenerator generator = new GqGroupGenerator(group);
 		GqElement h = generator.genNonIdentityNonGeneratorMember();
 		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(k).collect(Collectors.toList());
 		return new CommitmentKey(h, gList);

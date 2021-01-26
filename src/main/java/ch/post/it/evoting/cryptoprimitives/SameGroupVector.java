@@ -9,9 +9,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
@@ -90,7 +92,36 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 	}
 
 	/**
+	 * Append a new element to this vector. Returns a new SameGroupVector.
+	 *
+	 * @param element The element to append. Must be non null and from the same group.
+	 * @return A new SameGroupVector with the appended {@code element}.
+	 */
+	public SameGroupVector<E, G> append(final E element) {
+		checkNotNull(element);
+		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
+
+		final List<E> newVector = Streams.concat(this.stream(), Stream.of(element)).collect(Collectors.toList());
+		return new SameGroupVector<>(newVector);
+	}
+
+	/**
+	 * Prepend a new element to this vector. Returns a new SameGroupVector.
+	 *
+	 * @param element The element to prepend. Must be non null and from the same group.
+	 * @return A new SameGroupVector with the prepended {@code element}.
+	 */
+	public SameGroupVector<E, G> prepend(final E element) {
+		checkNotNull(element);
+		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
+
+		final List<E> newVector = Streams.concat(Stream.of(element), this.stream()).collect(Collectors.toList());
+		return new SameGroupVector<>(newVector);
+	}
+
+	/**
 	 * Validate that a property holds for all elements.
+	 *
 	 * @param property to check all elements against.
 	 * @return true if the vector is empty or all elements are equal under this property. False otherwise.
 	 */

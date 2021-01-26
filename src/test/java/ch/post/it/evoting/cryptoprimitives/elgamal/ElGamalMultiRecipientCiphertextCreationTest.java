@@ -24,7 +24,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class ElGamalMultiRecipientCiphertextCreationTest {
 
@@ -34,7 +34,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	static private GqElement gqIdentity;
 	static private RandomService randomService;
 	static private ZqGroup zqGroup;
-	static private GqGroupMemberGenerator gqGroupGenerator;
+	static private GqGroupGenerator gqGroupGenerator;
 	private static ElGamalMultiRecipientMessage onesMessage;
 
 	private ElGamalMultiRecipientMessage validMessage;
@@ -45,7 +45,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	static void setUp() {
 		gqGroup = GqGroupTestData.getGroup();
 		gqIdentity = gqGroup.getIdentity();
-		gqGroupGenerator = new GqGroupMemberGenerator(gqGroup);
+		gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		randomService = new RandomService();
 		List<GqElement> ones = Stream.generate(() -> gqGroup.getIdentity()).limit(NUM_RECIPIENTS).collect(Collectors.toList());

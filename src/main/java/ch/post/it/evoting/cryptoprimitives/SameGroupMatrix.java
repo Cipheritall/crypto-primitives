@@ -11,9 +11,12 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
@@ -141,6 +144,69 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 		checkArgument(j >= 0);
 		checkArgument(j < this.columnSize);
 		return this.rows.stream().map(row -> row.get(j)).collect(toImmutableList());
+	}
+
+	/**
+	 * @return A flat stream of the matrix elements, row after row.
+	 */
+	public Stream<E> stream() {
+		return IntStream.range(0, this.rowSize())
+				.mapToObj(this::getRow)
+				.flatMap(Collection::stream);
+	}
+
+	/**
+	 * @return A stream over the matrix' rows.
+	 */
+	public Stream<ImmutableList<E>> rowStream() {
+		return this.rows.stream();
+	}
+
+	/**
+	 * @return A stream over the matrix' columns.
+	 */
+	public Stream<ImmutableList<E>> columnStream() {
+		return IntStream.range(0, columnSize)
+				.mapToObj(this::getColumn);
+	}
+
+	/**
+	 * @return The matrix represented as a List of List, using row representation.
+	 */
+	public List<List<E>> toLists() {
+		return IntStream.range(0, this.rowSize())
+				.mapToObj(this::getRow)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Append a new column to the matrix. Returns a new SameGroupMatrix.
+	 *
+	 * @param column The new column to append. Must be non null and have {@code rowSize} elements.
+	 * @return A new SameGroupMatrix with the appended {@code column}.
+	 */
+	public SameGroupMatrix<E, G> appendColumn(final List<E> column) {
+		checkNotNull(column);
+		checkArgument(column.size() == rowSize,
+				String.format("The new column size does not match size of matrix' columns. Size: %d, rowSize: %d", column.size(), rowSize));
+
+		final List<List<E>> newColumns = Streams.concat(this.columnStream(), Stream.of(column)).collect(Collectors.toList());
+		return SameGroupMatrix.fromColumns(newColumns);
+	}
+
+	/**
+	 * Prepend a new column to the matrix. Returns a new SameGroupMatrix.
+	 *
+	 * @param column The new column to prepend. Must be non null and have {@code rowSize} elements.
+	 * @return A new SameGroupMatrix with the prepended {@code column}.
+	 */
+	public SameGroupMatrix<E, G> prependColumn(final List<E> column) {
+		checkNotNull(column);
+		checkArgument(column.size() == rowSize,
+				String.format("The new column size does not match size of matrix' columns. Size: %d, rowSize: %d", column.size(), rowSize));
+
+		final List<List<E>> newColumns = Streams.concat(Stream.of(column), this.columnStream()).collect(Collectors.toList());
+		return SameGroupMatrix.fromColumns(newColumns);
 	}
 
 	@Override

@@ -18,7 +18,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class ElGamalMultiRecipientEncryptionDecryptionTest {
 
@@ -26,7 +26,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 
 	private static RandomService randomService;
 	private static GqGroup gqGroup;
-	private static GqGroupMemberGenerator generator;
+	private static GqGroupGenerator generator;
 	private static ZqGroup zqGroup;
 
 	private static ElGamalMultiRecipientMessage message;
@@ -36,7 +36,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 		randomService = new RandomService();
 		gqGroup = GqGroupTestData.getGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		generator = new GqGroupMemberGenerator(gqGroup);
+		generator = new GqGroupGenerator(gqGroup);
 	}
 
 	@BeforeEach

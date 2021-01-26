@@ -19,7 +19,7 @@ public class HashService {
 	 *
 	 * @param messageDigest with which to hash.
 	 */
-	HashService(MessageDigest messageDigest) {
+	public HashService(MessageDigest messageDigest) {
 		checkNotNull(messageDigest);
 		this.hashFunction = messageDigest::digest;
 	}
@@ -42,14 +42,13 @@ public class HashService {
 	 * domain of each input element is well defined. </li>
 	 * 	</p>
 	 */
-	byte[] recursiveHash(final Object... values) {
+	public byte[] recursiveHash(final Object... values) {
 		checkNotNull(values);
 		checkArgument(values.length != 0, "Cannot hash no values.");
 
 		if (values.length > 1) {
 			return recursiveHash(Arrays.asList(values));
-		}
-		else {
+		} else {
 			Object value = values[0];
 			if (value instanceof byte[]) {
 				return this.hashFunction.apply((byte[]) value);
@@ -59,7 +58,7 @@ public class HashService {
 			}
 			else if (value instanceof BigInteger) {
 				BigInteger bigInteger = (BigInteger) value;
-				checkArgument(bigInteger.compareTo(BigInteger.ZERO) > 0);
+				checkArgument(bigInteger.compareTo(BigInteger.ZERO) >= 0);
 				return this.hashFunction.apply(toByteArray(bigInteger));
 			}
 			else if (value instanceof List<?>) {

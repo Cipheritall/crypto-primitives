@@ -20,11 +20,11 @@ import org.junit.jupiter.api.Test;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class CommitmentKeyTest {
 
-	private static GqGroupMemberGenerator generator;
+	private static GqGroupGenerator generator;
 
 	private GqElement h;
 	private List<GqElement> gs;
@@ -32,7 +32,7 @@ class CommitmentKeyTest {
 	@BeforeAll
 	static void setUpAll() {
 		GqGroup gqGroup = GqGroupTestData.getGroup();
-		generator = new GqGroupMemberGenerator(gqGroup);
+		generator = new GqGroupGenerator(gqGroup);
 	}
 
 	@BeforeEach
@@ -70,7 +70,7 @@ class CommitmentKeyTest {
 	void constructionWithElementsFromDifferentGroupsTest() {
 		List<GqElement> elements = new LinkedList<>(gs);
 		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(h.getGroup());
-		GqGroupMemberGenerator differentGroupGenerator = new GqGroupMemberGenerator(differentGroup);
+		GqGroupGenerator differentGroupGenerator = new GqGroupGenerator(differentGroup);
 		elements.add(differentGroupGenerator.genNonIdentityNonGeneratorMember());
 
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, elements));
@@ -79,7 +79,7 @@ class CommitmentKeyTest {
 	@Test
 	void constructionWithHAndGFromDifferentGroupsTest() {
 		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(h.getGroup());
-		GqGroupMemberGenerator differentGroupGenerator = new GqGroupMemberGenerator(differentGroup);
+		GqGroupGenerator differentGroupGenerator = new GqGroupGenerator(differentGroup);
 		List<GqElement> gList = Stream.generate(differentGroupGenerator::genNonIdentityNonGeneratorMember).limit(3).collect(Collectors.toList());
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, gList));
 	}

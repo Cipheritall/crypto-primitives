@@ -14,14 +14,14 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class GqGroupTest {
 	private static BigInteger p;
 	private static BigInteger q;
 	private static BigInteger g;
 	private static GqGroup smallGroup;
-	private static GqGroupMemberGenerator smallGroupGenerator;
+	private static GqGroupGenerator smallGroupGenerator;
 
 	@BeforeAll
 	static void setUp() {
@@ -30,7 +30,7 @@ class GqGroupTest {
 		q = new BigInteger("11");
 		g = new BigInteger("2");
 		smallGroup = new GqGroup(p, q, g);
-		smallGroupGenerator = new GqGroupMemberGenerator(smallGroup);
+		smallGroupGenerator = new GqGroupGenerator(smallGroup);
 	}
 
 	//Object instantiation validations

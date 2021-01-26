@@ -19,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
@@ -144,7 +145,7 @@ class SameGroupVectorTest {
 		TestValuedElement third = new TestValuedElement(BigInteger.valueOf(3), group);
 		List<TestValuedElement> elements = Arrays.asList(first, second, third);
 		SameGroupVector<TestValuedElement, TestGroup> vector = new SameGroupVector<>(elements);
-		assertAll ( () -> {
+		assertAll(() -> {
 			assertFalse(vector.allEqual(TestValuedElement::getValue));
 			assertTrue(vector.allEqual(TestValuedElement::getGroup));
 		});
@@ -169,5 +170,63 @@ class SameGroupVectorTest {
 		List<TestHasGroupElement> elements = Collections.singletonList(new TestHasGroupElement(group));
 		SameGroupVector<TestHasGroupElement, TestGroup> vector = new SameGroupVector<>(elements);
 		assertFalse(vector.isEmpty());
+	}
+
+	@Test
+	void appendWithInvalidParamsThrows() {
+		TestGroup group = new TestGroup();
+		int n = random.nextInt(10) + 1;
+		List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector = new SameGroupVector<>(elements);
+
+		assertThrows(NullPointerException.class, () -> sameGroupVector.append(null));
+
+		final TestHasGroupElement element = new TestHasGroupElement(new TestGroup());
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> sameGroupVector.append(element));
+		assertEquals("The element to prepend must be in the same group.", illegalArgumentException.getMessage());
+	}
+
+	@RepeatedTest(10)
+	void appendCorrectlyAppends() {
+		TestGroup group = new TestGroup();
+		int n = random.nextInt(10) + 1;
+		List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector = new SameGroupVector<>(elements);
+
+		final TestHasGroupElement element = new TestHasGroupElement(group);
+		final SameGroupVector<TestHasGroupElement, TestGroup> augmentedVector = sameGroupVector.append(element);
+
+		assertEquals(sameGroupVector.size() + 1, augmentedVector.size());
+		assertEquals(element, augmentedVector.get(n));
+	}
+
+	@Test
+	void prependWithInvalidParamsThrows() {
+		TestGroup group = new TestGroup();
+		int n = random.nextInt(10) + 1;
+		List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector = new SameGroupVector<>(elements);
+
+		assertThrows(NullPointerException.class, () -> sameGroupVector.prepend(null));
+
+		final TestHasGroupElement element = new TestHasGroupElement(new TestGroup());
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> sameGroupVector.prepend(element));
+		assertEquals("The element to prepend must be in the same group.", illegalArgumentException.getMessage());
+	}
+
+	@RepeatedTest(10)
+	void prependCorrectlyPrepends() {
+		TestGroup group = new TestGroup();
+		int n = random.nextInt(10) + 1;
+		List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector = new SameGroupVector<>(elements);
+
+		final TestHasGroupElement element = new TestHasGroupElement(group);
+		final SameGroupVector<TestHasGroupElement, TestGroup> augmentedVector = sameGroupVector.prepend(element);
+
+		assertEquals(sameGroupVector.size() + 1, augmentedVector.size());
+		assertEquals(element, augmentedVector.get(0));
 	}
 }

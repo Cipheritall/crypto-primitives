@@ -5,6 +5,7 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -17,13 +18,14 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 /**
  * Brute force the generation of group members.
  */
-public class GqGroupMemberGenerator {
+public class GqGroupGenerator {
 
-	static final BigInteger MAX_GROUP_SIZE = BigInteger.valueOf(1000);
+	private static final BigInteger MAX_GROUP_SIZE = BigInteger.valueOf(1000);
+
 	private final GqGroup group;
 	private final SecureRandom random;
 
-	public GqGroupMemberGenerator(GqGroup group) {
+	public GqGroupGenerator(GqGroup group) {
 		this.group = group;
 		this.random = new SecureRandom();
 	}
@@ -102,6 +104,16 @@ public class GqGroupMemberGenerator {
 		return genMember(member -> member.equals(group.getIdentity()) || member.equals(group.getGenerator()));
 	}
 
+	/**
+	 * Generate a random vector of {@link GqElement} in this {@code group}.
+	 *
+	 * @param numElements the number of elements to generate.
+	 * @return a vector of {@code numElements} random {@link GqElement}.
+	 */
+	public List<GqElement> generateRandomGqElementList(final int numElements) {
+		return Stream.generate(this::genMember).limit(numElements).collect(Collectors.toList());
+	}
+
 	private GqElement genMember(Predicate<GqElement> invalid) {
 		GqElement member;
 		do {
@@ -109,7 +121,6 @@ public class GqGroupMemberGenerator {
 		} while (invalid.test(member));
 		return member;
 	}
-
 
 	private BigInteger randomBigInteger(int bitLength) {
 		return new BigInteger(bitLength, random);

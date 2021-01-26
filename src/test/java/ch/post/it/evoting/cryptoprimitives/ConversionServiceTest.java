@@ -1,3 +1,6 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.fromByteArray;

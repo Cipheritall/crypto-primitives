@@ -23,17 +23,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupMemberGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class ElGamalMultiRecipientPublicKeyTest {
 
-	private static GqGroupMemberGenerator generator;
+	private static GqGroupGenerator generator;
 	private static GqGroup gqGroup;
 
 	@BeforeAll
 	static void setUpAll() {
 		gqGroup = GqGroupTestData.getGroup();
-		generator = new GqGroupMemberGenerator(gqGroup);
+		generator = new GqGroupGenerator(gqGroup);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ class ElGamalMultiRecipientPublicKeyTest {
 		List<GqElement> keyElementsDifferentGroups = new LinkedList<>();
 		keyElementsDifferentGroups.add(generator.genMember());
 		GqGroup other = GqGroupTestData.getDifferentGroup(gqGroup);
-		GqGroupMemberGenerator otherGenerator = new GqGroupMemberGenerator(other);
+		GqGroupGenerator otherGenerator = new GqGroupGenerator(other);
 		keyElementsDifferentGroups.add(otherGenerator.genMember());
 
 		return Stream.of(
