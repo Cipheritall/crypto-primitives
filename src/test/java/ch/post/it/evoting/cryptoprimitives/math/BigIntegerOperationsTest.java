@@ -106,7 +106,8 @@ class BigIntegerOperationsTest {
 	@Test
 	void modExponentiateBaseModulusNotRelativelyPrime() {
 		assertEquals(TWO, BigIntegerOperations.modExponentiate(TWO, THREE, SIX));
-		assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modExponentiate(TWO, THREE.negate(), SIX));
+		final BigInteger negativeThree = THREE.negate();
+		assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modExponentiate(TWO, negativeThree, SIX));
 	}
 
 	@Test

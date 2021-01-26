@@ -22,7 +22,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup> {
 
-	private final SameGroupVector<ZqElement, ZqGroup> elements;
+	private final SameGroupVector<ZqElement, ZqGroup> privateKeyElements;
 
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPrivateKey} object.
@@ -34,8 +34,8 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	 *                    <li>no element must be equal to 1</li></p>
 	 */
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
-		this.elements = new SameGroupVector<>(keyElements);
-		checkArgument(!elements.isEmpty(), "An ElGamal private key cannot be empty.");
+		this.privateKeyElements = new SameGroupVector<>(keyElements);
+		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ZERO) != 0),
 				"An ElGamal private key cannot contain a 0 valued element.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
@@ -45,24 +45,25 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	@Override
 	public ZqGroup getGroup() {
 		//A private key cannot be empty
-		return this.elements.getGroup();
+		return this.privateKeyElements.getGroup();
 	}
 
 	@Override
 	public int size() {
-		return this.elements.size();
+		return this.privateKeyElements.size();
 	}
 
 	/**
 	 * @return the ith element.
 	 */
+	@Override
 	public ZqElement get(int i) {
-		return this.elements.get(i);
+		return this.privateKeyElements.get(i);
 	}
 
 	@Override
 	public Stream<ZqElement> stream() {
-		return this.elements.stream();
+		return this.privateKeyElements.stream();
 	}
 
 	@Override
@@ -74,11 +75,11 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 			return false;
 		}
 		ElGamalMultiRecipientPrivateKey that = (ElGamalMultiRecipientPrivateKey) o;
-		return elements.equals(that.elements);
+		return privateKeyElements.equals(that.privateKeyElements);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(elements);
+		return Objects.hash(privateKeyElements);
 	}
 }

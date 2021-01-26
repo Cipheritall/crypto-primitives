@@ -26,20 +26,20 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  */
 public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipientObject<GqElement, GqGroup> {
 
-	private final SameGroupVector<GqElement, GqGroup> elements;
+	private final SameGroupVector<GqElement, GqGroup> publicKeyElements;
 
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPublicKey} object.
 	 *
-	 * @param keyElements <p>the list of public key Gq group elements, which must satisfy the conditions of a {@link SameGroupVector} and
+	 * @param keyElements <p>the list of public key Gq group publicKeyElements, which must satisfy the conditions of a {@link SameGroupVector} and
 	 *                    the following:
 	 *                    <li>not be empty</li>
 	 *                    <li>no element must be equal to 1</li>
 	 *                    <li>no element must be equal to the generator of the group they belong to</li></p>
 	 */
 	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
-		this.elements = new SameGroupVector<>(keyElements);
-		checkArgument(!elements.isEmpty(), "An ElGamal public key must not be empty.");
+		this.publicKeyElements = new SameGroupVector<>(keyElements);
+		checkArgument(!publicKeyElements.isEmpty(), "An ElGamal public key must not be empty.");
 		checkArgument(keyElements.stream().map(GqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
 				"An ElGamal public key cannot contain a 1 valued element.");
 		checkArgument(keyElements.stream().allMatch(element -> element.getValue().compareTo(element.getGroup().getGenerator().getValue()) != 0),
@@ -49,22 +49,22 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	@Override
 	public GqGroup getGroup() {
 		//An ElGamal public key is not empty
-		return this.elements.getGroup();
+		return this.publicKeyElements.getGroup();
 	}
 
 	@Override
 	public int size() {
-		return this.elements.size();
+		return this.publicKeyElements.size();
 	}
 
 	@Override
 	public GqElement get(int i) {
-		return this.elements.get(i);
+		return this.publicKeyElements.get(i);
 	}
 
 	@Override
 	public Stream<GqElement> stream() {
-		return this.elements.stream();
+		return this.publicKeyElements.stream();
 	}
 
 	@Override
@@ -76,11 +76,11 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 			return false;
 		}
 		ElGamalMultiRecipientPublicKey publicKey = (ElGamalMultiRecipientPublicKey) o;
-		return elements.equals(publicKey.elements);
+		return publicKeyElements.equals(publicKey.publicKeyElements);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(elements);
+		return Objects.hash(publicKeyElements);
 	}
 }
