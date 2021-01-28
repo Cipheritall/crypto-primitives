@@ -38,17 +38,15 @@ final class ZeroArgumentService {
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 
-	private final CommitmentService commitmentService;
 	private final RandomService randomService;
 	private final HashService hashService;
 
-	ZeroArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey, final CommitmentService commitmentService,
+	ZeroArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 			final RandomService randomService, final HashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);
 		checkNotNull(commitmentKey);
-		checkNotNull(commitmentService);
 		checkNotNull(randomService);
 		checkNotNull(hashService);
 
@@ -60,7 +58,6 @@ final class ZeroArgumentService {
 
 		this.publicKey = publicKey;
 		this.commitmentKey = commitmentKey;
-		this.commitmentService = commitmentService;
 		this.randomService = randomService;
 		this.hashService = hashService;
 	}
@@ -101,10 +98,10 @@ final class ZeroArgumentService {
 		checkArgument(y.getGroup().equals(exponentsR.getGroup()), "The statement y and exponents must be part of the same group.");
 
 		// Ensure the statement and witness are corresponding.
-		final List<GqElement> computedCommitmentsA = commitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
+		final List<GqElement> computedCommitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 		checkArgument(commitmentsA.equals(new SameGroupVector<>(computedCommitmentsA)),
 				"The statement's Ca commitments must be equal to the witness' commitment matrix A.");
-		final List<GqElement> computedCommitmentsB = commitmentService.getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
+		final List<GqElement> computedCommitmentsB = CommitmentService.getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
 		checkArgument(commitmentsB.equals(new SameGroupVector<>(computedCommitmentsB)),
 				"The statement's Cb commitments must be equal to the witness' commitment matrix B.");
 
@@ -125,8 +122,8 @@ final class ZeroArgumentService {
 		final List<ZqElement> bm = generateRandomZqElementList(n, zqGroup);
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
-		final GqElement cA0 = commitmentService.getCommitment(a0, r0, commitmentKey);
-		final GqElement cBm = commitmentService.getCommitment(bm, sm, commitmentKey);
+		final GqElement cA0 = CommitmentService.getCommitment(a0, r0, commitmentKey);
+		final GqElement cBm = CommitmentService.getCommitment(bm, sm, commitmentKey);
 
 		// Compute the D vector.
 		final SameGroupMatrix<ZqElement, ZqGroup> augmentedMatrixA = matrixA.prependColumn(a0);
@@ -137,7 +134,7 @@ final class ZeroArgumentService {
 		// Compute t and c_d.
 		final List<ZqElement> t = new ArrayList<>(generateRandomZqElementList(2 * m + 1, zqGroup));
 		t.set(m + 1, ZqElement.create(BigInteger.ZERO, zqGroup));
-		final List<GqElement> cd = commitmentService.getCommitmentVector(d, t, commitmentKey);
+		final List<GqElement> cd = CommitmentService.getCommitmentVector(d, t, commitmentKey);
 
 		// Compute x, later used to compute a', b', r', s' and t'.
 		final GqGroup gqGroup = commitmentsA.get(0).getGroup();
@@ -147,7 +144,7 @@ final class ZeroArgumentService {
 				publicKey.stream()
 						.map(GqElement::getValue)
 						.collect(Collectors.toList()),
-				Stream.concat(Stream.of(commitmentKey.getH()), commitmentKey.stream())
+				commitmentKey.stream()
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList()),
 				cA0.getValue(),
@@ -162,7 +159,7 @@ final class ZeroArgumentService {
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList())
 		);
-		final ZqElement x = ZqElement.create(ConversionService.fromByteArray(hash), zqGroup);
+		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
 
 		// To avoid computing multiple times the powers of x.
 		final List<ZqElement> xExpI = IntStream.range(0, 2 * m + 1)

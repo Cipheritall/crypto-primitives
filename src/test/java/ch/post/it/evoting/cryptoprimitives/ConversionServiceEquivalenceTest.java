@@ -26,27 +26,27 @@ class ConversionServiceEquivalenceTest {
 	void randomBigIntegerConversionIsEquivalentWithTwoMethods() {
 		int BIT_LENGTH = 2048;
 		BigInteger random = new BigInteger(BIT_LENGTH, secureRandom);
-		byte[] expected = ConversionService.toByteArraySpec(random);
-		byte[] result = ConversionService.toByteArray(random);
+		byte[] expected = ConversionService.integerToByteArraySpec(random);
+		byte[] result = ConversionService.integerToByteArray(random);
 		assertArrayEquals(expected, result);
 	}
 
 	@Test
 	void testThrowsForNullValue() {
-		assertThrows(NullPointerException.class, () -> ConversionService.toByteArray((BigInteger) null));
+		assertThrows(NullPointerException.class, () -> ConversionService.integerToByteArray((BigInteger) null));
 	}
 
 	@Test
 	void throwsForNegativeValue() {
 		BigInteger value = BigInteger.valueOf(-1);
-		assertThrows(IllegalArgumentException.class, () -> ConversionService.toByteArray(value));
+		assertThrows(IllegalArgumentException.class, () -> ConversionService.integerToByteArray(value));
 	}
 
 	@Test
 	void sameByteArrayConversionForZero() {
 		BigInteger x = BigInteger.ZERO;
-		byte[] expected = ConversionService.toByteArraySpec(x);
-		byte[] result = ConversionService.toByteArray(x);
+		byte[] expected = ConversionService.integerToByteArraySpec(x);
+		byte[] result = ConversionService.integerToByteArray(x);
 		assertArrayEquals(expected, result);
 	}
 

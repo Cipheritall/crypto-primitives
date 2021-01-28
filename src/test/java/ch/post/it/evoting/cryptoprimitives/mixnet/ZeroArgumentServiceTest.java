@@ -70,7 +70,6 @@ class ZeroArgumentServiceTest {
 	private static ZeroArgumentService zeroArgumentService;
 	private static CommitmentKey commitmentKey;
 	private static ElGamalMultiRecipientPublicKey publicKey;
-	private static CommitmentService commitmentService;
 	private static RandomService randomService;
 	private static HashService hashService;
 
@@ -91,11 +90,10 @@ class ZeroArgumentServiceTest {
 		publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 		// Init services.
-		commitmentService = new CommitmentService();
 		randomService = new RandomService();
 		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 
-		zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, commitmentService, randomService, hashService);
+		zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 	}
 
 	@Test
@@ -103,15 +101,13 @@ class ZeroArgumentServiceTest {
 	void constructNullParams() {
 		assertAll(
 				() -> assertThrows(NullPointerException.class,
-						() -> new ZeroArgumentService(null, commitmentKey, commitmentService, randomService, hashService)),
+						() -> new ZeroArgumentService(null, commitmentKey, randomService, hashService)),
 				() -> assertThrows(NullPointerException.class,
-						() -> new ZeroArgumentService(publicKey, null, commitmentService, randomService, hashService)),
+						() -> new ZeroArgumentService(publicKey, null, randomService, hashService)),
 				() -> assertThrows(NullPointerException.class,
-						() -> new ZeroArgumentService(publicKey, commitmentKey, null, randomService, hashService)),
+						() -> new ZeroArgumentService(publicKey, commitmentKey, null, hashService)),
 				() -> assertThrows(NullPointerException.class,
-						() -> new ZeroArgumentService(publicKey, commitmentKey, commitmentService, null, hashService)),
-				() -> assertThrows(NullPointerException.class,
-						() -> new ZeroArgumentService(publicKey, commitmentKey, commitmentService, randomService, null))
+						() -> new ZeroArgumentService(publicKey, commitmentKey, randomService, null))
 		);
 	}
 
@@ -123,7 +119,7 @@ class ZeroArgumentServiceTest {
 		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, commitmentService, randomService, hashService));
+				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
 		assertEquals("The public and commitment keys do not have compatible sizes.", exception.getMessage());
 	}
 
@@ -137,8 +133,24 @@ class ZeroArgumentServiceTest {
 		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, commitmentService, randomService, hashService));
+				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
 		assertEquals("The public and commitment keys are not from the same group.", exception.getMessage());
+	}
+
+	/**
+	 * Get a different ZqGroup from the one used before each test cases.
+	 *
+	 * @return a different {@link ZqGroup}.
+	 */
+	private ZqGroup getDifferentZqGroup() {
+		GqGroup otherGqGroup;
+		ZqGroup otherZqGroup;
+		do {
+			otherGqGroup = GqGroupTestData.getGroup();
+			otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
+		} while (otherZqGroup.equals(zqGroup));
+
+		return otherZqGroup;
 	}
 
 	@Nested
@@ -537,6 +549,10 @@ class ZeroArgumentServiceTest {
 		}
 	}
 
+	// ===============================================================================================================================================
+	// Utility methods
+	// ===============================================================================================================================================
+
 	@Nested
 	@DisplayName("getZeroArgument")
 	class GetZeroArgument {
@@ -595,9 +611,9 @@ class ZeroArgumentServiceTest {
 			matrixB.get(n - 1).set(m - 1, matrixBLastElem.get());
 
 			// Construct the remaining parts of the statement.
-			final List<GqElement> commitmentsCa = commitmentService
+			final List<GqElement> commitmentsCa = CommitmentService
 					.getCommitmentMatrix(SameGroupMatrix.fromRows(matrixA), new SameGroupVector<>(exponentsR), commitmentKey);
-			final List<GqElement> commitmentsCb = commitmentService
+			final List<GqElement> commitmentsCb = CommitmentService
 					.getCommitmentMatrix(SameGroupMatrix.fromRows(matrixB), new SameGroupVector<>(exponentsS), commitmentKey);
 
 			zeroStatement = new ZeroStatement(commitmentsCa, commitmentsCb, y);
@@ -611,7 +627,7 @@ class ZeroArgumentServiceTest {
 			final HashService hashServiceMock = mock(HashService.class);
 			doReturn(new byte[] { 0x2 }).when(hashServiceMock).recursiveHash(any());
 
-			final ZeroArgumentService otherZeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, commitmentService, randomService,
+			final ZeroArgumentService otherZeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService,
 					hashServiceMock);
 
 			assertDoesNotThrow(() -> otherZeroArgumentService.getZeroArgument(zeroStatement, zeroWitness));
@@ -707,9 +723,9 @@ class ZeroArgumentServiceTest {
 			final ZeroWitness otherWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
 			// Derive statement from it.
-			final List<GqElement> commitmentsA = commitmentService
+			final List<GqElement> commitmentsA = CommitmentService
 					.getCommitmentMatrix(SameGroupMatrix.fromRows(matrixA), new SameGroupVector<>(exponentsR), commitmentKey);
-			final List<GqElement> commitmentsB = commitmentService
+			final List<GqElement> commitmentsB = CommitmentService
 					.getCommitmentMatrix(SameGroupMatrix.fromRows(matrixB), new SameGroupVector<>(exponentsS), commitmentKey);
 			// Fix y to 1 so the starMap gives 1 (because A and B are 1).
 			final ZqElement y = ZqElement.create(ONE, zqGroup);
@@ -788,7 +804,7 @@ class ZeroArgumentServiceTest {
 			final HashService hashServiceMock = mock(HashService.class);
 			doReturn(new byte[] { 0x2 }).when(hashServiceMock).recursiveHash(any());
 
-			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, commitmentService,
+			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey,
 					randomServiceMock, hashServiceMock);
 
 			// Verification.
@@ -798,25 +814,5 @@ class ZeroArgumentServiceTest {
 
 			assertEquals(simpleZeroArgument, zeroArgument);
 		}
-	}
-
-	// ===============================================================================================================================================
-	// Utility methods
-	// ===============================================================================================================================================
-
-	/**
-	 * Get a different ZqGroup from the one used before each test cases.
-	 *
-	 * @return a different {@link ZqGroup}.
-	 */
-	private ZqGroup getDifferentZqGroup() {
-		GqGroup otherGqGroup;
-		ZqGroup otherZqGroup;
-		do {
-			otherGqGroup = GqGroupTestData.getGroup();
-			otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
-		} while (otherZqGroup.equals(zqGroup));
-
-		return otherZqGroup;
 	}
 }

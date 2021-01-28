@@ -3,7 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.toByteArray;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -53,7 +53,7 @@ class HashServiceTest {
 	void testRecursiveHashOfByteArrayReturnsHashOfByteArray() {
 		byte[] bytes = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes);
-		byte[] recursiveHash = hashService.recursiveHash((Object) bytes);
+		byte[] recursiveHash = hashService.recursiveHash(bytes);
 		byte[] regularHash = messageDigest.digest(bytes);
 		assertArrayEquals(regularHash, recursiveHash);
 	}
@@ -61,7 +61,7 @@ class HashServiceTest {
 	@Test
 	void testRecursiveHashOfStringReturnsHashOfString() {
 		String string = randomService.genRandomBase32String(TEST_INPUT_LENGTH);
-		byte[] expected = messageDigest.digest(toByteArray(string));
+		byte[] expected = messageDigest.digest(integerToByteArray(string));
 		byte[] recursiveHash = hashService.recursiveHash(string);
 		assertArrayEquals(expected, recursiveHash);
 	}
@@ -70,7 +70,7 @@ class HashServiceTest {
 	void testRecursiveHashOfBigIntegerValue10ReturnsSameHashOfInteger10() {
 		BigInteger bigInteger = new BigInteger(2048, secureRandom);
 		byte[] recursiveHash = hashService.recursiveHash(bigInteger);
-		byte[] regularHash = messageDigest.digest(toByteArray(bigInteger));
+		byte[] regularHash = messageDigest.digest(ConversionService.integerToByteArray(bigInteger));
 		assertArrayEquals(regularHash, recursiveHash);
 	}
 
@@ -180,19 +180,19 @@ class HashServiceTest {
 		List<Object> input = Arrays.asList(first, second, subList);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		outputStream.write(messageDigest.digest(toByteArray(first)));
+		outputStream.write(messageDigest.digest(ConversionService.integerToByteArray(first)));
 		outputStream.write(messageDigest.digest(second));
 		byte[] expectedSubSubListHash = messageDigest.digest(outputStream.toByteArray());
 		outputStream.close();
 
 		ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
-		outputStream1.write(messageDigest.digest(toByteArray(third)));
+		outputStream1.write(messageDigest.digest(integerToByteArray(third)));
 		outputStream1.write(expectedSubSubListHash);
 		byte[] expectedSubListHash = messageDigest.digest(outputStream1.toByteArray());
 		outputStream1.close();
 
 		ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
-		outputStream2.write(messageDigest.digest(toByteArray(first)));
+		outputStream2.write(messageDigest.digest(ConversionService.integerToByteArray(first)));
 		outputStream2.write(messageDigest.digest(second));
 		outputStream2.write(expectedSubListHash);
 		byte[] expectedHash = messageDigest.digest(outputStream2.toByteArray());

@@ -1,6 +1,9 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.toByteArray;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -28,19 +31,20 @@ public class HashService {
 	 * Compute the hash of multiple (potentially) recursive inputs.
 	 *
 	 * @param values, objects of the following type:
-	 *   <li>byte[]</li>
-	 * 	 <li>String</li>
-	 * 	 <li>BigInteger</li>
-	 * 	 <li>List<?> where every member is of one of the allowed types</li>
+	 *                <li>byte[]</li>
+	 *                <li>String</li>
+	 *                <li>BigInteger</li>
+	 *                <li>List<?> where every member is of one of the allowed types</li>
 	 * @return the hash of the input.
 	 *
 	 * <p> NOTE:
 	 * <li>If the input object(s) are modified during the calculation of the hash, the output is undefined.</li>
 	 * <li>It is the caller's responsibility to make sure that the input is not infinite (for example if it contains self-references).</li>
-	 * <li>Inputs of different type that have the same byte representation can hash to the same value (for example the empty string and the empty byte
+	 * <li>Inputs of different type that have the same byte representation can hash to the same value (for example the empty string and the empty
+	 * byte
 	 * array, or the integer 1 and the byte array 0x1). It is the caller's responsibility to make sure to avoid these collisions by making sure the
 	 * domain of each input element is well defined. </li>
-	 * 	</p>
+	 * </p>
 	 */
 	public byte[] recursiveHash(final Object... values) {
 		checkNotNull(values);
@@ -52,16 +56,13 @@ public class HashService {
 			Object value = values[0];
 			if (value instanceof byte[]) {
 				return this.hashFunction.apply((byte[]) value);
-			}
-			else if (value instanceof String) {
-				return this.hashFunction.apply(toByteArray((String) value));
-			}
-			else if (value instanceof BigInteger) {
+			} else if (value instanceof String) {
+				return this.hashFunction.apply(integerToByteArray((String) value));
+			} else if (value instanceof BigInteger) {
 				BigInteger bigInteger = (BigInteger) value;
 				checkArgument(bigInteger.compareTo(BigInteger.ZERO) >= 0);
-				return this.hashFunction.apply(toByteArray(bigInteger));
-			}
-			else if (value instanceof List<?>) {
+				return this.hashFunction.apply(integerToByteArray(bigInteger));
+			} else if (value instanceof List<?>) {
 				List<?> list = (List<?>) value;
 				checkArgument(!list.isEmpty(), "Cannot hash an empty list.");
 
@@ -70,14 +71,13 @@ public class HashService {
 
 				byte[] concatenatedSubHashes = new byte[totalSize];
 				int offset = 0;
-				for (byte[] subHash: subHashes) {
+				for (byte[] subHash : subHashes) {
 					System.arraycopy(subHash, 0, concatenatedSubHashes, offset, subHash.length);
 					offset += subHash.length;
 				}
 
 				return this.hashFunction.apply(concatenatedSubHashes);
-			}
-			else {
+			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", values.getClass()));
 			}
 		}

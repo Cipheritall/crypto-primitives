@@ -15,11 +15,9 @@ import java.util.stream.Stream;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
- * Represents a public key of {@link GqElement}s that is used for the calculation of a commitment.
- * Instances of this class are immutable.
+ * Represents a public key of {@link GqElement}s that is used for the calculation of a commitment. Instances of this class are immutable.
  *
  * <p>A commitment key is of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>)</p>
  */
@@ -31,18 +29,17 @@ class CommitmentKey {
 
 	/**
 	 * Creates a {@link CommitmentKey} object.
+	 * <p>
+	 * All elements of the commitment key have to comply with the following.
+	 * <ul>
+	 *     <li>be non-null</li>
+	 *     <li>be different from 1</li>
+	 *     <li>be different from the generator of the group they belong to</li>
+	 *     <li>belong to the same {@link GqGroup}</li>
+	 * </ul>
 	 *
-	 * @param h			the h element of this commitment key, which must respect the following:
-	 *                  	<li>h must be non-null</li>
-	 *                 		<li>h must be different from 1</li>
-	 *	                    <li>h must be different from the generator of the group it belongs to</li></p>
-	 * @param gElements the list of g elements contained by this commitment key, which must respect the following:
-	 *                 		<li>the list must be non-null</li>
-	 *                 		<li>the list must contain at least one element</li>
-	 *                 		<li>the list must not contain any nulls</li>
-	 *                 		<li>all elements must be from the same {@link MathematicalGroup} as h</li>
-	 *                 		<li>no element must be equal to 1</li>
-	 *	                    <li>no element must be equal to the generator of the group they belong to</li></p>
+	 * @param h         the h element of this commitment key
+	 * @param gElements the list of g elements contained by this commitment key
 	 */
 	CommitmentKey(GqElement h, List<GqElement> gElements) {
 		//Validate h
@@ -82,17 +79,12 @@ class CommitmentKey {
 	}
 
 	/**
-	 * @return h
-	 */
-	GqElement getH() {
-		return h;
-	}
-
-	/**
-	 * @return a stream of g elements
+	 * Creates a stream of the elements of the commitment key.
+	 *
+	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>k</sub> in that order
 	 */
 	Stream<GqElement> stream() {
-		return gElements.stream();
+		return Stream.concat(Stream.of(this.h), this.gElements.stream());
 	}
 
 	@Override

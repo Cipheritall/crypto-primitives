@@ -25,6 +25,10 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 public class CommitmentService {
 
+	private CommitmentService() {
+		// intentionally left blank
+	}
+
 	/**
 	 * Computes a commitment to the given elements with the given random element and <code>CommitmentKey</code>.
 	 *
@@ -43,7 +47,7 @@ public class CommitmentService {
 	 * @param commitmentKey <b>ck</b>, a {@link CommitmentKey} (h, g<sub>1</sub>, ..., g<sub>k</sub>)
 	 * @return the commitment to the provided elements as a {@link GqElement}
 	 */
-	GqElement getCommitment(final List<ZqElement> values, final ZqElement randomElement, final CommitmentKey commitmentKey) {
+	static GqElement getCommitment(final List<ZqElement> values, final ZqElement randomElement, final CommitmentKey commitmentKey) {
 		//Null checks
 		checkNotNull(values);
 		checkNotNull(randomElement);
@@ -63,7 +67,7 @@ public class CommitmentService {
 		checkArgument(k >= l, "The commitment key must be equal to or longer than the list of elements to commit to");
 
 		List<BigInteger> commitmentKeyValues =
-				Stream.concat(Stream.of(commitmentKey.getH()), commitmentKey.stream())
+				commitmentKey.stream()
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList());
 		GqGroup group = commitmentKey.getGroup();
@@ -101,7 +105,7 @@ public class CommitmentService {
 	 * @param commitmentKey  <b>ck</b>, the commitment key of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>), k >= n.
 	 * @return the commitments (c<sub>0</sub>, ..., c<sub>m-1</sub>)
 	 */
-	List<GqElement> getCommitmentMatrix(final SameGroupMatrix<ZqElement, ZqGroup> elementsMatrix,
+	static List<GqElement> getCommitmentMatrix(final SameGroupMatrix<ZqElement, ZqGroup> elementsMatrix,
 			final SameGroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
 
 		//Check nullity
@@ -151,7 +155,7 @@ public class CommitmentService {
 	 * @param commitmentKey  <b>ck</b>, the {@link CommitmentKey} of size k &ge; 1.
 	 * @return the commitment c = (c<sub>0</sub>, ..., c<sub>2m</sub>)
 	 */
-	List<GqElement> getCommitmentVector(final List<ZqElement> elementsVector, final List<ZqElement> randomElements,
+	static List<GqElement> getCommitmentVector(final List<ZqElement> elementsVector, final List<ZqElement> randomElements,
 			final CommitmentKey commitmentKey) {
 
 		checkNotNull(elementsVector);

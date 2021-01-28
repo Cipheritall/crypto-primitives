@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
@@ -46,8 +47,8 @@ class CommitmentKeyTest {
 	void constructionTest() {
 		CommitmentKey commitmentKey = new CommitmentKey(h, gs);
 
-		assertEquals(h, commitmentKey.getH());
-		assertEquals(gs, commitmentKey.stream().collect(Collectors.toList()));
+		assertEquals(h, commitmentKey.stream().limit(1).collect(Collectors.toList()).get(0));
+		assertEquals(gs, commitmentKey.stream().skip(1).collect(Collectors.toList()));
 	}
 
 	@Test
