@@ -113,7 +113,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}.
+	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}. This method implements the GetCiphertextProduct algorithm.
 	 *
 	 * @param other The ciphertext to be multiplied by {@code this}. It must be non null and its gamma and phis must belong to the same group as the
 	 *              gamma and phis of {@code this}.
