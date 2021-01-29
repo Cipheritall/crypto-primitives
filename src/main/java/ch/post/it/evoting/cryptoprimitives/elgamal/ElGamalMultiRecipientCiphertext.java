@@ -135,6 +135,27 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		return new ElGamalMultiRecipientCiphertext(resultGamma, resultPhis);
 	}
 
+	/**
+	 * Exponentiates a multi-recipient ciphertext
+	 *
+	 * @param exponent A {@code ZqElement}
+	 *
+	 * @return A {@code ElGamalMultiRecipientCiphertext} whose phis value are {exponentiated with @code(exponent)}.
+	 */
+
+	public  ElGamalMultiRecipientCiphertext  getCiphertextExponentiation(ZqElement exponent) {
+		checkNotNull(exponent);
+		checkArgument(this.group.getQ().equals(exponent.getGroup().getQ()));
+
+		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
+		ImmutableList<GqElement> exponentiatedPhis = ImmutableList.copyOf(
+				this.phis.stream()
+				.map(p -> p.exponentiate(exponent))
+				.collect(Collectors.toList()));
+
+		return new ElGamalMultiRecipientCiphertext(exponentiatedGamma, exponentiatedPhis);
+	}
+
 	public final GqElement getGamma() {
 		return this.gamma;
 	}
