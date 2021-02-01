@@ -9,6 +9,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.io.BaseEncoding;
 
@@ -33,7 +36,7 @@ public final class RandomService {
 	 * @return A random BigInteger <code>r s.t. 0 <= r < m</code>.
 	 */
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
-		checkNotNull(upperBound, "The upper bound can not be null.");
+		checkNotNull(upperBound);
 		checkArgument(upperBound.compareTo(BigInteger.ZERO) > 0, "The upper bound must a be a positive integer greater than 0.");
 
 		final int bitLength = upperBound.bitLength();
@@ -126,5 +129,24 @@ public final class RandomService {
 
 		BigInteger value = genRandomIntegerWithinBounds(BigInteger.valueOf(2), group.getQ());
 		return ZqElement.create(value, group);
+	}
+
+	/**
+	 * Generates a vector (collection) of random {@link ZqElement}s between 0 (incl.) and {@code upperBound} (excl.).
+	 *
+	 * @param upperBound q
+	 * @param length n
+	 * @return {@code List<ZqElement>}
+	 */
+	public List<ZqElement> genRandomVector(final BigInteger upperBound, final int length) {
+		checkNotNull(upperBound);
+		checkArgument(upperBound.compareTo(BigInteger.ZERO) > 0, "The upper bound should be greater than zero");
+		checkArgument(length > 0, "The length should be greater than zero");
+
+		final ZqGroup zqGroup = new ZqGroup(upperBound);
+
+		return  Stream.generate(()->ZqElement.create(genRandomInteger(upperBound),zqGroup))
+				.limit(length)
+				.collect(Collectors.toList());
 	}
 }

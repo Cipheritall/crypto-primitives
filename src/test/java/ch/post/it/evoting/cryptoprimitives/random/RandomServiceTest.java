@@ -12,6 +12,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.doReturn;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -173,5 +174,23 @@ class RandomServiceTest {
 	void genRandomBase64StringInvalidLengthShouldThrow() {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(-1));
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(4000));
+	}
+
+	@Test
+	void genRandomVector() {
+		BigInteger upperBound = BigInteger.valueOf(100);
+		int length = 20;
+		List<ZqElement> randomVector = randomService.genRandomVector(upperBound, length);
+
+		assertEquals(length, randomVector.size());
+		assertEquals(0, (int) randomVector.stream().filter(zq -> zq.getValue().compareTo(upperBound) >= 0).count());
+		assertTrue (randomVector.stream().distinct().count()> 1);
+	}
+
+	@Test
+	void checkGenRandomVectorParameterChecks() {
+		assertThrows(NullPointerException.class, () -> randomService.genRandomVector(null,1));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ZERO,1));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ONE,0));
 	}
 }
