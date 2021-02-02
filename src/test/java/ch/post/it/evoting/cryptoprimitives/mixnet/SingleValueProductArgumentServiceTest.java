@@ -34,6 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class SingleValueProductArgumentServiceTest {
 
@@ -41,12 +42,13 @@ class SingleValueProductArgumentServiceTest {
 	private static final RandomService randomService = new RandomService();
 
 	private static ZqGroup zqGroup;
+	private static ZqGroupGenerator zqGroupGenerator;
 	private static CommitmentKey commitmentKey;
 	private static SingleValueProductArgumentService svpArgumentProvider;
 
 	private GqElement commitment;
 	private ZqElement product;
-	private List<ZqElement> elements;
+	private SameGroupVector<ZqElement, ZqGroup> elements;
 	private ZqElement randomness;
 
 	private SingleValueProductStatement statement;
@@ -56,6 +58,7 @@ class SingleValueProductArgumentServiceTest {
 	static void setupAll() {
 		GqGroup gqGroup = GqGroupTestData.getGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		ElGamalMultiRecipientPublicKey publicKey = keyPair.getPublicKey();
@@ -68,7 +71,7 @@ class SingleValueProductArgumentServiceTest {
 
 	@BeforeEach
 	void setup() {
-		elements = Stream.generate(() -> randomService.genRandomExponent(zqGroup)).limit(NUM_ELEMENTS).collect(Collectors.toList());
+		elements = zqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
 		randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 		commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);
@@ -109,8 +112,8 @@ class SingleValueProductArgumentServiceTest {
 	void getSingleValueProductArgumentWithWitnessFromDifferentGroupThrows() {
 		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitmentKey.getGroup());
 		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
-		List<ZqElement> differentElements = Stream.generate(() -> randomService.genRandomExponent(differentZqGroup)).limit(NUM_ELEMENTS)
-				.collect(Collectors.toList());
+		ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
+		SameGroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
 		ZqElement differentRandomness = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
 		SingleValueProductWitness differentWitness = new SingleValueProductWitness(differentElements, differentRandomness);
 		Exception exception = assertThrows(IllegalArgumentException.class,
@@ -195,7 +198,7 @@ class SingleValueProductArgumentServiceTest {
 						BigInteger.valueOf(4), BigInteger.valueOf(8));      // s_0, s_x
 
 		SingleValueProductStatement statement = new SingleValueProductStatement(commitment, product);
-		SingleValueProductWitness witness = new SingleValueProductWitness(a, r);
+		SingleValueProductWitness witness = new SingleValueProductWitness(new SameGroupVector<>(a), r);
 
 		HashService hashService = mock(HashService.class);
 		when(hashService.recursiveHash(any()))

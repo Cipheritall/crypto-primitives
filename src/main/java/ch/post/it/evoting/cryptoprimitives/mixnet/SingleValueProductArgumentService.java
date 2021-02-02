@@ -74,7 +74,7 @@ class SingleValueProductArgumentService {
 				"The witness' group must have the same order as the commitment key's group.");
 
 		// Ensure that the statement corresponds to the witness
-		checkArgument(ca.equals(CommitmentService.getCommitment(a.stream().collect(Collectors.toList()), r, commitmentKey)),
+		checkArgument(ca.equals(CommitmentService.getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
 		ZqGroup group = b.getGroup();
 		ZqElement one = ZqElement.create(BigInteger.ONE, group); // Identity for multiplication
@@ -91,8 +91,10 @@ class SingleValueProductArgumentService {
 				.collect(Collectors.toList());
 
 		// Calculate d and r_d
-		List<ZqElement> d = Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n)
-				.collect(Collectors.toList());
+		SameGroupVector<ZqElement, ZqGroup> d = Stream.generate(() -> randomService.genRandomInteger(q))
+				.map(value -> ZqElement.create(value, group))
+				.limit(n)
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 		ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ
@@ -107,14 +109,14 @@ class SingleValueProductArgumentService {
 		ZqElement sx = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ' and Δ
-		List<ZqElement> lowerDeltaPrime = IntStream.range(0, n - 1)
+		SameGroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k).negate().multiply(d.get(k + 1)))
-				.collect(Collectors.toList());
-		List<ZqElement> upperDelta = IntStream.range(0, n - 1)
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+		SameGroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k + 1)
 						.add(a.get(k + 1).negate().multiply(lowerDelta.get(k)))
 						.add(bList.get(k).negate().multiply(d.get(k + 1))))
-				.collect(Collectors.toList());
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 
 		// Calculate c_d, c_δ and c_Δ
 		GqElement cd = CommitmentService.getCommitment(d, rd, commitmentKey);
@@ -133,12 +135,12 @@ class SingleValueProductArgumentService {
 		ZqElement x = ZqElement.create(hashNumber, group);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
-		List<ZqElement> aTilde = IntStream.range(0, n)
+		SameGroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(a.get(k)).add(d.get(k)))
-				.collect(Collectors.toList());
-		List<ZqElement> bTilde = IntStream.range(0, n)
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+		SameGroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(bList.get(k)).add(lowerDelta.get(k)))
-				.collect(Collectors.toList());
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 		ZqElement rTilde = x.multiply(r).add(rd);
 		ZqElement sTilde = x.multiply(sx).add(s0);
 
@@ -146,8 +148,8 @@ class SingleValueProductArgumentService {
 				.withCLowerD(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
-				.withATilde(new SameGroupVector<>(aTilde))
-				.withBTilde(new SameGroupVector<>(bTilde))
+				.withATilde(aTilde)
+				.withBTilde(bTilde)
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();

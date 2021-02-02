@@ -38,7 +38,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParamete
 class ElGamalMultiRecipientCiphertextTest {
 
 	private static GqGroup gqGroup;
-	private static GqGroupGenerator generator;
+	private static GqGroupGenerator gqGroupGenerator;
 
 	private static ImmutableList<GqElement> validPhis;
 	private static GqElement validGamma;
@@ -51,20 +51,20 @@ class ElGamalMultiRecipientCiphertextTest {
 		final BigInteger g = new BigInteger("2");
 
 		gqGroup = new GqGroup(p, q, g);
-		generator = new GqGroupGenerator(gqGroup);
+		gqGroupGenerator = new GqGroupGenerator(gqGroup);
 	}
 
 	@BeforeEach
 	void setUp() {
 		// Generate valid phis.
-		final GqElement ge1 = generator.genMember();
-		final GqElement ge2 = generator.genMember();
+		final GqElement ge1 = gqGroupGenerator.genMember();
+		final GqElement ge2 = gqGroupGenerator.genMember();
 
 		validPhis = ImmutableList.of(ge1, ge2);
 
 		// Generate a valid gamma.
 		do {
-			validGamma = generator.genNonIdentityMember();
+			validGamma = gqGroupGenerator.genNonIdentityMember();
 		} while (validGamma.equals(gqGroup.getGenerator()));
 	}
 
@@ -84,7 +84,7 @@ class ElGamalMultiRecipientCiphertextTest {
 
 		final GqGroup differentGroup = new GqGroup(BigInteger.valueOf(7), BigInteger.valueOf(3), BigInteger.valueOf(2));
 		final GqGroupGenerator differentGenerator = new GqGroupGenerator(differentGroup);
-		final List<GqElement> differentGroupPhis = Arrays.asList(generator.genMember(), differentGenerator.genMember());
+		final List<GqElement> differentGroupPhis = Arrays.asList(gqGroupGenerator.genMember(), differentGenerator.genMember());
 
 		final GqElement otherGroupGamma = genOtherGroupGamma(differentGroup);
 
@@ -157,7 +157,7 @@ class ElGamalMultiRecipientCiphertextTest {
 	private GqElement genDifferentGamma() {
 		GqElement differentGamma;
 		do {
-			differentGamma = generator.genNonIdentityMember();
+			differentGamma = gqGroupGenerator.genNonIdentityMember();
 		} while (differentGamma.equals(validGamma) || differentGamma.equals(gqGroup.getGenerator()));
 		return differentGamma;
 	}
@@ -165,7 +165,7 @@ class ElGamalMultiRecipientCiphertextTest {
 	private List<GqElement> genDifferentPhis() {
 		List<GqElement> differentPhis;
 		do {
-			differentPhis = Arrays.asList(generator.genMember(), generator.genMember());
+			differentPhis = Arrays.asList(gqGroupGenerator.genMember(), gqGroupGenerator.genMember());
 		} while (differentPhis.equals(validPhis));
 		return differentPhis;
 	}
@@ -322,7 +322,8 @@ class ElGamalMultiRecipientCiphertextTest {
 	void decryptedExponentiatedCiphertextAndExponentiatedMessageShouldBeEqual() {
 		final int NO_OF_MESSAGE_ELEMENTS = 5;
 		RandomService randomService = new RandomService();
-		List<GqElement> validMessageElements = Stream.generate(generator::genMember).limit(NO_OF_MESSAGE_ELEMENTS).collect(Collectors.toList());
+		List<GqElement> validMessageElements = Stream.generate(gqGroupGenerator::genMember).limit(NO_OF_MESSAGE_ELEMENTS)
+				.collect(Collectors.toList());
 		ElGamalMultiRecipientMessage originalMessage = new ElGamalMultiRecipientMessage(validMessageElements);
 
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);

@@ -50,7 +50,6 @@ class ElGamalMultiRecipientPublicKeyTest {
 		assertThrows(IllegalArgumentException.class, () -> new ElGamalMultiRecipientPublicKey(exponents));
 	}
 
-
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createInvalidArgumentsProvider() {
 		List<GqElement> keyElementsFirstNull = new LinkedList<>();

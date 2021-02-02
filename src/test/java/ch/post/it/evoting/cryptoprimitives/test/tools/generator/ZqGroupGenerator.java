@@ -7,8 +7,9 @@ import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupE
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
 
 import java.math.BigInteger;
-import java.util.List;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
@@ -39,23 +40,23 @@ public class ZqGroupGenerator {
 	}
 
 	/**
-	 * Generate a random vector of {@link ZqElement} in this {@code group}.
+	 * Generate a random {@link SameGroupVector} of {@link ZqElement} in this {@code group}.
 	 *
 	 * @param numElements the number of elements to generate.
 	 * @return a vector of {@code numElements} random {@link ZqElement}.
 	 */
-	public List<ZqElement> generateRandomZqElementList(final int numElements) {
-		return generateElementList(numElements, this::genZqElementMember);
+	public SameGroupVector<ZqElement, ZqGroup> generateRandomZqElementVector(final int numElements) {
+		return new SameGroupVector<>(generateElementList(numElements, this::genZqElementMember));
 	}
 
 	/**
-	 * Generate a random matrix of {@link ZqElement} in this {@code group}.
+	 * Generate a random {@link SameGroupMatrix} of {@link ZqElement} in this {@code group}.
 	 *
 	 * @param m the matrix' number of lines.
 	 * @param n the matrix' number of columns.
 	 * @return a m &times; n matrix of random {@link ZqElement}.
 	 */
-	public List<List<ZqElement>> generateRandomZqElementMatrix(final int m, final int n) {
-		return generateElementMatrix(m, n, this::genZqElementMember);
+	public SameGroupMatrix<ZqElement, ZqGroup> generateRandomZqElementMatrix(final int m, final int n) {
+		return SameGroupMatrix.fromRows(generateElementMatrix(m, n, this::genZqElementMember));
 	}
 }

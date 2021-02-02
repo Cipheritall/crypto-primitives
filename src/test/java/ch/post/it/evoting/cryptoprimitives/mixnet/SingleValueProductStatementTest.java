@@ -8,14 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -23,6 +21,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 @DisplayName("Instantiating a SingleValueProductStatement should...")
 class SingleValueProductStatementTest {
@@ -37,10 +36,11 @@ class SingleValueProductStatementTest {
 	void setup() {
 		GqGroup gqGroup = GqGroupTestData.getGroup();
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
 		CommitmentKey commitmentKey = SingleValueProductArgumentServiceTest.genCommitmentKey(gqGroup, NUM_ELEMENTS);
 
-		List<ZqElement> elements = Stream.generate(() -> randomService.genRandomExponent(zqGroup)).limit(NUM_ELEMENTS).collect(Collectors.toList());
+		SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
 		ZqElement randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 		commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);

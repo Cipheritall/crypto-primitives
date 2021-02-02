@@ -6,7 +6,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
@@ -39,29 +38,23 @@ class ZeroWitness {
 	 * @param exponentsR r, a vector of {@link ZqElement}s.
 	 * @param exponentsS s, a vector of {@link ZqElement}s.
 	 */
-	ZeroWitness(final List<List<ZqElement>> matrixA, final List<List<ZqElement>> matrixB, final List<ZqElement> exponentsR,
-			final List<ZqElement> exponentsS) {
+	ZeroWitness(final SameGroupMatrix<ZqElement, ZqGroup> matrixA, final SameGroupMatrix<ZqElement, ZqGroup> matrixB,
+			final SameGroupVector<ZqElement, ZqGroup> exponentsR, SameGroupVector<ZqElement, ZqGroup> exponentsS) {
 
 		// Null checking.
-		checkNotNull(matrixA);
-		checkNotNull(matrixB);
-		checkNotNull(exponentsR);
-		checkNotNull(exponentsS);
+		this.matrixA = checkNotNull(matrixA);
+		this.matrixB = checkNotNull(matrixB);
+		this.exponentsR = checkNotNull(exponentsR);
+		this.exponentsS = checkNotNull(exponentsS);
 
-		// Immutable copies.
-		this.matrixA = SameGroupMatrix.fromRows(matrixA);
-		this.matrixB = SameGroupMatrix.fromRows(matrixB);
-		this.exponentsR = new SameGroupVector<>(exponentsR);
-		this.exponentsS = new SameGroupVector<>(exponentsS);
-
-		// Dimensions checking.
+		// Cross dimensions checking.
 		checkArgument(this.matrixA.rowSize() == this.matrixB.rowSize(), "The two matrices must have the same number of rows.");
 		checkArgument(this.matrixA.columnSize() == this.matrixB.columnSize(), "The two matrices must have the same number of columns.");
 		checkArgument(this.exponentsR.size() == this.exponentsS.size(), "The exponents vector must have the same size.");
 		checkArgument(this.exponentsR.size() == this.matrixA.columnSize(),
 				"The exponents vectors size must be the number of columns of the matrices.");
 
-		// Group checking.
+		// Cross group checking.
 		if (!this.matrixA.isEmpty()) {
 			final ZqGroup group = this.matrixA.getGroup();
 			checkArgument(this.matrixB.getGroup().equals(group), "The matrices are not from the same group.");

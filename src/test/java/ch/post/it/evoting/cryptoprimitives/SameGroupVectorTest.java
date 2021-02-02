@@ -31,19 +31,50 @@ class SameGroupVectorTest {
 	static SecureRandom random = new SecureRandom();
 
 	@Test
+	void testOf() {
+		TestGroup group = new TestGroup();
+		TestHasGroupElement e1 = new TestHasGroupElement(group);
+		TestHasGroupElement e2 = new TestHasGroupElement(group);
+
+		final SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector = SameGroupVector.of(e1, e2);
+		assertEquals(2, sameGroupVector.size());
+
+		final SameGroupVector<TestHasGroupElement, TestGroup> emptySameGroupVector = SameGroupVector.of();
+		assertEquals(0, emptySameGroupVector.size());
+	}
+
+	@Test
+	void testOfWithInvalidParametersThrows() {
+		assertThrows(NullPointerException.class, () -> SameGroupVector.of(null));
+
+		// With null elem.
+		TestGroup group = new TestGroup();
+		TestHasGroupElement e1 = new TestHasGroupElement(group);
+		final IllegalArgumentException nullIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> SameGroupVector.of(e1, null));
+		assertEquals("Elements must not contain nulls", nullIllegalArgumentException.getMessage());
+
+		// Different group elems.
+		TestHasGroupElement e2 = new TestHasGroupElement(new TestGroup());
+		final IllegalArgumentException diffGroupIllegalArgumentException2 = assertThrows(IllegalArgumentException.class,
+				() -> SameGroupVector.of(e1, e2));
+		assertEquals("All elements must belong to the same group.", diffGroupIllegalArgumentException2.getMessage());
+	}
+
+	@Test
 	void testNullElementsThrows() {
 		assertThrows(NullPointerException.class, () -> new SameGroupVector<TestHasGroupElement, TestGroup>(null));
 	}
 
 	@Test
 	void testEmptyElementsDoesNotThrow() {
-		SameGroupVector<TestHasGroupElement, TestGroup> vector = new SameGroupVector<>(Collections.emptyList());
+		SameGroupVector<TestHasGroupElement, TestGroup> vector = SameGroupVector.of();
 		assertEquals(0, vector.size());
 	}
 
 	@Test
 	void testGroupOfEmptyVectorThrows() {
-		SameGroupVector<TestHasGroupElement, TestGroup> vector = new SameGroupVector<>(Collections.emptyList());
+		SameGroupVector<TestHasGroupElement, TestGroup> vector = SameGroupVector.of();
 		assertThrows(IllegalStateException.class, vector::getGroup);
 	}
 
@@ -131,7 +162,7 @@ class SameGroupVectorTest {
 
 	@Test
 	void givenAPropertyHoldsForAnEmptyVector() {
-		SameGroupVector<TestHasGroupElement, ?> empty = new SameGroupVector<>(Collections.emptyList());
+		SameGroupVector<TestHasGroupElement, ?> empty = SameGroupVector.of();
 		SecureRandom random = new SecureRandom();
 		Function<TestHasGroupElement, ?> randomFunction = ignored -> random.nextInt();
 		assertTrue(empty.allEqual(randomFunction));

@@ -10,14 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -37,8 +36,8 @@ class ZeroStatementTest {
 	private static GqGroupGenerator gqGroupGenerator;
 
 	private int m;
-	private List<GqElement> commitmentsA;
-	private List<GqElement> commitmentsB;
+	private SameGroupVector<GqElement, GqGroup> commitmentsA;
+	private SameGroupVector<GqElement, GqGroup> commitmentsB;
 	private ZqElement y;
 
 	@BeforeAll
@@ -73,8 +72,8 @@ class ZeroStatementTest {
 	@Test
 	@DisplayName("constructed with empty commitments works as expected")
 	void constructEmptyCommitments() {
-		final List<GqElement> emptyCommitmentsA = Collections.emptyList();
-		final List<GqElement> emptyCommitmentsB = Collections.emptyList();
+		final SameGroupVector<GqElement, GqGroup> emptyCommitmentsA = SameGroupVector.of();
+		final SameGroupVector<GqElement, GqGroup> emptyCommitmentsB = SameGroupVector.of();
 
 		assertDoesNotThrow(() -> new ZeroStatement(emptyCommitmentsA, emptyCommitmentsB, y));
 	}
@@ -82,8 +81,8 @@ class ZeroStatementTest {
 	@Test
 	@DisplayName("constructed with any null parameters throws NullPointerException")
 	void constructNullParams() {
-		final List<GqElement> emptyCommitmentsA = Collections.emptyList();
-		final List<GqElement> emptyCommitmentsB = Collections.emptyList();
+		final SameGroupVector<GqElement, GqGroup> emptyCommitmentsA = SameGroupVector.of();
+		final SameGroupVector<GqElement, GqGroup> emptyCommitmentsB = SameGroupVector.of();
 
 		assertAll(
 				() -> assertThrows(NullPointerException.class, () -> new ZeroStatement(null, commitmentsB, y)),
@@ -98,10 +97,10 @@ class ZeroStatementTest {
 	@Test
 	@DisplayName("constructed with commitments of different size throws IllegalArgumentException")
 	void constructDiffSizeCommitments() {
-		commitmentsB.add(GqElement.create(BigInteger.ONE, gqGroup));
+		final SameGroupVector<GqElement, GqGroup> additionalElementCommitmentsB = commitmentsB.append(GqElement.create(BigInteger.ONE, gqGroup));
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ZeroStatement(commitmentsA, commitmentsB, y));
+				() -> new ZeroStatement(commitmentsA, additionalElementCommitmentsB, y));
 		assertEquals("The two commitments vectors must have the same size.", exception.getMessage());
 	}
 
@@ -111,7 +110,7 @@ class ZeroStatementTest {
 		// Generate commitmentsA from different group.
 		final GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
 		final GqGroupGenerator otherGqGroupGenerator = new GqGroupGenerator(differentGroup);
-		final List<GqElement> diffCommitmentsA = otherGqGroupGenerator.generateRandomGqElementList(m);
+		final SameGroupVector<GqElement, GqGroup> diffCommitmentsA = otherGqGroupGenerator.generateRandomGqElementList(m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroStatement(diffCommitmentsA, commitmentsB, y));

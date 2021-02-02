@@ -6,7 +6,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
@@ -37,27 +36,23 @@ class ZeroStatement {
 	 * @param commitmentsB c<sub>B</sub>, a list of {@link GqElement}s.
 	 * @param y            The value defining the bilinear mapping.
 	 */
-	ZeroStatement(final List<GqElement> commitmentsA, final List<GqElement> commitmentsB, final ZqElement y) {
+	ZeroStatement(final SameGroupVector<GqElement, GqGroup> commitmentsA, final SameGroupVector<GqElement, GqGroup> commitmentsB, final ZqElement y) {
 		// Null checking.
-		checkNotNull(commitmentsA);
-		checkNotNull(commitmentsB);
-		checkNotNull(y);
+		this.commitmentsA = checkNotNull(commitmentsA);
+		this.commitmentsB = checkNotNull(commitmentsB);
+		this.y = checkNotNull(y);
 
-		// Immutable copies.
-		this.commitmentsA = new SameGroupVector<>(commitmentsA);
-		this.commitmentsB = new SameGroupVector<>(commitmentsB);
-
-		// Dimension checking.
+		// Cross dimension checking.
 		checkArgument(this.commitmentsA.size() == this.commitmentsB.size(), "The two commitments vectors must have the same size.");
 
-		// Group checking.
+		// Cross group checking.
 		if (!commitmentsA.isEmpty()) {
 			final GqGroup group = this.commitmentsA.getGroup();
 			checkArgument(group.equals(this.commitmentsB.getGroup()), "The two commitments must be part of the same group.");
-			checkArgument(group.getQ().equals(y.getGroup().getQ()), "The y value group must be of the same order as the group of the commitments.");
+			checkArgument(group.getQ().equals(this.y.getGroup().getQ()),
+					"The y value group must be of the same order as the group of the commitments.");
 		}
 
-		this.y = y;
 	}
 
 	SameGroupVector<GqElement, GqGroup> getCommitmentsA() {

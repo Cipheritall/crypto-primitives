@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,12 +32,16 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class CommitmentServiceTest {
 
 	private static final int KEY_LENGTH = 5; // This must be >= 2
 	private static final RandomService randomService = new RandomService();
 	private static final SecureRandom secureRandom = new SecureRandom();
+
+	private static ZqGroupGenerator zqGroupGenerator;
+
 	private GqGroup gqGroup;
 	private ZqGroup zqGroup;
 	private CommitmentKey validCommitmentKey;
@@ -47,29 +50,8 @@ class CommitmentServiceTest {
 	void setup() {
 		gqGroup = GqGroupTestData.getGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 		validCommitmentKey = genCommitmentKey(gqGroup, KEY_LENGTH);
-	}
-
-	/**
-	 * Generate a random vector of {@link ZqElement} in the specified {@code group}.
-	 *
-	 * @param numElements the number of elements to generate.
-	 * @return a vector of {@code numElements} random {@link ZqElement}.
-	 */
-	private List<ZqElement> generateRandomZqElementList(final int numElements, final ZqGroup group) {
-		return Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(group.getQ()), group)).limit(numElements)
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Generate a random matrix of {@link ZqElement} in the specified {@code group}.
-	 *
-	 * @param m the matrix' number of lines.
-	 * @param n the matrix' number of columns.
-	 * @return a m &times; n matrix of random {@link ZqElement}.
-	 */
-	private List<List<ZqElement>> generateRandomZqElementMatrix(final int m, final int n, final ZqGroup group) {
-		return Stream.generate(() -> generateRandomZqElementList(n, group)).limit(m).collect(Collectors.toList());
 	}
 
 	/**
@@ -86,38 +68,17 @@ class CommitmentServiceTest {
 		return new CommitmentKey(h, gList);
 	}
 
-	// ===============================================================================================================================================
-	// Utility methods
-	// ===============================================================================================================================================
-
-	/**
-	 * Get a different ZqGroup from the one used before each test cases.
-	 *
-	 * @return a different {@link ZqGroup}.
-	 */
-	private ZqGroup getDifferentZqGroup() {
-		GqGroup otherGqGroup;
-		ZqGroup otherZqGroup;
-		do {
-			otherGqGroup = GqGroupTestData.getGroup();
-			otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
-		} while (otherZqGroup.equals(zqGroup));
-
-		return otherZqGroup;
-	}
-
 	@Nested
 	@DisplayName("getCommitment")
 	class GetCommitmentTest {
 
-		private List<ZqElement> validElements;
+		private SameGroupVector<ZqElement, ZqGroup> validElements;
 		private ZqElement randomValue;
 
 		@BeforeEach
 		void setup() {
-			validElements = Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup)).limit(KEY_LENGTH)
-					.collect(Collectors.toList());
-			randomValue = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
+			validElements = zqGroupGenerator.generateRandomZqElementVector(KEY_LENGTH);
+			randomValue = zqGroupGenerator.genZqElementMember();
 		}
 
 		@Test
@@ -131,18 +92,19 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with empty list of values to commit to does not throw")
 		void getCommitmentOfEmptyList() {
-			List<ZqElement> values = Collections.emptyList();
+			SameGroupVector<ZqElement, ZqGroup> values = SameGroupVector.of();
 			assertNotNull(CommitmentService.getCommitment(values, randomValue, validCommitmentKey));
 		}
 
 		@RepeatedTest(10)
 		@DisplayName("with empty list result is multimodexp with padding")
 		void withEmptyListResultIsMultiModExpWithPadding() {
-			List<ZqElement> values = Collections.emptyList();
+			SameGroupVector<ZqElement, ZqGroup> values = SameGroupVector.of();
 			List<BigInteger> aPrime = Stream.generate(() -> BigInteger.ZERO).limit(KEY_LENGTH).collect(Collectors.toList());
 			aPrime.add(0, randomValue.getValue());
 			BigInteger expected = BigIntegerOperations.multiModExp(
-					validCommitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+					validCommitmentKey.stream().map(GqElement::getValue)
+							.collect(Collectors.toList()),
 					aPrime,
 					gqGroup.getP());
 			assertEquals(expected, CommitmentService.getCommitment(values, randomValue, validCommitmentKey).getValue());
@@ -151,8 +113,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with element list longer than commitment key throws IllegalArgumentException")
 		void getCommitmentWithTooLongListOfValues() {
-			List<ZqElement> tooLongList = new ArrayList<>(validElements);
-			tooLongList.add(zqGroup.getIdentity());
+			SameGroupVector<ZqElement, ZqGroup> tooLongList = validElements.append(zqGroup.getIdentity());
 			assertThrows(IllegalArgumentException.class, () -> CommitmentService.getCommitment(tooLongList, randomValue, validCommitmentKey));
 		}
 
@@ -172,15 +133,6 @@ class CommitmentServiceTest {
 			assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitment(validElements, differentRandomValue, validCommitmentKey));
 
-		}
-
-		@Test
-		@DisplayName("with elements of different groups to be committed to throws IllegalArgumentException")
-		void getCommitmentWithElementsFromDifferentGroups() {
-			List<ZqElement> invalidElements = new ArrayList<>(validElements);
-			ZqGroup differentZqGroup = getDifferentZqGroup();
-			invalidElements.set(0, differentZqGroup.getIdentity());
-			assertThrows(IllegalArgumentException.class, () -> CommitmentService.getCommitment(invalidElements, randomValue, validCommitmentKey));
 		}
 
 		@RepeatedTest(100)
@@ -221,7 +173,7 @@ class CommitmentServiceTest {
 			// c = 3
 			GqElement expected = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
 
-			assertEquals(expected, CommitmentService.getCommitment(a, r, ck));
+			assertEquals(expected, CommitmentService.getCommitment(new SameGroupVector<>(a), r, ck));
 		}
 	}
 
@@ -239,8 +191,8 @@ class CommitmentServiceTest {
 		void setup() {
 			m = secureRandom.nextInt(10) + 1;
 			n = KEY_LENGTH;
-			validMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(n, m, zqGroup));
-			validRandomValues = new SameGroupVector<>(generateRandomZqElementList(m, zqGroup));
+			validMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
+			validRandomValues = zqGroupGenerator.generateRandomZqElementVector(m);
 		}
 
 		@Test
@@ -254,24 +206,25 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with empty elements matrix returns empty list")
 		void getCommitmentMatrixWithEmptyElementsMatrix() {
-			SameGroupMatrix<ZqElement, ZqGroup> emptyMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(0, 0, zqGroup));
+			SameGroupMatrix<ZqElement, ZqGroup> emptyMatrix = zqGroupGenerator.generateRandomZqElementMatrix(0, 0);
 
-			assertEquals(Collections.emptyList(),
+			assertEquals(SameGroupVector.of(),
 					CommitmentService.getCommitmentMatrix(emptyMatrix, validRandomValues, validCommitmentKey));
 		}
 
 		@Test
 		@DisplayName("with empty rows in elements matrix returns empty list")
 		void getCommitmentMatrixWithEmptyRowsInElementsMatrix() {
-			SameGroupMatrix<ZqElement, ZqGroup> emptyRowsMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(0, m, zqGroup));
-			SameGroupVector<ZqElement, ZqGroup> emptyRandomElements = new SameGroupVector<>(generateRandomZqElementList(0, zqGroup));
-			assertEquals(Collections.emptyList(), CommitmentService.getCommitmentMatrix(emptyRowsMatrix, emptyRandomElements, validCommitmentKey));
+			SameGroupMatrix<ZqElement, ZqGroup> emptyRowsMatrix = zqGroupGenerator.generateRandomZqElementMatrix(0, m);
+			SameGroupVector<ZqElement, ZqGroup> emptyRandomElements = zqGroupGenerator.generateRandomZqElementVector(0);
+			assertEquals(SameGroupVector.of(),
+					CommitmentService.getCommitmentMatrix(emptyRowsMatrix, emptyRandomElements, validCommitmentKey));
 		}
 
 		@Test
 		@DisplayName("with too large matrix throws IllegalArgumentException")
 		void getCommitmentMatrixWithTooManyRows() {
-			SameGroupMatrix<ZqElement, ZqGroup> tooManyRowsMatrix = SameGroupMatrix.fromRows(generateRandomZqElementMatrix(n + 1, m, zqGroup));
+			SameGroupMatrix<ZqElement, ZqGroup> tooManyRowsMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n + 1, m);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitmentMatrix(tooManyRowsMatrix, validRandomValues, validCommitmentKey));
@@ -293,7 +246,8 @@ class CommitmentServiceTest {
 		@DisplayName("with matrix group different from random values group throws IllegalArgumentException")
 		void getCommitmentWithRandomValueDifferentGroupThanValues() {
 			ZqGroup differentZqGroup = new ZqGroup(zqGroup.getQ().multiply(BigInteger.TEN));
-			SameGroupVector<ZqElement, ZqGroup> differentRandomValues = new SameGroupVector<>(generateRandomZqElementList(m, differentZqGroup));
+			final ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
+			SameGroupVector<ZqElement, ZqGroup> differentRandomValues = differentZqGroupGenerator.generateRandomZqElementVector(m);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitmentMatrix(validMatrix, differentRandomValues, validCommitmentKey));
@@ -303,7 +257,8 @@ class CommitmentServiceTest {
 		@RepeatedTest(100)
 		@DisplayName("returns commitment vector of the same group than the commitment key")
 		void getCommitmentMatrixInSameGroupAsCommitmentKey() {
-			List<GqElement> commitment = CommitmentService.getCommitmentMatrix(validMatrix, validRandomValues, validCommitmentKey);
+			final SameGroupVector<GqElement, GqGroup> commitment = CommitmentService
+					.getCommitmentMatrix(validMatrix, validRandomValues, validCommitmentKey);
 			GqGroup commitmentGroup = commitment.get(0).getGroup();
 			assertEquals(gqGroup, commitmentGroup);
 		}
@@ -315,8 +270,10 @@ class CommitmentServiceTest {
 			CommitmentKey exactCommitmentKey =
 					new CommitmentKey(longerCommitmentKey.stream().limit(1).collect(Collectors.toList()).get(0),
 							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
-			List<GqElement> commitmentExactCK = CommitmentService.getCommitmentMatrix(validMatrix, validRandomValues, exactCommitmentKey);
-			List<GqElement> commitmentLongerCK = CommitmentService.getCommitmentMatrix(validMatrix, validRandomValues, longerCommitmentKey);
+			SameGroupVector<GqElement, GqGroup> commitmentExactCK = CommitmentService
+					.getCommitmentMatrix(validMatrix, validRandomValues, exactCommitmentKey);
+			SameGroupVector<GqElement, GqGroup> commitmentLongerCK = CommitmentService
+					.getCommitmentMatrix(validMatrix, validRandomValues, longerCommitmentKey);
 			assertEquals(commitmentExactCK, commitmentLongerCK);
 		}
 
@@ -350,7 +307,7 @@ class CommitmentServiceTest {
 			expected.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
 			expected.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
 
-			assertEquals(expected, CommitmentService.getCommitmentMatrix(a, r, ck));
+			assertEquals(new SameGroupVector<>(expected), CommitmentService.getCommitmentMatrix(a, r, ck));
 		}
 	}
 
@@ -358,13 +315,13 @@ class CommitmentServiceTest {
 	@DisplayName("getCommitmentVector")
 	class GetCommitmentVectorTest {
 
-		private List<ZqElement> validElements;
-		private List<ZqElement> validRandomElements;
+		private SameGroupVector<ZqElement, ZqGroup> validElements;
+		private SameGroupVector<ZqElement, ZqGroup> validRandomElements;
 
 		@BeforeEach
 		void setup() {
-			validElements = generateRandomZqElementList(KEY_LENGTH, zqGroup);
-			validRandomElements = generateRandomZqElementList(KEY_LENGTH, zqGroup);
+			validElements = zqGroupGenerator.generateRandomZqElementVector(KEY_LENGTH);
+			validRandomElements = zqGroupGenerator.generateRandomZqElementVector(KEY_LENGTH);
 		}
 
 		@Test
@@ -378,8 +335,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with element list longer than commitment key throws IllegalArgumentException")
 		void getCommitmentVectorWithTooLongListOfValues() {
-			List<ZqElement> tooLongList = new ArrayList<>(validElements);
-			tooLongList.add(zqGroup.getIdentity());
+			final SameGroupVector<ZqElement, ZqGroup> tooLongList = validElements.append(zqGroup.getIdentity());
 			assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitmentVector(tooLongList, validRandomElements, validCommitmentKey));
 		}
@@ -396,39 +352,18 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with elements to be committed to and random elements from different groups throws IllegalArgumentException")
 		void getCommitmentVectorWithRandomValueDifferentGroupThanValues() {
-			ZqGroup differentZqGroup = getDifferentZqGroup();
-			List<ZqElement> differentRandomElements = generateRandomZqElementList(KEY_LENGTH, differentZqGroup);
+			final ZqGroup differentZqGroup = getDifferentZqGroup();
+			final ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
+			final SameGroupVector<ZqElement, ZqGroup> differentRandomElements = differentZqGroupGenerator.generateRandomZqElementVector(KEY_LENGTH);
 			assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitmentVector(validElements, differentRandomElements, validCommitmentKey));
-
-		}
-
-		@Test
-		@DisplayName("with elements of different groups to be committed to throws IllegalArgumentException")
-		void getCommitmentVectorWithElementsFromDifferentGroups() {
-			List<ZqElement> invalidElements = new ArrayList<>(validElements);
-			ZqGroup differentZqGroup = getDifferentZqGroup();
-			invalidElements.set(0, differentZqGroup.getIdentity());
-			assertThrows(IllegalArgumentException.class,
-					() -> CommitmentService.getCommitmentVector(invalidElements, validRandomElements, validCommitmentKey));
-		}
-
-		@Test
-		@DisplayName("with random values of different groups throws IllegalArgumentException")
-		void getCommitmentVectorWithRandomValuesFromDifferentGroups() {
-			List<ZqElement> validElements = generateRandomZqElementList(KEY_LENGTH + 1, zqGroup);
-			List<ZqElement> invalidRandomValues = generateRandomZqElementList(KEY_LENGTH + 1, zqGroup);
-			ZqGroup differentZqGroup = getDifferentZqGroup();
-			invalidRandomValues.set(KEY_LENGTH, differentZqGroup.getIdentity());
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> CommitmentService.getCommitmentVector(validElements, invalidRandomValues, validCommitmentKey));
-			assertEquals("All elements must belong to the same group.", exception.getMessage());
 		}
 
 		@RepeatedTest(100)
 		@DisplayName("returns a commitment that belongs to the same group than the commitment key elements")
 		void getCommitmentVectorInSameGroupAsCommitmentKey() {
-			List<GqElement> commitment = CommitmentService.getCommitmentVector(validElements, validRandomElements, validCommitmentKey);
+			SameGroupVector<GqElement, GqGroup> commitment = CommitmentService
+					.getCommitmentVector(validElements, validRandomElements, validCommitmentKey);
 			assertTrue(commitment.stream().map(GqElement::getGroup).allMatch(gqGroup::equals));
 		}
 
@@ -439,8 +374,10 @@ class CommitmentServiceTest {
 			CommitmentKey exactCommitmentKey =
 					new CommitmentKey(longerCommitmentKey.stream().limit(1).collect(Collectors.toList()).get(0),
 							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
-			List<GqElement> commitmentExactCK = CommitmentService.getCommitmentVector(validElements, validRandomElements, exactCommitmentKey);
-			List<GqElement> commitmentLongerCK = CommitmentService.getCommitmentVector(validElements, validRandomElements, longerCommitmentKey);
+			SameGroupVector<GqElement, GqGroup> commitmentExactCK = CommitmentService
+					.getCommitmentVector(validElements, validRandomElements, exactCommitmentKey);
+			SameGroupVector<GqElement, GqGroup> commitmentLongerCK = CommitmentService
+					.getCommitmentVector(validElements, validRandomElements, longerCommitmentKey);
 			assertEquals(commitmentExactCK, commitmentLongerCK);
 		}
 
@@ -467,7 +404,24 @@ class CommitmentServiceTest {
 			expected.add(GqElement.create(BigInteger.valueOf(12), specificGqGroup));
 			expected.add(GqElement.create(BigInteger.valueOf(1), specificGqGroup));
 
-			assertEquals(expected, CommitmentService.getCommitmentVector(a, r, ck));
+			assertEquals(new SameGroupVector<>(expected),
+					CommitmentService.getCommitmentVector(new SameGroupVector<>(a), new SameGroupVector<>(r), ck));
 		}
+	}
+
+	/**
+	 * Get a different ZqGroup from the one used before each test cases.
+	 *
+	 * @return a different {@link ZqGroup}.
+	 */
+	private ZqGroup getDifferentZqGroup() {
+		GqGroup otherGqGroup;
+		ZqGroup otherZqGroup;
+		do {
+			otherGqGroup = GqGroupTestData.getGroup();
+			otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
+		} while (otherZqGroup.equals(zqGroup));
+
+		return otherZqGroup;
 	}
 }

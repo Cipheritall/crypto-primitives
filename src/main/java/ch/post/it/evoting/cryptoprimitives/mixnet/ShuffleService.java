@@ -39,8 +39,9 @@ public class ShuffleService {
 
 	/**
 	 * Shuffle and re-encrypt a list of ciphertext with the given key.
+	 *
 	 * @param ciphertexts the ciphertexts to re-encrypt and shuffle.
-	 * @param publicKey the public key with which to re-encrypt the ciphertexts.
+	 * @param publicKey   the public key with which to re-encrypt the ciphertexts.
 	 * @return a {@link Shuffle} with the result of the re-encrypting shuffle.
 	 */
 	Shuffle genShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey) {
@@ -75,7 +76,7 @@ public class ShuffleService {
 		ElGamalMultiRecipientMessage onesMessage = new ElGamalMultiRecipientMessage(ones);
 
 		ImmutableList<ZqElement> exponents =
-				Stream.generate(() ->  randomService.genRandomExponent(exponentGroup)).limit(N).collect(ImmutableList.toImmutableList());
+				Stream.generate(() -> randomService.genRandomExponent(exponentGroup)).limit(N).collect(ImmutableList.toImmutableList());
 		ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertexts =
 				IntStream.range(0, N)
 						.mapToObj(i -> getCiphertext(onesMessage, exponents.get(i), publicKey).multiply(ciphertextsCopy.get(psi.get(i))))

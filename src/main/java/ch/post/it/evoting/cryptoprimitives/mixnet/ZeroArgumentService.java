@@ -8,11 +8,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -98,12 +95,10 @@ final class ZeroArgumentService {
 		checkArgument(y.getGroup().equals(exponentsR.getGroup()), "The statement y and exponents must be part of the same group.");
 
 		// Ensure the statement and witness are corresponding.
-		final List<GqElement> computedCommitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
-		checkArgument(commitmentsA.equals(new SameGroupVector<>(computedCommitmentsA)),
-				"The statement's Ca commitments must be equal to the witness' commitment matrix A.");
-		final List<GqElement> computedCommitmentsB = CommitmentService.getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
-		checkArgument(commitmentsB.equals(new SameGroupVector<>(computedCommitmentsB)),
-				"The statement's Cb commitments must be equal to the witness' commitment matrix B.");
+		final SameGroupVector<GqElement, GqGroup> computedCommitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
+		checkArgument(commitmentsA.equals(computedCommitmentsA), "The statement's Ca commitments must be equal to the witness' commitment matrix A.");
+		final SameGroupVector<GqElement, GqGroup> computedCommitmentsB = CommitmentService.getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
+		checkArgument(commitmentsB.equals(computedCommitmentsB), "The statement's Cb commitments must be equal to the witness' commitment matrix B.");
 
 		final ZqGroup zqGroup = y.getGroup();
 
@@ -118,8 +113,8 @@ final class ZeroArgumentService {
 		// Algorithm operations.
 
 		final int n = matrixA.rowSize();
-		final List<ZqElement> a0 = generateRandomZqElementList(n, zqGroup);
-		final List<ZqElement> bm = generateRandomZqElementList(n, zqGroup);
+		final SameGroupVector<ZqElement, ZqGroup> a0 = new SameGroupVector<>(generateRandomZqElementList(n, zqGroup));
+		final SameGroupVector<ZqElement, ZqGroup> bm = new SameGroupVector<>(generateRandomZqElementList(n, zqGroup));
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		final GqElement cA0 = CommitmentService.getCommitment(a0, r0, commitmentKey);
@@ -129,12 +124,12 @@ final class ZeroArgumentService {
 		final SameGroupMatrix<ZqElement, ZqGroup> augmentedMatrixA = matrixA.prependColumn(a0);
 		final SameGroupMatrix<ZqElement, ZqGroup> augmentedMatrixB = matrixB.appendColumn(bm);
 
-		final List<ZqElement> d = computeDVector(augmentedMatrixA.toLists(), augmentedMatrixB.toLists(), y);
+		final SameGroupVector<ZqElement, ZqGroup> d = computeDVector(augmentedMatrixA, augmentedMatrixB, y);
 
 		// Compute t and c_d.
 		final List<ZqElement> t = new ArrayList<>(generateRandomZqElementList(2 * m + 1, zqGroup));
 		t.set(m + 1, ZqElement.create(BigInteger.ZERO, zqGroup));
-		final List<GqElement> cd = CommitmentService.getCommitmentVector(d, t, commitmentKey);
+		final SameGroupVector<GqElement, GqGroup> cd = CommitmentService.getCommitmentVector(d, new SameGroupVector<>(t), commitmentKey);
 
 		// Compute x, later used to compute a', b', r', s' and t'.
 		final GqGroup gqGroup = commitmentsA.get(0).getGroup();
@@ -170,19 +165,19 @@ final class ZeroArgumentService {
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		// Compute vectors a' and b'.
-		final List<ZqElement> aPrime = IntStream.range(0, n)
+		final SameGroupVector<ZqElement, ZqGroup> aPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(i).multiply(augmentedMatrixA.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(Collectors.toList());
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 
-		final List<ZqElement> bPrime = IntStream.range(0, n)
+		final SameGroupVector<ZqElement, ZqGroup> bPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpMMinusI.get(i).multiply(augmentedMatrixB.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(Collectors.toList());
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 
 		// Add newly created elements to the exponents vectors.
 		final SameGroupVector<ZqElement, ZqGroup> augmentedExponentsR = exponentsR.prepend(r0);
@@ -229,34 +224,28 @@ final class ZeroArgumentService {
 	 * @param secondMatrix B, the second matrix.
 	 * @return the computed <b>d</b> vector.
 	 */
-	List<ZqElement> computeDVector(final List<List<ZqElement>> firstMatrix, final List<List<ZqElement>> secondMatrix, final ZqElement y) {
+	SameGroupVector<ZqElement, ZqGroup> computeDVector(final SameGroupMatrix<ZqElement, ZqGroup> firstMatrix,
+			final SameGroupMatrix<ZqElement, ZqGroup> secondMatrix, final ZqElement y) {
+
 		// Null checking.
 		checkNotNull(firstMatrix);
 		checkNotNull(secondMatrix);
 		checkNotNull(y);
-		checkArgument(firstMatrix.stream().allMatch(Objects::nonNull), "First matrix rows must not be null.");
-		checkArgument(secondMatrix.stream().allMatch(Objects::nonNull), "Second matrix rows must not be null.");
-		checkArgument(firstMatrix.stream().flatMap(Collection::stream).allMatch(Objects::nonNull), "First matrix elements must not be null.");
-		checkArgument(secondMatrix.stream().flatMap(Collection::stream).allMatch(Objects::nonNull), "Second matrix elements must not be null.");
-
-		// Immutable copies and individual matrix validation (group and size).
-		final SameGroupMatrix<ZqElement, ZqGroup> firstMatrixCopy = SameGroupMatrix.fromRows(firstMatrix);
-		final SameGroupMatrix<ZqElement, ZqGroup> secondMatrixCopy = SameGroupMatrix.fromRows(secondMatrix);
 
 		// Cross matrix dimensions checking.
-		checkArgument(firstMatrixCopy.rowSize() == secondMatrixCopy.rowSize(), "The two matrices must have the same number of rows.");
-		checkArgument(firstMatrixCopy.columnSize() == secondMatrixCopy.columnSize(), "The two matrices must have the same number of columns.");
+		checkArgument(firstMatrix.rowSize() == secondMatrix.rowSize(), "The two matrices must have the same number of rows.");
+		checkArgument(firstMatrix.columnSize() == secondMatrix.columnSize(), "The two matrices must have the same number of columns.");
 
-		if (firstMatrixCopy.isEmpty()) {
-			return Collections.emptyList();
+		if (firstMatrix.isEmpty()) {
+			return SameGroupVector.of();
 		}
 
-		//Cross matrix group checking.
-		checkArgument(firstMatrixCopy.getGroup().equals(secondMatrixCopy.getGroup()), "The elements of both matrices must be in the same group.");
-		checkArgument(y.getGroup().equals(firstMatrixCopy.getGroup()), "The value y must be in the same group as the elements of the matrices.");
+		// Cross matrix group checking.
+		checkArgument(firstMatrix.getGroup().equals(secondMatrix.getGroup()), "The elements of both matrices must be in the same group.");
+		checkArgument(y.getGroup().equals(firstMatrix.getGroup()), "The value y must be in the same group as the elements of the matrices.");
 
 		// Computing the d vector.
-		final int m = firstMatrixCopy.columnSize() - 1;
+		final int m = firstMatrix.columnSize() - 1;
 		final LinkedList<ZqElement> d = new LinkedList<>();
 		final ZqGroup group = y.getGroup();
 		for (int k = 0; k <= 2 * m; k++) {
@@ -266,12 +255,12 @@ final class ZeroArgumentService {
 				if (j > m) {
 					break;
 				}
-				dk = dk.add(starMap(firstMatrixCopy.getColumn(i), secondMatrixCopy.getColumn(j), y));
+				dk = dk.add(starMap(firstMatrix.getColumn(i), secondMatrix.getColumn(j), y));
 			}
 			d.add(dk);
 		}
 
-		return d;
+		return new SameGroupVector<>(d);
 	}
 
 	/**
@@ -285,36 +274,32 @@ final class ZeroArgumentService {
 	 * @param secondVector b, the second vector.
 	 * @return The sum &sum;<sub>j=0</sub><sup>n-1</sup> a<sub>j</sub> &middot; b<sub>j</sub> &middot; y<sup>j</sup>
 	 */
-	ZqElement starMap(final List<ZqElement> firstVector, final List<ZqElement> secondVector, final ZqElement y) {
+	ZqElement starMap(final SameGroupVector<ZqElement, ZqGroup> firstVector, final SameGroupVector<ZqElement, ZqGroup> secondVector,
+			final ZqElement y) {
+
 		// Null checking.
 		checkNotNull(firstVector);
 		checkNotNull(secondVector);
 		checkNotNull(y);
-		checkArgument(firstVector.stream().allMatch(Objects::nonNull), "The elements of the first vector must not be null.");
-		checkArgument(secondVector.stream().allMatch(Objects::nonNull), "The elements of the second vector must not be null.");
 
-		// Immutable copies and individual group check.
-		final SameGroupVector<ZqElement, ZqGroup> firstVectorCopy = new SameGroupVector<>(firstVector);
-		final SameGroupVector<ZqElement, ZqGroup> secondVectorCopy = new SameGroupVector<>(secondVector);
-
-		// Dimensions checking.
-		checkArgument(firstVectorCopy.size() == secondVectorCopy.size(), "The provided vectors must have the same size.");
+		// Cross dimensions checking.
+		checkArgument(firstVector.size() == secondVector.size(), "The provided vectors must have the same size.");
 
 		// Handle empty vectors.
-		if (firstVectorCopy.isEmpty()) {
+		if (firstVector.isEmpty()) {
 			return y.getGroup().getIdentity();
 		}
 
-		// Group checking.
-		checkArgument(firstVectorCopy.getGroup().equals(secondVectorCopy.getGroup()), "The elements of both vectors must be in the same group.");
-		checkArgument(firstVectorCopy.getGroup().equals(y.getGroup()), "The value y must be in the same group as the vectors elements");
+		// Cross group checking.
+		checkArgument(firstVector.getGroup().equals(secondVector.getGroup()), "The elements of both vectors must be in the same group.");
+		checkArgument(firstVector.getGroup().equals(y.getGroup()), "The value y must be in the same group as the vectors elements");
 		final ZqGroup group = y.getGroup();
 
 		// StarMap computing.
-		final int n = firstVectorCopy.size();
+		final int n = firstVector.size();
 		return IntStream.range(0, n)
-				.mapToObj(j -> firstVectorCopy.get(j)
-						.multiply(secondVectorCopy.get(j))
+				.mapToObj(j -> firstVector.get(j)
+						.multiply(secondVector.get(j))
 						.multiply(y.exponentiate(BigInteger.valueOf(j))))
 				.reduce(group.getIdentity(), ZqElement::add);
 	}

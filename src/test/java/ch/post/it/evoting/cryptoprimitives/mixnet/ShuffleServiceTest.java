@@ -51,7 +51,7 @@ class ShuffleServiceTest {
 	}
 
 	@Test
-	void testNullCiphertextsThrows(){
+	void testNullCiphertextsThrows() {
 		assertThrows(NullPointerException.class, () -> shuffleService.genShuffle(null, randomPublicKey));
 	}
 
@@ -68,8 +68,8 @@ class ShuffleServiceTest {
 
 	@Test
 	void testCiphertextLongerThanKeyThrows() {
-		List<ElGamalMultiRecipientCiphertext> ciphertexts = Collections.singletonList(genRandomCiphertext(group, NUM_ELEMENTS+1));
-		assertThrows(IllegalArgumentException.class,() -> shuffleService.genShuffle(ciphertexts, randomPublicKey));
+		List<ElGamalMultiRecipientCiphertext> ciphertexts = Collections.singletonList(genRandomCiphertext(group, NUM_ELEMENTS + 1));
+		assertThrows(IllegalArgumentException.class, () -> shuffleService.genShuffle(ciphertexts, randomPublicKey));
 	}
 
 	@Test
@@ -110,7 +110,7 @@ class ShuffleServiceTest {
 				.map(r -> ZqElement.create(BigInteger.valueOf(r), exponentGroup))
 				.collect(Collectors.toList());
 		when(randomService.genRandomExponent(exponentGroup))
-				.thenReturn(randomExponents.get(0), randomExponents.subList(1, randomExponents.size()).toArray(new ZqElement[]{}));
+				.thenReturn(randomExponents.get(0), randomExponents.subList(1, randomExponents.size()).toArray(new ZqElement[] {}));
 
 		//Create public key
 		List<GqElement> pkElements =
@@ -122,7 +122,7 @@ class ShuffleServiceTest {
 				Arrays.asList(16, 18, 2, 2),
 				Arrays.asList(13, 1, 3, 4),
 				Arrays.asList(3, 3, 6, 6)
-				);
+		);
 		List<ElGamalMultiRecipientCiphertext> ciphertexts = valuesToCiphertext(ciphertextValues, localGroup);
 
 		//Expected ciphertexts
@@ -145,7 +145,7 @@ class ShuffleServiceTest {
 	//Convert a matrix of values to ciphertexts
 	private List<ElGamalMultiRecipientCiphertext> valuesToCiphertext(Stream<List<Integer>> ciphertextValues, GqGroup group) {
 		return ciphertextValues
-				.map(values -> values.stream().map(BigInteger::valueOf).map(value-> GqElement.create(value, group)).collect(Collectors.toList()))
+				.map(values -> values.stream().map(BigInteger::valueOf).map(value -> GqElement.create(value, group)).collect(Collectors.toList()))
 				.map(values -> ElGamalMultiRecipientCiphertext.create(values.get(0), values.subList(1, values.size())))
 				.collect(Collectors.toList());
 	}

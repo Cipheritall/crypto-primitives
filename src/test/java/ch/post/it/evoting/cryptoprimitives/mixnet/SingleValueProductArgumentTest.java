@@ -6,7 +6,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,8 +34,12 @@ class SingleValueProductArgumentTest {
 		final GqElement cd = generator.genNonIdentityMember();
 		final GqElement cLowerDelta = generator.genMember();
 		final GqElement cUpperDelta = generator.genMember();
-		final List<ZqElement> as = IntStream.range(0, n).mapToObj(i -> randomService.genRandomExponent(zqGroup)).collect(Collectors.toList());
-		final List<ZqElement> bs = IntStream.range(0, n).mapToObj(i -> randomService.genRandomExponent(zqGroup)).collect(Collectors.toList());
+		final SameGroupVector<ZqElement, ZqGroup> as = IntStream.range(0, n)
+				.mapToObj(i -> randomService.genRandomExponent(zqGroup))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+		final SameGroupVector<ZqElement, ZqGroup> bs = IntStream.range(0, n)
+				.mapToObj(i -> randomService.genRandomExponent(zqGroup))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 		final ZqElement rTilde = randomService.genRandomExponent(zqGroup);
 		final ZqElement sTilde = randomService.genRandomExponent(zqGroup);
 
@@ -45,8 +48,8 @@ class SingleValueProductArgumentTest {
 				.withCLowerD(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
-				.withATilde(new SameGroupVector<>(as))
-				.withBTilde(new SameGroupVector<>(bs))
+				.withATilde(as)
+				.withBTilde(bs)
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();
@@ -54,8 +57,8 @@ class SingleValueProductArgumentTest {
 				.withCLowerD(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
-				.withATilde(new SameGroupVector<>(as))
-				.withBTilde(new SameGroupVector<>(bs))
+				.withATilde(as)
+				.withBTilde(bs)
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();
@@ -63,8 +66,8 @@ class SingleValueProductArgumentTest {
 				.withCLowerD(cd.multiply(cd))
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
-				.withATilde(new SameGroupVector<>(as))
-				.withBTilde(new SameGroupVector<>(bs))
+				.withATilde(as)
+				.withBTilde(bs)
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();

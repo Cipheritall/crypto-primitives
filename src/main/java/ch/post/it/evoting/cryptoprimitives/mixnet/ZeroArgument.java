@@ -5,11 +5,13 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Collection of the values contained in a zero argument.
@@ -18,9 +20,9 @@ class ZeroArgument {
 
 	private GqElement cA0;
 	private GqElement cBm;
-	private List<GqElement> cd;
-	private List<ZqElement> aPrime;
-	private List<ZqElement> bPrime;
+	private SameGroupVector<GqElement, GqGroup> cd;
+	private SameGroupVector<ZqElement, ZqGroup> aPrime;
+	private SameGroupVector<ZqElement, ZqGroup> bPrime;
 	private ZqElement rPrime;
 	private ZqElement sPrime;
 	private ZqElement tPrime;
@@ -36,15 +38,15 @@ class ZeroArgument {
 		return cBm;
 	}
 
-	List<GqElement> getCd() {
+	SameGroupVector<GqElement, GqGroup> getCd() {
 		return cd;
 	}
 
-	List<ZqElement> getAPrime() {
+	SameGroupVector<ZqElement, ZqGroup> getAPrime() {
 		return aPrime;
 	}
 
-	List<ZqElement> getBPrime() {
+	SameGroupVector<ZqElement, ZqGroup> getBPrime() {
 		return bPrime;
 	}
 
@@ -85,9 +87,9 @@ class ZeroArgument {
 
 		private GqElement cA0;
 		private GqElement cBm;
-		private List<GqElement> cd;
-		private List<ZqElement> aPrime;
-		private List<ZqElement> bPrime;
+		private SameGroupVector<GqElement, GqGroup> cd;
+		private SameGroupVector<ZqElement, ZqGroup> aPrime;
+		private SameGroupVector<ZqElement, ZqGroup> bPrime;
 		private ZqElement rPrime;
 		private ZqElement sPrime;
 		private ZqElement tPrime;
@@ -102,17 +104,17 @@ class ZeroArgument {
 			return this;
 		}
 
-		ZeroArgumentBuilder withCd(final List<GqElement> cd) {
+		ZeroArgumentBuilder withCd(final SameGroupVector<GqElement, GqGroup> cd) {
 			this.cd = cd;
 			return this;
 		}
 
-		ZeroArgumentBuilder withAPrime(final List<ZqElement> aPrime) {
+		ZeroArgumentBuilder withAPrime(final SameGroupVector<ZqElement, ZqGroup> aPrime) {
 			this.aPrime = aPrime;
 			return this;
 		}
 
-		ZeroArgumentBuilder withBPrime(final List<ZqElement> bPrime) {
+		ZeroArgumentBuilder withBPrime(final SameGroupVector<ZqElement, ZqGroup> bPrime) {
 			this.bPrime = bPrime;
 			return this;
 		}

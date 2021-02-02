@@ -8,7 +8,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,10 +29,29 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  */
 public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<G>> implements HasGroup<G> {
 
-	final G group;
-	private final ImmutableList<ImmutableList<E>> rows;
+	private final G group;
+	private final ImmutableList<SameGroupVector<E, G>> rows;
 	private final int rowSize;
 	private final int columnSize;
+
+	private SameGroupMatrix(final ImmutableList<SameGroupVector<E, G>> rows) {
+		// Null checking.
+		checkNotNull(rows);
+		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
+
+		// Size checking.
+		checkArgument(allEqual(rows.stream(), SameGroupVector::size), "All rows of the matrix must have the same number of columns.");
+
+		// Group checking.
+		if (!isEmpty(rows) && !rows.get(0).isEmpty()) {
+			checkArgument(allEqual(rows.stream(), SameGroupVector::getGroup), "All elements of the matrix must be in the same group.");
+		}
+
+		this.rows = isEmpty(rows) ? ImmutableList.of() : rows;
+		this.rowSize = isEmpty(rows) ? 0 : rows.size();
+		this.columnSize = isEmpty(rows) ? 0 : rows.get(0).size();
+		this.group = isEmpty(rows) ? null : rows.get(0).get(0).getGroup();
+	}
 
 	/**
 	 * Create a SameGroupMatrix from rows of elements.
@@ -48,7 +66,15 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public static <L extends List<E>, E extends HasGroup<G>, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromRows(List<L> rows) {
-		return new SameGroupMatrix<>(rows);
+		//Null checks
+		checkNotNull(rows);
+		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
+
+		final ImmutableList<SameGroupVector<E, G>> rowVectors = rows.stream()
+				.map(SameGroupVector::new)
+				.collect(toImmutableList());
+
+		return new SameGroupMatrix<>(rowVectors);
 	}
 
 	/**
@@ -64,30 +90,12 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public static <L extends List<E>, E extends HasGroup<G>, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromColumns(List<L> columns) {
-		return new SameGroupMatrix<>(columns).transpose();
+		return fromRows(columns).transpose();
 	}
 
-	private <L extends List<E>> SameGroupMatrix(List<L> rows) {
-		//Null checks
-		checkNotNull(rows);
-		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
-		checkArgument(rows.stream().flatMap(Collection::stream).allMatch(Objects::nonNull), "A matrix cannot contain a null element.");
-
-		//Immutable copy
-		final ImmutableList<ImmutableList<E>> rowsCopy = rows.stream()
-				.map(ImmutableList::copyOf)
-				.collect(toImmutableList());
-
-		//Size checking
-		checkArgument(allEqual(rowsCopy.stream(), ImmutableList::size), "All rows of the matrix must have the same number of columns.");
-
-		//Group checking
-		checkArgument(allEqual(rowsCopy.stream().flatMap(Collection::stream), E::getGroup), "All elements of the matrix must be in the same group.");
-
-		this.rows = isEmpty(rowsCopy) ? ImmutableList.of() : rowsCopy;
-		this.rowSize = isEmpty(rowsCopy) ? 0 : rowsCopy.size();
-		this.columnSize = isEmpty(rowsCopy) ? 0 : rowsCopy.get(0).size();
-		this.group = isEmpty(rowsCopy) ? null : rowsCopy.get(0).get(0).getGroup();
+	private static <E extends HasGroup<G>, G extends MathematicalGroup<G>>
+	SameGroupMatrix<E, G> fromColumnVector(final ImmutableList<SameGroupVector<E, G>> columns) {
+		return new SameGroupMatrix<>(columns).transpose();
 	}
 
 	private SameGroupMatrix<E, G> transpose() {
@@ -109,7 +117,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 		return isEmpty(this.rows);
 	}
 
-	private boolean isEmpty(ImmutableList<ImmutableList<E>> matrix) {
+	private boolean isEmpty(ImmutableList<SameGroupVector<E, G>> matrix) {
 		return matrix.isEmpty() || matrix.get(0).isEmpty();
 	}
 
@@ -131,7 +139,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	/**
 	 * @return the ith row. i must be within bounds.
 	 */
-	public ImmutableList<E> getRow(int i) {
+	public SameGroupVector<E, G> getRow(int i) {
 		checkArgument(i >= 0);
 		checkArgument(i < this.rowSize);
 		return this.rows.get(i);
@@ -140,10 +148,10 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	/**
 	 * @return the jth row. j must be within bounds.
 	 */
-	public ImmutableList<E> getColumn(int j) {
+	public SameGroupVector<E, G> getColumn(int j) {
 		checkArgument(j >= 0);
 		checkArgument(j < this.columnSize);
-		return this.rows.stream().map(row -> row.get(j)).collect(toImmutableList());
+		return this.rows.stream().map(row -> row.get(j)).collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 	}
 
 	/**
@@ -152,61 +160,68 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	public Stream<E> stream() {
 		return IntStream.range(0, this.rowSize())
 				.mapToObj(this::getRow)
-				.flatMap(Collection::stream);
+				.flatMap(SameGroupVector::stream);
 	}
 
 	/**
 	 * @return A stream over the matrix' rows.
 	 */
-	public Stream<ImmutableList<E>> rowStream() {
+	public Stream<SameGroupVector<E, G>> rowStream() {
 		return this.rows.stream();
 	}
 
 	/**
 	 * @return A stream over the matrix' columns.
 	 */
-	public Stream<ImmutableList<E>> columnStream() {
+	Stream<SameGroupVector<E, G>> columnStream() {
 		return IntStream.range(0, columnSize)
 				.mapToObj(this::getColumn);
 	}
 
 	/**
-	 * @return The matrix represented as a List of List, using row representation.
-	 */
-	public List<List<E>> toLists() {
-		return IntStream.range(0, this.rowSize())
-				.mapToObj(this::getRow)
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Append a new column to the matrix. Returns a new SameGroupMatrix.
+	 * Append a new column to the matrix. Returns a new SameGroupMatrix. The new column must:
+	 * <ul>
+	 *     <li>be non null</li>
+	 *     <li>have {@code rowSize} elements</li>
+	 *     <li>have the same group as the matrix'</li>
+	 * </ul>
 	 *
-	 * @param column The new column to append. Must be non null and have {@code rowSize} elements.
+	 * @param column The new column to append.
 	 * @return A new SameGroupMatrix with the appended {@code column}.
 	 */
-	public SameGroupMatrix<E, G> appendColumn(final List<E> column) {
+	public SameGroupMatrix<E, G> appendColumn(final SameGroupVector<E, G> column) {
 		checkNotNull(column);
 		checkArgument(column.size() == rowSize,
 				String.format("The new column size does not match size of matrix' columns. Size: %d, rowSize: %d", column.size(), rowSize));
+		if (!column.isEmpty()) {
+			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
+		}
 
-		final List<List<E>> newColumns = Streams.concat(this.columnStream(), Stream.of(column)).collect(Collectors.toList());
-		return SameGroupMatrix.fromColumns(newColumns);
+		final ImmutableList<SameGroupVector<E, G>> newColumns = Streams.concat(this.columnStream(), Stream.of(column)).collect(toImmutableList());
+		return SameGroupMatrix.fromColumnVector(newColumns);
 	}
 
 	/**
-	 * Prepend a new column to the matrix. Returns a new SameGroupMatrix.
+	 * Prepend a new column to the matrix. Returns a new SameGroupMatrix. The new column must:
+	 * <ul>
+	 *     <li>be non null</li>
+	 *     <li>have {@code rowSize} elements</li>
+	 *     <li>have the same group as the matrix'</li>
+	 * </ul>
 	 *
-	 * @param column The new column to prepend. Must be non null and have {@code rowSize} elements.
+	 * @param column The new column to prepend.
 	 * @return A new SameGroupMatrix with the prepended {@code column}.
 	 */
-	public SameGroupMatrix<E, G> prependColumn(final List<E> column) {
+	public SameGroupMatrix<E, G> prependColumn(final SameGroupVector<E, G> column) {
 		checkNotNull(column);
 		checkArgument(column.size() == rowSize,
 				String.format("The new column size does not match size of matrix' columns. Size: %d, rowSize: %d", column.size(), rowSize));
+		if (!column.isEmpty()) {
+			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
+		}
 
-		final List<List<E>> newColumns = Streams.concat(Stream.of(column), this.columnStream()).collect(Collectors.toList());
-		return SameGroupMatrix.fromColumns(newColumns);
+		final ImmutableList<SameGroupVector<E, G>> newColumns = Streams.concat(Stream.of(column), this.columnStream()).collect(toImmutableList());
+		return SameGroupMatrix.fromColumnVector(newColumns);
 	}
 
 	@Override

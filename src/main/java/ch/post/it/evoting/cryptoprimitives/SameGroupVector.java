@@ -6,6 +6,7 @@ package ch.post.it.evoting.cryptoprimitives;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -30,6 +31,24 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 
 	private final G group;
 	private final ImmutableList<E> elements;
+
+	/**
+	 * Returns a SameGroupVector of {@code elements}. The elements must comply with the SameGroupVector constraints.
+	 *
+	 * @param elements The elements to be contained in this vector. May be empty.
+	 * @param <E>      The type of the elements.
+	 * @param <G>      The group of the elements.
+	 * @return A SameGroupVector containing {@code elements}.
+	 * @see #SameGroupVector(List)
+	 */
+	@SafeVarargs
+	public static <E extends HasGroup<G>, G extends MathematicalGroup<G>> SameGroupVector<E, G> of(final E... elements) {
+		//Check null values
+		checkNotNull(elements);
+		checkArgument(Arrays.stream(elements).allMatch(Objects::nonNull), "Elements must not contain nulls");
+
+		return new SameGroupVector<>(ImmutableList.copyOf(elements));
+	}
 
 	/**
 	 * @param elements the list of elements contained by this vector, which must respect the following:

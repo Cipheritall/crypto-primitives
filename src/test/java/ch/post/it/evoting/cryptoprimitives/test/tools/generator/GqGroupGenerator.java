@@ -5,13 +5,13 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -105,13 +105,13 @@ public class GqGroupGenerator {
 	}
 
 	/**
-	 * Generate a random vector of {@link GqElement} in this {@code group}.
+	 * Generate a random {@link SameGroupVector} of {@link GqElement} in this {@code group}.
 	 *
 	 * @param numElements the number of elements to generate.
 	 * @return a vector of {@code numElements} random {@link GqElement}.
 	 */
-	public List<GqElement> generateRandomGqElementList(final int numElements) {
-		return Stream.generate(this::genMember).limit(numElements).collect(Collectors.toList());
+	public SameGroupVector<GqElement, GqGroup> generateRandomGqElementList(final int numElements) {
+		return new SameGroupVector<>(Stream.generate(this::genMember).limit(numElements).collect(Collectors.toList()));
 	}
 
 	private GqElement genMember(Predicate<GqElement> invalid) {

@@ -6,7 +6,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
@@ -30,12 +29,9 @@ class SingleValueProductWitness {
 	 * @param elements   (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
 	 * @param randomness r, the randomness
 	 */
-	SingleValueProductWitness(final List<ZqElement> elements, final ZqElement randomness) {
-		checkNotNull(elements);
-		checkNotNull(randomness);
-
-		this.elements = new SameGroupVector<>(elements);
-		this.randomness = randomness;
+	SingleValueProductWitness(final SameGroupVector<ZqElement, ZqGroup> elements, final ZqElement randomness) {
+		this.elements = checkNotNull(elements);
+		this.randomness = checkNotNull(randomness);
 
 		checkArgument(this.elements.getGroup().equals(this.randomness.getGroup()),
 				"All elements must belong to the same group as the randomness");

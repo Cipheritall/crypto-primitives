@@ -50,7 +50,7 @@ class ElGamalMultiRecipientMessageTest {
 	@BeforeEach
 	void setUp() {
 		GqElement m1 = generator.genMember();
-		GqElement m2= generator.genMember();
+		GqElement m2 = generator.genMember();
 
 		validMessageElements = new LinkedList<>();
 		validMessageElements.add(m1);
@@ -123,7 +123,8 @@ class ElGamalMultiRecipientMessageTest {
 	@ParameterizedTest(name = "ciphertext = {0} and secret key = {1} throws {2}")
 	@MethodSource("createInvalidDecryptionArgumentsProvider")
 	@DisplayName("get message with invalid parameters")
-	void whenGetMessageWithInvalidParametersTest(ElGamalMultiRecipientCiphertext c, ElGamalMultiRecipientPrivateKey sk, final Class<? extends RuntimeException> exceptionClass) {
+	void whenGetMessageWithInvalidParametersTest(ElGamalMultiRecipientCiphertext c, ElGamalMultiRecipientPrivateKey sk,
+			final Class<? extends RuntimeException> exceptionClass) {
 		assertThrows(exceptionClass, () -> ElGamalMultiRecipientMessage.getMessage(c, sk));
 	}
 
