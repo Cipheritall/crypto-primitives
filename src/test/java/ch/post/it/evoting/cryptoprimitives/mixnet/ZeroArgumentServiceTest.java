@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +18,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -261,20 +261,25 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with simple values gives expected result")
 		void computeDVectorSimpleValuesTest() {
 			// Small Zq group.
-			final ZqGroup group = new ZqGroup(ELEVEN);
+			final ZqGroup group = new ZqGroup(FIVE);
 
 			// Construct the two matrices and value y.
-			final List<ZqElement> a0 = Arrays.asList(ZqElement.create(ZERO, group), ZqElement.create(TWO, group));
-			final List<ZqElement> a1 = Arrays.asList(ZqElement.create(FOUR, group), ZqElement.create(SIX, group));
-			final List<ZqElement> b0 = Arrays.asList(ZqElement.create(ONE, group), ZqElement.create(THREE, group));
-			final List<ZqElement> b1 = Arrays.asList(ZqElement.create(FIVE, group), ZqElement.create(SEVEN, group));
-			final SameGroupMatrix<ZqElement, ZqGroup> firstMatrix = SameGroupMatrix.fromRows(Arrays.asList(a0, a1));
-			final SameGroupMatrix<ZqElement, ZqGroup> secondMatrix = SameGroupMatrix.fromRows(Arrays.asList(b0, b1));
-			final ZqElement y = ZqElement.create(EIGHT, group);
+			final List<ZqElement> a0 = asList(ZqElement.create(ONE, group), ZqElement.create(TWO, group), ZqElement.create(ZERO, group),
+					ZqElement.create(FOUR, group));
+			final List<ZqElement> a1 = asList(ZqElement.create(THREE, group), ZqElement.create(TWO, group), ZqElement.create(FOUR, group),
+					ZqElement.create(FOUR, group));
+			final List<ZqElement> b0 = asList(ZqElement.create(THREE, group), ZqElement.create(TWO, group), ZqElement.create(ONE, group),
+					ZqElement.create(TWO, group));
+			final List<ZqElement> b1 = asList(ZqElement.create(ZERO, group), ZqElement.create(ZERO, group), ZqElement.create(ZERO, group),
+					ZqElement.create(ONE, group));
+			final SameGroupMatrix<ZqElement, ZqGroup> firstMatrix = SameGroupMatrix.fromRows(asList(a0, a1));
+			final SameGroupMatrix<ZqElement, ZqGroup> secondMatrix = SameGroupMatrix.fromRows(asList(b0, b1));
+			final ZqElement y = ZqElement.create(TWO, group);
 
 			// Expected d vector.
 			final SameGroupVector<ZqElement, ZqGroup> expected = SameGroupVector.of(
-					ZqElement.create(FOUR, group), ZqElement.create(SEVEN, group), ZqElement.create(ZERO, group));
+					ZqElement.create(ONE, group), ZqElement.create(THREE, group), ZqElement.create(FOUR, group), ZqElement.create(ONE, group),
+					ZqElement.create(ZERO, group), ZqElement.create(ONE, group), ZqElement.create(FOUR, group));
 
 			assertEquals(expected, zeroArgumentService.computeDVector(firstMatrix, secondMatrix, y));
 		}
@@ -370,14 +375,14 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with simple values gives expected result")
 		void starMapTestSimpleValues() {
 			// Small ZpGroup.
-			final ZqGroup group = new ZqGroup(ELEVEN);
+			final ZqGroup group = new ZqGroup(FIVE);
 
 			// Construct the two vectors and value y.
 			final SameGroupVector<ZqElement, ZqGroup> firstVector = SameGroupVector.of(
-					ZqElement.create(TWO, group), ZqElement.create(SIX, group));
+					ZqElement.create(ONE, group), ZqElement.create(THREE, group));
 			final SameGroupVector<ZqElement, ZqGroup> secondVector = SameGroupVector.of(
-					ZqElement.create(THREE, group), ZqElement.create(SEVEN, group));
-			final ZqElement y = ZqElement.create(EIGHT, group);
+					ZqElement.create(TWO, group), ZqElement.create(ONE, group));
+			final ZqElement y = ZqElement.create(TWO, group);
 
 			// Expected starMap result.
 			final ZqElement expected = ZqElement.create(ONE, group);
@@ -431,7 +436,7 @@ class ZeroArgumentServiceTest {
 				final ZqElement secondRight = IntStream.range(0, n - 1)
 						.mapToObj(j -> finalMatrixA.get(j, m - 1)
 								.multiply(finalMatrixB.get(j, m - 1))
-								.multiply(finalY.exponentiate(BigInteger.valueOf(j))))
+								.multiply(finalY.exponentiate(BigInteger.valueOf(j + 1L))))
 						.reduce(zqGroup.getIdentity(), ZqElement::add).negate();
 				final ZqElement right = firstRight.add(secondRight);
 
@@ -439,7 +444,7 @@ class ZeroArgumentServiceTest {
 						.mapToObj(i -> ZqElement.create(BigInteger.valueOf(i), zqGroup))
 						.filter(x -> finalMatrixA.get(n - 1, m - 1)
 								.multiply(x)
-								.multiply(finalY.exponentiate(BigInteger.valueOf(n - 1)))
+								.multiply(finalY.exponentiate(BigInteger.valueOf(n)))
 								.equals(right))
 						.findAny();
 			} while (!matrixBLastElem.isPresent());
@@ -590,40 +595,41 @@ class ZeroArgumentServiceTest {
 
 			// Statement.
 			final SameGroupVector<GqElement, GqGroup> commitmentsA = SameGroupVector.of(
-					GqElement.create(ONE, simpleGqGroup), GqElement.create(ONE, simpleGqGroup));
+					GqElement.create(FIVE, simpleGqGroup), GqElement.create(THREE, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup));
 			final SameGroupVector<GqElement, GqGroup> commitmentsB = SameGroupVector.of(
-					GqElement.create(NINE, simpleGqGroup), GqElement.create(FIVE, simpleGqGroup));
-			final ZqElement y = ZqElement.create(FOUR, simpleZqGroup);
+					GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup), GqElement.create(NINE, simpleGqGroup));
+			final ZqElement y = ZqElement.create(TWO, simpleZqGroup);
 
 			final ZeroStatement simpleZeroStatement = new ZeroStatement(commitmentsA, commitmentsB, y);
 
 			// Witness.
-			final SameGroupMatrix<ZqElement, ZqGroup> simpleMatrixA = SameGroupMatrix.fromRows(Arrays.asList(
-					Arrays.asList(ZqElement.create(ONE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup)),
-					Arrays.asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup))));
-			final SameGroupMatrix<ZqElement, ZqGroup> simpleMatrixB = SameGroupMatrix.fromRows(Arrays.asList(
-					Arrays.asList(ZqElement.create(THREE, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup)),
-					Arrays.asList(ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup))));
+			final SameGroupMatrix<ZqElement, ZqGroup> simpleMatrixA = SameGroupMatrix.fromRows(asList(
+					asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup)),
+					asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup))));
+			final SameGroupMatrix<ZqElement, ZqGroup> simpleMatrixB = SameGroupMatrix.fromRows(asList(
+					asList(ZqElement.create(THREE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup)),
+					asList(ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup))));
 			final SameGroupVector<ZqElement, ZqGroup> simpleExponentsR = SameGroupVector.of(
-					ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup));
+					ZqElement.create(THREE, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
 			final SameGroupVector<ZqElement, ZqGroup> simpleExponentsS = SameGroupVector.of(
-					ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup));
+					ZqElement.create(ONE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup));
 
 			final ZeroWitness simpleZeroWitness = new ZeroWitness(simpleMatrixA, simpleMatrixB, simpleExponentsR, simpleExponentsS);
 
 			// Argument.
-			final GqElement cA0 = GqElement.create(FOUR, simpleGqGroup);
-			final GqElement cBm = GqElement.create(NINE, simpleGqGroup);
+			final GqElement cA0 = GqElement.create(FIVE, simpleGqGroup);
+			final GqElement cBm = GqElement.create(ONE, simpleGqGroup);
 			final SameGroupVector<GqElement, GqGroup> cd = SameGroupVector.of(
-					GqElement.create(NINE, simpleGqGroup), GqElement.create(NINE, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup),
-					GqElement.create(ONE, simpleGqGroup), GqElement.create(NINE, simpleGqGroup));
+					GqElement.create(FOUR, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup),
+					GqElement.create(NINE, simpleGqGroup), GqElement.create(NINE, simpleGqGroup), GqElement.create(ONE, simpleGqGroup),
+					GqElement.create(THREE, simpleGqGroup), GqElement.create(ONE, simpleGqGroup));
 			final SameGroupVector<ZqElement, ZqGroup> aPrime = SameGroupVector.of(
-					ZqElement.create(THREE, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup));
+					ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
 			final SameGroupVector<ZqElement, ZqGroup> bPrime = SameGroupVector.of(
-					ZqElement.create(TWO, simpleZqGroup), ZqElement.create(THREE, simpleZqGroup));
+					ZqElement.create(ONE, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup));
 			final ZqElement rPrime = ZqElement.create(ONE, simpleZqGroup);
-			final ZqElement sPrime = ZqElement.create(ONE, simpleZqGroup);
-			final ZqElement tPrime = ZqElement.create(THREE, simpleZqGroup);
+			final ZqElement sPrime = ZqElement.create(FOUR, simpleZqGroup);
+			final ZqElement tPrime = ZqElement.create(ONE, simpleZqGroup);
 
 			final ZeroArgument.ZeroArgumentBuilder zeroArgumentBuilder = new ZeroArgument.ZeroArgumentBuilder();
 			zeroArgumentBuilder
@@ -638,17 +644,17 @@ class ZeroArgumentServiceTest {
 			final ZeroArgument simpleZeroArgument = zeroArgumentBuilder.build();
 
 			// PublicKey and commitmentKey.
-			final GqElement h = GqElement.create(FOUR, simpleGqGroup);
-			final List<GqElement> g = Arrays.asList(GqElement.create(FOUR, simpleGqGroup), GqElement.create(FIVE, simpleGqGroup));
+			final GqElement h = GqElement.create(NINE, simpleGqGroup);
+			final List<GqElement> g = asList(GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup));
 			final CommitmentKey simpleCommitmentKey = new CommitmentKey(h, g);
 
-			final List<GqElement> pkElements = Arrays.asList(GqElement.create(NINE, simpleGqGroup), GqElement.create(FIVE, simpleGqGroup));
+			final List<GqElement> pkElements = asList(GqElement.create(NINE, simpleGqGroup), GqElement.create(FIVE, simpleGqGroup));
 			final ElGamalMultiRecipientPublicKey simplePublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 			// Mock random elements. There are 11 values to mock:
-			// a0=(3,4) bm=(3,3) r0=0 sm=4 t=(1,3,1,0,2)
+			// a0=(1,3) bm=(2,1) r0=4 sm=0 t=(0,1,3,4,0,1,2)
 			final RandomService randomServiceMock = mock(RandomService.class);
-			doReturn(THREE, FOUR, THREE, THREE, ZERO, FOUR, ONE, THREE, ONE, ZERO, TWO).when(randomServiceMock)
+			doReturn(ONE, THREE, TWO, ONE, FOUR, ZERO, ZERO, ONE, THREE, FOUR, ZERO, ONE, TWO).when(randomServiceMock)
 					.genRandomInteger(simpleZqGroup.getQ());
 
 			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
@@ -660,7 +666,7 @@ class ZeroArgumentServiceTest {
 
 			// Verification.
 			final ZeroArgument zeroArgument = simpleZeroArgumentService.getZeroArgument(simpleZeroStatement, simpleZeroWitness);
-			verify(randomServiceMock, times(11)).genRandomInteger(simpleZqGroup.getQ());
+			verify(randomServiceMock, times(13)).genRandomInteger(simpleZqGroup.getQ());
 			verify(hashServiceMock, times(1)).recursiveHash(any());
 
 			assertEquals(simpleZeroArgument, zeroArgument);

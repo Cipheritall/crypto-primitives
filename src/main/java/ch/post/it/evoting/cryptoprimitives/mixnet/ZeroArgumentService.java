@@ -300,7 +300,7 @@ final class ZeroArgumentService {
 		return IntStream.range(0, n)
 				.mapToObj(j -> firstVector.get(j)
 						.multiply(secondVector.get(j))
-						.multiply(y.exponentiate(BigInteger.valueOf(j))))
+						.multiply(y.exponentiate(BigInteger.valueOf(j + 1L))))
 				.reduce(group.getIdentity(), ZqElement::add);
 	}
 

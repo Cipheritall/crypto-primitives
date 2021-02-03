@@ -173,7 +173,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	/**
 	 * @return A stream over the matrix' columns.
 	 */
-	Stream<SameGroupVector<E, G>> columnStream() {
+	public Stream<SameGroupVector<E, G>> columnStream() {
 		return IntStream.range(0, columnSize)
 				.mapToObj(this::getColumn);
 	}

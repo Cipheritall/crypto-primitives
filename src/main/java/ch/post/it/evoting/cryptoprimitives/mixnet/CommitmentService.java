@@ -90,8 +90,8 @@ public class CommitmentService {
 	 * <p>The input arguments must comply with the following:
 	 * 		<ul>
 	 * 		 	<li>be non null</li>
-	 * 			<li>there must be as many random elements as rows in the matrix of elements to be committed</li>
-	 * 			<li>the commitment key must have at least as many g elements as columns in the matrix of elements to be committed</li>
+	 * 			<li>there must be as many random elements as columns in the matrix of elements to be committed</li>
+	 * 			<li>the commitment key must have at least as many g elements as rows in the matrix of elements to be committed</li>
 	 * 			<li>all inputs must have the same group order <i>q</i></li>
 	 * 		</ul>
 	 * </p>
