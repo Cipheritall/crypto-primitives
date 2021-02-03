@@ -25,7 +25,7 @@ public class ElGamalTestDataGenerator {
 		return Stream.generate(groupGenerator::genMember).limit(size).collect(Collectors.toList());
 	}
 
-	private static ElGamalMultiRecipientMessage genRandomMessage(GqGroupGenerator groupGenerator, int size) {
+	public static ElGamalMultiRecipientMessage genRandomMessage(GqGroupGenerator groupGenerator, int size) {
 		return new ElGamalMultiRecipientMessage(genRandomMessageElements(groupGenerator, size));
 	}
 
@@ -55,4 +55,11 @@ public class ElGamalTestDataGenerator {
 				.limit(numCiphertexts).collect(Collectors.toList());
 	}
 
+	public static ElGamalMultiRecipientCiphertext encryptMessage(ElGamalMultiRecipientMessage originalMessage, ElGamalMultiRecipientKeyPair keyPair,
+			GqGroup gqGroup) {
+		RandomService randomService = new RandomService();
+		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
+	}
 }

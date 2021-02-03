@@ -8,10 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +33,9 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.math.Matrix;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
@@ -320,25 +325,141 @@ class ElGamalMultiRecipientCiphertextTest {
 	@Test
 	@DisplayName("exponentiate the ciphertext")
 	void decryptedExponentiatedCiphertextAndExponentiatedMessageShouldBeEqual() {
-		final int NO_OF_MESSAGE_ELEMENTS = 5;
+		int noOfMessageElements = 5;
 		RandomService randomService = new RandomService();
-		List<GqElement> validMessageElements = Stream.generate(gqGroupGenerator::genMember).limit(NO_OF_MESSAGE_ELEMENTS)
+
+		ZqElement exponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(gqGroup));
+		ElGamalMultiRecipientMessage originalMessage = ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements);
+		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
+		ElGamalMultiRecipientCiphertext ciphertext = ElGamalTestDataGenerator.encryptMessage(originalMessage, keyPair, gqGroup);
+
+		ElGamalMultiRecipientCiphertext exponentiatedCiphertext = ciphertext.exponentiate(exponent);
+		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText = ElGamalMultiRecipientMessage
+				.getMessage(exponentiatedCiphertext, keyPair.getPrivateKey());
+
+		List<GqElement> exponentiatedOriginalMessageElements = originalMessage.stream()
+				.map(e -> e.exponentiate(exponent))
 				.collect(Collectors.toList());
-		ElGamalMultiRecipientMessage originalMessage = new ElGamalMultiRecipientMessage(validMessageElements);
 
-		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NO_OF_MESSAGE_ELEMENTS, randomService);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = new ElGamalMultiRecipientMessage(exponentiatedOriginalMessageElements);
 
-		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
-
-		ElGamalMultiRecipientCiphertext exponentiatedCiphertext = ciphertext.getCiphertextExponentiation(exponent);
-		ElGamalMultiRecipientMessage exponentiatedMessage = ElGamalMultiRecipientMessage.getMessage(exponentiatedCiphertext, keyPair.getPrivateKey());
-
-		List<GqElement> collect = originalMessage.stream().map(e -> e.exponentiate(exponent)).collect(Collectors.toList());
-		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = new ElGamalMultiRecipientMessage(collect);
-
-		assertEquals(exponentiatedOriginalMessage, exponentiatedMessage);
+		assertEquals(exponentiatedOriginalMessage, decryptedExponentiatedCipherText);
 	}
 
+	@Test
+	@DisplayName("test vector ciphertext exponentiation")
+	void compressedExponentiatedMessagesShouldEqualDecryptedExponentiatedCiphertextVector() {
+		int noOfMessageElements = 5;
+		RandomService randomService = new RandomService();
+
+		List<ElGamalMultiRecipientMessage> originalMessages = Stream
+				.generate(() -> ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements))
+				.limit(noOfMessageElements)
+				.collect(Collectors.toList());
+
+		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
+
+		List<ElGamalMultiRecipientCiphertext> elGamalMultiRecipientCiphertexts = originalMessages.stream()
+				.map(originalMessage -> ElGamalTestDataGenerator.encryptMessage(originalMessage, keyPair, gqGroup))
+				.collect(Collectors.toList());
+
+		List<ZqElement> exponents = Stream
+				.generate(() -> randomService.genRandomExponent(ZqGroup.sameOrderAs(gqGroup)))
+				.limit(elGamalMultiRecipientCiphertexts.size())
+				.collect(Collectors.toList());
+
+		ElGamalMultiRecipientCiphertext ciphertextVectorExponentiation = ElGamalMultiRecipientCiphertext
+				.getCiphertextVectorExponentiation(elGamalMultiRecipientCiphertexts, exponents);
+
+		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText =
+				ElGamalMultiRecipientMessage.getMessage(ciphertextVectorExponentiation, keyPair.getPrivateKey());
+
+		List<List<BigInteger>> exponentiatedOriginalMessageElements = IntStream.range(0, originalMessages.size())
+				.mapToObj(i -> originalMessages.get(i).stream().map(m -> m.exponentiate(exponents.get(i)).getValue()).collect(Collectors.toList()))
+				.collect(Collectors.toList());
+
+		List<GqElement> reducedOriginalMessageElements = Matrix.transpose(exponentiatedOriginalMessageElements)
+				.stream()
+				.map(a -> a.stream()
+						.map(b -> GqElement.create(b, gqGroup))
+						.reduce(GqElement::multiply))
+				.map(Optional::get)
+				.collect(Collectors.toList());
+
+		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = new ElGamalMultiRecipientMessage(reducedOriginalMessageElements);
+
+		assertEquals(exponentiatedOriginalMessage, decryptedExponentiatedCipherText);
+	}
+
+	@Test
+	void testCiphertextVectorExponentiationNullAndEmptyParameterValidation() {
+
+		List<ElGamalMultiRecipientCiphertext> emptyCipherTexts = new ArrayList<>();
+		List<ZqElement> emptyExponents = new ArrayList<>();
+
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(null, emptyExponents));
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(emptyCipherTexts, null));
+
+		IllegalArgumentException emptyIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(emptyCipherTexts, emptyExponents));
+
+		assertEquals("Ciphertexts should not be empty", emptyIllegalArgumentException.getMessage());
+	}
+
+	@Test
+	void testCiphertextVectorExponentiationParameterValidation() {
+		int noOfMessageElements = 5;
+		RandomService randomService = new RandomService();
+
+		List<ElGamalMultiRecipientMessage> originalMessages = Stream
+				.generate(() -> ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements))
+				.limit(noOfMessageElements)
+				.collect(Collectors.toList());
+
+		List<ElGamalMultiRecipientCiphertext> fiveCipherTexts = originalMessages.stream()
+				.map(originalMessage -> ElGamalTestDataGenerator
+						.encryptMessage(originalMessage, ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, originalMessage.size(), randomService),
+								gqGroup))
+				.collect(Collectors.toList());
+
+		List<ZqElement> fourExponents = Stream
+				.generate(() -> randomService.genRandomExponent(ZqGroup.sameOrderAs(gqGroup)))
+				.limit(fiveCipherTexts.size() - 1)
+				.collect(Collectors.toList());
+
+		IllegalArgumentException sizeIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(fiveCipherTexts, fourExponents));
+
+		assertEquals("There should be a matching ciphertext for every exponent.", sizeIllegalArgumentException.getMessage());
+
+		List<ElGamalMultiRecipientMessage> unevenNumberOfMessageElements = IntStream.range(1, noOfMessageElements)
+				.mapToObj(i -> ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, i))
+				.limit(noOfMessageElements)
+				.collect(Collectors.toList());
+
+		List<ElGamalMultiRecipientCiphertext> unevenNumberOfCipherTextElements = IntStream.range(1, noOfMessageElements)
+				.mapToObj(i -> ElGamalTestDataGenerator.encryptMessage(unevenNumberOfMessageElements.get(i - 1),
+						ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, i + 1, randomService), gqGroup))
+				.collect(Collectors.toList());
+
+		IllegalArgumentException unevenIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(unevenNumberOfCipherTextElements, fourExponents));
+		assertEquals("All ciphertexts must have the same number of phi elements", unevenIllegalArgumentException.getMessage());
+
+		final BigInteger p = new BigInteger("11");
+		final BigInteger q = new BigInteger("5");
+		final BigInteger g = new BigInteger("3");
+
+		GqGroup differentgqGroup = new GqGroup(p, q, g);
+
+		List<ZqElement> fiveExponents = Stream
+				.generate(() -> randomService.genRandomExponent(ZqGroup.sameOrderAs(differentgqGroup)))
+				.limit(fiveCipherTexts.size())
+				.collect(Collectors.toList());
+
+		IllegalArgumentException differentQIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(fiveCipherTexts, fiveExponents));
+		assertEquals("Group order (q) should be the same across all ciphertexts and exponents", differentQIllegalArgumentException.getMessage());
+
+	}
 }
