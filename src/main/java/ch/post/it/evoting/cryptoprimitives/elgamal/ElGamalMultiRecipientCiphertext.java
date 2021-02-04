@@ -113,7 +113,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}. This method implements the GetCiphertextProduct algorithm.
+	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}. This method implements the GetCiphertextProduct
+	 * algorithm.
 	 *
 	 * @param other The ciphertext to be multiplied by {@code this}. It must be non null and its gamma and phis must belong to the same group as the
 	 *              gamma and phis of {@code this}.
@@ -139,7 +140,6 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * Exponentiates a multi-recipient ciphertext. This method implements the GetCiphertextExponentiation algorithm.
 	 *
 	 * @param exponent A {@code ZqElement}
-	 *
 	 * @return A {@code ElGamalMultiRecipientCiphertext} whose phis value are {exponentiated with @code(exponent)}.
 	 */
 
@@ -156,18 +156,17 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Takes a vector of cipherTexts, exponentiates them using the supplied exponents and returns ({@code ElGamalMultiRecipientCiphertext}) the product of the exponentiated ciphertexts.
+	 * Takes a vector of cipherTexts, exponentiates them using the supplied exponents and returns ({@code ElGamalMultiRecipientCiphertext}) the
+	 * product of the exponentiated ciphertexts. Both ciphertexts and exponents should :
+	 * <ul>
+	 * 	<li>not be null</li>
+	 * 	<li>not be empty</li>
+	 * 	<li>be the same size</li>
+	 * <li>have the same order</li>
+	 * </ul>
 	 *
 	 * @param ciphertexts A List of {@code ElGamalMultiRecipientCiphertext}s, each element containing the same number of phis.
-	 * @param exponents A List of {@code ZqElement}s, of the same size as the ciphertexts list <br>
-	 *
-	 *  Both ciphertexts and exponents should :
-	 * 	 <ul>
-	 * 	 	<li>not be null</li>
-	 * 	 	<li>not be empty</li>
-	 * 	 	<li>be the same size</li>
-	 * 	 	<li>have the same order</li>
-	 * 	 </ul>
+	 * @param exponents   A List of {@code ZqElement}s, of the same size as the ciphertexts list <br>
 	 * @return {@code List<ElGamalMultiRecipientCiphertext>}
 	 */
 	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(final List<ElGamalMultiRecipientCiphertext> ciphertexts,
@@ -214,7 +213,6 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 				.mapToObj(i -> ciphertextsCopy.get(i).exponentiate(exponentsCopy.get(i)))
 				.reduce(identity, ElGamalMultiRecipientCiphertext::multiply);
 	}
-
 
 	public final GqElement getGamma() {
 		return this.gamma;
