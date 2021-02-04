@@ -92,7 +92,7 @@ final class ZeroArgumentService {
 		checkArgument(commitmentsA.size() == exponentsR.size(), "The statement commitments must have the same size as the witness exponents.");
 
 		// Cross group checking.
-		checkArgument(y.getGroup().equals(exponentsR.getGroup()), "The statement y and exponents must be part of the same group.");
+		checkArgument(y.getGroup().equals(exponentsR.getGroup()), "The statement y and witness exponents must be part of the same group.");
 
 		// Ensure the statement and witness are corresponding.
 		final SameGroupVector<GqElement, GqGroup> computedCommitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
@@ -103,16 +103,16 @@ final class ZeroArgumentService {
 		final ZqGroup zqGroup = y.getGroup();
 
 		// The specifications uses the indices [1,m] for matrixA and [0,m-1] for matrixB. In the code, we use [0,m-1] for both indices.
-		final int m = matrixA.columnSize();
+		final int m = matrixA.numColumns();
 		final ZqElement starMapSum = IntStream.range(0, m)
 				.mapToObj(i -> starMap(matrixA.getColumn(i), matrixB.getColumn(i), y))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 		checkArgument(zqGroup.getIdentity().equals(starMapSum),
-				"The starMap sum between the witness' matrices rows are not equal to ZqGroup identity.");
+				"The sum of the starMap operations between the witness's matrices columns is not equal to 0.");
 
 		// Algorithm operations.
 
-		final int n = matrixA.rowSize();
+		final int n = matrixA.numRows();
 		final SameGroupVector<ZqElement, ZqGroup> a0 = new SameGroupVector<>(generateRandomZqElementList(n, zqGroup));
 		final SameGroupVector<ZqElement, ZqGroup> bm = new SameGroupVector<>(generateRandomZqElementList(n, zqGroup));
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
@@ -160,9 +160,6 @@ final class ZeroArgumentService {
 		final List<ZqElement> xExpI = IntStream.range(0, 2 * m + 1)
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
 				.collect(Collectors.toCollection(ArrayList::new));
-		final List<ZqElement> xExpMMinusI = IntStream.range(0, m + 1)
-				.mapToObj(i -> x.exponentiate(BigInteger.valueOf((long) m - i)))
-				.collect(Collectors.toCollection(ArrayList::new));
 
 		// Compute vectors a' and b'.
 		final SameGroupVector<ZqElement, ZqGroup> aPrime = IntStream.range(0, n)
@@ -175,21 +172,20 @@ final class ZeroArgumentService {
 		final SameGroupVector<ZqElement, ZqGroup> bPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
-								.mapToObj(i -> xExpMMinusI.get(i).multiply(augmentedMatrixB.get(j, i)))
+								.mapToObj(i -> xExpI.get(m - i).multiply(augmentedMatrixB.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 
-		// Add newly created elements to the exponents vectors.
+		// Compute r', s' and t'.
 		final SameGroupVector<ZqElement, ZqGroup> augmentedExponentsR = exponentsR.prepend(r0);
 		final SameGroupVector<ZqElement, ZqGroup> augmentedExponentsS = exponentsS.append(sm);
 
-		// Compute r', s' and t'.
 		final ZqElement rPrime = IntStream.range(0, m + 1)
 				.mapToObj(i -> xExpI.get(i).multiply(augmentedExponentsR.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement sPrime = IntStream.range(0, m + 1)
-				.mapToObj(i -> xExpMMinusI.get(i).multiply(augmentedExponentsS.get(i)))
+				.mapToObj(i -> xExpI.get(m - i).multiply(augmentedExponentsS.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement tPrime = IntStream.range(0, 2 * m + 1)
@@ -233,8 +229,8 @@ final class ZeroArgumentService {
 		checkNotNull(y);
 
 		// Cross matrix dimensions checking.
-		checkArgument(firstMatrix.rowSize() == secondMatrix.rowSize(), "The two matrices must have the same number of rows.");
-		checkArgument(firstMatrix.columnSize() == secondMatrix.columnSize(), "The two matrices must have the same number of columns.");
+		checkArgument(firstMatrix.numRows() == secondMatrix.numRows(), "The two matrices must have the same number of rows.");
+		checkArgument(firstMatrix.numColumns() == secondMatrix.numColumns(), "The two matrices must have the same number of columns.");
 
 		if (firstMatrix.isEmpty()) {
 			return SameGroupVector.of();
@@ -245,7 +241,7 @@ final class ZeroArgumentService {
 		checkArgument(y.getGroup().equals(firstMatrix.getGroup()), "The value y must be in the same group as the elements of the matrices.");
 
 		// Computing the d vector.
-		final int m = firstMatrix.columnSize() - 1;
+		final int m = firstMatrix.numColumns() - 1;
 		final LinkedList<ZqElement> d = new LinkedList<>();
 		final ZqGroup group = y.getGroup();
 		for (int k = 0; k <= 2 * m; k++) {

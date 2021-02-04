@@ -33,7 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.Matrix;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -329,9 +329,9 @@ class ElGamalMultiRecipientCiphertextTest {
 		RandomService randomService = new RandomService();
 
 		ZqElement exponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(gqGroup));
-		ElGamalMultiRecipientMessage originalMessage = ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements);
+		ElGamalMultiRecipientMessage originalMessage = ElGamalGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
-		ElGamalMultiRecipientCiphertext ciphertext = ElGamalTestDataGenerator.encryptMessage(originalMessage, keyPair, gqGroup);
+		ElGamalMultiRecipientCiphertext ciphertext = ElGamalGenerator.encryptMessage(originalMessage, keyPair, gqGroup);
 
 		ElGamalMultiRecipientCiphertext exponentiatedCiphertext = ciphertext.exponentiate(exponent);
 		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText = ElGamalMultiRecipientMessage
@@ -353,14 +353,14 @@ class ElGamalMultiRecipientCiphertextTest {
 		RandomService randomService = new RandomService();
 
 		List<ElGamalMultiRecipientMessage> originalMessages = Stream
-				.generate(() -> ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements))
+				.generate(() -> ElGamalGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements))
 				.limit(noOfMessageElements)
 				.collect(Collectors.toList());
 
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
 
 		List<ElGamalMultiRecipientCiphertext> elGamalMultiRecipientCiphertexts = originalMessages.stream()
-				.map(originalMessage -> ElGamalTestDataGenerator.encryptMessage(originalMessage, keyPair, gqGroup))
+				.map(originalMessage -> ElGamalGenerator.encryptMessage(originalMessage, keyPair, gqGroup))
 				.collect(Collectors.toList());
 
 		List<ZqElement> exponents = Stream
@@ -412,12 +412,12 @@ class ElGamalMultiRecipientCiphertextTest {
 		RandomService randomService = new RandomService();
 
 		List<ElGamalMultiRecipientMessage> originalMessages = Stream
-				.generate(() -> ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements))
+				.generate(() -> ElGamalGenerator.genRandomMessage(gqGroupGenerator, noOfMessageElements))
 				.limit(noOfMessageElements)
 				.collect(Collectors.toList());
 
 		List<ElGamalMultiRecipientCiphertext> fiveCipherTexts = originalMessages.stream()
-				.map(originalMessage -> ElGamalTestDataGenerator
+				.map(originalMessage -> ElGamalGenerator
 						.encryptMessage(originalMessage, ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, originalMessage.size(), randomService),
 								gqGroup))
 				.collect(Collectors.toList());
@@ -433,12 +433,12 @@ class ElGamalMultiRecipientCiphertextTest {
 		assertEquals("There should be a matching ciphertext for every exponent.", sizeIllegalArgumentException.getMessage());
 
 		List<ElGamalMultiRecipientMessage> unevenNumberOfMessageElements = IntStream.range(1, noOfMessageElements)
-				.mapToObj(i -> ElGamalTestDataGenerator.genRandomMessage(gqGroupGenerator, i))
+				.mapToObj(i -> ElGamalGenerator.genRandomMessage(gqGroupGenerator, i))
 				.limit(noOfMessageElements)
 				.collect(Collectors.toList());
 
 		List<ElGamalMultiRecipientCiphertext> unevenNumberOfCipherTextElements = IntStream.range(1, noOfMessageElements)
-				.mapToObj(i -> ElGamalTestDataGenerator.encryptMessage(unevenNumberOfMessageElements.get(i - 1),
+				.mapToObj(i -> ElGamalGenerator.encryptMessage(unevenNumberOfMessageElements.get(i - 1),
 						ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, i + 1, randomService), gqGroup))
 				.collect(Collectors.toList());
 

@@ -28,6 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator
 @DisplayName("A ZeroStatement")
 class ZeroStatementTest {
 
+	private static final int RANDOM_UPPER_BOUND = 10;
 	private static final SecureRandom secureRandom = new SecureRandom();
 	private static final RandomService randomService = new RandomService();
 
@@ -50,7 +51,7 @@ class ZeroStatementTest {
 
 	@BeforeEach
 	void setUp() {
-		m = secureRandom.nextInt(10) + 1;
+		m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
 		commitmentsA = gqGroupGenerator.generateRandomGqElementList(m);
 		commitmentsB = gqGroupGenerator.generateRandomGqElementList(m);
 		y = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);

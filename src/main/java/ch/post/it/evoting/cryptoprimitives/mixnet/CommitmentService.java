@@ -115,8 +115,8 @@ public class CommitmentService {
 		}
 
 		// Cross arguments dimension checking.
-		int n = elementsMatrix.rowSize();
-		int m = elementsMatrix.columnSize();
+		int n = elementsMatrix.numRows();
+		int m = elementsMatrix.numColumns();
 		int k = commitmentKey.size();
 
 		checkArgument(randomElements.size() == m, "There must be as many random elements as there are columns in the element matrix");
@@ -162,7 +162,7 @@ public class CommitmentService {
 		SameGroupMatrix<ZqElement, ZqGroup> elementsMatrix = SameGroupMatrix.fromRows(rows);
 
 		// Cross dimension checking.
-		checkArgument(elementsMatrix.columnSize() == randomElements.size(),
+		checkArgument(elementsMatrix.numColumns() == randomElements.size(),
 				"The elements vector and the random elements must be of equal length");
 
 		checkArgument(!elementsMatrix.isEmpty(), "getCommitmentVector is not defined on an empty matrix.");

@@ -48,10 +48,10 @@ class ZeroWitness {
 		this.exponentsS = checkNotNull(exponentsS);
 
 		// Cross dimensions checking.
-		checkArgument(this.matrixA.rowSize() == this.matrixB.rowSize(), "The two matrices must have the same number of rows.");
-		checkArgument(this.matrixA.columnSize() == this.matrixB.columnSize(), "The two matrices must have the same number of columns.");
+		checkArgument(this.matrixA.numRows() == this.matrixB.numRows(), "The two matrices must have the same number of rows.");
+		checkArgument(this.matrixA.numColumns() == this.matrixB.numColumns(), "The two matrices must have the same number of columns.");
 		checkArgument(this.exponentsR.size() == this.exponentsS.size(), "The exponents vector must have the same size.");
-		checkArgument(this.exponentsR.size() == this.matrixA.columnSize(),
+		checkArgument(this.exponentsR.size() == this.matrixA.numColumns(),
 				"The exponents vectors size must be the number of columns of the matrices.");
 
 		// Cross group checking.

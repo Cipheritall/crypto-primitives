@@ -1,8 +1,8 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator.genRandomCiphertext;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator.genRandomCiphertexts;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalTestDataGenerator.genRandomPublicKey;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator.genRandomCiphertext;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator.genRandomCiphertexts;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator.genRandomPublicKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

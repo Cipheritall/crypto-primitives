@@ -28,9 +28,9 @@ class HadamardWitness {
 		this.exponentS = randomness;
 
 		// Dimension checks
-		checkArgument(matrixA.rowSize() == vectorB.size(),
+		checkArgument(matrixA.numRows() == vectorB.size(),
 				"The matrix A must have the same number of rows as the vector b has elements.");
-		checkArgument(matrixA.columnSize() == exponentsR.size(),
+		checkArgument(matrixA.numColumns() == exponentsR.size(),
 				"The matrix A must have the same number of columns as the exponents r have elements.");
 
 		// Group checks

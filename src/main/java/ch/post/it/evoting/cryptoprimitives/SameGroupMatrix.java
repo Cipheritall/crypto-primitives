@@ -31,8 +31,8 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 
 	private final G group;
 	private final ImmutableList<SameGroupVector<E, G>> rows;
-	private final int rowSize;
-	private final int columnSize;
+	private final int numRows;
+	private final int numColumns;
 
 	private SameGroupMatrix(final ImmutableList<SameGroupVector<E, G>> rows) {
 		// Null checking.
@@ -48,8 +48,8 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 		}
 
 		this.rows = isEmpty(rows) ? ImmutableList.of() : rows;
-		this.rowSize = isEmpty(rows) ? 0 : rows.size();
-		this.columnSize = isEmpty(rows) ? 0 : rows.get(0).size();
+		this.numRows = isEmpty(rows) ? 0 : rows.size();
+		this.numColumns = isEmpty(rows) ? 0 : rows.get(0).size();
 		this.group = isEmpty(rows) ? null : rows.get(0).get(0).getGroup();
 	}
 
@@ -99,15 +99,15 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	}
 
 	private SameGroupMatrix<E, G> transpose() {
-		return new SameGroupMatrix<>(IntStream.range(0, columnSize).mapToObj(this::getColumn).collect(toImmutableList()));
+		return new SameGroupMatrix<>(IntStream.range(0, numColumns).mapToObj(this::getColumn).collect(toImmutableList()));
 	}
 
-	public int rowSize() {
-		return this.rowSize;
+	public int numRows() {
+		return this.numRows;
 	}
 
-	public int columnSize() {
-		return this.columnSize;
+	public int numColumns() {
+		return this.numColumns;
 	}
 
 	/**
@@ -130,9 +130,9 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public E get(int row, int column) {
 		checkArgument(row >= 0, "The index of a row cannot be negative.");
-		checkArgument(row < rowSize, "The index of a row cannot be larger than the number of rows of the matrix.");
+		checkArgument(row < numRows, "The index of a row cannot be larger than the number of rows of the matrix.");
 		checkArgument(column >= 0, "The index of a column cannot be negative.");
-		checkArgument(column < columnSize, "The index of a columnd cannot be larger than the number of columns of the matrix.");
+		checkArgument(column < numColumns, "The index of a columnd cannot be larger than the number of columns of the matrix.");
 		return this.rows.get(row).get(column);
 	}
 
@@ -141,7 +141,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public SameGroupVector<E, G> getRow(int i) {
 		checkArgument(i >= 0);
-		checkArgument(i < this.rowSize);
+		checkArgument(i < this.numRows);
 		return this.rows.get(i);
 	}
 
@@ -150,7 +150,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public SameGroupVector<E, G> getColumn(int j) {
 		checkArgument(j >= 0);
-		checkArgument(j < this.columnSize);
+		checkArgument(j < this.numColumns);
 		return this.rows.stream().map(row -> row.get(j)).collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 	}
 
@@ -158,9 +158,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @return A flat stream of the matrix elements, row after row.
 	 */
 	public Stream<E> stream() {
-		return IntStream.range(0, this.rowSize())
-				.mapToObj(this::getRow)
-				.flatMap(SameGroupVector::stream);
+		return this.rowStream().flatMap(SameGroupVector::stream);
 	}
 
 	/**
@@ -174,7 +172,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @return A stream over the matrix' columns.
 	 */
 	public Stream<SameGroupVector<E, G>> columnStream() {
-		return IntStream.range(0, columnSize)
+		return IntStream.range(0, numColumns)
 				.mapToObj(this::getColumn);
 	}
 
@@ -182,7 +180,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * Append a new column to the matrix. Returns a new SameGroupMatrix. The new column must:
 	 * <ul>
 	 *     <li>be non null</li>
-	 *     <li>have {@code rowSize} elements</li>
+	 *     <li>have {@code numRows} elements</li>
 	 *     <li>have the same group as the matrix'</li>
 	 * </ul>
 	 *
@@ -191,8 +189,8 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public SameGroupMatrix<E, G> appendColumn(final SameGroupVector<E, G> column) {
 		checkNotNull(column);
-		checkArgument(column.size() == rowSize,
-				String.format("The new column size does not match size of matrix' columns. Size: %d, rowSize: %d", column.size(), rowSize));
+		checkArgument(column.size() == numRows,
+				String.format("The new column size does not match size of matrix' columns. Size: %d, numRows: %d", column.size(), numRows));
 		if (!column.isEmpty()) {
 			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
 		}
@@ -205,7 +203,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * Prepend a new column to the matrix. Returns a new SameGroupMatrix. The new column must:
 	 * <ul>
 	 *     <li>be non null</li>
-	 *     <li>have {@code rowSize} elements</li>
+	 *     <li>have {@code numRows} elements</li>
 	 *     <li>have the same group as the matrix'</li>
 	 * </ul>
 	 *
@@ -214,8 +212,8 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 */
 	public SameGroupMatrix<E, G> prependColumn(final SameGroupVector<E, G> column) {
 		checkNotNull(column);
-		checkArgument(column.size() == rowSize,
-				String.format("The new column size does not match size of matrix' columns. Size: %d, rowSize: %d", column.size(), rowSize));
+		checkArgument(column.size() == numRows,
+				String.format("The new column size does not match size of matrix' columns. Size: %d, numRows: %d", column.size(), numRows));
 		if (!column.isEmpty()) {
 			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
 		}

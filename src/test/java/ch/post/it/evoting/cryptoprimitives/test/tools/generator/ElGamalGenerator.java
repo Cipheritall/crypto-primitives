@@ -17,7 +17,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
-public class ElGamalTestDataGenerator {
+public class ElGamalGenerator {
 
 	private static final RandomService randomService = new RandomService();
 

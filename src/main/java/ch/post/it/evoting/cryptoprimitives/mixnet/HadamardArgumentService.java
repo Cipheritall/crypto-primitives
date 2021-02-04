@@ -64,8 +64,8 @@ public class HadamardArgumentService {
 		final ZqElement s = witness.getExponentS();
 
 		// Check dimensions and groups
-		final int m = A.columnSize();
-		final int n = A.rowSize();
+		final int m = A.numColumns();
+		final int n = A.numRows();
 		final int k = commitmentKey.size();
 		checkArgument(cA.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
 		checkArgument(cA.getGroup().getQ().equals(A.getGroup().getQ()), "The matrix A and its commitments must have the same group order q.");
@@ -79,7 +79,7 @@ public class HadamardArgumentService {
 		final GqElement commitment = CommitmentService.getCommitment(b, s, commitmentKey);
 		checkArgument(cb.equals(commitment),
 				"The commitment b must correspond to the commitment to vector b with exponent s and the given commitment key.");
-		checkArgument(b.equals(getHadamardProduct(A, A.columnSize() - 1)),
+		checkArgument(b.equals(getHadamardProduct(A, A.numColumns() - 1)),
 				"The vector b must correspond to the product of the column vectors of the matrix A.");
 
 		// Start operation
@@ -218,9 +218,9 @@ public class HadamardArgumentService {
 	SameGroupVector<ZqElement, ZqGroup> getHadamardProduct(final SameGroupMatrix<ZqElement, ZqGroup> matrix, final int j) {
 		checkNotNull(matrix);
 		checkArgument(j >= 0, "The column index must be greater than or equal to 0.");
-		checkArgument(j < matrix.columnSize(), "The column index must be smaller than the number of rows in the matrix.");
+		checkArgument(j < matrix.numColumns(), "The column index must be smaller than the number of rows in the matrix.");
 		ZqElement one = ZqElement.create(BigInteger.ONE, matrix.getGroup());
-		int n = matrix.rowSize();
+		int n = matrix.numRows();
 		return IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream()
 						.limit(j + 1L)
