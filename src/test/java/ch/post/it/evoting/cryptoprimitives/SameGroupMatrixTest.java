@@ -347,12 +347,6 @@ class SameGroupMatrixTest {
 	// Utilities //
 	//***************************//
 
-	private static class TestValuedElement extends GroupElement<TestGroup> {
-		protected TestValuedElement(BigInteger value, TestGroup group) {
-			super(value, group);
-		}
-	}
-
 	//Generate a matrix with incrementing count.
 	private SameGroupMatrix<TestValuedElement, TestGroup> generateIncrementingMatrix(int numRows, int numColumns, TestGroup group) {
 		List<List<TestValuedElement>> matrixElements =
@@ -369,5 +363,11 @@ class SameGroupMatrixTest {
 				.mapToObj(BigInteger::valueOf)
 				.map(value -> new TestValuedElement(value, group))
 				.collect(Collectors.toList());
+	}
+
+	private static class TestValuedElement extends GroupElement<TestGroup> {
+		protected TestValuedElement(BigInteger value, TestGroup group) {
+			super(value, group);
+		}
 	}
 }

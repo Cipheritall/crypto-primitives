@@ -19,6 +19,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -182,12 +185,6 @@ class SameGroupVectorTest {
 		});
 	}
 
-	private static class TestValuedElement extends GroupElement<TestGroup> {
-		protected TestValuedElement(BigInteger value, TestGroup group) {
-			super(value, group);
-		}
-	}
-
 	@Test
 	void isEmptyReturnsTrueForEmptyVector() {
 		List<TestHasGroupElement> elements = Collections.emptyList();
@@ -259,5 +256,115 @@ class SameGroupVectorTest {
 
 		assertEquals(sameGroupVector.size() + 1, augmentedVector.size());
 		assertEquals(element, augmentedVector.get(0));
+	}
+
+	private static class TestValuedElement extends GroupElement<TestGroup> {
+		protected TestValuedElement(BigInteger value, TestGroup group) {
+			super(value, group);
+		}
+	}
+
+	@Nested
+	@DisplayName("Transforming a vector of ciphertext into a matrix of ciphertexts...")
+	class ToCiphertextMatrixTest {
+
+		private static final int BOUND_MATRIX_SIZE = 10;
+
+		private int m;
+		private int n;
+
+		private TestGroup group;
+		private SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector;
+
+		@BeforeEach
+		void setup() {
+			m = random.nextInt(BOUND_MATRIX_SIZE) + 1;
+			n = random.nextInt(BOUND_MATRIX_SIZE) + 1;
+
+			group = new TestGroup();
+			List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit((long) n * m)
+					.collect(Collectors.toList());
+			sameGroupVector = new SameGroupVector<>(elements);
+		}
+
+		@Test
+		@DisplayName("with negative number of rows or columns throws IllegalArgumentException")
+		void toCiphertextMatrixWithInvalidNumRowsOrColumns() {
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toCiphertextMatrix(-m, n));
+			assertEquals("The number of rows must be positive.", exception.getMessage());
+			exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toCiphertextMatrix(m, -n));
+			assertEquals("The number of columns must be positive.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with incompatible decomposition into rows and columns throws an IllegalArgumentException")
+		void toCiphertextMatrixWithWrongN() {
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toCiphertextMatrix(m + 1, n));
+			assertEquals("The vector of ciphertexts must be decomposable into m rows and n columns.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with valid input yields expected result")
+		void toCiphertextMatrixTest() {
+			SameGroupMatrix<TestHasGroupElement, TestGroup> ciphertextMatrix = sameGroupVector.toCiphertextMatrix(m, n);
+
+			for (int i = 0; i < m; i++) {
+				for (int j = 0; j < n; j++) {
+					assertEquals(sameGroupVector.get(i + m * j), ciphertextMatrix.get(i, j));
+				}
+			}
+		}
+	}
+
+	@Nested
+	@DisplayName("Transforming a vector of exponents into a matrix of exponents...")
+	class ToExponentMatrixTest {
+
+		private static final int BOUND_MATRIX_SIZE = 10;
+
+		private int m;
+		private int n;
+
+		private TestGroup group;
+		private SameGroupVector<TestHasGroupElement, TestGroup> sameGroupVector;
+
+		@BeforeEach
+		void setup() {
+			m = random.nextInt(BOUND_MATRIX_SIZE) + 1;
+			n = random.nextInt(BOUND_MATRIX_SIZE) + 1;
+
+			group = new TestGroup();
+			List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit((long) n * m)
+					.collect(Collectors.toList());
+			sameGroupVector = new SameGroupVector<>(elements);
+		}
+
+		@Test
+		@DisplayName("with negative number of rows or columns throws IllegalArgumentException")
+		void toExponentMatrixWithInvalidNumRowsOrColumns() {
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toExponentMatrix(-m, n));
+			assertEquals("The number of rows must be positive.", exception.getMessage());
+			exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toExponentMatrix(m, -n));
+			assertEquals("The number of columns must be positive.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with incompatible decomposition into rows and columns throws an IllegalArgumentException")
+		void toExponentMatrixWithWrongN() {
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toExponentMatrix(n + 1, m));
+			assertEquals("The vector of exponents must be decomposable into n rows and m columns.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with valid input yields expected result")
+		void toExponentMatrixTest() {
+			SameGroupMatrix<TestHasGroupElement, TestGroup> exponentMatrix = sameGroupVector.toExponentMatrix(n, m);
+
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					assertEquals(sameGroupVector.get(m * i + j), exponentMatrix.get(i, j));
+				}
+			}
+		}
 	}
 }
