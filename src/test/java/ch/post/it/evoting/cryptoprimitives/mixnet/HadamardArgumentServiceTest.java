@@ -1,3 +1,6 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -231,7 +234,7 @@ class HadamardArgumentServiceTest {
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
-			assertEquals("The number of columns in the matrix must be smaller than the commitment key size.", exception.getMessage());
+			assertEquals("The number of rows in the matrix must be smaller than the commitment key size.", exception.getMessage());
 		}
 
 		@Test

@@ -1,3 +1,6 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -15,6 +18,23 @@ class HadamardWitness {
 	private final SameGroupVector<ZqElement, ZqGroup> exponentsR;
 	private final ZqElement exponentS;
 
+	/**
+	 * Constructs a {@code HadamardWitness} object.
+	 * <p>
+	 * The inputs must comply with the following:
+	 * <ul>
+	 *     <li>be non null</li>
+	 *     <li>belong to the same {@link ZqGroup}</li>
+	 *     <li>the number of rows of the matrix and the vector size must be equal</li>
+	 *     <li>the number of columns of the matrix and the size of the exponents vector must be equal</li>
+	 * </ul>
+	 *
+	 *
+	 * @param matrix	 A, a matrix of {@code ZqElements} of size <i>n</i> &times; <i>m</i>
+	 * @param vector	 b, a vector of {@code ZqElements} of size <i>n</i>
+	 * @param exponents	 r, a vector of {@code ZqElements} of size <i>m</i>
+	 * @param randomness s, a {@code ZqElement}
+	 */
 	HadamardWitness(final SameGroupMatrix<ZqElement, ZqGroup> matrix, final SameGroupVector<ZqElement, ZqGroup> vector,
 			final SameGroupVector<ZqElement, ZqGroup> exponents, final ZqElement randomness) {
 		checkNotNull(matrix);

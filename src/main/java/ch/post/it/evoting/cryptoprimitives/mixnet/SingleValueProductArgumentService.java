@@ -44,8 +44,8 @@ class SingleValueProductArgumentService {
 	 * Computes a Single Value Product Argument.
 	 *
 	 * <p>Takes a statement - consisting of a commitment and a product - and
-	 * a witness - consisting of elements (a<sub>0</sub>, ..., a<sub>n-1</sub>) and the commitment's randomness. 
-	 * The statement and witness must comply with the following:
+	 * a witness - consisting of elements (a<sub>0</sub>, ..., a<sub>n-1</sub>) and the commitment's randomness. The statement and witness must comply
+	 * with the following:
 	 * <ul>
 	 *  <li>be non null</li>
 	 *  <li>have the same order <i>q</i></li>
@@ -100,9 +100,11 @@ class SingleValueProductArgumentService {
 		// Calculate δ
 		List<ZqElement> lowerDelta = new ArrayList<>(n);
 		lowerDelta.add(d.get(0));
-		lowerDelta.addAll(Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
-				.collect(Collectors.toList()));
-		lowerDelta.add(d.get(n - 1));
+		if(n > 1) {
+			lowerDelta.addAll(Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
+					.collect(Collectors.toList()));
+			lowerDelta.add(d.get(n - 1));
+		}
 
 		// Calculate s_0 and s_x
 		ZqElement s0 = ZqElement.create(randomService.genRandomInteger(q), group);

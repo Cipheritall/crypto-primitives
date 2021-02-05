@@ -1,3 +1,6 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -30,6 +33,20 @@ public class HadamardArgumentService {
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
 
+	/**
+	 * Constructs a {code HadamardArgumentService}.
+	 * <p>
+	 * The inputs must comply with the following:
+	 * <ul>
+	 *     <li>be non null</li>
+	 *     <li>the public key and the commitment key must belong to the same {@link GqGroup}</li>
+	 * </ul>
+	 *
+	 * @param randomService the random service to be used for the creation of random integers.
+	 * @param hashService   the hash service that provides the recursive hash function.
+	 * @param publicKey     the public key.
+	 * @param commitmentKey the commitment key for calculating the commitments.
+	 */
 	HadamardArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		checkNotNull(randomService);
@@ -50,6 +67,25 @@ public class HadamardArgumentService {
 		this.zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 	}
 
+	/**
+	 * Calculates an argument of knowledge of the openings a<sub>0</sub>, ..., a<sub>m-1</sub> and ⃗b to the commitments c<sub>A</sub> and
+	 * c<sub>b</sub>.
+	 * <p>
+	 * The statement and witness must comply with the following:
+	 * <ul>
+	 *     <li>be non null</li>
+	 *     <li>commitment c<sub>A</sub> must have the size as the number of columns in matrix A</li>
+	 *     <li>the commitments c<sub>A</sub> must have the same group order than matrix A</li>
+	 *     <li>the matrix A must not have more columns than there are elements in the commitment key</li>
+	 *     <li>the matrix A must have at least 2 columns</li>
+	 *     <li>the commitments c<sub>A</sub> must correspond to the commitments to matrix A</li>
+	 *     <li>the vector b must be the Hadamard product of the column vectors of matrix A</li>
+	 * </ul>
+	 *
+	 * @param statement the Hadamard statement.
+	 * @param witness   the Hadamard witness.
+	 * @return the {@link HadamardArgument} consisting of a vector of commitments and a {@link ZeroArgument}.
+	 */
 	HadamardArgument getHadamardArgument(final HadamardStatement statement, final HadamardWitness witness) {
 		checkNotNull(statement);
 		checkNotNull(witness);
@@ -69,7 +105,7 @@ public class HadamardArgumentService {
 		final int k = commitmentKey.size();
 		checkArgument(cA.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
 		checkArgument(cA.getGroup().getQ().equals(A.getGroup().getQ()), "The matrix A and its commitments must have the same group order q.");
-		checkArgument(n <= k, "The number of columns in the matrix must be smaller than the commitment key size.");
+		checkArgument(n <= k, "The number of rows in the matrix must be smaller than the commitment key size.");
 
 		// Ensure statement corresponds to witness
 		checkArgument(m >= 2, "The matrix must have at least 2 columns.");
