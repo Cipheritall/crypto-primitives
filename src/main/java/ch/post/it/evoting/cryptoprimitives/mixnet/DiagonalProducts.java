@@ -98,9 +98,7 @@ class DiagonalProducts {
 								final int j = (k - m) + i + 1;
 								final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextRowI = ciphertexts.getRow(i);
 								final SameGroupVector<ZqElement, ZqGroup> exponentsColumnJ = exponents.getColumn(j);
-								return ElGamalMultiRecipientCiphertext
-										.getCiphertextVectorExponentiation(ciphertextRowI.stream().collect(Collectors.toList()),
-												exponentsColumnJ.stream().collect(Collectors.toList()));
+								return ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(ciphertextRowI, exponentsColumnJ);
 							})
 							.reduce(ciphertextMultiplicationIdentity, ElGamalMultiRecipientCiphertext::multiply);
 				})

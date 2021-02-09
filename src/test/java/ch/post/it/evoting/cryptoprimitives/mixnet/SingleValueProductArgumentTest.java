@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -36,10 +37,10 @@ class SingleValueProductArgumentTest {
 		final GqElement cUpperDelta = generator.genMember();
 		final SameGroupVector<ZqElement, ZqGroup> as = IntStream.range(0, n)
 				.mapToObj(i -> randomService.genRandomExponent(zqGroup))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 		final SameGroupVector<ZqElement, ZqGroup> bs = IntStream.range(0, n)
 				.mapToObj(i -> randomService.genRandomExponent(zqGroup))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 		final ZqElement rTilde = randomService.genRandomExponent(zqGroup);
 		final ZqElement sTilde = randomService.genRandomExponent(zqGroup);
 

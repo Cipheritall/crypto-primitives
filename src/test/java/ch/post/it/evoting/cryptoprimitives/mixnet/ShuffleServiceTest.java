@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalUtils;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -123,7 +124,7 @@ class ShuffleServiceTest {
 				Arrays.asList(13, 1, 3, 4),
 				Arrays.asList(3, 3, 6, 6)
 		);
-		List<ElGamalMultiRecipientCiphertext> ciphertexts = valuesToCiphertext(ciphertextValues, localGroup);
+		List<ElGamalMultiRecipientCiphertext> ciphertexts = ElGamalUtils.valuesToCiphertext(ciphertextValues, localGroup);
 
 		//Expected ciphertexts
 		Stream<List<Integer>> expectedCiphertextValues = Stream.of(
@@ -131,7 +132,7 @@ class ShuffleServiceTest {
 				Arrays.asList(4, 6, 3, 9),
 				Arrays.asList(13, 1, 13, 8)
 		);
-		List<ElGamalMultiRecipientCiphertext> expectedCiphertexts = valuesToCiphertext(expectedCiphertextValues, localGroup);
+		List<ElGamalMultiRecipientCiphertext> expectedCiphertexts = ElGamalUtils.valuesToCiphertext(expectedCiphertextValues, localGroup);
 
 		//Create shuffle
 		ShuffleService shuffleService = new ShuffleService(randomService, permutationService);
@@ -140,13 +141,5 @@ class ShuffleServiceTest {
 		assertEquals(expectedCiphertexts, shuffle.getCiphertexts());
 		assertEquals(permutation, shuffle.getPermutation());
 		assertEquals(randomExponents, shuffle.getReEncryptionExponents());
-	}
-
-	//Convert a matrix of values to ciphertexts
-	private List<ElGamalMultiRecipientCiphertext> valuesToCiphertext(Stream<List<Integer>> ciphertextValues, GqGroup group) {
-		return ciphertextValues
-				.map(values -> values.stream().map(BigInteger::valueOf).map(value -> GqElement.create(value, group)).collect(Collectors.toList()))
-				.map(values -> ElGamalMultiRecipientCiphertext.create(values.get(0), values.subList(1, values.size())))
-				.collect(Collectors.toList());
 	}
 }

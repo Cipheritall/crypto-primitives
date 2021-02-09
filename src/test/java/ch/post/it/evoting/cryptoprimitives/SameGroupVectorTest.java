@@ -258,6 +258,17 @@ class SameGroupVectorTest {
 		assertEquals(element, augmentedVector.get(0));
 	}
 
+	@Test
+	void toSameGroupVectorCorrectlyCollects() {
+		int n = random.nextInt(10) + 1;
+		TestGroup group = new TestGroup();
+		List<TestHasGroupElement> elements = Stream.generate(() -> new TestHasGroupElement(group)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestHasGroupElement, TestGroup> actual = elements.stream().collect(SameGroupVector.toSameGroupVector());
+		SameGroupVector<TestHasGroupElement, TestGroup> expected = new SameGroupVector<>(elements);
+
+		assertEquals(expected, actual);
+	}
+
 	private static class TestValuedElement extends GroupElement<TestGroup> {
 		protected TestValuedElement(BigInteger value, TestGroup group) {
 			super(value, group);

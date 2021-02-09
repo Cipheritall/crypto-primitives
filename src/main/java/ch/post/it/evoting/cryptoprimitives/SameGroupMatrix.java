@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -151,7 +152,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	public SameGroupVector<E, G> getColumn(int j) {
 		checkArgument(j >= 0);
 		checkArgument(j < this.numColumns);
-		return this.rows.stream().map(row -> row.get(j)).collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+		return this.rows.stream().map(row -> row.get(j)).collect(toSameGroupVector());
 	}
 
 	/**

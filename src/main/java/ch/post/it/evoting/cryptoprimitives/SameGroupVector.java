@@ -5,11 +5,13 @@ package ch.post.it.evoting.cryptoprimitives;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -121,7 +123,7 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 		checkNotNull(element);
 		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
 
-		final List<E> newVector = Streams.concat(this.stream(), Stream.of(element)).collect(Collectors.toList());
+		final List<E> newVector = Streams.concat(this.stream(), Stream.of(element)).collect(toList());
 		return new SameGroupVector<>(newVector);
 	}
 
@@ -135,7 +137,7 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 		checkNotNull(element);
 		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
 
-		final List<E> newVector = Streams.concat(Stream.of(element), this.stream()).collect(Collectors.toList());
+		final List<E> newVector = Streams.concat(Stream.of(element), this.stream()).collect(toList());
 		return new SameGroupVector<>(newVector);
 	}
 
@@ -197,6 +199,17 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 						.mapToObj(j -> this.get(numColumns * i + j))
 						.collect(Collectors.toList()))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupMatrix::fromRows));
+	}
+
+	/**
+	 * Returns a Collector that accumulates the input elements into a SameGroupVector.
+	 *
+	 * @param <E> the type of elements this list contains.
+	 * @param <G> the group type the elements of the list belong to.
+	 * @return a {@code Collector} for accumulating the input elements into a SameGroupVector.
+	 */
+	public static <E extends HasGroup<G>, G extends MathematicalGroup<G>> Collector<E, ?, SameGroupVector<E, G>> toSameGroupVector() {
+		return Collectors.collectingAndThen(toList(), SameGroupVector::new);
 	}
 
 	@Override

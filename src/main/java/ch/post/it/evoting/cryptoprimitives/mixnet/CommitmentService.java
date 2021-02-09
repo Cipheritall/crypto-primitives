@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -131,7 +132,7 @@ public class CommitmentService {
 		// Algorithm.
 		return IntStream.range(0, m)
 				.mapToObj(i -> getCommitment(elementsMatrix.getColumn(i), randomElements.get(i), commitmentKey))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 	}
 
 	/**

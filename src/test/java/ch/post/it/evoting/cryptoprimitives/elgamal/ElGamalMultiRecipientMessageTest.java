@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,6 +101,26 @@ class ElGamalMultiRecipientMessageTest {
 		assertEquals(errorMsg, exception.getMessage());
 	}
 
+	@Test
+	@DisplayName("create from ones contains only 1s")
+	void onesTest() {
+		int n = new SecureRandom().nextInt(10) + 1;
+		ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(n, gqGroup);
+
+		List<GqElement> onesList = Stream.generate(gqGroup::getIdentity).limit(n).collect(Collectors.toList());
+
+		assertEquals(onesList, ones.stream().collect(Collectors.toList()));
+		assertEquals(n, ones.size());
+	}
+
+	@Test
+	@DisplayName("create from ones with bad input throws")
+	void onesWithBadInputTest() {
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientMessage.ones(1, null));
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientMessage.ones(0, gqGroup));
+		assertEquals("The message of ones' size must be strictly greater than 0.", exception.getMessage());
+	}
+
 	// Provides parameters for the invalid decryption parameters test.
 	static Stream<Arguments> createInvalidDecryptionArgumentsProvider() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
@@ -140,14 +161,10 @@ class ElGamalMultiRecipientMessageTest {
 
 	@Test
 	void whenGetMessageFromUnityCiphertextTest() {
-		LinkedList<GqElement> ones = new LinkedList<>();
-		ones.add(gqGroup.getIdentity());
-		ones.add(gqGroup.getIdentity());
-
-		ElGamalMultiRecipientMessage unityMessage = new ElGamalMultiRecipientMessage(ones);
+		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(2, gqGroup);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		ZqElement zero = zqGroup.getIdentity();
-		ElGamalMultiRecipientCiphertext unityCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(unityMessage, zero, keyPair.getPublicKey());
-		assertEquals(unityMessage, ElGamalMultiRecipientMessage.getMessage(unityCiphertext, keyPair.getPrivateKey()));
+		ElGamalMultiRecipientCiphertext unityCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(onesMessage, zero, keyPair.getPublicKey());
+		assertEquals(onesMessage, ElGamalMultiRecipientMessage.getMessage(unityCiphertext, keyPair.getPrivateKey()));
 	}
 }

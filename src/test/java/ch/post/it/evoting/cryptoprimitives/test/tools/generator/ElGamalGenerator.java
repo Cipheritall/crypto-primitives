@@ -62,4 +62,5 @@ public class ElGamalGenerator {
 		ZqElement exponent = randomService.genRandomExponent(zqGroup);
 		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
 	}
+
 }

@@ -6,7 +6,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -16,7 +15,6 @@ import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -71,9 +69,7 @@ public class ShuffleService {
 		//Generate shuffle
 		Permutation psi = this.permutationService.genPermutation(N);
 		ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
-		GqElement identity = group.getIdentity();
-		List<GqElement> ones = Stream.generate(() -> identity).limit(n).collect(Collectors.toList());
-		ElGamalMultiRecipientMessage onesMessage = new ElGamalMultiRecipientMessage(ones);
+		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(n, group);
 
 		ImmutableList<ZqElement> exponents =
 				Stream.generate(() -> randomService.genRandomExponent(exponentGroup)).limit(N).collect(ImmutableList.toImmutableList());

@@ -5,7 +5,10 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +33,23 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	public ElGamalMultiRecipientMessage(final List<GqElement> messageElements) {
 		this.messageElements = new SameGroupVector<>(messageElements);
 		checkArgument(!this.messageElements.isEmpty(), "An ElGamal message must not be empty.");
+	}
+
+	/**
+	 * Generates an {@link ElGamalMultiRecipientMessage} of ones.
+	 *
+	 * @param size  the number of ones to be contained in the message
+	 * @param group the {@link GqGroup} of the message
+	 * @return the message (1, ..., 1) with {@code size} elements
+	 */
+	public static ElGamalMultiRecipientMessage ones(final int size, final GqGroup group) {
+		checkNotNull(group);
+		checkArgument(size > 0, "The message of ones' size must be strictly greater than 0.");
+
+		return Stream.generate(() -> BigInteger.ONE)
+				.limit(size)
+				.map(one -> GqElement.create(one, group))
+				.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
 	}
 
 	/**

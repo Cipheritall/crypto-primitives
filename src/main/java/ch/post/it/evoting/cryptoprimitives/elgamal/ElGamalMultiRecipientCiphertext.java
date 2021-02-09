@@ -3,8 +3,10 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.LinkedList;
@@ -14,12 +16,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₙ₋₁). The gamma is the left-hand side of a standard
@@ -36,6 +37,49 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		this.gamma = gamma;
 		this.phis = phis;
 		this.group = gamma.getGroup();
+	}
+
+	/**
+	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}. This method implements the GetCiphertextProduct
+	 * algorithm.
+	 *
+	 * @param other The ciphertext to be multiplied by {@code this}. It must be non null and its gamma and phis must belong to the same group as the
+	 *              gamma and phis of {@code this}.
+	 * @return {@code this * other}.
+	 */
+	public ElGamalMultiRecipientCiphertext multiply(final ElGamalMultiRecipientCiphertext other) {
+		checkNotNull(other);
+		checkArgument(this.phis.size() == other.phis.size());
+		checkArgument(this.group.equals(other.group));
+
+		final GqElement resultGamma = this.gamma.multiply(other.gamma);
+
+		final int n = this.phis.size();
+		final SameGroupVector<GqElement, GqGroup> resultPhis =
+				IntStream.range(0, n)
+						.mapToObj(i -> this.phis.get(i).multiply(other.phis.get(i)))
+						.collect(toSameGroupVector());
+
+		return new ElGamalMultiRecipientCiphertext(resultGamma, resultPhis);
+	}
+
+	/**
+	 * Exponentiates a multi-recipient ciphertext. This method implements the GetCiphertextExponentiation algorithm.
+	 *
+	 * @param exponent A {@code ZqElement}
+	 * @return A {@code ElGamalMultiRecipientCiphertext} whose phis value are {exponentiated with @code(exponent)}.
+	 */
+
+	public ElGamalMultiRecipientCiphertext exponentiate(ZqElement exponent) {
+		checkNotNull(exponent);
+		checkArgument(this.group.getQ().equals(exponent.getGroup().getQ()));
+
+		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
+		SameGroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
+				.map(p -> p.exponentiate(exponent))
+				.collect(toSameGroupVector());
+
+		return new ElGamalMultiRecipientCiphertext(exponentiatedGamma, exponentiatedPhis);
 	}
 
 	/**
@@ -102,7 +146,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *              <li>The list must not contain any null.</li>
 	 *              <li>All elements must be from the same Gq group as gamma.</li>
 	 */
-	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
+	static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
 		SameGroupVector<GqElement, GqGroup> phisVector = new SameGroupVector<>(phis);
@@ -113,46 +157,19 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}. This method implements the GetCiphertextProduct
-	 * algorithm.
+	 * Creates a neutral element for ciphertext multiplication.
+	 * <p>
+	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₙ₋₁) = (1, 1, ..., 1).
 	 *
-	 * @param other The ciphertext to be multiplied by {@code this}. It must be non null and its gamma and phis must belong to the same group as the
-	 *              gamma and phis of {@code this}.
-	 * @return {@code this * other}.
+	 * @param numPhi The number of phis in the neutral element.
+	 * @param group  The {@link GqGroup} of the neutral element.
+	 * @return A new {@link ElGamalMultiRecipientCiphertext} filled with ones.
 	 */
-	public ElGamalMultiRecipientCiphertext multiply(final ElGamalMultiRecipientCiphertext other) {
-		checkNotNull(other);
-		checkArgument(this.phis.size() == other.phis.size());
-		checkArgument(this.group.equals(other.group));
+	static ElGamalMultiRecipientCiphertext neutralElement(final int numPhi, final GqGroup group) {
+		checkNotNull(group);
+		checkArgument(numPhi > 0, "The neutral ciphertext must have at least one phi.");
 
-		final GqElement resultGamma = this.gamma.multiply(other.gamma);
-
-		final int n = this.phis.size();
-		final SameGroupVector<GqElement, GqGroup> resultPhis =
-				IntStream.range(0, n)
-						.mapToObj(i -> this.phis.get(i).multiply(other.phis.get(i)))
-						.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
-
-		return new ElGamalMultiRecipientCiphertext(resultGamma, resultPhis);
-	}
-
-	/**
-	 * Exponentiates a multi-recipient ciphertext. This method implements the GetCiphertextExponentiation algorithm.
-	 *
-	 * @param exponent A {@code ZqElement}
-	 * @return A {@code ElGamalMultiRecipientCiphertext} whose phis value are {exponentiated with @code(exponent)}.
-	 */
-
-	public ElGamalMultiRecipientCiphertext exponentiate(ZqElement exponent) {
-		checkNotNull(exponent);
-		checkArgument(this.group.getQ().equals(exponent.getGroup().getQ()));
-
-		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
-		SameGroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
-				.map(p -> p.exponentiate(exponent))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
-
-		return new ElGamalMultiRecipientCiphertext(exponentiatedGamma, exponentiatedPhis);
+		return create(group.getIdentity(), Stream.generate(group::getIdentity).limit(numPhi).collect(toList()));
 	}
 
 	/**
@@ -167,51 +184,29 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *
 	 * @param ciphertexts A List of {@code ElGamalMultiRecipientCiphertext}s, each element containing the same number of phis.
 	 * @param exponents   A List of {@code ZqElement}s, of the same size as the ciphertexts list <br>
-	 * @return {@code List<ElGamalMultiRecipientCiphertext>}
+	 * @return {@code ElGamalMultiRecipientCiphertext}
 	 */
-	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(final List<ElGamalMultiRecipientCiphertext> ciphertexts,
-			final List<ZqElement> exponents) {
+	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+			final SameGroupVector<ZqElement, ZqGroup> exponents) {
 
 		checkNotNull(ciphertexts);
 		checkNotNull(exponents);
-		final ImmutableList<ZqElement> exponentsCopy = ImmutableList.copyOf(exponents);
-		final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertextsCopy = ImmutableList.copyOf(ciphertexts);
 
-		checkArgument(!ciphertextsCopy.isEmpty(), "Ciphertexts should not be empty");
-		checkArgument(ciphertextsCopy.size() == exponentsCopy.size(), "There should be a matching ciphertext for every exponent.");
+		checkArgument(!ciphertexts.isEmpty(), "Ciphertexts should not be empty");
+		checkArgument(ciphertexts.size() == exponents.size(), "There should be a matching ciphertext for every exponent.");
 
-		List<Integer> cipherTextSizes = ciphertextsCopy.stream()
-				.map(ElGamalMultiRecipientCiphertext::size)
-				.distinct()
-				.collect(Collectors.toList());
-		checkArgument(cipherTextSizes.size() == 1, "All ciphertexts must have the same number of phi elements");
+		checkArgument(ciphertexts.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same number of phi elements");
+		checkArgument(ciphertexts.getGroup().getQ().equals(exponents.getGroup().getQ()), "Ciphertexts and exponents must be of the same group.");
 
-		List<BigInteger> cipherTextQs = ciphertextsCopy.stream()
-				.map(a -> a.group.getQ())
-				.distinct()
-				.collect(Collectors.toList());
+		int numberOfPhiElements = ciphertexts.get(0).size();
 
-		List<BigInteger> exponentQs = exponentsCopy.stream()
-				.map(a -> a.getGroup().getQ())
-				.distinct()
-				.collect(Collectors.toList());
-
-		checkArgument(cipherTextQs.size() == 1 &&
-						cipherTextQs.size() == exponentQs.size() &&
-						cipherTextQs.get(0).equals(exponentQs.get(0)),
-				"Group order (q) should be the same across all ciphertexts and exponents");
-
-		int numberOfPhiElements = cipherTextSizes.get(0);
-		GqElement gqElement = GqElement.create(BigInteger.ONE, ciphertextsCopy.get(0).group);
-		List<GqElement> phis = Stream.generate(() -> gqElement).limit(numberOfPhiElements).collect(Collectors.toList());
-
-		//identity maps to product in the protocol
-		ElGamalMultiRecipientCiphertext identity = ElGamalMultiRecipientCiphertext.create(gqElement, phis);
+		ElGamalMultiRecipientCiphertext neutralElement = neutralElement(numberOfPhiElements, ciphertexts.getGroup());
 
 		return IntStream
-				.range(0, exponentsCopy.size())
-				.mapToObj(i -> ciphertextsCopy.get(i).exponentiate(exponentsCopy.get(i)))
-				.reduce(identity, ElGamalMultiRecipientCiphertext::multiply);
+				.range(0, exponents.size())
+				.mapToObj(i -> ciphertexts.get(i).exponentiate(exponents.get(i)))
+				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
 	}
 
 	public final GqElement getGamma() {

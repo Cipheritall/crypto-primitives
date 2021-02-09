@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -167,14 +168,14 @@ final class ZeroArgumentService {
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(i).multiply(augmentedMatrixA.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 
 		final SameGroupVector<ZqElement, ZqGroup> bPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(m - i).multiply(augmentedMatrixB.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 
 		// Compute r', s' and t'.
 		final SameGroupVector<ZqElement, ZqGroup> augmentedExponentsR = exponentsR.prepend(r0);

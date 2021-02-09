@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -94,7 +95,7 @@ class SingleValueProductArgumentService {
 		SameGroupVector<ZqElement, ZqGroup> d = Stream.generate(() -> randomService.genRandomInteger(q))
 				.map(value -> ZqElement.create(value, group))
 				.limit(n)
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 		ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ
@@ -113,12 +114,12 @@ class SingleValueProductArgumentService {
 		// Calculate δ' and Δ
 		SameGroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k).negate().multiply(d.get(k + 1)))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 		SameGroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k + 1)
 						.add(a.get(k + 1).negate().multiply(lowerDelta.get(k)))
 						.add(bList.get(k).negate().multiply(d.get(k + 1))))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 
 		// Calculate c_d, c_δ and c_Δ
 		GqElement cd = CommitmentService.getCommitment(d, rd, commitmentKey);
@@ -139,10 +140,10 @@ class SingleValueProductArgumentService {
 		// Calculate aTilde, bTilde, rTilde and sTilde
 		SameGroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(a.get(k)).add(d.get(k)))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 		SameGroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(bList.get(k)).add(lowerDelta.get(k)))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(toSameGroupVector());
 		ZqElement rTilde = x.multiply(r).add(rd);
 		ZqElement sTilde = x.multiply(sx).add(s0);
 

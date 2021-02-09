@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -134,7 +135,7 @@ class HadamardArgumentServiceTest {
 			zqGenerator = new ZqGroupGenerator(zqGroup);
 			matrix = zqGenerator.generateRandomZqElementMatrix(n, m);
 			vector = IntStream.range(0, n).mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
-					.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+					.collect(toSameGroupVector());
 			exponents = zqGenerator.generateRandomZqElementVector(m);
 			randomness = zqGenerator.genZqElementMember();
 			witness = new HadamardWitness(matrix, vector, exponents, randomness);
@@ -222,7 +223,7 @@ class HadamardArgumentServiceTest {
 			zqGenerator = new ZqGroupGenerator(zqGroup);
 			matrix = zqGenerator.generateRandomZqElementMatrix(n + 1, m);
 			vector = IntStream.range(0, n + 1).mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
-					.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+					.collect(toSameGroupVector());
 			exponents = zqGenerator.generateRandomZqElementVector(m);
 			randomness = zqGenerator.genZqElementMember();
 			witness = new HadamardWitness(matrix, vector, exponents, randomness);
