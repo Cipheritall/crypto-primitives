@@ -328,11 +328,11 @@ class ProductArgumentServiceTest {
 
 			// Create the expected SingleValueProductArgument
 			SingleValueProductArgument expectedSingleValueProductArgument = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
-					.withCLowerD(gqFive)
+					.withCd(gqFive)
 					.withCLowerDelta(gqThree)
-					.withCUpperDelta(gqThree)
+					.withCUpperDelta(gqNine)
 					.withATilde(SameGroupVector.of(zqFour, zqZero))
-					.withBTilde(SameGroupVector.of(zqFour, zqOne))
+					.withBTilde(SameGroupVector.of(zqFour, zqZero))
 					.withRTilde(zqThree)
 					.withSTilde(zqZero)
 					.build();

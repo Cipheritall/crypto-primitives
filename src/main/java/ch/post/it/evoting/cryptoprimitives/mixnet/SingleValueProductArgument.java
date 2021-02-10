@@ -6,7 +6,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -18,7 +17,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 class SingleValueProductArgument {
 
-	private GqElement cLowerD;
+	private GqElement cd;
 	private GqElement cLowerDelta;
 	private GqElement cUpperDelta;
 	private SameGroupVector<ZqElement, ZqGroup> aTilde;
@@ -29,8 +28,8 @@ class SingleValueProductArgument {
 	private SingleValueProductArgument() {
 	}
 
-	GqElement getCLowerD() {
-		return cLowerD;
+	GqElement getCd() {
+		return cd;
 	}
 
 	GqElement getCLowerDelta() {
@@ -41,12 +40,12 @@ class SingleValueProductArgument {
 		return cUpperDelta;
 	}
 
-	Stream<ZqElement> getATilde() {
-		return aTilde.stream();
+	SameGroupVector<ZqElement, ZqGroup> getATilde() {
+		return aTilde;
 	}
 
-	Stream<ZqElement> getBTilde() {
-		return bTilde.stream();
+	SameGroupVector<ZqElement, ZqGroup> getBTilde() {
+		return bTilde;
 	}
 
 	ZqElement getRTilde() {
@@ -66,7 +65,7 @@ class SingleValueProductArgument {
 			return false;
 		}
 		SingleValueProductArgument that = (SingleValueProductArgument) o;
-		return cLowerD.equals(that.cLowerD) &&
+		return cd.equals(that.cd) &&
 				cLowerDelta.equals(that.cLowerDelta) &&
 				cUpperDelta.equals(that.cUpperDelta) &&
 				aTilde.equals(that.aTilde) &&
@@ -77,12 +76,12 @@ class SingleValueProductArgument {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cLowerD, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
+		return Objects.hash(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
 	}
 
 	static class SingleValueProductArgumentBuilder {
 
-		private GqElement cLowerD;
+		private GqElement cd;
 		private GqElement cLowerDelta;
 		private GqElement cUpperDelta;
 		private SameGroupVector<ZqElement, ZqGroup> aTilde;
@@ -94,8 +93,8 @@ class SingleValueProductArgument {
 
 		}
 
-		SingleValueProductArgumentBuilder withCLowerD(final GqElement cLowerD) {
-			this.cLowerD = cLowerD;
+		SingleValueProductArgumentBuilder withCd(final GqElement cd) {
+			this.cd = cd;
 			return this;
 		}
 
@@ -131,7 +130,7 @@ class SingleValueProductArgument {
 
 		SingleValueProductArgument build() {
 			SingleValueProductArgument argument = new SingleValueProductArgument();
-			argument.cLowerD = checkNotNull(this.cLowerD);
+			argument.cd = checkNotNull(this.cd);
 			argument.cLowerDelta = checkNotNull(this.cLowerDelta);
 			argument.cUpperDelta = checkNotNull(this.cUpperDelta);
 			argument.aTilde = checkNotNull(this.aTilde);

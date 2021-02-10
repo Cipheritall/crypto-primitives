@@ -46,7 +46,7 @@ class SingleValueProductArgumentTest {
 
 		// Create singleValueProdArgument 1 == singleValueProdArgument 2 != singleValueProdArgument 3
 		SingleValueProductArgument singleValueProdArgument1 = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
-				.withCLowerD(cd)
+				.withCd(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
 				.withATilde(as)
@@ -55,7 +55,7 @@ class SingleValueProductArgumentTest {
 				.withSTilde(sTilde)
 				.build();
 		SingleValueProductArgument singleValueProdArgument2 = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
-				.withCLowerD(cd)
+				.withCd(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
 				.withATilde(as)
@@ -64,7 +64,7 @@ class SingleValueProductArgumentTest {
 				.withSTilde(sTilde)
 				.build();
 		SingleValueProductArgument singleValueProdArgument3 = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
-				.withCLowerD(cd.multiply(cd))
+				.withCd(cd.multiply(cd))
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
 				.withATilde(as)

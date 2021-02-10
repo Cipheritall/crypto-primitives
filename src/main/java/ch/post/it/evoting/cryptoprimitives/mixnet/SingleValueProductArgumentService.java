@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,10 +36,10 @@ class SingleValueProductArgumentService {
 
 	SingleValueProductArgumentService(final RandomService randomService, final HashService hashService,
 			final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey) {
-		this.randomService = randomService;
-		this.hashService = hashService;
-		this.publicKey = publicKey;
-		this.commitmentKey = commitmentKey;
+		this.randomService = checkNotNull(randomService);
+		this.hashService = checkNotNull(hashService);
+		this.publicKey = checkNotNull(publicKey);
+		this.commitmentKey = checkNotNull(commitmentKey);
 	}
 
 	/**
@@ -75,7 +76,7 @@ class SingleValueProductArgumentService {
 				"The witness' group must have the same order as the commitment key's group.");
 
 		// Ensure that the statement corresponds to the witness
-		checkArgument(ca.equals(CommitmentService.getCommitment(a, r, commitmentKey)),
+		checkArgument(ca.equals(getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
 		ZqGroup group = b.getGroup();
 		ZqElement one = ZqElement.create(BigInteger.ONE, group); // Identity for multiplication
@@ -100,11 +101,11 @@ class SingleValueProductArgumentService {
 
 		// Calculate δ
 		List<ZqElement> lowerDelta = new ArrayList<>(n);
-		lowerDelta.add(d.get(0));
-		if(n > 1) {
-			lowerDelta.addAll(Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
+		lowerDelta.add(0, d.get(0));
+		if (n > 1) {
+			lowerDelta.addAll(1, Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
 					.collect(Collectors.toList()));
-			lowerDelta.add(d.get(n - 1));
+			lowerDelta.add(n - 1, group.getIdentity());
 		}
 
 		// Calculate s_0 and s_x
@@ -122,9 +123,9 @@ class SingleValueProductArgumentService {
 				.collect(toSameGroupVector());
 
 		// Calculate c_d, c_δ and c_Δ
-		GqElement cd = CommitmentService.getCommitment(d, rd, commitmentKey);
-		GqElement cLowerDelta = CommitmentService.getCommitment(lowerDeltaPrime, s0, commitmentKey);
-		GqElement cUpperDelta = CommitmentService.getCommitment(upperDelta, sx, commitmentKey);
+		GqElement cd = getCommitment(d, rd, commitmentKey);
+		GqElement cLowerDelta = getCommitment(lowerDeltaPrime, s0, commitmentKey);
+		GqElement cUpperDelta = getCommitment(upperDelta, sx, commitmentKey);
 
 		// Calculate x
 		byte[] hash = hashService.recursiveHash(publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
@@ -134,8 +135,7 @@ class SingleValueProductArgumentService {
 				cd.getValue(),
 				b.getValue(),
 				ca.getValue());
-		BigInteger hashNumber = ConversionService.byteArrayToInteger(hash);
-		ZqElement x = ZqElement.create(hashNumber, group);
+		ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), group);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
 		SameGroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
@@ -148,7 +148,7 @@ class SingleValueProductArgumentService {
 		ZqElement sTilde = x.multiply(sx).add(s0);
 
 		return new SingleValueProductArgument.SingleValueProductArgumentBuilder()
-				.withCLowerD(cd)
+				.withCd(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
 				.withATilde(aTilde)
@@ -158,4 +158,63 @@ class SingleValueProductArgumentService {
 				.build();
 	}
 
+	/**
+	 * Verifies the correctness of a {@link SingleValueProductArgument} with respect to a given {@link SingleValueProductStatement}.
+	 * <p>
+	 * The statement and the argument must be non null and have compatible groups.
+	 *
+	 * @param statement the statement for which the argument is to be verified.
+	 * @param argument  the argument to be verified.
+	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 */
+	boolean verifySingleValueProductArgument(final SingleValueProductStatement statement, final SingleValueProductArgument argument) {
+		checkNotNull(statement);
+		checkNotNull(argument);
+
+		checkArgument(statement.getCommitment().getGroup().equals(argument.getCd().getGroup()),
+				"The statement and the argument must have compatible groups.");
+
+		// Retrieve elements for verification
+		final GqElement ca = statement.getCommitment();
+		final ZqElement b = statement.getProduct();
+		final GqElement cd = argument.getCd();
+		final GqElement cLowerDelta = argument.getCLowerDelta();
+		final GqElement cUpperDelta = argument.getCUpperDelta();
+		final SameGroupVector<ZqElement, ZqGroup> aTilde = argument.getATilde();
+		final SameGroupVector<ZqElement, ZqGroup> bTilde = argument.getBTilde();
+		final ZqElement rTilde = argument.getRTilde();
+		final ZqElement sTilde = argument.getSTilde();
+
+		final int n = aTilde.size();
+		final ZqGroup zqGroup = b.getGroup();
+
+		// Calculate x
+		final byte[] hash = hashService.recursiveHash(publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+				cUpperDelta.getValue(),
+				cLowerDelta.getValue(),
+				cd.getValue(),
+				b.getValue(),
+				ca.getValue());
+		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
+
+		// Verify A
+		final GqElement prodCa = ca.exponentiate(x).multiply(cd);
+		final GqElement commA = getCommitment(aTilde, rTilde, commitmentKey);
+		final boolean verifA = prodCa.equals(commA);
+
+		// Verify Delta
+		final GqElement prodDelta = cUpperDelta.exponentiate(x).multiply(cLowerDelta);
+		final SameGroupVector<ZqElement, ZqGroup> eiVector = IntStream.range(0, n - 1)
+				.mapToObj(i -> x.multiply(bTilde.get(i + 1))
+						.add(bTilde.get(i).multiply(aTilde.get(i + 1).negate())))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
+		final boolean verifDelta = prodDelta.equals(commDelta);
+
+		// Verify B
+		final boolean verifB = ((bTilde.get(0).equals(aTilde.get(0))) && (bTilde.get(n - 1).equals(x.multiply(b))));
+
+		return verifA && verifDelta && verifB;
+	}
 }

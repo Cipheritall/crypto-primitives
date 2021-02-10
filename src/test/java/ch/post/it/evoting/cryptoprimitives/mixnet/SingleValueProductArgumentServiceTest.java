@@ -6,7 +6,9 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,6 +22,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -38,13 +41,16 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator
 
 class SingleValueProductArgumentServiceTest {
 
-	private static final int NUM_ELEMENTS = 5;
+	private static final int NUM_ELEMENTS = 10;
 	private static final RandomService randomService = new RandomService();
 
+	private static GqGroup gqGroup;
 	private static ZqGroup zqGroup;
 	private static ZqGroupGenerator zqGroupGenerator;
+	private static HashService hashService;
+	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
-	private static SingleValueProductArgumentService svpArgumentProvider;
+	private static SingleValueProductArgumentService argumentService;
 
 	private GqElement commitment;
 	private ZqElement product;
@@ -56,17 +62,17 @@ class SingleValueProductArgumentServiceTest {
 
 	@BeforeAll
 	static void setupAll() {
-		GqGroup gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GqGroupTestData.getGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
-		ElGamalMultiRecipientPublicKey publicKey = keyPair.getPublicKey();
+		publicKey = keyPair.getPublicKey();
 		commitmentKey = genCommitmentKey(gqGroup, NUM_ELEMENTS);
-		HashService hashService = mock(HashService.class);
+		hashService = mock(HashService.class);
 		when(hashService.recursiveHash(any()))
 				.thenReturn(new byte[] { 0b10 });
-		svpArgumentProvider = new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey);
+		argumentService = new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 	}
 
 	@BeforeEach
@@ -80,36 +86,51 @@ class SingleValueProductArgumentServiceTest {
 		witness = new SingleValueProductWitness(elements, randomness);
 	}
 
-	@RepeatedTest(10)
-	void getSingleValueProductArgumentDoesNotThrow() {
-		assertDoesNotThrow(() -> svpArgumentProvider.getSingleValueProductArgument(statement, witness));
-	}
-
 	@Test
-	@DisplayName("getSingleValueProductArgument with null input throws NullPointerException")
-	void getSingleValueProductArgumentWithNullThrows() {
+	@DisplayName("Constructing a SingleValueProductArgument with null arguments throws a NullPointerException")
+	void constructSingleValueProductArgumentServiceWithNullArguments() {
 		assertAll(
-				() -> assertThrows(NullPointerException.class, () -> svpArgumentProvider.getSingleValueProductArgument(null, witness)),
-				() -> assertThrows(NullPointerException.class, () -> svpArgumentProvider.getSingleValueProductArgument(statement, null))
+				() -> assertThrows(NullPointerException.class, () -> new SingleValueProductArgumentService(null, hashService, publicKey, commitmentKey)),
+				() -> assertThrows(NullPointerException.class, () -> new SingleValueProductArgumentService(randomService, null, publicKey, commitmentKey)),
+				() -> assertThrows(NullPointerException.class, () -> new SingleValueProductArgumentService(randomService, hashService, null, commitmentKey)),
+				() -> assertThrows(NullPointerException.class, () -> new SingleValueProductArgumentService(randomService, hashService, publicKey, null))
 		);
 	}
 
-	@Test
-	@DisplayName("getSingleValueProductArgument with statement groups different from commitment key group throws IllegalArgumentException")
-	void getSingleValueProductArgumentWithStatementFromDifferentGroupsThrows() {
+	@Nested
+	@DisplayName("getSingleValueProductArgument...")
+	class GetSingleValueProductArgumentTest {
+
+		@RepeatedTest(10)
+		void getSingleValueProductArgumentDoesNotThrow () {
+		assertDoesNotThrow(() -> argumentService.getSingleValueProductArgument(statement, witness));
+	}
+
+		@Test
+		@DisplayName("with null input throws NullPointerException")
+		void getSingleValueProductArgumentWithNullThrows () {
+		assertAll(
+				() -> assertThrows(NullPointerException.class, () -> argumentService.getSingleValueProductArgument(null, witness)),
+				() -> assertThrows(NullPointerException.class, () -> argumentService.getSingleValueProductArgument(statement, null))
+		);
+	}
+
+		@Test
+		@DisplayName("with statement groups different from commitment key group throws IllegalArgumentException")
+		void getSingleValueProductArgumentWithStatementFromDifferentGroupsThrows () {
 		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitmentKey.getGroup());
 		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 		GqElement differentCommitment = differentGqGroup.getIdentity();
 		ZqElement differentProduct = differentZqGroup.getIdentity();
 		SingleValueProductStatement differentStatement = new SingleValueProductStatement(differentCommitment, differentProduct);
 		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> svpArgumentProvider.getSingleValueProductArgument(differentStatement, witness));
+				() -> argumentService.getSingleValueProductArgument(differentStatement, witness));
 		assertEquals("The statement's groups must have the same order as the commitment key's group.", exception.getMessage());
 	}
 
-	@Test
-	@DisplayName("getSingleValueProductArgument with witness group order different from commitment key group order throws IllegalArgumentException")
-	void getSingleValueProductArgumentWithWitnessFromDifferentGroupThrows() {
+		@Test
+		@DisplayName("with witness group order different from commitment key group order throws IllegalArgumentException")
+		void getSingleValueProductArgumentWithWitnessFromDifferentGroupThrows () {
 		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitmentKey.getGroup());
 		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 		ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
@@ -117,34 +138,34 @@ class SingleValueProductArgumentServiceTest {
 		ZqElement differentRandomness = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
 		SingleValueProductWitness differentWitness = new SingleValueProductWitness(differentElements, differentRandomness);
 		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> svpArgumentProvider.getSingleValueProductArgument(statement, differentWitness));
+				() -> argumentService.getSingleValueProductArgument(statement, differentWitness));
 		assertEquals("The witness' group must have the same order as the commitment key's group.", exception.getMessage());
 	}
 
-	@Test
-	@DisplayName("getSingleValueProductArgument with incorrect commitment throws IllegalArgumentException")
-	void getSingleValueProductArgumentWithWrongCommitmentThrows() {
+		@Test
+		@DisplayName("with incorrect commitment throws IllegalArgumentException")
+		void getSingleValueProductArgumentWithWrongCommitmentThrows () {
 		GqElement wrongCommitment = commitment.multiply(commitment.getGroup().getGenerator());
 		SingleValueProductStatement wrongStatement = new SingleValueProductStatement(wrongCommitment, product);
 		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> svpArgumentProvider.getSingleValueProductArgument(wrongStatement, witness));
+				() -> argumentService.getSingleValueProductArgument(wrongStatement, witness));
 		assertEquals("The provided commitment does not correspond to the elements, randomness and commitment key provided.",
 				exception.getMessage());
 	}
 
-	@Test
-	@DisplayName("getSingleValueProductArgument with incorrect product throws IllegalArgumentException")
-	void getSingleValueProductArgumentWithWrongProductThrows() {
+		@Test
+		@DisplayName("with incorrect product throws IllegalArgumentException")
+		void getSingleValueProductArgumentWithWrongProductThrows () {
 		ZqElement wrongProduct = product.add(ZqElement.create(BigInteger.ONE, product.getGroup()));
 		SingleValueProductStatement wrongStatement = new SingleValueProductStatement(commitment, wrongProduct);
 		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> svpArgumentProvider.getSingleValueProductArgument(wrongStatement, witness));
+				() -> argumentService.getSingleValueProductArgument(wrongStatement, witness));
 		assertEquals("The product of the provided elements does not give the provided product.", exception.getMessage());
 	}
 
-	@Test
-	@DisplayName("getSingleValueProductArgument with specific values gives expected result")
-	void getSingleValueProductArgumentWithSpecificValues() {
+		@Test
+		@DisplayName("with specific values gives expected result")
+		void getSingleValueProductArgumentWithSpecificValues () {
 		GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 		ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 		// commitment = 3
@@ -168,20 +189,20 @@ class SingleValueProductArgumentServiceTest {
 		gElements.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
 		gElements.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
 		CommitmentKey ck = new CommitmentKey(h, gElements);
-		// expected = (16, 2, 6, (1, 8), (1, 9), 5, 7)
+		// expected = (16, 2, 3, (1, 8), (1, 2), 5, 7)
 		GqElement cd = GqElement.create(BigInteger.valueOf(16), specificGqGroup);
 		GqElement cdelta = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
-		GqElement cDelta = GqElement.create(BigInteger.valueOf(6), specificGqGroup);
+		GqElement cDelta = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
 		List<ZqElement> aTilde = new ArrayList<>(2);
 		aTilde.add(ZqElement.create(BigInteger.valueOf(1), specificZqGroup));
 		aTilde.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
 		List<ZqElement> bTilde = new ArrayList<>(2);
 		bTilde.add(ZqElement.create(BigInteger.valueOf(1), specificZqGroup));
-		bTilde.add(ZqElement.create(BigInteger.valueOf(9), specificZqGroup));
+		bTilde.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
 		ZqElement rTilde = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 		ZqElement sTilde = ZqElement.create(BigInteger.valueOf(7), specificZqGroup);
 		SingleValueProductArgument expected = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
-				.withCLowerD(cd)
+				.withCd(cd)
 				.withCLowerDelta(cdelta)
 				.withCUpperDelta(cDelta)
 				.withATilde(new SameGroupVector<>(aTilde))
@@ -205,6 +226,57 @@ class SingleValueProductArgumentServiceTest {
 				.thenReturn(new byte[] { 0b1010 });
 		SingleValueProductArgumentService svpArgumentProvider = new SingleValueProductArgumentService(randomService, hashService, pk, ck);
 		assertEquals(expected, svpArgumentProvider.getSingleValueProductArgument(statement, witness));
+	}
+	}
+
+	@Nested
+	@DisplayName("verifySingleValueProductArgument...")
+	class VerifySingleValueProductArgumentServiceTest {
+
+		private SingleValueProductArgument argument;
+
+		@BeforeEach
+		void setup() {
+			argument = argumentService.getSingleValueProductArgument(statement, witness);
+		}
+
+		@Test
+		@DisplayName("with null arguments throws a NullPointerException")
+		void verifySingleValueProductArgumentWithNullArguments() {
+			assertThrows(NullPointerException.class, () -> argumentService.verifySingleValueProductArgument(null, argument));
+			assertThrows(NullPointerException.class, () -> argumentService.verifySingleValueProductArgument(statement, null));
+		}
+
+		@Test
+		@DisplayName("with statement and argument having different groups throws an IllegalArgumentException")
+		void verifySingleValueProductArgumentWithIncompatibleStatementAndArgument() {
+			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
+			GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGqGroup);
+			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
+			GqElement commitment = differentGqGroupGenerator.genMember();
+			ZqElement product = differentZqGroupGenerator.genZqElementMember();
+			statement = new SingleValueProductStatement(commitment, product);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> argumentService.verifySingleValueProductArgument(statement, argument));
+			assertEquals("The statement and the argument must have compatible groups.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with a correct argument returns true")
+		void verifySingleValueProductArgumentWithCorrectArgument() {
+			assertTrue(argumentService.verifySingleValueProductArgument(statement, argument));
+		}
+
+		@Test
+		@DisplayName("with an incorrect argument returns false")
+		void verifySingleValueProductArgumentWithIncorrectArgument() {
+			GqElement commitment = statement.getCommitment();
+			commitment = commitment.multiply(gqGroup.getGenerator());
+			ZqElement product = statement.getProduct();
+			statement = new SingleValueProductStatement(commitment, product);
+			assertFalse(argumentService.verifySingleValueProductArgument(statement, argument));
+		}
 	}
 
 	protected static CommitmentKey genCommitmentKey(GqGroup group, int k) {
