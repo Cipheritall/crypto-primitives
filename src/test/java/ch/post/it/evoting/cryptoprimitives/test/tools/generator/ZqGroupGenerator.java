@@ -50,6 +50,17 @@ public class ZqGroupGenerator {
 	}
 
 	/**
+	 * Generate a  {@link SameGroupVector} of {@link ZqElement} in this {@code group}. Populated with {@code element}
+	 *
+	 * @param numElements the number of elements to generate.
+	 * @param element,    value with which the matrix is initialised
+	 * @return a vector of {@code numElements} defined {@link ZqElement}.
+	 */
+	public SameGroupVector<ZqElement, ZqGroup> initializeElementVectorWithElement(final int numElements, ZqElement element) {
+		return new SameGroupVector<>(generateElementList(numElements, () -> element));
+	}
+
+	/**
 	 * Generate a random {@link SameGroupMatrix} of {@link ZqElement} in this {@code group}.
 	 *
 	 * @param m the matrix' number of lines.
@@ -58,5 +69,17 @@ public class ZqGroupGenerator {
 	 */
 	public SameGroupMatrix<ZqElement, ZqGroup> generateRandomZqElementMatrix(final int m, final int n) {
 		return SameGroupMatrix.fromRows(generateElementMatrix(m, n, this::genZqElementMember));
+	}
+
+	/**
+	 * Generate a {@link SameGroupMatrix} of {@link ZqElement} in this {@code group}. Populated with {@code element}
+	 *
+	 * @param m        the matrix' number of lines.
+	 * @param n        the matrix' number of columns.
+	 * @param element, value with which the matrix is initialised
+	 * @return a m &times; n matrix of defined {@link ZqElement}.
+	 */
+	public SameGroupMatrix<ZqElement, ZqGroup> initializeMatrixWithElement(final int m, final int n, ZqElement element) {
+		return SameGroupMatrix.fromRows(generateElementMatrix(m, n, () -> element));
 	}
 }

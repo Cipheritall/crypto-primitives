@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.data;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 public class GqGroupTestData {
 
-	static ImmutableList<GqGroup> testGroups;
+	static ImmutableList<GqGroup> smallTestGroups;
 
 	static {
 		//More groups can be added to this class as needed
@@ -30,19 +31,22 @@ public class GqGroupTestData {
 		final BigInteger q2 = new BigInteger("5");
 		final BigInteger g2 = new BigInteger("3");
 		GqGroup group2 = new GqGroup(p2, q2, g2);
-
-		testGroups = ImmutableList.of(group1, group2);
+		smallTestGroups = ImmutableList.of(group1, group2);
 	}
 
 	private GqGroupTestData() {
 	}
 
 	static public GqGroup getGroup() {
-		return getRandomGroupFrom(testGroups);
+		return getRandomGroupFrom(smallTestGroups);
+	}
+
+	static public GqGroup getFirstGroup() {
+		return smallTestGroups.get(0);
 	}
 
 	static public GqGroup getDifferentGroup(final GqGroup group) {
-		List<GqGroup> otherGroups = new ArrayList<>(testGroups);
+		List<GqGroup> otherGroups = new ArrayList<>(smallTestGroups);
 		otherGroups.remove(group);
 		return getRandomGroupFrom(otherGroups);
 	}
@@ -51,4 +55,9 @@ public class GqGroupTestData {
 		SecureRandom random = new SecureRandom();
 		return groups.get(random.nextInt(groups.size()));
 	}
+
+	static public GqGroup getLargeGroup() throws IOException {
+		return new GqGroupLoader("/subgroup.json").getGroup();
+	}
+
 }

@@ -8,21 +8,20 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import ch.post.it.evoting.cryptoprimitives.HashService;
@@ -398,8 +398,6 @@ class ZeroArgumentServiceTest {
 	@DisplayName("getZeroArgument")
 	class GetZeroArgument {
 
-		private static final int RANDOM_UPPER_BOUND = 10;
-
 		private int m;
 		private int n;
 		private ZeroStatement zeroStatement;
@@ -407,72 +405,12 @@ class ZeroArgumentServiceTest {
 
 		@BeforeEach
 		void setUp() {
-			m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1; // Columns.
-			n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1; // Rows.
-
-			// Construct valid witness and statement so that the zero product property holds. To do so, pick at random every witness parameters and
-			// the witness' y value. Then isolate the last element of matrix B, B_(n,m) in the expanded zero product property. Once done, try every
-			// member of the Zq group as a value for B_(n,m) until the zero product property is satisfied. This is fast as long as the test groups are
-			// small.
-			SameGroupMatrix<ZqElement, ZqGroup> matrixA;
-			SameGroupMatrix<ZqElement, ZqGroup> matrixB;
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.generateRandomZqElementVector(m);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.generateRandomZqElementVector(m);
-			ZqElement y;
-
-			// Generate a new set of random values until a valid B_(n,m) is found.
-			Optional<ZqElement> matrixBLastElem;
-			do {
-				matrixA = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
-				matrixB = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
-				y = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
-
-				// Copies to be usable in streams.
-				final SameGroupMatrix<ZqElement, ZqGroup> finalMatrixA = matrixA;
-				final SameGroupMatrix<ZqElement, ZqGroup> finalMatrixB = matrixB;
-				ZqElement finalY = y;
-
-				final ZqElement sumOfOtherZeroProductTerms = IntStream.range(0, m - 1)
-						.mapToObj(
-								i -> zeroArgumentService.starMap(
-										finalMatrixA.getColumn(i),
-										finalMatrixB.getColumn(i),
-										finalY))
-						.reduce(zqGroup.getIdentity(), ZqElement::add).negate();
-				// Corresponds to starMap with last column of matrices, without its last element.
-				final ZqElement sumOfOtherStarMapTerms = IntStream.range(0, n - 1)
-						.mapToObj(j -> finalMatrixA.get(j, m - 1)
-								.multiply(finalMatrixB.get(j, m - 1))
-								.multiply(finalY.exponentiate(BigInteger.valueOf(j + 1L))))
-						.reduce(zqGroup.getIdentity(), ZqElement::add).negate();
-				final ZqElement otherTerms = sumOfOtherZeroProductTerms.add(sumOfOtherStarMapTerms);
-
-				matrixBLastElem = IntStream.range(0, zqGroup.getQ().intValue())
-						.mapToObj(i -> ZqElement.create(BigInteger.valueOf(i), zqGroup))
-						.filter(candidate -> finalMatrixA.get(n - 1, m - 1)
-								.multiply(candidate)
-								.multiply(finalY.exponentiate(BigInteger.valueOf(n)))
-								.equals(otherTerms))
-						.findAny();
-			} while (!matrixBLastElem.isPresent());
-
-			// Replace B_(n,m) by the value satisfying the ensure equation.
-			final List<List<ZqElement>> rows = matrixB.rowStream()
-					.map(sgv -> sgv.stream().collect(Collectors.toList()))
-					.collect(Collectors.toCollection(ArrayList::new));
-			final List<ZqElement> lastRow = matrixB.getRow(n - 1).stream().collect(Collectors.toCollection(ArrayList::new));
-			lastRow.set(m - 1, matrixBLastElem.get());
-			rows.set(n - 1, lastRow);
-			final SameGroupMatrix<ZqElement, ZqGroup> updatedMatrixB = SameGroupMatrix.fromRows(rows);
-
-			// Construct the remaining parts of the statement.
-			final SameGroupVector<GqElement, GqGroup> commitmentsCa = CommitmentService
-					.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
-			final SameGroupVector<GqElement, GqGroup> commitmentsCb = CommitmentService
-					.getCommitmentMatrix(updatedMatrixB, exponentsS, commitmentKey);
-
-			zeroStatement = new ZeroStatement(commitmentsCa, commitmentsCb, y);
-			zeroWitness = new ZeroWitness(matrixA, updatedMatrixB, exponentsR, exponentsS);
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
+			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+			zeroStatement = testData.getZeroStatement();
+			zeroWitness = testData.getZeroWitness();
+			m = testData.getM();
+			n = testData.getN();
 		}
 
 		@Test
@@ -482,8 +420,12 @@ class ZeroArgumentServiceTest {
 			final HashService hashServiceMock = mock(HashService.class);
 			doReturn(new byte[] { 0x2 }).when(hashServiceMock).recursiveHash(any());
 
-			final ZeroArgumentService otherZeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService,
-					hashServiceMock);
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+			ZeroStatement zeroStatement = testData.getZeroStatement();
+			ZeroWitness zeroWitness = testData.getZeroWitness();
+
+			final ZeroArgumentService otherZeroArgumentService = testData.getZeroArgumentService();
 
 			assertDoesNotThrow(() -> otherZeroArgumentService.getZeroArgument(zeroStatement, zeroWitness));
 		}
@@ -666,7 +608,7 @@ class ZeroArgumentServiceTest {
 
 			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
 			final HashService hashServiceMock = mock(HashService.class);
-			doReturn(new byte[] { 0x2 }).when(hashServiceMock).recursiveHash(any());
+			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
 
 			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
 					hashServiceMock);
@@ -678,8 +620,74 @@ class ZeroArgumentServiceTest {
 
 			assertEquals(simpleZeroArgument, zeroArgument);
 		}
-	}
 
+		@Nested
+		@DisplayName("VerifyZeroArgument")
+		class VerifyZeroArgument {
+
+			@RepeatedTest(10)
+			void verifyZeroArgumentTest() {
+				// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
+				final HashService hashServiceMock = mock(HashService.class);
+				when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
+
+				ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+				ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+				ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
+				ZeroStatement statement = testData.getZeroStatement();
+				ZeroWitness witness = testData.getZeroWitness();
+
+				ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
+
+				assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument));
+			}
+
+			@Test
+			void testNullInputParameters() {
+
+				ZeroArgument zeroArgument = mock(ZeroArgument.class);
+				ZeroStatement zeroStatement = mock(ZeroStatement.class);
+
+				assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(zeroStatement, null));
+				assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(null, zeroArgument));
+			}
+
+			@Test
+			void testInputParameterGroupSizes() {
+
+				ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
+				ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
+
+				when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
+				when(zeroStatement.getCommitmentsA().getGroup()).thenReturn(gqGroup);
+
+				when(zeroArgument.getCd().size()).thenReturn(1);
+				when(zeroStatement.getCommitmentsA().size()).thenReturn(2);
+
+				IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
+						() -> zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument));
+				assertEquals("The m of the statement should be equal to the m of the argument (2m+1)", invalidMException.getMessage());
+
+			}
+
+			@Test
+			void testInputParameterGroupMembership() {
+
+				ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
+				ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
+
+				when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
+				when(otherGroupStatement.getCommitmentsA().getGroup()).thenReturn(GqGroupTestData.getDifferentGroup(gqGroup));
+
+				IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
+						() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));
+				assertEquals("Statement and argument do not share the same group", wrongGroupException.getMessage());
+
+			}
+
+		}
+
+	}
 	// ===============================================================================================================================================
 	// Utility methods
 	// ===============================================================================================================================================

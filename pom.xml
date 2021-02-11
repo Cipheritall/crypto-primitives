@@ -13,6 +13,7 @@
 	<properties>
 		<!-- Dependencies versions -->
 		<guava.version>30.0-jre</guava.version>
+		<slf4j-api.version>1.7.30</slf4j-api.version>
 		<jackson.version>2.11.3</jackson.version>
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<lombok.version>1.18.16</lombok.version>
@@ -39,6 +40,13 @@
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-api.version}</version>
+			</dependency>
+
 
 			<!-- Test dependencies -->
 			<dependency>
@@ -98,6 +106,11 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->
