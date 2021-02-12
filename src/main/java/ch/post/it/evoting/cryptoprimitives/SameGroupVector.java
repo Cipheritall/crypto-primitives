@@ -161,7 +161,7 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	 * @param numColumns n, the number of columns of the matrix to be created
 	 * @return a {@link SameGroupMatrix} of size m &times; n
 	 */
-	SameGroupMatrix<E, G> toCiphertextMatrix(final int numRows, final int numColumns) {
+	public SameGroupMatrix<E, G> toCiphertextMatrix(final int numRows, final int numColumns) {
 		checkArgument(numRows > 0, "The number of rows must be positive.");
 		checkArgument(numColumns > 0, "The number of columns must be positive.");
 
@@ -186,7 +186,7 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	 * @param numColumns m, the number of columns of the matrix to be created
 	 * @return a {@link SameGroupMatrix} of size n &times; m
 	 */
-	SameGroupMatrix<E, G> toExponentMatrix(final int numRows, final int numColumns) {
+	public SameGroupMatrix<E, G> toExponentMatrix(final int numRows, final int numColumns) {
 		checkArgument(numRows > 0, "The number of rows must be positive.");
 		checkArgument(numColumns > 0, "The number of columns must be positive.");
 

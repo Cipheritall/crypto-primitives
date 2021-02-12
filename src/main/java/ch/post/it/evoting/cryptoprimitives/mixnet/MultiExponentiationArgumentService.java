@@ -51,8 +51,8 @@ final class MultiExponentiationArgumentService {
 	private final ZqGroup zqGroup;
 
 	/**
-	 * <p>Instantiate a new multi exponentiation argument service. </p>
-	 *
+	 * Instantiate a new multi exponentiation argument service.
+	 * <p>
 	 * The parameters must abide by the following conditions:
 	 * <ul>
 	 *     <li>be non null</li>
@@ -60,10 +60,10 @@ final class MultiExponentiationArgumentService {
 	 *     <li>the public key and commitment key must be of the same size</li>
 	 * </ul>
 	 *
-	 * @param publicKey the public key with which to encrypt ciphertexts
+	 * @param publicKey     the public key with which to encrypt ciphertexts
 	 * @param commitmentKey the key used for commitments
 	 * @param randomService the service providing randomness
-	 * @param hashService the service providing hashing
+	 * @param hashService   the service providing hashing
 	 */
 	MultiExponentiationArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 			final RandomService randomService, final HashService hashService) {
@@ -90,15 +90,16 @@ final class MultiExponentiationArgumentService {
 
 	/**
 	 * Generates a multi exponentiation proof using the statement and witness.
-	 *
+	 * <p>
 	 * The statement and the witness must abide by the following conditions:
 	 * <ul>
 	 *     <li>be non null</li>
 	 *     <li>the statement dimension m and n must be equal to the witness dimensions m and n</li>
 	 *     <li>n must be smaller than the size of the public key</li>
 	 * </ul>
+	 *
 	 * @param statement the statement, which must belong to the same Gq group as the public key and commitment key
-	 * @param witness the witness, which must belong to a Zq group of the same order as the public key and commitment key
+	 * @param witness   the witness, which must belong to a Zq group of the same order as the public key and commitment key
 	 */
 	MultiExponentiationArgument getMultiExponentiationArgument(final MultiExponentiationStatement statement,
 			final MultiExponentiationWitness witness) {
@@ -138,7 +139,6 @@ final class MultiExponentiationArgumentService {
 		//Ensure that cA is the commitment to matrix A
 		checkArgument(cA.equals(getCommitmentMatrix(AMatrix, rVector, ck)), "The commitment provided does not correspond to the matrix A.");
 
-
 		//Algorithm
 		//Generate a0, r0, bs, ss, taus,
 		SameGroupVector<ZqElement, ZqGroup> a0 = new SameGroupVector<>(randomService.genRandomVector(q, n));
@@ -172,11 +172,11 @@ final class MultiExponentiationArgumentService {
 						.limit(l)
 						.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
 		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
-			IntStream.range(0, 2 * m)
-					.mapToObj(k ->
-							getCiphertext(gPowBk.apply(k), tauVector.get(k), pk)
-									.multiply(diagonalProducts.get(k)))
-					.collect(collectingAndThen(toList(), SameGroupVector::new));
+				IntStream.range(0, 2 * m)
+						.mapToObj(k ->
+								getCiphertext(gPowBk.apply(k), tauVector.get(k), pk)
+										.multiply(diagonalProducts.get(k)))
+						.collect(collectingAndThen(toList(), SameGroupVector::new));
 
 		//Compute challenge hash
 		byte[] hash = hashService.recursiveHash(
@@ -240,14 +240,18 @@ final class MultiExponentiationArgumentService {
 	}
 
 	@VisibleForTesting
-	ElGamalMultiRecipientCiphertext multiExponentiation(SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix,
-			SameGroupMatrix<ZqElement, ZqGroup> AMatrix, ZqElement rho, int m, int ciphertextSize) {
-		ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(ciphertextSize, gqGroup);
-		ElGamalMultiRecipientCiphertext onesCiphertext = getCiphertext(ones, rho, pk);
-		return IntStream.range(0, m)
-				//Due to 0 indexing the index i+1 in the spec on the matrix A becomes index i here
+	ElGamalMultiRecipientCiphertext multiExponentiation(final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix,
+			final SameGroupMatrix<ZqElement, ZqGroup> AMatrix, final ZqElement rho, final int m, final int ciphertextSize) {
+
+		final ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertext.neutralElement(ciphertextSize, gqGroup);
+		//Due to 0 indexing the index i+1 in the spec on the matrix A becomes index i here
+		final ElGamalMultiRecipientCiphertext multiExponentiationProduct = IntStream.range(0, m)
 				.mapToObj(i -> getCiphertextVectorExponentiation(CMatrix.getRow(i), AMatrix.getColumn(i)))
-				.reduce(onesCiphertext, ElGamalMultiRecipientCiphertext::multiply);
+				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
+
+		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(ciphertextSize, gqGroup);
+		final ElGamalMultiRecipientCiphertext onesCiphertext = getCiphertext(ones, rho, pk);
+		return onesCiphertext.multiply(multiExponentiationProduct);
 	}
 
 	/**

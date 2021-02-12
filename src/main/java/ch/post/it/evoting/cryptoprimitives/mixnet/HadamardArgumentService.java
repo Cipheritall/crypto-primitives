@@ -254,7 +254,7 @@ public class HadamardArgumentService {
 	 * The statement and the argument must be non null and have compatible groups.
 	 *
 	 * @param statement the statement for which the argument is to be verified.
-	 * @param argument	the argument to be verified.
+	 * @param argument  the argument to be verified.
 	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
 	 */
 	boolean verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
@@ -275,7 +275,7 @@ public class HadamardArgumentService {
 		// Start verification
 		final int m = cA.size();
 		final boolean verifB = cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB);
-		if(!verifB) {
+		if (!verifB) {
 			log.error("cUpperB.get(0) {} must equal cA.get(0) {} and cUpperB.get(m - 1) {} must equal cLowerB {}",
 					cUpperB.get(0), cA.get(0), cUpperB.get(m - 1), cLowerB);
 			return false;
@@ -283,26 +283,26 @@ public class HadamardArgumentService {
 
 		// Calculate x
 		final byte[] hashX = hashService.recursiveHash(
-				p,
-				q,
-				publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				cA.stream().map(GroupElement::getValue).collect(Collectors.toList()),
-				cLowerB.getValue(),
-				cUpperB.stream().map(GroupElement::getValue)
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
+				publicKey,
+				commitmentKey,
+				cA,
+				cLowerB,
+				cUpperB
 		);
 		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hashX), zqGroup);
 
 		// Calculate y
 		final byte[] hashY = hashService.recursiveHash(
-				"1",
-				p,
-				q,
-				publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				cA.stream().map(GroupElement::getValue).collect(Collectors.toList()),
-				cLowerB.getValue(),
-				cUpperB.stream().map(GroupElement::getValue)
+				HashableString.from("1"),
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
+				publicKey,
+				commitmentKey,
+				cA,
+				cLowerB,
+				cUpperB
 		);
 		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(hashY), zqGroup);
 
@@ -334,7 +334,7 @@ public class HadamardArgumentService {
 		final ZeroArgument zArgument = argument.getZeroArgument();
 		final boolean verifZ = zeroArgumentService.verifyZeroArgument(zStatement, zArgument);
 
-		if(!verifZ) {
+		if (!verifZ) {
 			log.error("Failed to verify the ZeroArgument");
 			return false;
 		}
@@ -368,7 +368,7 @@ public class HadamardArgumentService {
 	/**
 	 * Creates a {@link SameGroupVector} with <i>n</i> elements of value <i>q - 1</i>.
 	 *
-	 * @param size	  the size of the vector
+	 * @param size    the size of the vector
 	 * @param zqGroup the {@link ZqGroup} of the vector
 	 * @return a vector of {@code size} elements with value {@code zqGroup.getQ() - 1}
 	 */
