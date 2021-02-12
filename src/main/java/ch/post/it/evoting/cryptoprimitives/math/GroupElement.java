@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.HasGroup;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 
 /**
  * Representation of a mathematical group element.
@@ -15,7 +16,7 @@ import ch.post.it.evoting.cryptoprimitives.HasGroup;
  *
  * @param <G> the type of the mathematical group this group element belongs to.
  */
-public abstract class GroupElement<G extends MathematicalGroup<G>> implements HasGroup<G> {
+public abstract class GroupElement<G extends MathematicalGroup<G>> implements HasGroup<G>, HashableBigInteger {
 
 	protected final BigInteger value;
 	protected final G group;
@@ -54,5 +55,10 @@ public abstract class GroupElement<G extends MathematicalGroup<G>> implements Ha
 	@Override
 	public int hashCode() {
 		return Objects.hash(value, group);
+	}
+
+	@Override
+	public BigInteger toHashableForm() {
+		return this.value;
 	}
 }

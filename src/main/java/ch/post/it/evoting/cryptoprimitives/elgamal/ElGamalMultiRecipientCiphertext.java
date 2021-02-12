@@ -6,6 +6,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
@@ -16,6 +17,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -26,7 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₙ₋₁). The gamma is the left-hand side of a standard
  * ElGamal encryption. Each phi is the encryption of a different message, using a different public key element and the same randomness.
  */
-public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup> {
+public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
 	private final GqElement gamma;
 	private final SameGroupVector<GqElement, GqGroup> phis;
@@ -265,6 +270,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	public String toString() {
 		List<String> simplePhis = phis.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
 		return "ElGamalMultiRecipientCiphertext{" + "gamma=" + gamma + ", phis=" + simplePhis + '}';
+	}
+
+	@Override
+	public ImmutableList<Hashable> toHashableForm() {
+		return this.stream().collect(toImmutableList());
 	}
 }
 

@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */
-public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<G>> {
+public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> implements HashableList {
 
 	private final G group;
 	private final ImmutableList<E> elements;
@@ -66,7 +66,7 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @see #SameGroupVector(List)
 	 */
 	@SafeVarargs
-	public static <E extends HasGroup<G>, G extends MathematicalGroup<G>> SameGroupVector<E, G> of(final E... elements) {
+	public static <E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> SameGroupVector<E, G> of(final E... elements) {
 		//Check null values
 		checkNotNull(elements);
 		checkArgument(Arrays.stream(elements).allMatch(Objects::nonNull), "Elements must not contain nulls");
@@ -208,7 +208,7 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @param <G> the group type the elements of the list belong to.
 	 * @return a {@code Collector} for accumulating the input elements into a SameGroupVector.
 	 */
-	public static <E extends HasGroup<G>, G extends MathematicalGroup<G>> Collector<E, ?, SameGroupVector<E, G>> toSameGroupVector() {
+	public static <E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, SameGroupVector<E, G>> toSameGroupVector() {
 		return Collectors.collectingAndThen(toList(), SameGroupVector::new);
 	}
 
@@ -232,5 +232,11 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 	@Override
 	public int hashCode() {
 		return Objects.hash(elements);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return this.elements;
+
 	}
 }

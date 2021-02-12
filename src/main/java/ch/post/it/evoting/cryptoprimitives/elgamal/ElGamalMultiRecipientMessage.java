@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -26,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * <p>
  * This class is immutable.
  */
-public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup> {
+public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
 	private final SameGroupVector<GqElement, GqGroup> messageElements;
 
@@ -133,5 +137,10 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	@Override
 	public int hashCode() {
 		return Objects.hash(messageElements);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return this.messageElements.toHashableForm();
 	}
 }

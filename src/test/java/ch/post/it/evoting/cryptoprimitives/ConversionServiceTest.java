@@ -4,7 +4,6 @@
 package ch.post.it.evoting.cryptoprimitives;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

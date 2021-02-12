@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -179,38 +180,16 @@ final class MultiExponentiationArgumentService {
 
 		//Compute challenge hash
 		byte[] hash = hashService.recursiveHash(
-				gqGroup.getP(),
-				gqGroup.getQ(),
-				pk.stream()
-						.map(GqElement::getValue)
-						.collect(toList()),
-				ck.stream()
-						.map(GqElement::getValue)
-						.collect(toList()),
-				CMatrix.rowStream()
-						.map(row -> row.stream()
-							.map(ciphertext -> ciphertext
-									.stream()
-									.map(GqElement::getValue)
-									.collect(toList()))
-							.collect(toList()))
-						.collect(toList()),
-				CCiphertext.stream()
-						.map(GqElement::getValue)
-						.collect(toList()),
-				cA.stream()
-						.map(GqElement::getValue)
-						.collect(toList()),
-				cA0.getValue(),
-				cBVector.stream()
-						.map(GqElement::getValue)
-						.collect(toList()),
-				EVector.stream()
-						.map(ciphertext -> ciphertext
-								.stream()
-								.map(GqElement::getValue)
-								.collect(toList()))
-						.collect(toList())
+				HashableBigInteger.from(gqGroup.getP()),
+				HashableBigInteger.from(gqGroup.getQ()),
+				pk,
+				ck,
+				CMatrix,
+				CCiphertext,
+				cA,
+				cA0,
+				cBVector,
+				EVector
 		);
 		ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
 

@@ -3,8 +3,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -128,13 +128,14 @@ class SingleValueProductArgumentService {
 		GqElement cUpperDelta = getCommitment(upperDelta, sx, commitmentKey);
 
 		// Calculate x
-		byte[] hash = hashService.recursiveHash(publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				cUpperDelta.getValue(),
-				cLowerDelta.getValue(),
-				cd.getValue(),
-				b.getValue(),
-				ca.getValue());
+		byte[] hash = hashService.recursiveHash(
+				publicKey,
+				commitmentKey,
+				cUpperDelta,
+				cLowerDelta,
+				cd,
+				b,
+				ca);
 		ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), group);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
@@ -189,13 +190,14 @@ class SingleValueProductArgumentService {
 		final ZqGroup zqGroup = b.getGroup();
 
 		// Calculate x
-		final byte[] hash = hashService.recursiveHash(publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				cUpperDelta.getValue(),
-				cLowerDelta.getValue(),
-				cd.getValue(),
-				b.getValue(),
-				ca.getValue());
+		final byte[] hash = hashService.recursiveHash(
+				publicKey,
+				commitmentKey,
+				cUpperDelta,
+				cLowerDelta,
+				cd,
+				b,
+				ca);
 		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
 
 		// Verify A

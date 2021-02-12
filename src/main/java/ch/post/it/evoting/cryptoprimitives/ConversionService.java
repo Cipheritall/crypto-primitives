@@ -22,7 +22,7 @@ public final class ConversionService {
 	 * @param s the string to convert.
 	 * @return the byte array representation of the string.
 	 */
-	public static byte[] integerToByteArray(final String s) {
+	public static byte[] stringToByteArray(final String s) {
 		checkNotNull(s);
 		return s.getBytes(StandardCharsets.UTF_8);
 	}
@@ -40,7 +40,7 @@ public final class ConversionService {
 		checkNotNull(x);
 		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
 
-		// BigInteger#integerToByteArray gives back a 2s complement representation of the value. Given that we work only with positive BigIntegers, this
+		// BigInteger#toByteArray gives back a 2s complement representation of the value. Given that we work only with positive BigIntegers, this
 		// representation is equivalent to the binary representation, except for a potential extra leading zero byte. (The presence or not of the
 		// leading zero depends on the number of bits needed to represent this value).
 		byte[] twosComplement = x.toByteArray();

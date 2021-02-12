@@ -16,12 +16,13 @@ import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.HashableString;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
@@ -146,29 +147,30 @@ public class HadamardArgumentService {
 				.mapToObj(j -> CommitmentService.getCommitment(bList.get(j), sList.get(j), commitmentKey))
 				.collect(Collectors.toList()));
 		cBList.add(m - 1, cb);
+		final SameGroupVector<GqElement, GqGroup> cBVector = new SameGroupVector<>(cBList);
 
 		// Calculate x
 		final byte[] hashX = hashService.recursiveHash(
-				p,
-				q,
-				publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				cA.stream().map(GroupElement::getValue).collect(Collectors.toList()),
-				cb.getValue(),
-				cBList.stream().map(GroupElement::getValue)
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
+				publicKey,
+				commitmentKey,
+				cA,
+				cb,
+				cBVector
 		);
 		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hashX), zqGroup);
 
 		// Calculate y
 		final byte[] hashY = hashService.recursiveHash(
-				"1",
-				p,
-				q,
-				publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
-				cA.stream().map(GroupElement::getValue).collect(Collectors.toList()),
-				cb.getValue(),
-				cBList.stream().map(GroupElement::getValue)
+				HashableString.from("1"),
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
+				publicKey,
+				commitmentKey,
+				cA,
+				cb,
+				cBVector
 		);
 		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(hashY), zqGroup);
 
@@ -186,7 +188,7 @@ public class HadamardArgumentService {
 
 		// Calculate c_(D_0), ..., c_(D_(m-2))
 		final SameGroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
-				.mapToObj(i -> cBList.get(i).exponentiate(xExpI.get(i + 1)))
+				.mapToObj(i -> cBVector.get(i).exponentiate(xExpI.get(i + 1)))
 				.collect(toSameGroupVector());
 
 		// Calculate t_0, ..., t_(m-2)
@@ -203,7 +205,7 @@ public class HadamardArgumentService {
 
 		// Calculate c_D
 		final GqElement cD = IntStream.range(1, m)
-				.mapToObj(i -> cBList.get(i).exponentiate(xExpI.get(i)))
+				.mapToObj(i -> cBVector.get(i).exponentiate(xExpI.get(i)))
 				.reduce(gqGroup.getIdentity(), GqElement::multiply);
 
 		// Calculate t

@@ -2,6 +2,7 @@
  * HEADER_LICENSE_OPEN_SOURCE
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
+
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
@@ -22,12 +23,12 @@ import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroArgument.ZeroArgumentBuilder;
@@ -413,25 +414,15 @@ final class ZeroArgumentService {
 		BigInteger q = gqGroup.getQ();
 
 		return hashService.recursiveHash(
-				p,
-				q,
-				publicKey.stream()
-						.map(GqElement::getValue)
-						.collect(Collectors.toList()),
-				commitmentKey.stream()
-						.map(GroupElement::getValue)
-						.collect(Collectors.toList()),
-				cA0.getValue(),
-				cBm.getValue(),
-				cd.stream()
-						.map(GqElement::getValue)
-						.collect(Collectors.toList()),
-				commitmentsB.stream()
-						.map(GroupElement::getValue)
-						.collect(Collectors.toList()),
-				commitmentsA.stream()
-						.map(GroupElement::getValue)
-						.collect(Collectors.toList())
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
+				publicKey,
+				commitmentKey,
+				cA0,
+				cBm,
+				cd,
+				commitmentsB,
+				commitmentsA
 		);
 	}
 

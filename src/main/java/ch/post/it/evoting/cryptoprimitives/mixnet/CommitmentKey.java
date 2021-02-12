@@ -5,6 +5,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -12,6 +13,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -21,7 +26,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  *
  * <p>A commitment key is of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>)</p>
  */
-class CommitmentKey {
+class CommitmentKey implements HashableList {
 
 	private final GqGroup group;
 	private final GqElement h;
@@ -110,5 +115,10 @@ class CommitmentKey {
 	public String toString() {
 		List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
 		return "CommitmentKey{" + "h=" + h + ", g elements=" + simpleGElements + '}';
+	}
+
+	@Override
+	public ImmutableList<Hashable> toHashableForm() {
+		return this.stream().collect(toImmutableList());
 	}
 }

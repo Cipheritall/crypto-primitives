@@ -3,7 +3,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,13 +14,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+
+import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
@@ -45,7 +45,7 @@ class HashServiceTest {
 	}
 
 	@Test
-	void testInstantiateWithNullHashFunctionThrows(){
+	void testInstantiateWithNullHashFunctionThrows() {
 		assertThrows(NullPointerException.class, () -> new HashService(null));
 	}
 
@@ -53,7 +53,7 @@ class HashServiceTest {
 	void testRecursiveHashOfByteArrayReturnsHashOfByteArray() {
 		byte[] bytes = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes);
-		byte[] recursiveHash = hashService.recursiveHash(bytes);
+		byte[] recursiveHash = hashService.recursiveHash(HashableByteArray.from(bytes));
 		byte[] regularHash = messageDigest.digest(bytes);
 		assertArrayEquals(regularHash, recursiveHash);
 	}
@@ -61,52 +61,44 @@ class HashServiceTest {
 	@Test
 	void testRecursiveHashOfStringReturnsHashOfString() {
 		String string = randomService.genRandomBase32String(TEST_INPUT_LENGTH);
-		byte[] expected = messageDigest.digest(integerToByteArray(string));
-		byte[] recursiveHash = hashService.recursiveHash(string);
+		byte[] expected = messageDigest.digest(ConversionService.stringToByteArray(string));
+		byte[] recursiveHash = hashService.recursiveHash(HashableString.from(string));
 		assertArrayEquals(expected, recursiveHash);
 	}
 
 	@Test
 	void testRecursiveHashOfBigIntegerValue10ReturnsSameHashOfInteger10() {
 		BigInteger bigInteger = new BigInteger(2048, secureRandom);
-		byte[] recursiveHash = hashService.recursiveHash(bigInteger);
+		byte[] recursiveHash = hashService.recursiveHash(HashableBigInteger.from(bigInteger));
 		byte[] regularHash = messageDigest.digest(ConversionService.integerToByteArray(bigInteger));
 		assertArrayEquals(regularHash, recursiveHash);
 	}
 
 	@Test
-	void testRecursiveHashOfInvalidTypeThrow(){
-		int integer = 5;
-		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(integer));
-	}
-
-	@Test
-	void testRecursiveHashOfNullObjectThrows(){
-		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash((Object) null));
-	}
-
-	@Test
 	void testRecursiveHashOfNullThrows() {
-		assertThrows(NullPointerException.class, () -> hashService.recursiveHash(null));
+		assertThrows(NullPointerException.class, () -> hashService.recursiveHash((Hashable) null));
 	}
 
 	@Test
-	void testRecursiveHashOfListOfOneElementReturnsHashOfElement(){
+	void testRecursiveHashOfListOfOneElementReturnsHashOfElement() {
 		byte[] bytes = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes);
-		List<?> list = Collections.singletonList(bytes);
+		ImmutableList<Hashable> list = ImmutableList.of(HashableByteArray.from(bytes));
 		byte[] expected = messageDigest.digest(messageDigest.digest(bytes));
-		byte[] hash = hashService.recursiveHash(list);
+		byte[] hash = hashService.recursiveHash(HashableList.from(list));
 		assertArrayEquals(expected, hash);
 	}
 
 	@Test
-	void testRecursiveHashOfTwoByteArraysReturnsHashOfConcatenatedIndividualHashes(){
+	void testRecursiveHashOfTwoByteArraysReturnsHashOfConcatenatedIndividualHashes() {
 		byte[] bytes1 = new byte[TEST_INPUT_LENGTH];
 		byte[] bytes2 = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes1);
 		secureRandom.nextBytes(bytes2);
-		List<?> list = Arrays.asList(bytes1, bytes2);
+		HashableByteArray hashableBytes1 = HashableByteArray.from(bytes1);
+		HashableByteArray hashableBytes2 = HashableByteArray.from(bytes2);
+
+		HashableList list = hashableListOf(hashableBytes1, hashableBytes2);
 
 		byte[] hash = hashService.recursiveHash(list);
 
@@ -119,15 +111,18 @@ class HashServiceTest {
 	}
 
 	@Test
-	void testRecursiveHashOfAByteArrayAndAListOfTwoByteArraysReturnsExpectedHash(){
+	void testRecursiveHashOfAByteArrayAndAListOfTwoByteArraysReturnsExpectedHash() {
 		byte[] bytes1 = new byte[TEST_INPUT_LENGTH];
 		byte[] bytes2 = new byte[TEST_INPUT_LENGTH];
 		byte[] bytes3 = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes1);
 		secureRandom.nextBytes(bytes2);
 		secureRandom.nextBytes(bytes3);
-		List<?> list = Arrays.asList(bytes2, bytes3);
-		Object input = Arrays.asList(bytes1, list);
+		HashableByteArray hashableBytes1 = HashableByteArray.from(bytes1);
+		HashableByteArray hashableBytes2 = HashableByteArray.from(bytes2);
+		HashableByteArray hashableBytes3 = HashableByteArray.from(bytes3);
+		HashableList list = hashableListOf(hashableBytes2, hashableBytes3);
+		HashableList input = hashableListOf(hashableBytes1, list);
 
 		byte[] hash = hashService.recursiveHash(input);
 
@@ -145,24 +140,24 @@ class HashServiceTest {
 
 	@Test
 	void testRecursiveHashOfEmptyListThrows() {
-		List<?> list = Collections.emptyList();
+		HashableList list = hashableListOf();
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
 
 	@Test
 	void testRecursiveHashOfNestedEmptyListThrows() {
-		List<?> emptyList = Collections.emptyList();
-		List<?> list = Arrays.asList(1, emptyList);
+		HashableList emptyList = hashableListOf();
+		HashableList list = hashableListOf(HashableBigInteger.from(BigInteger.ONE), emptyList);
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
 
 	@Test
 	void testRecursiveHashWithVarargsGivesSameResultAsWithList() {
-		Object first = genRandomLeafObject(BigInteger.class);
-		Object second = genRandomLeafObject(String.class);
-		Object third = genRandomLeafObject(byte[].class);
-		List<?> list = Collections.singletonList(third);
-		List<?> input = Arrays.asList(list, first, second);
+		HashableBigInteger first = genRandomHashableBigInteger();
+		HashableString second = genRandomHashableString();
+		HashableByteArray third = genRandomHashableByteArray();
+		HashableList list = hashableListOf(third);
+		HashableList input = hashableListOf(list, first, second);
 		byte[] varargsHash = hashService.recursiveHash(list, first, second);
 		byte[] listHash = hashService.recursiveHash(input);
 		assertArrayEquals(listHash, varargsHash);
@@ -170,30 +165,31 @@ class HashServiceTest {
 
 	@Test
 	void testRecursiveHashWithNestedListAndSpecificValues() throws IOException {
-		BigInteger first = (BigInteger) genRandomLeafObject(BigInteger.class);
-		byte[] second = (byte[]) genRandomLeafObject(byte[].class);
-		String third = (String) genRandomLeafObject(String.class);
-		List<Object> subSubList = new LinkedList<>();
+		HashableBigInteger first = genRandomHashableBigInteger();
+		HashableByteArray second = genRandomHashableByteArray();
+		HashableString third = genRandomHashableString();
+		List<Hashable> subSubList = new LinkedList<>();
 		subSubList.add(first);
 		subSubList.add(second);
-		List<Object> subList = Arrays.asList(third, subSubList);
-		List<Object> input = Arrays.asList(first, second, subList);
+		HashableList hashableSubSubList = HashableList.from(ImmutableList.copyOf(subSubList));
+		HashableList subList = hashableListOf(third, hashableSubSubList);
+		HashableList input = hashableListOf(first, second, subList);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		outputStream.write(messageDigest.digest(ConversionService.integerToByteArray(first)));
-		outputStream.write(messageDigest.digest(second));
+		outputStream.write(messageDigest.digest(ConversionService.integerToByteArray(first.toHashableForm())));
+		outputStream.write(messageDigest.digest(second.toHashableForm()));
 		byte[] expectedSubSubListHash = messageDigest.digest(outputStream.toByteArray());
 		outputStream.close();
 
 		ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
-		outputStream1.write(messageDigest.digest(integerToByteArray(third)));
+		outputStream1.write(messageDigest.digest(ConversionService.stringToByteArray(third.toHashableForm())));
 		outputStream1.write(expectedSubSubListHash);
 		byte[] expectedSubListHash = messageDigest.digest(outputStream1.toByteArray());
 		outputStream1.close();
 
 		ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
-		outputStream2.write(messageDigest.digest(ConversionService.integerToByteArray(first)));
-		outputStream2.write(messageDigest.digest(second));
+		outputStream2.write(messageDigest.digest(ConversionService.integerToByteArray(first.toHashableForm())));
+		outputStream2.write(messageDigest.digest(second.toHashableForm()));
 		outputStream2.write(expectedSubListHash);
 		byte[] expectedHash = messageDigest.digest(outputStream2.toByteArray());
 		outputStream2.close();
@@ -203,25 +199,25 @@ class HashServiceTest {
 		assertArrayEquals(expectedHash, hash);
 	}
 
-	private Object genRandomLeafObject(Class<?> clazz) {
-		if (clazz.equals(BigInteger.class)){
-			return new BigInteger(50 , secureRandom);
-		} else if (clazz.equals(byte[].class)){
-			int size = secureRandom.nextInt(500);
-			byte[] bytes = new byte[size];
-			secureRandom.nextBytes(bytes);
-			return bytes;
-		} else if (clazz.equals(String.class)){
-			return randomService.genRandomBase32String(TEST_INPUT_LENGTH);
-		} else {
-			throw new UnsupportedOperationException();
-		}
+	private HashableByteArray genRandomHashableByteArray() {
+		int size = secureRandom.nextInt(500);
+		byte[] bytes = new byte[size];
+		secureRandom.nextBytes(bytes);
+		return HashableByteArray.from(bytes);
+	}
+
+	private HashableString genRandomHashableString() {
+		return HashableString.from(randomService.genRandomBase32String(TEST_INPUT_LENGTH));
+	}
+
+	private HashableBigInteger genRandomHashableBigInteger() {
+		return HashableBigInteger.from(new BigInteger(50, secureRandom));
 	}
 
 	@Test
 	void thereExistsCollisions() {
-		BigInteger num = BigInteger.valueOf(33);
-		String string = "!";
+		HashableBigInteger num = HashableBigInteger.from(BigInteger.valueOf(33));
+		HashableString string = HashableString.from("!");
 		assertArrayEquals(hashService.recursiveHash(num), hashService.recursiveHash(string));
 	}
 
@@ -235,7 +231,7 @@ class HashServiceTest {
 		Split second;
 		do {
 			second = split(concatenated);
-		} while (Arrays.equals(second.start, first.start));
+		} while (Arrays.equals(second.start.toHashableForm(), first.start.toHashableForm()));
 
 		byte[] firstHash = hashService.recursiveHash(first.start, first.end);
 		byte[] secondHash = hashService.recursiveHash(second.start, second.end);
@@ -249,14 +245,14 @@ class HashServiceTest {
 		byte[] second = new byte[input.length - split];
 		System.arraycopy(input, 0, first, 0, split);
 		System.arraycopy(input, split, second, 0, input.length - split);
-		return new Split(first, second);
+		return new Split(HashableByteArray.from(first), HashableByteArray.from(second));
 	}
 
 	private static class Split {
-		final byte[] start;
-		final byte[] end;
+		final HashableByteArray start;
+		final HashableByteArray end;
 
-		Split(byte[] start, byte[] end) {
+		Split(HashableByteArray start, HashableByteArray end) {
 			this.start = start;
 			this.end = end;
 		}
@@ -264,10 +260,15 @@ class HashServiceTest {
 
 	@Test
 	void testThatSimilarCharactersHashToDifferentValues() {
-		String first = "e";
+		HashableString first = HashableString.from("e");
 		byte[] firstHash = hashService.recursiveHash(first);
-		String second = "é";
+		HashableString second = HashableString.from("é");
 		byte[] secondHash = hashService.recursiveHash(second);
 		assertNotEquals(firstHash, secondHash);
+	}
+
+	//Utilities
+	static HashableList hashableListOf(Hashable... items) {
+		return HashableList.from(ImmutableList.copyOf(items));
 	}
 }

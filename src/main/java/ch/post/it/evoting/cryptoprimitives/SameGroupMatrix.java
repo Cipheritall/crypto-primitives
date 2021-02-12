@@ -27,7 +27,7 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */
-public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<G>> implements HasGroup<G> {
+public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> implements HasGroup<G>, HashableList {
 
 	private final G group;
 	private final ImmutableList<SameGroupVector<E, G>> rows;
@@ -64,7 +64,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 *             <li>all rows must have the same size</li>
 	 *             <li>all elements must be from the same {@link MathematicalGroup} </li>
 	 */
-	public static <L extends List<E>, E extends HasGroup<G>, G extends MathematicalGroup<G>>
+	public static <L extends List<E>, E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromRows(List<L> rows) {
 		//Null checks
 		checkNotNull(rows);
@@ -88,12 +88,12 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 *                <li>all columns must have the same size</li>
 	 *                <li>all elements must be from the same {@link MathematicalGroup} </li>
 	 */
-	public static <L extends List<E>, E extends HasGroup<G>, G extends MathematicalGroup<G>>
+	public static <L extends List<E>, E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromColumns(List<L> columns) {
 		return fromRows(columns).transpose();
 	}
 
-	private static <E extends HasGroup<G>, G extends MathematicalGroup<G>>
+	private static <E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromColumnVector(final ImmutableList<SameGroupVector<E, G>> columns) {
 		return new SameGroupMatrix<>(columns).transpose();
 	}
@@ -247,5 +247,10 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	@Override
 	public String toString() {
 		return "SameGroupMatrix{" + "rows=" + rows + '}';
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return this.rows;
 	}
 }

@@ -7,6 +7,7 @@ import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToI
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationStatementWitnessPairGenerator.StatementWitnessPair;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,7 +20,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -28,7 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.stubbing.Answer;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -74,8 +78,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		when(hashServiceMock.recursiveHash(any())).thenAnswer(
 				(Answer<byte[]>) invocationOnMock -> {
 					Object[] args = invocationOnMock.getArguments();
-					List<Object> argsList = Arrays.asList(args);
-					BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(argsList)).mod(gqGroup.getQ());
+					ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
+					HashableList hashables = HashableList.from(argsList);
+					BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ());
 					return integerToByteArray(hashModQ);
 				}
 		);
