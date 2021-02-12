@@ -13,17 +13,28 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 class HashServiceTest {
 
@@ -47,6 +58,68 @@ class HashServiceTest {
 	@Test
 	void testInstantiateWithNullHashFunctionThrows() {
 		assertThrows(NullPointerException.class, () -> new HashService(null));
+	}
+
+	static Stream<Arguments> jsonFileArgumentProvider() {
+
+		final List<TestParameters> parametersList = TestParameters.fromResource("/recursive-hash-sha256.json");
+
+		return parametersList.stream().parallel().map(testParameters -> {
+
+			final String messageDigest = testParameters.getContext().getJsonData("hash_function").getJsonNode().asText();
+
+			final JsonData input = testParameters.getInput();
+
+			Hashable[] values = readInput(input).toArray(new Hashable[] {});
+
+			JsonData output = testParameters.getOutput();
+			byte[] hash = output.get("value", byte[].class);
+
+			return Arguments.of(messageDigest, values, hash, testParameters.getDescription());
+		});
+	}
+
+	private static ImmutableList<Hashable> readInput(JsonData input) {
+		List<Hashable> values = new ArrayList<>();
+		if (input.getJsonNode().isArray()) {
+			ArrayNode nodes = (ArrayNode) input.getJsonNode();
+			for (JsonNode node : nodes) {
+				JsonData nodeData = new JsonData(node);
+				if (nodeData.getJsonNode().isArray()) {
+					values.add(HashableList.from(readInput(nodeData)));
+				} else {
+					values.add(readValue(nodeData));
+				}
+			}
+		} else {
+			values.add(readValue(input));
+		}
+
+		return ImmutableList.copyOf(values);
+	}
+
+	private static Hashable readValue(JsonData data) {
+		String type = data.getJsonData("type").getJsonNode().asText();
+		switch (type) {
+		case "string":
+			return HashableString.from(data.get("value", String.class));
+		case "integer":
+			return HashableBigInteger.from(data.get("value", BigInteger.class));
+		case "bytes":
+			return HashableByteArray.from(data.get("value", byte[].class));
+		default:
+			throw new IllegalArgumentException(String.format("Unknown type: %s", type));
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("jsonFileArgumentProvider")
+	@DisplayName("recursiveHash of specific input returns expected output")
+	void testRecursiveHashWithRealValues(final String messageDigest, final Hashable[] input, final byte[] output, final String description)
+			throws NoSuchAlgorithmException {
+		HashService testHashService = new HashService(MessageDigest.getInstance(messageDigest));
+		byte[] actual = testHashService.recursiveHash(input);
+		assertArrayEquals(output, actual, String.format("assertion failed for: %s", description));
 	}
 
 	@Test

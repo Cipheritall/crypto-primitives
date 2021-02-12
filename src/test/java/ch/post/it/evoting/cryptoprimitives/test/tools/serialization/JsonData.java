@@ -3,6 +3,8 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.serialization;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +31,8 @@ public final class JsonData {
 	 * <li>BigInteger</li>
 	 * <li>BigInteger[]</li>
 	 * <li>BigInteger[][]</li>
+	 * <li>String</li>
+	 * <li>byte[]</li>
 	 *
 	 * @param field The name of the field to search for.
 	 * @param clazz The target class to convert the field to.
@@ -45,6 +49,10 @@ public final class JsonData {
 			return clazz.cast(getBigIntegerArray(field));
 		} else if (clazz.equals(BigInteger[][].class)) {
 			return clazz.cast(getBigIntegerArrayArray(field));
+		} else if (clazz.equals(String.class)) {
+			return clazz.cast(jsonNode.get(field).asText());
+		} else if (clazz.equals(byte[].class)) {
+			return clazz.cast(Base64.getDecoder().decode(jsonNode.get(field).asText()));
 		} else {
 			throw new IllegalArgumentException("Unsupported target class.");
 		}

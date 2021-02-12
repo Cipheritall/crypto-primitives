@@ -221,10 +221,10 @@ class ElGamalMultiRecipientCiphertextTest {
 
 		return parametersList.stream().parallel().map(testParameters -> {
 			// Context.
-			final JsonData egJsonData = testParameters.getContext().getJsonData("eg");
-			final BigInteger p = egJsonData.get("p", BigInteger.class);
-			final BigInteger q = egJsonData.get("q", BigInteger.class);
-			final BigInteger g = testParameters.getContext().get("g", BigInteger.class);
+			final JsonData context = testParameters.getContext();
+			final BigInteger p = context.get("p", BigInteger.class);
+			final BigInteger q = context.get("q", BigInteger.class);
+			final BigInteger g = context.get("g", BigInteger.class);
 
 			final GqGroup group = new GqGroup(p, q, g);
 
