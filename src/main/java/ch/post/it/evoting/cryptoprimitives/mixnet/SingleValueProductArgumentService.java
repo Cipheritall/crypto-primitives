@@ -15,11 +15,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
@@ -33,6 +38,8 @@ class SingleValueProductArgumentService {
 	private final HashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
+
+	private final Logger log = LoggerFactory.getLogger(SingleValueProductArgumentService.class);
 
 	SingleValueProductArgumentService(final RandomService randomService, final HashService hashService,
 			final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey) {
@@ -128,15 +135,7 @@ class SingleValueProductArgumentService {
 		GqElement cUpperDelta = getCommitment(upperDelta, sx, commitmentKey);
 
 		// Calculate x
-		byte[] hash = hashService.recursiveHash(
-				publicKey,
-				commitmentKey,
-				cUpperDelta,
-				cLowerDelta,
-				cd,
-				b,
-				ca);
-		ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), group);
+		ZqElement x = hashAndConvertX(cUpperDelta, cLowerDelta, cd, b, ca);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
 		SameGroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
@@ -187,10 +186,55 @@ class SingleValueProductArgumentService {
 		final ZqElement sTilde = argument.getSTilde();
 
 		final int n = aTilde.size();
-		final ZqGroup zqGroup = b.getGroup();
 
 		// Calculate x
-		final byte[] hash = hashService.recursiveHash(
+		final ZqElement x = hashAndConvertX(cUpperDelta, cLowerDelta, cd, b, ca);
+
+		// Verify A
+		final GqElement prodCa = ca.exponentiate(x).multiply(cd);
+		final GqElement commA = getCommitment(aTilde, rTilde, commitmentKey);
+		final boolean verifA = prodCa.equals(commA);
+
+		if (!verifA) {
+			log.error("prodCa {} and commA {} are not equal", prodCa, commA);
+			return false;
+		}
+
+		// Verify Delta
+		final GqElement prodDelta = cUpperDelta.exponentiate(x).multiply(cLowerDelta);
+		final SameGroupVector<ZqElement, ZqGroup> eiVector = IntStream.range(0, n - 1)
+				.mapToObj(i -> x.multiply(bTilde.get(i + 1))
+						.subtract(bTilde.get(i).multiply(aTilde.get(i + 1))))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
+		final boolean verifDelta = prodDelta.equals(commDelta);
+
+		if (!verifDelta) {
+			log.error("prodDelta {} and commDelta {} are not equal", prodDelta, commDelta);
+			return false;
+		}
+
+		// Verify B
+		final boolean verifB = ((bTilde.get(0).equals(aTilde.get(0))) && (bTilde.get(n - 1).equals(x.multiply(b))));
+
+		if (!verifB) {
+			log.error("bTilde.get(0) {} must equal aTilde.get(0) {} and bTilde.get(n - 1) {} must equal x * b {}", bTilde.get(0), aTilde.get(0),
+					bTilde.get(n - 1), x.multiply(b));
+			return false;
+		}
+
+		return verifA && verifDelta && verifB;
+	}
+
+	private ZqElement hashAndConvertX(GqElement cUpperDelta, GqElement cLowerDelta, GqElement cd, ZqElement b, GqElement ca) {
+		GqGroup gqGroup = ca.getGroup();
+		ZqGroup zqGroup = b.getGroup();
+		BigInteger p = gqGroup.getP();
+		BigInteger q = gqGroup.getQ();
+
+		byte[] hash = hashService.recursiveHash(
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
 				publicKey,
 				commitmentKey,
 				cUpperDelta,
@@ -198,25 +242,7 @@ class SingleValueProductArgumentService {
 				cd,
 				b,
 				ca);
-		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
 
-		// Verify A
-		final GqElement prodCa = ca.exponentiate(x).multiply(cd);
-		final GqElement commA = getCommitment(aTilde, rTilde, commitmentKey);
-		final boolean verifA = prodCa.equals(commA);
-
-		// Verify Delta
-		final GqElement prodDelta = cUpperDelta.exponentiate(x).multiply(cLowerDelta);
-		final SameGroupVector<ZqElement, ZqGroup> eiVector = IntStream.range(0, n - 1)
-				.mapToObj(i -> x.multiply(bTilde.get(i + 1))
-						.add(bTilde.get(i).multiply(aTilde.get(i + 1).negate())))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
-		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
-		final boolean verifDelta = prodDelta.equals(commDelta);
-
-		// Verify B
-		final boolean verifB = ((bTilde.get(0).equals(aTilde.get(0))) && (bTilde.get(n - 1).equals(x.multiply(b))));
-
-		return verifA && verifDelta && verifB;
+		return ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
 	}
 }
