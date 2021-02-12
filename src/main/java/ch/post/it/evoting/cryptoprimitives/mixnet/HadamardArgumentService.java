@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
@@ -34,6 +37,8 @@ public class HadamardArgumentService {
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
+
+	private final Logger log = LoggerFactory.getLogger(HadamardArgumentService.class);
 
 	/**
 	 * Constructs a {code HadamardArgumentService}.
@@ -214,8 +219,7 @@ public class HadamardArgumentService {
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		// (-1, ..., -1) and c_(-1)
-		final SameGroupVector<ZqElement, ZqGroup> minusOnes = Stream.generate(() -> ZqElement.create(q.subtract(BigInteger.ONE), zqGroup)).limit(n)
-				.collect(toSameGroupVector());
+		final SameGroupVector<ZqElement, ZqGroup> minusOnes = getMinusOnes(n, zqGroup);
 		final ZqElement zero = zqGroup.getIdentity();
 		final GqElement cMinusOne = CommitmentService.getCommitment(minusOnes, zero, commitmentKey);
 
@@ -245,6 +249,100 @@ public class HadamardArgumentService {
 	}
 
 	/**
+	 * Verifies the correctness of a {@link HadamardArgument} with respect to a given {@link HadamardStatement}.
+	 * <p>
+	 * The statement and the argument must be non null and have compatible groups.
+	 *
+	 * @param statement the statement for which the argument is to be verified.
+	 * @param argument	the argument to be verified.
+	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 */
+	boolean verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
+		checkNotNull(statement);
+		checkNotNull(argument);
+
+		// Retrieve elements for verification
+		final SameGroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
+		final GqElement cLowerB = statement.getCommitmentB();
+		final SameGroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
+		final SameGroupVector<ZqElement, ZqGroup> aPrime = argument.getZeroArgument().getAPrime();
+
+		final ZqGroup zqGroup = aPrime.getGroup();
+		final GqGroup gqGroup = cA.getGroup();
+		final BigInteger p = cA.getGroup().getP();
+		final BigInteger q = cA.getGroup().getQ();
+
+		// Start verification
+		final int m = cA.size();
+		final boolean verifB = cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB);
+		if(!verifB) {
+			log.error("cUpperB.get(0) {} must equal cA.get(0) {} and cUpperB.get(m - 1) {} must equal cLowerB {}",
+					cUpperB.get(0), cA.get(0), cUpperB.get(m - 1), cLowerB);
+			return false;
+		}
+
+		// Calculate x
+		final byte[] hashX = hashService.recursiveHash(
+				p,
+				q,
+				publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+				cA.stream().map(GroupElement::getValue).collect(Collectors.toList()),
+				cLowerB.getValue(),
+				cUpperB.stream().map(GroupElement::getValue)
+		);
+		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hashX), zqGroup);
+
+		// Calculate y
+		final byte[] hashY = hashService.recursiveHash(
+				"1",
+				p,
+				q,
+				publicKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+				commitmentKey.stream().map(GqElement::getValue).collect(Collectors.toList()),
+				cA.stream().map(GroupElement::getValue).collect(Collectors.toList()),
+				cLowerB.getValue(),
+				cUpperB.stream().map(GroupElement::getValue)
+		);
+		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(hashY), zqGroup);
+
+		// Pre-calculate the powers of x
+		final SameGroupVector<ZqElement, ZqGroup> xPowers = IntStream.range(0, m)
+				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
+				.collect(toSameGroupVector());
+
+		// Calculate c_(D_0), ..., c_(D_(m-2))
+		final SameGroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
+				.mapToObj(i -> cUpperB.get(i).exponentiate(xPowers.get(i + 1)))
+				.collect(toSameGroupVector());
+
+		// Calculate c_D
+		final GqElement cD = IntStream.range(1, m)
+				.mapToObj(i -> cUpperB.get(i).exponentiate(xPowers.get(i)))
+				.reduce(gqGroup.getIdentity(), GqElement::multiply);
+
+		// (-1, ..., -1) and c_(-1)
+		final int n = aPrime.size();
+		final SameGroupVector<ZqElement, ZqGroup> minusOnes = getMinusOnes(n, zqGroup);
+		final ZqElement zero = zqGroup.getIdentity();
+		final GqElement cMinusOne = CommitmentService.getCommitment(minusOnes, zero, commitmentKey);
+
+		// Create zero statement
+		final SameGroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1).collect(toSameGroupVector());
+		final SameGroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
+		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
+		final ZeroArgument zArgument = argument.getZeroArgument();
+		final boolean verifZ = zeroArgumentService.verifyZeroArgument(zStatement, zArgument);
+
+		if(!verifZ) {
+			log.error("Failed to verify the ZeroArgument");
+			return false;
+		}
+
+		return verifB && verifZ;
+	}
+
+	/**
 	 * Calculates the Hadamard product for the first <i>j - 1</i> column vectors of a matrix.
 	 * <p>
 	 * The Hadamard product of two column vectors v = (v<sub>0</sub>, ..., v<sub>n-1</sub>) and w = (w<sub>0</sub>, ..., w<sub>n-1</sub> is the entry
@@ -264,6 +362,20 @@ public class HadamardArgumentService {
 				.mapToObj(i -> matrix.getRow(i).stream()
 						.limit(j + 1L)
 						.reduce(one, ZqElement::multiply))
+				.collect(toSameGroupVector());
+	}
+
+	/**
+	 * Creates a {@link SameGroupVector} with <i>n</i> elements of value <i>q - 1</i>.
+	 *
+	 * @param size	  the size of the vector
+	 * @param zqGroup the {@link ZqGroup} of the vector
+	 * @return a vector of {@code size} elements with value {@code zqGroup.getQ() - 1}
+	 */
+	private SameGroupVector<ZqElement, ZqGroup> getMinusOnes(final int size, final ZqGroup zqGroup) {
+		BigInteger q = zqGroup.getQ();
+
+		return Stream.generate(() -> ZqElement.create(q.subtract(BigInteger.ONE), zqGroup)).limit(size)
 				.collect(toSameGroupVector());
 	}
 }

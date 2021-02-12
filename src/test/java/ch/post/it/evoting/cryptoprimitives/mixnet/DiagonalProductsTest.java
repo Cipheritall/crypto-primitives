@@ -142,7 +142,8 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@DisplayName("with ciphertexts of different size throws IllegalArgumentException")
 	void getDiagonalProductsDifferentSizeCiphertexts() {
 		// Create a row with ciphertexts having more phis.
-		final List<ElGamalMultiRecipientCiphertext> longerCiphertexts = elGamalGenerator.genRandomCiphertexts(publicKey, l + 1, n);
+		ElGamalMultiRecipientPublicKey longerPublicKey = elGamalGenerator.genRandomPublicKey(l + 1);
+		final List<ElGamalMultiRecipientCiphertext> longerCiphertexts = elGamalGenerator.genRandomCiphertexts(longerPublicKey, l + 1, n);
 		// Convert matrix to a mutable one.
 		final List<List<ElGamalMultiRecipientCiphertext>> collect = ciphertexts.rowStream()
 				.map(l -> l.stream().collect(Collectors.toList()))

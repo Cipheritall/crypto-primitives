@@ -7,7 +7,9 @@ import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVec
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,6 +56,9 @@ class HadamardArgumentServiceTest {
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
 	private static HadamardArgumentService hadamardArgumentService;
+
+	private HadamardStatement statement;
+	private HadamardWitness witness;
 
 	@BeforeAll
 	static void setupAll() {
@@ -122,9 +127,6 @@ class HadamardArgumentServiceTest {
 		private SameGroupVector<ZqElement, ZqGroup> vector;
 		private SameGroupVector<ZqElement, ZqGroup> exponents;
 		private ZqElement randomness;
-
-		private HadamardStatement statement;
-		private HadamardWitness witness;
 
 		@BeforeEach
 		void setup() {
@@ -369,6 +371,89 @@ class HadamardArgumentServiceTest {
 			HadamardArgument expected = new HadamardArgument(cB, zeroArgument);
 
 			assertEquals(expected, specificHadamardArgumentService.getHadamardArgument(hadamardStatement, hadamardWitness));
+		}
+	}
+
+	@Nested
+	@DisplayName("Verifying a Hadamard argument...")
+	class VerifyHadamardArgumentTest {
+
+		private ZqGroup zqGroup;
+
+		private HadamardArgument argument;
+
+		@BeforeEach
+		void setup() {
+			zqGroup = ZqGroup.sameOrderAs(gqGroup);
+			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
+
+			// Generate the Hadamard witness
+			ZqGroupGenerator zqGenerator = new ZqGroupGenerator(zqGroup);
+			SameGroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, m);
+			SameGroupVector<ZqElement, ZqGroup> vector = IntStream.range(0, n)
+					.mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
+					.collect(toSameGroupVector());
+			SameGroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(m);
+			ZqElement randomness = zqGenerator.genRandomZqElementMember();
+			HadamardWitness witness = new HadamardWitness(matrix, vector, exponents, randomness);
+
+			// Generate the Hadamard statement
+			SameGroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, commitmentKey);
+			GqElement commitmentB = CommitmentService.getCommitment(vector, randomness, commitmentKey);
+			statement = new HadamardStatement(commitmentsA, commitmentB);
+
+			argument = hadamardArgumentService.getHadamardArgument(statement, witness);
+		}
+
+		@Test
+		@DisplayName("with null arguments throws a NullPointerException")
+		void verifyHadamardArgumentWithNullArguments() {
+			assertThrows(NullPointerException.class, () -> hadamardArgumentService.verifyHadamardArgument(null, argument));
+			assertThrows(NullPointerException.class, () -> hadamardArgumentService.verifyHadamardArgument(statement, null));
+		}
+
+		@Test
+		@DisplayName("with correct input returns true")
+		void verifyHadamardArgumentWithCorrectInput() {
+			assertTrue(hadamardArgumentService.verifyHadamardArgument(statement, argument));
+		}
+
+		@Test
+		@DisplayName("with bad values for cUpperB returns false")
+		void verifyHadamardArgumentWithBadcUpperB() {
+			SameGroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
+
+			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
+			SameGroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toSameGroupVector()).prepend(badcUpperB0);
+			HadamardArgument badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
+
+			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+
+			int m = cUpperB.size();
+			GqElement badcUpperBmMinusOne = cUpperB.get(m - 1).multiply(gqGroup.getGenerator());
+			badcUpperB = new SameGroupVector<>(cUpperB.stream().collect(Collectors.toList()).subList(0, m - 1)).append(badcUpperBmMinusOne);
+			badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
+
+			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+		}
+
+		@Test
+		@DisplayName("with bad values for ZeroArgument returns false")
+		void verifyHadamardArgumentWithBadZeroArgument() {
+			ZeroArgument zeroArgument = argument.getZeroArgument();
+			GqElement badcA0 = zeroArgument.getCA0().multiply(gqGroup.getGenerator());
+			ZeroArgument badZeroArgument = new ZeroArgument.ZeroArgumentBuilder()
+					.withCA0(badcA0)
+					.withCBm(zeroArgument.getCBm())
+					.withCd(zeroArgument.getCd())
+					.withAPrime(zeroArgument.getAPrime())
+					.withBPrime(zeroArgument.getBPrime())
+					.withRPrime(zeroArgument.getRPrime())
+					.withSPrime(zeroArgument.getSPrime())
+					.withTPrime(zeroArgument.getTPrime())
+					.build();
+			HadamardArgument badArgument = new HadamardArgument(argument.getCommitmentsB(), badZeroArgument);
+			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
 		}
 	}
 
