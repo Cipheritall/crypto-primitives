@@ -53,10 +53,10 @@ class ZeroWitnessTest {
 		n = secureRandom.nextInt(10) + 1;
 		m = secureRandom.nextInt(10) + 1;
 
-		matrixA = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
-		matrixB = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
-		exponentsR = zqGroupGenerator.generateRandomZqElementVector(m);
-		exponentsS = zqGroupGenerator.generateRandomZqElementVector(m);
+		matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+		matrixB = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+		exponentsR = zqGroupGenerator.genRandomZqElementVector(m);
+		exponentsS = zqGroupGenerator.genRandomZqElementVector(m);
 	}
 
 	@Test
@@ -104,7 +104,7 @@ class ZeroWitnessTest {
 	@Test
 	@DisplayName("constructed with matrices of different size throws IllegalArgumentException")
 	void constructDiffSizeMatrices() {
-		final SameGroupMatrix<ZqElement, ZqGroup> additionalRowMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n + 1, m);
+		final SameGroupMatrix<ZqElement, ZqGroup> additionalRowMatrix = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroWitness(additionalRowMatrix, matrixB, exponentsR, exponentsS));
@@ -135,7 +135,7 @@ class ZeroWitnessTest {
 	@Test
 	@DisplayName("constructed with matrices with different number of columns throws IllegalArgumentException")
 	void constructMatricesDiffColNumber() {
-		final SameGroupVector<ZqElement, ZqGroup> newColumn = zqGroupGenerator.generateRandomZqElementVector(n);
+		final SameGroupVector<ZqElement, ZqGroup> newColumn = zqGroupGenerator.genRandomZqElementVector(n);
 		final SameGroupMatrix<ZqElement, ZqGroup> additionalColMatrixA = matrixA.appendColumn(newColumn);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -150,7 +150,7 @@ class ZeroWitnessTest {
 		final ZqGroup otherZqGroup = zqGroupGenerator.otherGroup();
 		final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 
-		final SameGroupMatrix<ZqElement, ZqGroup> otherZqGroupMatrix = otherZqGroupGenerator.generateRandomZqElementMatrix(n, m);
+		final SameGroupMatrix<ZqElement, ZqGroup> otherZqGroupMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroWitness(otherZqGroupMatrix, matrixB, exponentsR, exponentsS));
@@ -164,7 +164,7 @@ class ZeroWitnessTest {
 		final ZqGroup otherZqGroup = zqGroupGenerator.otherGroup();
 		final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 
-		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponents = otherZqGroupGenerator.generateRandomZqElementVector(m);
+		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponents = otherZqGroupGenerator.genRandomZqElementVector(m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroWitness(matrixA, matrixB, otherZqGroupExponents, exponentsS));
@@ -178,8 +178,8 @@ class ZeroWitnessTest {
 		final ZqGroup otherZqGroup = zqGroupGenerator.otherGroup();
 		final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 
-		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponentsR = otherZqGroupGenerator.generateRandomZqElementVector(m);
-		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponentsS = otherZqGroupGenerator.generateRandomZqElementVector(m);
+		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponentsR = otherZqGroupGenerator.genRandomZqElementVector(m);
+		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponentsS = otherZqGroupGenerator.genRandomZqElementVector(m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroWitness(matrixA, matrixB, otherZqGroupExponentsR, otherZqGroupExponentsS));

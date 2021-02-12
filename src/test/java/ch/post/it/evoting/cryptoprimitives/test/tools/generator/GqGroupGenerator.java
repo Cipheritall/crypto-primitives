@@ -3,14 +3,19 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -94,14 +99,14 @@ public class GqGroupGenerator {
 	 * Generate a non identity member of the group.
 	 */
 	public GqElement genNonIdentityMember() {
-		return genMember(member -> member.equals(group.getIdentity()));
+		return Generators.genWhile(this::genMember, member -> member.equals(group.getIdentity()));
 	}
 
 	/**
 	 * Generate a non identity, non generator member of the group.
 	 */
 	public GqElement genNonIdentityNonGeneratorMember() {
-		return genMember(member -> member.equals(group.getIdentity()) || member.equals(group.getGenerator()));
+		return Generators.genWhile(this::genMember, member -> member.equals(group.getIdentity()) || member.equals(group.getGenerator()));
 	}
 
 	/**
@@ -110,17 +115,15 @@ public class GqGroupGenerator {
 	 * @param numElements the number of elements to generate.
 	 * @return a vector of {@code numElements} random {@link GqElement}.
 	 */
-	public SameGroupVector<GqElement, GqGroup> generateRandomGqElementList(final int numElements) {
-		return new SameGroupVector<>(Stream.generate(this::genMember).limit(numElements).collect(Collectors.toList()));
+	public SameGroupVector<GqElement, GqGroup> genRandomGqElementVector(final int numElements) {
+		return new SameGroupVector<GqElement, GqGroup>(generateElementList(numElements, this::genMember));
 	}
 
-	private GqElement genMember(Predicate<GqElement> invalid) {
-		GqElement member;
-		do {
-			member = genMember();
-		} while (invalid.test(member));
-		return member;
+	public SameGroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
+		List<List<GqElement>> elements = generateElementMatrix(numRows, numColumns, this::genMember);
+		return SameGroupMatrix.fromRows(elements);
 	}
+
 
 	private BigInteger randomBigInteger(int bitLength) {
 		return new BigInteger(bitLength, random);

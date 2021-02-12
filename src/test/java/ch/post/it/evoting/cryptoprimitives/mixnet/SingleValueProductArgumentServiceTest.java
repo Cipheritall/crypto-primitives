@@ -54,8 +54,6 @@ class SingleValueProductArgumentServiceTest {
 
 	private GqElement commitment;
 	private ZqElement product;
-	private SameGroupVector<ZqElement, ZqGroup> elements;
-	private ZqElement randomness;
 
 	private SingleValueProductStatement statement;
 	private SingleValueProductWitness witness;
@@ -68,7 +66,8 @@ class SingleValueProductArgumentServiceTest {
 
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		publicKey = keyPair.getPublicKey();
-		commitmentKey = genCommitmentKey(gqGroup, NUM_ELEMENTS);
+		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		commitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
 		hashService = mock(HashService.class);
 		when(hashService.recursiveHash(any()))
 				.thenReturn(new byte[] { 0b10 });
@@ -77,8 +76,8 @@ class SingleValueProductArgumentServiceTest {
 
 	@BeforeEach
 	void setup() {
-		elements = zqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
-		randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
+		SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
+		ZqElement randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 		commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);
 
@@ -134,7 +133,7 @@ class SingleValueProductArgumentServiceTest {
 		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitmentKey.getGroup());
 		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 		ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
-		SameGroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
+		SameGroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
 		ZqElement differentRandomness = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
 		SingleValueProductWitness differentWitness = new SingleValueProductWitness(differentElements, differentRandomness);
 		Exception exception = assertThrows(IllegalArgumentException.class,
@@ -201,7 +200,7 @@ class SingleValueProductArgumentServiceTest {
 		bTilde.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
 		ZqElement rTilde = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 		ZqElement sTilde = ZqElement.create(BigInteger.valueOf(7), specificZqGroup);
-		SingleValueProductArgument expected = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
+		SingleValueProductArgument expected = new SingleValueProductArgument.Builder()
 				.withCd(cd)
 				.withCLowerDelta(cdelta)
 				.withCUpperDelta(cDelta)
@@ -255,7 +254,7 @@ class SingleValueProductArgumentServiceTest {
 			GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGqGroup);
 			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
 			GqElement commitment = differentGqGroupGenerator.genMember();
-			ZqElement product = differentZqGroupGenerator.genZqElementMember();
+			ZqElement product = differentZqGroupGenerator.genRandomZqElementMember();
 			statement = new SingleValueProductStatement(commitment, product);
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> argumentService.verifySingleValueProductArgument(statement, argument));
@@ -285,5 +284,4 @@ class SingleValueProductArgumentServiceTest {
 		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(k).collect(Collectors.toList());
 		return new CommitmentKey(h, gList);
 	}
-
 }

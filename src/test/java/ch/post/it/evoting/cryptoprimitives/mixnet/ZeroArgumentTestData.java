@@ -55,8 +55,8 @@ public class ZeroArgumentTestData {
 		// the witness' y value. Then isolate the last element of matrix B, B_(n,m) in the expanded zero product property. Once done, try every
 		// member of the Zq group as a value for B_(n,m) until the zero product property is satisfied. This is fast as long as the test groups are
 		// small.
-		SameGroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.generateRandomZqElementVector(m);
-		SameGroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.generateRandomZqElementVector(m);
+		SameGroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.genRandomZqElementVector(m);
+		SameGroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.genRandomZqElementVector(m);
 
 		// Generate a new set of random values until a valid B_(n,m) is found.
 		Optional<ZqElement> matrixBLastElem;
@@ -64,8 +64,8 @@ public class ZeroArgumentTestData {
 		SameGroupMatrix<ZqElement, ZqGroup> matrixA;
 		SameGroupMatrix<ZqElement, ZqGroup> matrixB;
 		do {
-			matrixA = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
-			matrixB = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
+			matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+			matrixB = zqGroupGenerator.genRandomZqElementMatrix(n, m);
 
 			y = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 

@@ -49,8 +49,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 */
 	public ElGamalMultiRecipientCiphertext multiply(final ElGamalMultiRecipientCiphertext other) {
 		checkNotNull(other);
-		checkArgument(this.phis.size() == other.phis.size());
-		checkArgument(this.group.equals(other.group));
+		checkArgument(this.phis.size() == other.phis.size(), "Cannot multiply ciphertexts of different size.");
+		checkArgument(this.group.equals(other.group), "Cannot multiply ciphertexts of different groups.");
 
 		final GqElement resultGamma = this.gamma.multiply(other.gamma);
 
@@ -165,7 +165,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @param group  The {@link GqGroup} of the neutral element.
 	 * @return A new {@link ElGamalMultiRecipientCiphertext} filled with ones.
 	 */
-	static ElGamalMultiRecipientCiphertext neutralElement(final int numPhi, final GqGroup group) {
+	public static ElGamalMultiRecipientCiphertext neutralElement(final int numPhi, final GqGroup group) {
 		checkNotNull(group);
 		checkArgument(numPhi > 0, "The neutral ciphertext must have at least one phi.");
 
@@ -197,7 +197,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		checkArgument(ciphertexts.size() == exponents.size(), "There should be a matching ciphertext for every exponent.");
 
 		checkArgument(ciphertexts.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same number of phi elements");
-		checkArgument(ciphertexts.getGroup().getQ().equals(exponents.getGroup().getQ()), "Ciphertexts and exponents must be of the same group.");
+		checkArgument(ciphertexts.getGroup().hasSameOrderAs(exponents.getGroup()), "Ciphertexts and exponents must be of the same group.");
 
 		int numberOfPhiElements = ciphertexts.get(0).size();
 
@@ -222,11 +222,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * @return an ordered stream of phis.
+	 * @return an ordered stream of gamma and phis.
 	 */
 	@Override
 	public Stream<GqElement> stream() {
-		return this.phis.stream();
+		return Stream.concat(Stream.of(this.gamma), this.phis.stream());
 	}
 
 	@Override

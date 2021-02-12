@@ -1,8 +1,5 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator.genRandomCiphertext;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator.genRandomCiphertexts;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator.genRandomPublicKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,6 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 
 class ShuffleServiceTest {
 
@@ -43,12 +41,14 @@ class ShuffleServiceTest {
 	private static GqGroup group;
 	private static ElGamalMultiRecipientPublicKey randomPublicKey;
 	private static List<ElGamalMultiRecipientCiphertext> randomCiphertexts;
+	private static ElGamalGenerator elGamalGenerator;
 
 	@BeforeAll
 	static void setUp() {
 		group = GqGroupTestData.getGroup();
-		randomPublicKey = genRandomPublicKey(group, NUM_ELEMENTS);
-		randomCiphertexts = Collections.singletonList(genRandomCiphertext(group, NUM_ELEMENTS));
+		elGamalGenerator = new ElGamalGenerator(group);
+		randomPublicKey = elGamalGenerator.genRandomPublicKey(NUM_ELEMENTS);
+		randomCiphertexts = Collections.singletonList(elGamalGenerator.genRandomCiphertext(NUM_ELEMENTS));
 	}
 
 	@Test
@@ -69,20 +69,21 @@ class ShuffleServiceTest {
 
 	@Test
 	void testCiphertextLongerThanKeyThrows() {
-		List<ElGamalMultiRecipientCiphertext> ciphertexts = Collections.singletonList(genRandomCiphertext(group, NUM_ELEMENTS + 1));
+		List<ElGamalMultiRecipientCiphertext> ciphertexts = Collections.singletonList(elGamalGenerator.genRandomCiphertext(NUM_ELEMENTS + 1));
 		assertThrows(IllegalArgumentException.class, () -> shuffleService.genShuffle(ciphertexts, randomPublicKey));
 	}
 
 	@Test
 	void testCiphertextAndKeyFromDifferentGroupsThrows() {
-		ElGamalMultiRecipientPublicKey otherGroupKey = genRandomPublicKey(GqGroupTestData.getDifferentGroup(group), NUM_ELEMENTS);
+		ElGamalGenerator otherGenerator = new ElGamalGenerator(GqGroupTestData.getDifferentGroup(group));
+		ElGamalMultiRecipientPublicKey otherGroupKey = otherGenerator.genRandomPublicKey(NUM_ELEMENTS);
 		assertThrows(IllegalArgumentException.class, () -> shuffleService.genShuffle(randomCiphertexts, otherGroupKey));
 	}
 
 	@Test
 	void testShuffleCiphertextIsNotEqualToOriginal() {
-		ElGamalMultiRecipientPublicKey publicKey = genRandomPublicKey(group, NUM_ELEMENTS);
-		List<ElGamalMultiRecipientCiphertext> ciphertexts = genRandomCiphertexts(group, publicKey, NUM_ELEMENTS, NUM_CIPHERTEXTS);
+		ElGamalMultiRecipientPublicKey publicKey = elGamalGenerator.genRandomPublicKey(NUM_ELEMENTS);
+		List<ElGamalMultiRecipientCiphertext> ciphertexts = elGamalGenerator.genRandomCiphertexts(publicKey, NUM_ELEMENTS, NUM_CIPHERTEXTS);
 		Shuffle shuffle = shuffleService.genShuffle(ciphertexts, publicKey);
 		assertNotEquals(ciphertexts, shuffle.getCiphertexts());
 	}

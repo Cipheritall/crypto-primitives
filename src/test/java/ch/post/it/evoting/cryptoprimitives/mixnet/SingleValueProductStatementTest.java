@@ -38,9 +38,10 @@ class SingleValueProductStatementTest {
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
-		CommitmentKey commitmentKey = SingleValueProductArgumentServiceTest.genCommitmentKey(gqGroup, NUM_ELEMENTS);
+		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
 
-		SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
+		SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
 		ZqElement randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 		commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);

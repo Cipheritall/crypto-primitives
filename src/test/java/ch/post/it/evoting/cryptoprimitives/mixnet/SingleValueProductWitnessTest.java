@@ -38,7 +38,7 @@ class SingleValueProductWitnessTest {
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
-		elements = zqGroupGenerator.generateRandomZqElementVector(NUM_ELEMENTS);
+		elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
 		randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 	}
 

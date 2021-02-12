@@ -83,7 +83,7 @@ class CommitmentKey {
 	 *
 	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>k</sub> in that order
 	 */
-	Stream<GqElement> stream() {
+	public Stream<GqElement> stream() {
 		return Stream.concat(Stream.of(this.h), this.gElements.stream());
 	}
 

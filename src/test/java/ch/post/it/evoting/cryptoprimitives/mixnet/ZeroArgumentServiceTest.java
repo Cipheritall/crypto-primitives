@@ -158,8 +158,8 @@ class ZeroArgumentServiceTest {
 		void setUp() {
 			n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
 			m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
-			firstMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n, m + 1);
-			secondMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n, m + 1);
+			firstMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			secondMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 			y = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		}
 
@@ -182,7 +182,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with matrices having unequal number of rows throws IllegalArgumentException")
 		void computeDVectorDifferentSizeLines() {
 			// Generate a first matrix with an additional row.
-			final SameGroupMatrix<ZqElement, ZqGroup> otherMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n + 1, m + 1);
+			final SameGroupMatrix<ZqElement, ZqGroup> otherMatrix = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(otherMatrix, secondMatrix, y));
@@ -202,8 +202,8 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with matrices with different number of columns throws IllegalArgumentException")
 		void computeDVectorDifferentSizeColumns() {
-			final SameGroupMatrix<ZqElement, ZqGroup> otherFirstMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n, m);
-			final SameGroupMatrix<ZqElement, ZqGroup> otherSecondMatrix = zqGroupGenerator.generateRandomZqElementMatrix(n, m + 1);
+			final SameGroupMatrix<ZqElement, ZqGroup> otherFirstMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+			final SameGroupMatrix<ZqElement, ZqGroup> otherSecondMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(otherFirstMatrix, otherSecondMatrix, y));
@@ -216,7 +216,7 @@ class ZeroArgumentServiceTest {
 			// Get a second matrix in a different ZqGroup.
 			final ZqGroup otherZqGroup = getDifferentZqGroup();
 			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
-			final SameGroupMatrix<ZqElement, ZqGroup> differentGroupSecondMatrix = otherZqGroupGenerator.generateRandomZqElementMatrix(n, m + 1);
+			final SameGroupMatrix<ZqElement, ZqGroup> differentGroupSecondMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(firstMatrix, differentGroupSecondMatrix, y));
@@ -300,8 +300,8 @@ class ZeroArgumentServiceTest {
 		@BeforeEach
 		void setUp() {
 			n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
-			firstVector = zqGroupGenerator.generateRandomZqElementVector(n);
-			secondVector = zqGroupGenerator.generateRandomZqElementVector(n);
+			firstVector = zqGroupGenerator.genRandomZqElementVector(n);
+			secondVector = zqGroupGenerator.genRandomZqElementVector(n);
 			y = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		}
 
@@ -323,7 +323,7 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with vectors of different size throws IllegalArgumentException")
 		void starMapVectorsDifferentSize() {
-			final SameGroupVector<ZqElement, ZqGroup> secondVector = zqGroupGenerator.generateRandomZqElementVector(n + 1);
+			final SameGroupVector<ZqElement, ZqGroup> secondVector = zqGroupGenerator.genRandomZqElementVector(n + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.starMap(firstVector, secondVector, y));
@@ -346,7 +346,7 @@ class ZeroArgumentServiceTest {
 			// Second vector from different group.
 			final ZqGroup otherZqGroup = getDifferentZqGroup();
 			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
-			final SameGroupVector<ZqElement, ZqGroup> secondVector = otherZqGroupGenerator.generateRandomZqElementVector(n);
+			final SameGroupVector<ZqElement, ZqGroup> secondVector = otherZqGroupGenerator.genRandomZqElementVector(n);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.starMap(firstVector, secondVector, y));
@@ -441,10 +441,10 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with commitments and exponents of different size throws IllegalArgumentException ")
 		void getZeroArgDiffComExp() {
 			// Create another witness with an additional element.
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.generateRandomZqElementMatrix(n, m + 1);
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = zqGroupGenerator.generateRandomZqElementMatrix(n, m + 1);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.generateRandomZqElementVector(m + 1);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.generateRandomZqElementVector(m + 1);
+			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			final SameGroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.genRandomZqElementVector(m + 1);
+			final SameGroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.genRandomZqElementVector(m + 1);
 
 			final ZeroWitness addElemZeroWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
@@ -458,10 +458,10 @@ class ZeroArgumentServiceTest {
 		void getZeroArgDiffGroupYAndExponents() {
 			// Create another witness in another group.
 			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(getDifferentZqGroup());
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = otherZqGroupGenerator.generateRandomZqElementMatrix(n, m);
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = otherZqGroupGenerator.generateRandomZqElementMatrix(n, m);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR = otherZqGroupGenerator.generateRandomZqElementVector(m);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsS = otherZqGroupGenerator.generateRandomZqElementVector(m);
+			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
+			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
+			final SameGroupVector<ZqElement, ZqGroup> exponentsR = otherZqGroupGenerator.genRandomZqElementVector(m);
+			final SameGroupVector<ZqElement, ZqGroup> exponentsS = otherZqGroupGenerator.genRandomZqElementVector(m);
 
 			final ZeroWitness otherZqGroupZeroWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
@@ -479,7 +479,7 @@ class ZeroArgumentServiceTest {
 			// Generate a different commitment.
 			SameGroupVector<GqElement, GqGroup> otherCommitments;
 			do {
-				otherCommitments = gqGroupGenerator.generateRandomGqElementList(m);
+				otherCommitments = gqGroupGenerator.genRandomGqElementVector(m);
 			} while (otherCommitments.equals(commitmentsA));
 
 			final SameGroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
@@ -498,7 +498,7 @@ class ZeroArgumentServiceTest {
 			// Generate a different commitment.
 			SameGroupVector<GqElement, GqGroup> otherCommitments;
 			do {
-				otherCommitments = gqGroupGenerator.generateRandomGqElementList(m);
+				otherCommitments = gqGroupGenerator.genRandomGqElementVector(m);
 			} while (otherCommitments.equals(commitmentsB));
 
 			final SameGroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();

@@ -26,6 +26,7 @@ class SingleValueProductArgument {
 	private ZqElement sTilde;
 
 	private SingleValueProductArgument() {
+		//Intentionally left blank
 	}
 
 	GqElement getCd() {
@@ -79,7 +80,7 @@ class SingleValueProductArgument {
 		return Objects.hash(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
 	}
 
-	static class SingleValueProductArgumentBuilder {
+	static class Builder {
 
 		private GqElement cd;
 		private GqElement cLowerDelta;
@@ -89,41 +90,41 @@ class SingleValueProductArgument {
 		private ZqElement rTilde;
 		private ZqElement sTilde;
 
-		SingleValueProductArgumentBuilder() {
+		Builder() {
 
 		}
 
-		SingleValueProductArgumentBuilder withCd(final GqElement cd) {
+		Builder withCd(final GqElement cd) {
 			this.cd = cd;
 			return this;
 		}
 
-		SingleValueProductArgumentBuilder withCLowerDelta(final GqElement cLowerDelta) {
+		Builder withCLowerDelta(final GqElement cLowerDelta) {
 			this.cLowerDelta = cLowerDelta;
 			return this;
 		}
 
-		SingleValueProductArgumentBuilder withCUpperDelta(final GqElement cUpperDelta) {
+		Builder withCUpperDelta(final GqElement cUpperDelta) {
 			this.cUpperDelta = cUpperDelta;
 			return this;
 		}
 
-		SingleValueProductArgumentBuilder withATilde(final SameGroupVector<ZqElement, ZqGroup> aTilde) {
+		Builder withATilde(final SameGroupVector<ZqElement, ZqGroup> aTilde) {
 			this.aTilde = aTilde;
 			return this;
 		}
 
-		SingleValueProductArgumentBuilder withBTilde(final SameGroupVector<ZqElement, ZqGroup> bTilde) {
+		Builder withBTilde(final SameGroupVector<ZqElement, ZqGroup> bTilde) {
 			this.bTilde = bTilde;
 			return this;
 		}
 
-		SingleValueProductArgumentBuilder withRTilde(final ZqElement rTilde) {
+		Builder withRTilde(final ZqElement rTilde) {
 			this.rTilde = rTilde;
 			return this;
 		}
 
-		SingleValueProductArgumentBuilder withSTilde(final ZqElement sTilde) {
+		Builder withSTilde(final ZqElement sTilde) {
 			this.sTilde = sTilde;
 			return this;
 		}

@@ -11,7 +11,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -133,7 +132,7 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 		checkArgument(row >= 0, "The index of a row cannot be negative.");
 		checkArgument(row < numRows, "The index of a row cannot be larger than the number of rows of the matrix.");
 		checkArgument(column >= 0, "The index of a column cannot be negative.");
-		checkArgument(column < numColumns, "The index of a columnd cannot be larger than the number of columns of the matrix.");
+		checkArgument(column < numColumns, "The index of a column cannot be larger than the number of columns of the matrix.");
 		return this.rows.get(row).get(column);
 	}
 
@@ -141,8 +140,8 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @return the ith row. i must be within bounds.
 	 */
 	public SameGroupVector<E, G> getRow(int i) {
-		checkArgument(i >= 0);
-		checkArgument(i < this.numRows);
+		checkArgument(i >= 0, "Trying to access index out of bound.");
+		checkArgument(i < this.numRows, "Trying to access index out of bound.");
 		return this.rows.get(i);
 	}
 
@@ -150,8 +149,8 @@ public class SameGroupMatrix<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @return the jth row. j must be within bounds.
 	 */
 	public SameGroupVector<E, G> getColumn(int j) {
-		checkArgument(j >= 0);
-		checkArgument(j < this.numColumns);
+		checkArgument(j >= 0, "Trying to access index out of bound.");
+		checkArgument(j < this.numColumns, "Trying to access index out of bound.");
 		return this.rows.stream().map(row -> row.get(j)).collect(toSameGroupVector());
 	}
 

@@ -34,7 +34,7 @@ class ElGamalMultiRecipientPrivateKeyTest {
 	static void setUp() {
 		validExponentGroup = new ZqGroup(BigInteger.TEN);
 		generator = new ZqGroupGenerator(validExponentGroup);
-		validExponent = generator.genZqElementMember();
+		validExponent = generator.genRandomZqElementMember();
 	}
 
 	@Test
@@ -55,16 +55,16 @@ class ElGamalMultiRecipientPrivateKeyTest {
 	static Stream<Arguments> createInvalidArgumentsProvider() {
 		List<ZqElement> messageElementsFirstNull = new LinkedList<>();
 		messageElementsFirstNull.add(null);
-		messageElementsFirstNull.add(generator.genZqElementMember());
+		messageElementsFirstNull.add(generator.genRandomZqElementMember());
 
 		List<ZqElement> messageElementsSecondNull = new LinkedList<>();
-		messageElementsSecondNull.add(generator.genZqElementMember());
+		messageElementsSecondNull.add(generator.genRandomZqElementMember());
 		messageElementsSecondNull.add(null);
 
 		List<ZqElement> messageElementsDifferentGroups = new LinkedList<>();
-		messageElementsDifferentGroups.add(generator.genZqElementMember());
+		messageElementsDifferentGroups.add(generator.genRandomZqElementMember());
 		ZqGroupGenerator otherGenerator = new ZqGroupGenerator(generator.otherGroup());
-		messageElementsDifferentGroups.add(otherGenerator.genZqElementMember());
+		messageElementsDifferentGroups.add(otherGenerator.genRandomZqElementMember());
 
 		return Stream.of(
 				Arguments.of(null, NullPointerException.class, null),

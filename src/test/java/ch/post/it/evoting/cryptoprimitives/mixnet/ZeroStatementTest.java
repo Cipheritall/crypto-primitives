@@ -52,8 +52,8 @@ class ZeroStatementTest {
 	@BeforeEach
 	void setUp() {
 		m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
-		commitmentsA = gqGroupGenerator.generateRandomGqElementList(m);
-		commitmentsB = gqGroupGenerator.generateRandomGqElementList(m);
+		commitmentsA = gqGroupGenerator.genRandomGqElementVector(m);
+		commitmentsB = gqGroupGenerator.genRandomGqElementVector(m);
 		y = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 	}
 
@@ -111,7 +111,7 @@ class ZeroStatementTest {
 		// Generate commitmentsA from different group.
 		final GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
 		final GqGroupGenerator otherGqGroupGenerator = new GqGroupGenerator(differentGroup);
-		final SameGroupVector<GqElement, GqGroup> diffCommitmentsA = otherGqGroupGenerator.generateRandomGqElementList(m);
+		final SameGroupVector<GqElement, GqGroup> diffCommitmentsA = otherGqGroupGenerator.genRandomGqElementVector(m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroStatement(diffCommitmentsA, commitmentsB, y));

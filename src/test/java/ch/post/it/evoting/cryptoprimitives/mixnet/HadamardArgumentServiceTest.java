@@ -133,11 +133,11 @@ class HadamardArgumentServiceTest {
 
 			// Generate the Hadamard witness
 			zqGenerator = new ZqGroupGenerator(zqGroup);
-			matrix = zqGenerator.generateRandomZqElementMatrix(n, m);
+			matrix = zqGenerator.genRandomZqElementMatrix(n, m);
 			vector = IntStream.range(0, n).mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
 					.collect(toSameGroupVector());
-			exponents = zqGenerator.generateRandomZqElementVector(m);
-			randomness = zqGenerator.genZqElementMember();
+			exponents = zqGenerator.genRandomZqElementVector(m);
+			randomness = zqGenerator.genRandomZqElementMember();
 			witness = new HadamardWitness(matrix, vector, exponents, randomness);
 
 			// Generate the Hadamard statement
@@ -164,10 +164,10 @@ class HadamardArgumentServiceTest {
 		void getHadamardArgumentWithTooFewColumns() {
 
 			// Generate the Hadamard witness
-			SameGroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.generateRandomZqElementMatrix(n, 1);
-			SameGroupVector<ZqElement, ZqGroup> vector = zqGenerator.generateRandomZqElementVector(n);
-			SameGroupVector<ZqElement, ZqGroup> exponents = zqGenerator.generateRandomZqElementVector(1);
-			ZqElement randomness = zqGenerator.genZqElementMember();
+			SameGroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, 1);
+			SameGroupVector<ZqElement, ZqGroup> vector = zqGenerator.genRandomZqElementVector(n);
+			SameGroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(1);
+			ZqElement randomness = zqGenerator.genRandomZqElementMember();
 			witness = new HadamardWitness(matrix, vector, exponents, randomness);
 
 			// Generate the Hadamard statement
@@ -206,7 +206,7 @@ class HadamardArgumentServiceTest {
 		void getHadamardArgumentWithCommitmentsFromDifferentGroup() {
 			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
 			GqGroupGenerator generator = new GqGroupGenerator(differentGqGroup);
-			commitmentsA = generator.generateRandomGqElementList(m);
+			commitmentsA = generator.genRandomGqElementVector(m);
 			commitmentB = generator.genMember();
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
@@ -221,16 +221,16 @@ class HadamardArgumentServiceTest {
 
 			// Generate the Hadamard witness
 			zqGenerator = new ZqGroupGenerator(zqGroup);
-			matrix = zqGenerator.generateRandomZqElementMatrix(n + 1, m);
+			matrix = zqGenerator.genRandomZqElementMatrix(n + 1, m);
 			vector = IntStream.range(0, n + 1).mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
 					.collect(toSameGroupVector());
-			exponents = zqGenerator.generateRandomZqElementVector(m);
-			randomness = zqGenerator.genZqElementMember();
+			exponents = zqGenerator.genRandomZqElementVector(m);
+			randomness = zqGenerator.genRandomZqElementMember();
 			witness = new HadamardWitness(matrix, vector, exponents, randomness);
 
 			// Generate the Hadamard statement
 			GqGroupGenerator gqGenerator = new GqGroupGenerator(gqGroup);
-			commitmentsA = gqGenerator.generateRandomGqElementList(m);
+			commitmentsA = gqGenerator.genRandomGqElementVector(m);
 			commitmentB = gqGenerator.genMember();
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 
@@ -382,7 +382,7 @@ class HadamardArgumentServiceTest {
 		void setup() {
 			ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 			ZqGroupGenerator zqGenerator = new ZqGroupGenerator(zqGroup);
-			matrix = zqGenerator.generateRandomZqElementMatrix(n, m);
+			matrix = zqGenerator.genRandomZqElementMatrix(n, m);
 		}
 
 		@Test

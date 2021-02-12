@@ -34,7 +34,7 @@ class HadamardStatementTest {
 		int n = secureRandom.nextInt(10) + 1;
 		group = GqGroupTestData.getGroup();
 		generator = new GqGroupGenerator(group);
-		commitmentsA = generator.generateRandomGqElementList(n);
+		commitmentsA = generator.genRandomGqElementVector(n);
 		commitmentB = generator.genMember();
 	}
 

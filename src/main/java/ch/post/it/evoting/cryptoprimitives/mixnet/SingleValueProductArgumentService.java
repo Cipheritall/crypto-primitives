@@ -147,7 +147,7 @@ class SingleValueProductArgumentService {
 		ZqElement rTilde = x.multiply(r).add(rd);
 		ZqElement sTilde = x.multiply(sx).add(s0);
 
-		return new SingleValueProductArgument.SingleValueProductArgumentBuilder()
+		return new SingleValueProductArgument.Builder()
 				.withCd(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)

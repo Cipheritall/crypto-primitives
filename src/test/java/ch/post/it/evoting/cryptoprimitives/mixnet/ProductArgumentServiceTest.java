@@ -121,8 +121,8 @@ class ProductArgumentServiceTest {
 			generator = new ZqGroupGenerator(zqGroup);
 			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
 
-			matrixA = generator.generateRandomZqElementMatrix(n, m);
-			exponentsR = generator.generateRandomZqElementVector(m);
+			matrixA = generator.genRandomZqElementMatrix(n, m);
+			exponentsR = generator.genRandomZqElementVector(m);
 			witness = new ProductWitness(matrixA, exponentsR);
 			commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 			productB = matrixA.stream().reduce(one, ZqElement::multiply);
@@ -148,7 +148,7 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with statement and witness having incompatible sizes throws IllegalArgumentException")
 		void getProductArgumentWithStatementAndWitnessDifferentSize() {
-			commitmentsA = gqGroupGenerator.generateRandomGqElementList(m + 1);
+			commitmentsA = gqGroupGenerator.genRandomGqElementVector(m + 1);
 			statement = new ProductStatement(commitmentsA, productB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
 			assertEquals("The commitments A and the exponents r must have the same size.", exception.getMessage());
@@ -158,7 +158,7 @@ class ProductArgumentServiceTest {
 		@DisplayName("with witness having a size incompatible with the commitment key throws an IllegalArgumentException")
 		void getProductArgumentWithWitnessSizeIncompatibleWithCommitmentKeySize() {
 			// Create a matrix with too many rows
-			SameGroupMatrix<ZqElement, ZqGroup> otherMatrixA = generator.generateRandomZqElementMatrix(k + 1, m);
+			SameGroupMatrix<ZqElement, ZqGroup> otherMatrixA = generator.genRandomZqElementMatrix(k + 1, m);
 			witness = new ProductWitness(otherMatrixA, exponentsR);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
 			assertEquals("The matrix' number of rows cannot be greater than the commitment key size.", exception.getMessage());
@@ -169,8 +169,8 @@ class ProductArgumentServiceTest {
 		void getProductArgumentWithStatementAndWitnessDifferentGroup() {
 			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
 			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
-			commitmentsA = new GqGroupGenerator(differentGqGroup).generateRandomGqElementList(m);
-			productB = new ZqGroupGenerator(differentZqGroup).genZqElementMember();
+			commitmentsA = new GqGroupGenerator(differentGqGroup).genRandomGqElementVector(m);
+			productB = new ZqGroupGenerator(differentZqGroup).genRandomZqElementMember();
 			statement = new ProductStatement(commitmentsA, productB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
 			assertEquals("The product b and the matrix A must belong to the same group.", exception.getMessage());
@@ -184,8 +184,8 @@ class ProductArgumentServiceTest {
 			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
 			ZqElement one = ZqElement.create(BigInteger.ONE, differentZqGroup);
 
-			matrixA = differentZqGroupGenerator.generateRandomZqElementMatrix(n, m);
-			exponentsR = differentZqGroupGenerator.generateRandomZqElementVector(m);
+			matrixA = differentZqGroupGenerator.genRandomZqElementMatrix(n, m);
+			exponentsR = differentZqGroupGenerator.genRandomZqElementVector(m);
 			witness = new ProductWitness(matrixA, exponentsR);
 
 			GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGqGroup);
@@ -203,8 +203,8 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with a matrix with too few columns throws an IllegalArgumentException")
 		void getProductArgumentWithTooSmallMatrix() {
-			matrixA = generator.generateRandomZqElementMatrix(n, 1);
-			exponentsR = generator.generateRandomZqElementVector(1);
+			matrixA = generator.genRandomZqElementMatrix(n, 1);
+			exponentsR = generator.genRandomZqElementVector(1);
 			witness = new ProductWitness(matrixA, exponentsR);
 			commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
@@ -327,7 +327,7 @@ class ProductArgumentServiceTest {
 			HadamardArgument expectedHadamardArgument = new HadamardArgument(commitmentsB, expectedZeroArgument);
 
 			// Create the expected SingleValueProductArgument
-			SingleValueProductArgument expectedSingleValueProductArgument = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
+			SingleValueProductArgument expectedSingleValueProductArgument = new SingleValueProductArgument.Builder()
 					.withCd(gqFive)
 					.withCLowerDelta(gqThree)
 					.withCUpperDelta(gqNine)

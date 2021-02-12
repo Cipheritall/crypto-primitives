@@ -120,7 +120,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(onesMessage, one, validPK);
 
 			assertEquals(gqGroup.getGenerator(), ciphertext.getGamma());
-			assertEquals(validPK.stream().collect(Collectors.toList()), ciphertext.stream().collect(Collectors.toList()));
+			assertEquals(validPK.stream().collect(Collectors.toList()), ciphertext.stream().skip(1).collect(Collectors.toList()));
 		}
 
 		@Test
@@ -132,9 +132,9 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 			ZqElement oneExponent = ZqElement.create(BigInteger.ONE, zqGroup);
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(smallOneMessage, oneExponent, validPK);
 
-			//With a exponent of one and message of ones, the ciphertext is just the public key
+			//With a exponent of one and message of ones, the ciphertext phis is just the public key
 			assertEquals(validPK.stream().limit(nMessages - 1).collect(Collectors.toList()),
-					ciphertext.stream().limit(nMessages - 1).collect(Collectors.toList()));
+					ciphertext.stream().skip(1).limit(nMessages - 1).collect(Collectors.toList()));
 
 			GqElement compressedKey =
 					validPK
@@ -149,7 +149,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 		void testZeroExponentGivesMessage() {
 			ZqElement zeroExponent = ZqElement.create(BigInteger.ZERO, zqGroup);
 			ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(validMessage, zeroExponent, validPK);
-			assertEquals(validMessage.stream().collect(Collectors.toList()), ciphertext.stream().collect(Collectors.toList()));
+			assertEquals(validMessage.stream().collect(Collectors.toList()), ciphertext.stream().skip(1).collect(Collectors.toList()));
 			assertEquals(gqIdentity, ciphertext.getGamma());
 		}
 

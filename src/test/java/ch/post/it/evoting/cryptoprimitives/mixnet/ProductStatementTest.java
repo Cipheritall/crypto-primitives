@@ -41,8 +41,8 @@ class ProductStatementTest {
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		GqGroupGenerator gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
-		commitments = gqGroupGenerator.generateRandomGqElementList(numElements);
-		product = zqGroupGenerator.genZqElementMember();
+		commitments = gqGroupGenerator.genRandomGqElementVector(numElements);
+		product = zqGroupGenerator.genRandomZqElementMember();
 	}
 
 	@Test
@@ -56,7 +56,7 @@ class ProductStatementTest {
 	@DisplayName("Instantiating a ProductStatement with commitments and product having a different order q throws an IllegalArgumentException")
 	void constructProductStatementWithCommitmentsAndProductDifferentOrders() {
 		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitments.getGroup());
-		commitments = new GqGroupGenerator(differentGqGroup).generateRandomGqElementList(numElements);
+		commitments = new GqGroupGenerator(differentGqGroup).genRandomGqElementVector(numElements);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductStatement(commitments, product));
 		assertEquals("The commitments and the product must have the same order q.", exception.getMessage());
 	}

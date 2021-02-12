@@ -89,8 +89,8 @@ public class SameGroupVector<E extends HasGroup<G>, G extends MathematicalGroup<
 	 * @return the ith element.
 	 */
 	public E get(int i) {
-		checkArgument(i >= 0);
-		checkArgument(i < elements.size());
+		checkArgument(i >= 0, "Trying to access index out of bound.");
+		checkArgument(i < elements.size(), "Trying to access index out of bound.");
 		return elements.get(i);
 	}
 

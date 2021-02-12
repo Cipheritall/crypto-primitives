@@ -26,7 +26,7 @@ public class ZqGroupGenerator {
 		this.randomService = new RandomService();
 	}
 
-	public ZqElement genZqElementMember() {
+	public ZqElement genRandomZqElementMember() {
 		final BigInteger value = randomService.genRandomInteger(this.group.getQ());
 		return ZqElement.create(value, this.group);
 	}
@@ -45,8 +45,8 @@ public class ZqGroupGenerator {
 	 * @param numElements the number of elements to generate.
 	 * @return a vector of {@code numElements} random {@link ZqElement}.
 	 */
-	public SameGroupVector<ZqElement, ZqGroup> generateRandomZqElementVector(final int numElements) {
-		return new SameGroupVector<>(generateElementList(numElements, this::genZqElementMember));
+	public SameGroupVector<ZqElement, ZqGroup> genRandomZqElementVector(final int numElements) {
+		return new SameGroupVector<>(generateElementList(numElements, this::genRandomZqElementMember));
 	}
 
 	/**
@@ -67,8 +67,8 @@ public class ZqGroupGenerator {
 	 * @param n the matrix' number of columns.
 	 * @return a m &times; n matrix of random {@link ZqElement}.
 	 */
-	public SameGroupMatrix<ZqElement, ZqGroup> generateRandomZqElementMatrix(final int m, final int n) {
-		return SameGroupMatrix.fromRows(generateElementMatrix(m, n, this::genZqElementMember));
+	public SameGroupMatrix<ZqElement, ZqGroup> genRandomZqElementMatrix(final int m, final int n) {
+		return SameGroupMatrix.fromRows(generateElementMatrix(m, n, this::genRandomZqElementMember));
 	}
 
 	/**

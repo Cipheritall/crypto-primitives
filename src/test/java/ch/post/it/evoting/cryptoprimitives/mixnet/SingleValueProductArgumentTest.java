@@ -7,7 +7,6 @@ import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVec
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ class SingleValueProductArgumentTest {
 		final ZqElement sTilde = randomService.genRandomExponent(zqGroup);
 
 		// Create singleValueProdArgument 1 == singleValueProdArgument 2 != singleValueProdArgument 3
-		SingleValueProductArgument singleValueProdArgument1 = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
+		SingleValueProductArgument singleValueProdArgument1 = new SingleValueProductArgument.Builder()
 				.withCd(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
@@ -54,7 +53,8 @@ class SingleValueProductArgumentTest {
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();
-		SingleValueProductArgument singleValueProdArgument2 = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
+
+		SingleValueProductArgument singleValueProdArgument2 = new SingleValueProductArgument.Builder()
 				.withCd(cd)
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
@@ -63,7 +63,8 @@ class SingleValueProductArgumentTest {
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();
-		SingleValueProductArgument singleValueProdArgument3 = new SingleValueProductArgument.SingleValueProductArgumentBuilder()
+
+		SingleValueProductArgument singleValueProdArgument3 = new SingleValueProductArgument.Builder()
 				.withCd(cd.multiply(cd))
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)

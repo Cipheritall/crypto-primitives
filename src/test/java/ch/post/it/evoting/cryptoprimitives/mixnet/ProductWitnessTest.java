@@ -46,8 +46,8 @@ class ProductWitnessTest {
 		GqGroup gqGroup = GqGroupTestData.getGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		generator = new ZqGroupGenerator(zqGroup);
-		matrix = generator.generateRandomZqElementMatrix(n, m);
-		exponents = generator.generateRandomZqElementVector(m);
+		matrix = generator.genRandomZqElementMatrix(n, m);
+		exponents = generator.genRandomZqElementVector(m);
 	}
 
 	@Test
@@ -60,7 +60,7 @@ class ProductWitnessTest {
 	@Test
 	@DisplayName("Instantiating a ProductWitness with exponents longer than the number of matrix columns throws an IllegalArgumentException")
 	void constructProductWitnessWithTooLongExponents() {
-		SameGroupVector<ZqElement, ZqGroup> tooLongExponents = generator.generateRandomZqElementVector(m + 1);
+		SameGroupVector<ZqElement, ZqGroup> tooLongExponents = generator.genRandomZqElementVector(m + 1);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, tooLongExponents));
 		assertEquals("The number of columns in the matrix must be equal to the number of exponents.", exception.getMessage());
 	}
@@ -70,7 +70,7 @@ class ProductWitnessTest {
 	void constructProductWitnessWithMatrixAndExponentsFromDifferentGroup() {
 		ZqGroup differentZqGroup = new ZqGroupGenerator(zqGroup).otherGroup();
 		ZqGroupGenerator differentGenerator = new ZqGroupGenerator(differentZqGroup);
-		SameGroupVector<ZqElement, ZqGroup> differentExponents = differentGenerator.generateRandomZqElementVector(m);
+		SameGroupVector<ZqElement, ZqGroup> differentExponents = differentGenerator.genRandomZqElementVector(m);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, differentExponents));
 		assertEquals("The matrix and the exponents must belong to the same group.", exception.getMessage());
 	}
