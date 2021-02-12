@@ -250,7 +250,7 @@ final class MultiExponentiationArgumentService {
 		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		return builder
 				.withcA0(cA0)
-				.withcbVector(cBVector)
+				.withcBVector(cBVector)
 				.withEVector(EVector)
 				.withaVector(aVector)
 				.withr(r)

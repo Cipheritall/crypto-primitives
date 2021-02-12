@@ -27,7 +27,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	private static final int DIMENSIONS_BOUND = 10;
 	private static GqElement cA0;
-	private static SameGroupVector<GqElement, GqGroup> cbVector;
+	private static SameGroupVector<GqElement, GqGroup> cBVector;
 	private static SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
 	private static SameGroupVector<ZqElement, ZqGroup> aVector;
 	private static ZqElement r;
@@ -41,7 +41,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		int m = secureRandom.nextInt(DIMENSIONS_BOUND) + 1;
 		int l = secureRandom.nextInt(DIMENSIONS_BOUND) + 1;
 		cA0 = gqGroupGenerator.genMember();
-		cbVector = gqGroupGenerator.genRandomGqElementVector(2 * m);
+		cBVector = gqGroupGenerator.genRandomGqElementVector(2 * m);
 		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
 		EVector = elGamalGenerator.genRandomCiphertextVector(2 * m, l);
 		aVector = zqGroupGenerator.genRandomZqElementVector(n);
@@ -56,7 +56,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		assertDoesNotThrow(() -> builder
 				.withcA0(cA0)
-				.withcbVector(cbVector)
+				.withcBVector(cBVector)
 				.withEVector(EVector)
 				.withaVector(aVector)
 				.withr(r)
@@ -69,26 +69,26 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	static Stream<Arguments> nullArgumentsProvider() {
 		return Stream.of(
-				Arguments.of(null, cbVector, EVector, aVector, r, b, s, tau),
+				Arguments.of(null, cBVector, EVector, aVector, r, b, s, tau),
 				Arguments.of(cA0, null, EVector, aVector, r, b, s, tau),
-				Arguments.of(cA0, cbVector, null, aVector, r, b, s, tau),
-				Arguments.of(cA0, cbVector, EVector, null, r, b, s, tau),
-				Arguments.of(cA0, cbVector, EVector, aVector, null, b, s, tau),
-				Arguments.of(cA0, cbVector, EVector, aVector, r, null, s, tau),
-				Arguments.of(cA0, cbVector, EVector, aVector, r, b, null, tau),
-				Arguments.of(cA0, cbVector, EVector, aVector, r, b, s, null)
+				Arguments.of(cA0, cBVector, null, aVector, r, b, s, tau),
+				Arguments.of(cA0, cBVector, EVector, null, r, b, s, tau),
+				Arguments.of(cA0, cBVector, EVector, aVector, null, b, s, tau),
+				Arguments.of(cA0, cBVector, EVector, aVector, r, null, s, tau),
+				Arguments.of(cA0, cBVector, EVector, aVector, r, b, null, tau),
+				Arguments.of(cA0, cBVector, EVector, aVector, r, b, s, null)
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("nullArgumentsProvider")
-	void zeroArgumentBuilderBuildNullFields(GqElement cA0, SameGroupVector<GqElement, GqGroup> cbVector,
+	void zeroArgumentBuilderBuildNullFields(GqElement cA0, SameGroupVector<GqElement, GqGroup> cBVector,
 			SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector, SameGroupVector<ZqElement, ZqGroup> aVector, ZqElement r, ZqElement b,
 			ZqElement s, ZqElement tau) {
 
 		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		builder.withcA0(cA0)
-				.withcbVector(cbVector)
+				.withcBVector(cBVector)
 				.withEVector(EVector)
 				.withaVector(aVector)
 				.withr(r)

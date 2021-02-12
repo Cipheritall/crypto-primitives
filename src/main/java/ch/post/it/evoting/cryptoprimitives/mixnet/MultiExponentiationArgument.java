@@ -17,17 +17,17 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 public class MultiExponentiationArgument {
 	private GqElement cA0;
-	private SameGroupVector<GqElement, GqGroup> cbVector;
+	private SameGroupVector<GqElement, GqGroup> cBVector;
 	private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
 	private SameGroupVector<ZqElement, ZqGroup> aVector;
 	private ZqElement r;
 	private ZqElement b;
 	private ZqElement s;
 	private ZqElement tau;
-
+	
 	static class Builder {
 		private GqElement cA0;
-		private SameGroupVector<GqElement, GqGroup> cbVector;
+		private SameGroupVector<GqElement, GqGroup> cBVector;
 		private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
 		private SameGroupVector<ZqElement, ZqGroup> aVector;
 		private ZqElement r;
@@ -44,8 +44,8 @@ public class MultiExponentiationArgument {
 			return this;
 		}
 
-		Builder withcbVector(final SameGroupVector<GqElement, GqGroup> cbVector) {
-			this.cbVector = cbVector;
+		Builder withcBVector(final SameGroupVector<GqElement, GqGroup> cBVector) {
+			this.cBVector = cBVector;
 			return this;
 		}
 
@@ -82,7 +82,7 @@ public class MultiExponentiationArgument {
 		MultiExponentiationArgument build() {
 			MultiExponentiationArgument argument = new MultiExponentiationArgument();
 			argument.cA0 = checkNotNull(this.cA0);
-			argument.cbVector = checkNotNull(this.cbVector);
+			argument.cBVector = checkNotNull(this.cBVector);
 			argument.EVector = checkNotNull(this.EVector);
 			argument.aVector = checkNotNull(this.aVector);
 			argument.r = checkNotNull(this.r);

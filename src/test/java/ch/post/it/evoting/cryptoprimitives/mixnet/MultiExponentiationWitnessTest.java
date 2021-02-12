@@ -68,7 +68,7 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 	}
 
 	@Test
-	void testThatMatrixAndExponentPhoOfDifferentGroupsThrows(){
+	void testThatMatrixAndExponentRhoOfDifferentGroupsThrows(){
 		ZqElement otherRho = otherZqGroupGenerator.genRandomZqElementMember();
 		Exception exception =
 				assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationWitness(matrixA, exponentsR, otherRho));

@@ -33,7 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator
 
 class DiagonalProductsTest extends TestGroupSetup {
 
-	private static final int KEY_ELEMENTS_NUMBER = 11;
+	private static final int KEY_SIZE = 10;
 
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static MultiExponentiationArgumentService multiExponentiationArgumentService;
@@ -48,10 +48,10 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@BeforeAll
 	static void setUpAll() throws NoSuchAlgorithmException {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
-		publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
+		publicKey = elGamalGenerator.genRandomPublicKey(KEY_SIZE);
 
 		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
-		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
+		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
 		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		multiExponentiationArgumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(), hashService);
 
@@ -59,9 +59,9 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 	@BeforeEach
 	void setUp() {
-		n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-		m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-		l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+		n = secureRandom.nextInt(KEY_SIZE) + 1;
+		m = secureRandom.nextInt(KEY_SIZE) + 1;
+		l = secureRandom.nextInt(KEY_SIZE) + 1;
 
 		// The ciphertexts matrix is a m x n matrix.
 		ciphertexts = elGamalGenerator.genRandomCiphertextMatrix(m, n, l);
@@ -123,11 +123,11 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with too few public key elements throws IllegalArgumentException")
 	void getDiagonalProductsTooFewKeyElements() {
-		final List<GqElement> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER + 1)
+		final List<GqElement> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_SIZE + 1)
 				.collect(Collectors.toList());
 		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 		final List<List<ElGamalMultiRecipientCiphertext>> randomCiphertexts = Stream.generate(
-				() -> elGamalGenerator.genRandomCiphertexts(otherPublicKey, KEY_ELEMENTS_NUMBER + 1, n))
+				() -> elGamalGenerator.genRandomCiphertexts(otherPublicKey, KEY_SIZE + 1, n))
 				.limit(m)
 				.collect(Collectors.toList());
 		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = SameGroupMatrix.fromRows(randomCiphertexts);

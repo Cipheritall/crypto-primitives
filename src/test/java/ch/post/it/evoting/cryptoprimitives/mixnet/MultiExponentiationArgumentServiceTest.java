@@ -112,7 +112,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	void publicKeyAndCommitmentKeyFromSameGroup() {
+	void publicKeyAndCommitmentKeyFromDifferentGroupsThrows() {
 		CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(otherGqGroup);
 		CommitmentKey otherKey = otherGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 		assertThrowsIllegalArgumentExceptionWithMessage("The public key and commitment key must belong to the same group",
