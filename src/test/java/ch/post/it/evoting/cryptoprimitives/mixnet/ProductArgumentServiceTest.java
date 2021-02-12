@@ -6,7 +6,9 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -111,12 +113,13 @@ class ProductArgumentServiceTest {
 		private SameGroupMatrix<ZqElement, ZqGroup> matrixA;
 		private SameGroupVector<ZqElement, ZqGroup> exponentsR;
 		private ProductWitness witness;
+		private HashService mockHashService;
 		private ProductArgumentService productArgumentService;
 
 		@BeforeEach
 		void setup() {
 			n = secureRandom.nextInt(k) + 1;
-			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 1) + 2; // We need to have at least 2 columns
+			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
 			zqGroup = ZqGroup.sameOrderAs(gqGroup);
 			generator = new ZqGroupGenerator(zqGroup);
 			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
@@ -127,7 +130,7 @@ class ProductArgumentServiceTest {
 			commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 			productB = matrixA.stream().reduce(one, ZqElement::multiply);
 			statement = new ProductStatement(commitmentsA, productB);
-			HashService mockHashService = mock(HashService.class);
+			mockHashService = mock(HashService.class);
 			when(mockHashService.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
 			productArgumentService = new ProductArgumentService(randomService, mockHashService, publicKey, commitmentKey);
 		}
@@ -201,8 +204,8 @@ class ProductArgumentServiceTest {
 		}
 
 		@Test
-		@DisplayName("with a matrix with too few columns throws an IllegalArgumentException")
-		void getProductArgumentWithTooSmallMatrix() {
+		@DisplayName("with a matrix with 1 column returns only the SingleValueProductArgument")
+		void getProductArgumentWithOneColumnMatrix() {
 			matrixA = generator.genRandomZqElementMatrix(n, 1);
 			exponentsR = generator.genRandomZqElementVector(1);
 			witness = new ProductWitness(matrixA, exponentsR);
@@ -210,8 +213,26 @@ class ProductArgumentServiceTest {
 			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
 			productB = matrixA.stream().reduce(one, ZqElement::multiply);
 			statement = new ProductStatement(commitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
-			assertEquals("The matrix A must have at least 2 columns.", exception.getMessage());
+
+			// To compare with SingleValueProductArgument result, we need the same random numbers
+			RandomService mockRandomService = mock(RandomService.class);
+			when(mockRandomService.genRandomInteger(any())).thenReturn(BigInteger.ONE);
+			ProductArgumentService newProductArgumentService = new ProductArgumentService(mockRandomService, mockHashService, publicKey,
+					commitmentKey);
+
+			ProductArgument argument = assertDoesNotThrow(() -> newProductArgumentService.getProductArgument(statement, witness));
+
+			// Check that the output is the same as with getSingleValueProductArgument
+			SingleValueProductWitness singleValueProductWitness = new SingleValueProductWitness(matrixA.getColumn(0), exponentsR.get(0));
+			SingleValueProductStatement singleValueProductStatement = new SingleValueProductStatement(commitmentsA.get(0), productB);
+			SingleValueProductArgumentService singleValueProductArgumentService = new SingleValueProductArgumentService(mockRandomService,
+					mockHashService, publicKey, commitmentKey);
+			SingleValueProductArgument singleValueProductArgument = singleValueProductArgumentService
+					.getSingleValueProductArgument(singleValueProductStatement, singleValueProductWitness);
+
+			assertNull(argument.getCommitmentB());
+			assertNull(argument.getHadamardArgument());
+			assertEquals(singleValueProductArgument, argument.getSingleValueProductArgument());
 		}
 
 		@Test

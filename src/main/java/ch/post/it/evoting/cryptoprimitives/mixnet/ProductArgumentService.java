@@ -95,7 +95,6 @@ final class ProductArgumentService {
 		// Ensure that the statement and the witness are compatible
 		final int n = A.numRows();
 		final int m = A.numColumns();
-		checkArgument(m >= 2, "The matrix A must have at least 2 columns.");
 		checkArgument(cA.equals(getCommitmentMatrix(A, r, commitmentKey)),
 				"The commitment to matrix A with exponents r using the given commitment key must yield the commitments cA.");
 		final ZqGroup zqGroup = A.getGroup();
@@ -105,24 +104,41 @@ final class ProductArgumentService {
 
 		// Start of the operations
 		final BigInteger q = zqGroup.getQ();
-		final ZqElement s = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
-		final SameGroupVector<ZqElement, ZqGroup> biList = IntStream.range(0, n)
-				.mapToObj(i -> IntStream.range(0, m)
-						.mapToObj(j -> A.get(i, j))
-						.reduce(one, ZqElement::multiply))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
-		final GqElement cb = getCommitment(biList, s, commitmentKey);
 
-		// Get the Hadamard argument
-		HadamardStatement hStatement = new HadamardStatement(cA, cb);
-		HadamardWitness hWitness = new HadamardWitness(A, biList, r, s);
-		HadamardArgument hadamardArgument = hadamardArgumentService.getHadamardArgument(hStatement, hWitness);
+		if (m > 1) {
+			// If m > 1, the ciphertexts can be arranged into a multi-column matrix.
+			// In that case, the Product Argument consists of a Hadamard Argument and a Single Value Product Argument.
 
-		// Get the single value product argument
-		SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
-		SingleValueProductWitness sWitness = new SingleValueProductWitness(biList, s);
-		SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService.getSingleValueProductArgument(sStatement, sWitness);
+			final ZqElement s = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
+			final SameGroupVector<ZqElement, ZqGroup> biList = IntStream.range(0, n)
+					.mapToObj(i -> IntStream.range(0, m)
+							.mapToObj(j -> A.get(i, j))
+							.reduce(one, ZqElement::multiply))
+					.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+			final GqElement cb = getCommitment(biList, s, commitmentKey);
 
-		return new ProductArgument(cb, hadamardArgument, singleValueProdArgument);
+			// Get the Hadamard argument
+			HadamardStatement hStatement = new HadamardStatement(cA, cb);
+			HadamardWitness hWitness = new HadamardWitness(A, biList, r, s);
+			HadamardArgument hadamardArgument = hadamardArgumentService.getHadamardArgument(hStatement, hWitness);
+
+			// Get the single value product argument
+			SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
+			SingleValueProductWitness sWitness = new SingleValueProductWitness(biList, s);
+			SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
+					.getSingleValueProductArgument(sStatement, sWitness);
+
+			return new ProductArgument(cb, hadamardArgument, singleValueProdArgument);
+		} else {
+			// If m = 1, the number of ciphertexts is prime and they cannot be arranged into a multi-column matrix.
+			// In that case, we omit the Hadamard Argument and return a Single Value Product Argument only.
+
+			// Get the single value product argument
+			SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
+			SingleValueProductWitness sWitness = new SingleValueProductWitness(A.getColumn(0), r.get(0));
+			SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService.getSingleValueProductArgument(sStatement, sWitness);
+
+			return new ProductArgument(singleValueProdArgument);
+		}
 	}
 }

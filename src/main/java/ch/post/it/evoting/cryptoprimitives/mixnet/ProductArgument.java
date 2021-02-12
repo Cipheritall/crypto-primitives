@@ -11,8 +11,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 
 class ProductArgument {
 
-	private final GqElement commitmentB;
-	private final HadamardArgument hadamardArgument;
+	private GqElement commitmentB;
+	private HadamardArgument hadamardArgument;
 	private final SingleValueProductArgument singleValueProductArgument;
 
 	/**
@@ -26,6 +26,10 @@ class ProductArgument {
 			final SingleValueProductArgument singleValueProductArgument) {
 		this.commitmentB = checkNotNull(commitmentB);
 		this.hadamardArgument = checkNotNull(hadamardArgument);
+		this.singleValueProductArgument = checkNotNull(singleValueProductArgument);
+	}
+
+	ProductArgument(final SingleValueProductArgument singleValueProductArgument) {
 		this.singleValueProductArgument = checkNotNull(singleValueProductArgument);
 	}
 
@@ -50,8 +54,8 @@ class ProductArgument {
 			return false;
 		}
 		ProductArgument that = (ProductArgument) o;
-		return commitmentB.equals(that.commitmentB) && hadamardArgument.equals(that.hadamardArgument) && singleValueProductArgument
-				.equals(that.singleValueProductArgument);
+		return Objects.equals(commitmentB, that.commitmentB) && Objects.equals(hadamardArgument, that.hadamardArgument)
+				&& singleValueProductArgument.equals(that.singleValueProductArgument);
 	}
 
 	@Override
