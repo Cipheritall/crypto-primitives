@@ -155,8 +155,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		void setUp() {
 			// Because the test groups are small.
 			do {
-				m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 2;
-				n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 2;
+				m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
+				n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
 			} while (BigInteger.valueOf((long) m * n).compareTo(zqGroup.getQ()) >= 0);
 			N = m * n;
 
