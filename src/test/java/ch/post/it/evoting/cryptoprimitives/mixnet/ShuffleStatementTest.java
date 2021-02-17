@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,22 +15,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 @DisplayName("A ShuffleStatement")
-class ShuffleStatementTest {
+class ShuffleStatementTest extends TestGroupSetup {
 
 	private static final int KEY_ELEMENTS_NUMBER = 11;
-	private static final int RANDOM_UPPER_BOUND = 10;
 	private static final SecureRandom secureRandom = new SecureRandom();
 
-	private static GqGroup gqGroup;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static ElGamalGenerator elGamalGenerator;
 
@@ -44,20 +37,15 @@ class ShuffleStatementTest {
 
 	@BeforeAll
 	static void setUpAll() {
-		gqGroup = GqGroupTestData.getGroup();
-		final GqGroupGenerator gqGroupGenerator = new GqGroupGenerator(gqGroup);
-
-		final List<GqElement> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
-				.collect(Collectors.toList());
-		publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
-
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
+
+		publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
 	}
 
 	@BeforeEach
 	void setUp() {
-		n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
-		l = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
+		n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+		l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 
 		ciphertexts = new SameGroupVector<>(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
 		shuffledCiphertexts = new SameGroupVector<>(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
@@ -134,8 +122,7 @@ class ShuffleStatementTest {
 	@Test
 	@DisplayName("with ciphertexts and shuffled ciphertexts having different size throws IllegalArgumentException")
 	void constructCiphertextsAndShuffledDiffSizePhis() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> morePhisCiphertexts = new SameGroupVector<>(
-				elGamalGenerator.genRandomCiphertexts(publicKey, l + 1, n));
+		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> morePhisCiphertexts = elGamalGenerator.genRandomCiphertextVector(n, l + 1);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(morePhisCiphertexts, shuffledCiphertexts));
@@ -145,21 +132,14 @@ class ShuffleStatementTest {
 	@Test
 	@DisplayName("with ciphertexts and shuffled ciphertexts from different groups throws IllegalArgumentException")
 	void constructDiffGroupCiphertextsAndShuffled() {
-		// Public key from different group.
-		final GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-		final GqGroupGenerator diffGroupGqGroupGenerator = new GqGroupGenerator(differentGroup);
-		final List<GqElement> pkElements = Stream.generate(diffGroupGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
-				.collect(Collectors.toList());
-		final ElGamalMultiRecipientPublicKey diffGroupPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
-
-		// Ciphertexts from different group with above key.
-		final ElGamalGenerator differentElGamalGenerator = new ElGamalGenerator(differentGroup);
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diffGroupCiphertexts = new SameGroupVector<>(
-				differentElGamalGenerator.genRandomCiphertexts(diffGroupPublicKey, l, n));
+		// Ciphertexts from different group.
+		final ElGamalGenerator differentElGamalGenerator = new ElGamalGenerator(otherGqGroup);
+		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diffGroupCiphertexts = differentElGamalGenerator
+				.genRandomCiphertextVector(n, l);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(diffGroupCiphertexts, shuffledCiphertexts));
-		assertEquals("The ciphertexts and shuffle ciphertexts must be part of the same group.", exception.getMessage());
+		assertEquals("The ciphertexts and shuffled ciphertexts must be part of the same group.", exception.getMessage());
 	}
 
 	@Test

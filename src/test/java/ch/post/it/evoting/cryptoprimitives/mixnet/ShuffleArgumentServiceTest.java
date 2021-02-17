@@ -20,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,10 +32,8 @@ import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
-import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -44,22 +41,24 @@ import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 
 @DisplayName("A ShuffleArgumentService")
 class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 	private static final int KEY_ELEMENTS_NUMBER = 11;
-	private static final int RANDOM_UPPER_BOUND = 10;
 	private static final RandomService randomService = new RandomService();
 	private static final SecureRandom secureRandom = new SecureRandom();
 	private static final PermutationService permutationService = new PermutationService(randomService);
 
 	private static ElGamalGenerator elGamalGenerator;
+	private static CommitmentKeyGenerator commitmentKeyGenerator;
 	private static HashService hashService;
 
 	@BeforeAll
 	static void setUpAll() throws NoSuchAlgorithmException {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
+		commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
 		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 	}
 
@@ -73,14 +72,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setUp() {
-			k = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
+			k = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 
-			final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, k, randomService);
-			publicKey = keyPair.getPublicKey();
-
-			final GqElement h = gqGroupGenerator.genNonIdentityNonGeneratorMember();
-			final List<GqElement> gList = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(k).collect(toList());
-			commitmentKey = new CommitmentKey(h, gList);
+			publicKey = elGamalGenerator.genRandomPublicKey(k);
+			commitmentKey = commitmentKeyGenerator.genCommitmentKey(k);
 		}
 
 		@Test
@@ -138,13 +133,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeAll
 		void setUpAll() {
-			final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, KEY_ELEMENTS_NUMBER, randomService);
-			publicKey = keyPair.getPublicKey();
+			publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
 
-			final GqElement h = gqGroupGenerator.genNonIdentityNonGeneratorMember();
-			final List<GqElement> gList = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
-					.collect(toList());
-			final CommitmentKey commitmentKey = new CommitmentKey(h, gList);
+			final CommitmentKey commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 
 			final HashService hashServiceMock = mock(HashService.class);
 			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
@@ -155,8 +146,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		void setUp() {
 			// Because the test groups are small.
 			do {
-				m = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
-				n = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
+				m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+				n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 			} while (BigInteger.valueOf((long) m * n).compareTo(zqGroup.getQ()) >= 0);
 			N = m * n;
 
@@ -167,9 +158,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			shuffleWitness = new ShuffleWitness(permutation, randomness);
 
 			// Create the corresponding statement.
-			l = secureRandom.nextInt(RANDOM_UPPER_BOUND) + 1;
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = new SameGroupVector<>(
-					elGamalGenerator.genRandomCiphertexts(publicKey, l, N));
+			l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
 
 			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(l, gqGroup);
 			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
@@ -254,13 +244,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("re-encrypted and shuffled ciphertexts C different C' throws IllegalArgumentException")
 		void getShuffleArgumentCiphertextsShuffledCiphertextsDiff() {
 			// Modify the shuffled ciphertexts by replacing its first element by a different ciphertext.
-			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts().stream()
-					.collect(toList());
+			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts().stream().collect(toList());
 			final ElGamalMultiRecipientCiphertext first = shuffledCiphertexts.get(0);
-			ElGamalMultiRecipientCiphertext otherFirst;
-			do {
-				otherFirst = elGamalGenerator.genRandomCiphertext(l);
-			} while (otherFirst.equals(first));
+			final ElGamalMultiRecipientCiphertext otherFirst = Generators.genWhile(() -> elGamalGenerator.genRandomCiphertext(l), first::equals);
 			shuffledCiphertexts.set(0, otherFirst);
 
 			// Recreate shuffled ciphertexts and statement.

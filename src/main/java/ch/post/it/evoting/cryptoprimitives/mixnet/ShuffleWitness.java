@@ -36,7 +36,6 @@ class ShuffleWitness {
 		checkNotNull(permutation);
 		checkNotNull(randomness);
 
-		checkArgument(!randomness.isEmpty(), "The randomness can not be empty.");
 		checkArgument(permutation.getSize() == randomness.size(), "The size of the permutation must be equal to the randomness vector size.");
 
 		this.permutation = permutation;

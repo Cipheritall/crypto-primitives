@@ -54,7 +54,7 @@ class ShuffleStatement {
 
 		// Cross group checking.
 		checkArgument(ciphertexts.getGroup().equals(shuffledCiphertexts.getGroup()),
-				"The ciphertexts and shuffle ciphertexts must be part of the same group.");
+				"The ciphertexts and shuffled ciphertexts must be part of the same group.");
 
 		this.ciphertexts = ciphertexts;
 		this.shuffledCiphertexts = shuffledCiphertexts;

@@ -6,6 +6,7 @@ package ch.post.it.evoting.cryptoprimitives.random;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 /**
  * Represents a permutation of integers in the range [0, N).
@@ -23,6 +24,13 @@ public class Permutation {
 	Permutation(final int[] valueMapping) {
 		this.size = valueMapping.length;
 		this.valueMapping = Arrays.copyOf(valueMapping, this.size);
+	}
+
+	/**
+	 * @return An {@code IntStream} over elements of this permutation.
+	 */
+	public IntStream stream() {
+		return Arrays.stream(this.valueMapping);
 	}
 
 	/**

@@ -13,32 +13,26 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 @DisplayName("A ShuffleWitness")
-class ShuffleWitnessTest {
+class ShuffleWitnessTest extends TestGroupSetup {
 
 	private static final int PERMUTATION_SIZE = 10;
 	private static final RandomService randomService = new RandomService();
 
 	private static PermutationService permutationService;
-	private static ZqGroupGenerator zqGroupGenerator;
 
 	private Permutation permutation;
 	private SameGroupVector<ZqElement, ZqGroup> randomness;
 
 	@BeforeAll
 	static void setUpAll() {
-		final GqGroup gqGroup = GqGroupTestData.getGroup();
-		final ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 		permutationService = new PermutationService(randomService);
 	}
 
@@ -70,7 +64,7 @@ class ShuffleWitnessTest {
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleWitness(permutation, emptyRandomness));
-		assertEquals("The randomness can not be empty.", exception.getMessage());
+		assertEquals("The size of the permutation must be equal to the randomness vector size.", exception.getMessage());
 	}
 
 	@Test

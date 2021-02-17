@@ -122,13 +122,18 @@ class ShuffleArgumentService {
 		checkArgument(l <= publicKey.size(), "The ciphertexts must be smaller than the public key.");
 
 		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(l, gqGroup);
-
-		checkArgument(
-				IntStream.range(0, N)
-						.allMatch(i ->
-								shuffledCiphertextsCprime.get(i)
-										.equals(getCiphertext(ones, randomness.get(i), publicKey).multiply(ciphertextsC.get(permutation.get(i))))),
+		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = randomness.stream()
+				.map(rho -> getCiphertext(ones, rho, publicKey))
+				.collect(toList());
+		final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = permutation.stream()
+				.mapToObj(ciphertextsC::get)
+				.collect(toList());
+		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computedShuffledCiphertextsCprime = IntStream.range(0, N)
+				.mapToObj(i -> encryptedOnes.get(i).multiply(shuffledCiphertexts.get(i)))
+				.collect(toSameGroupVector());
+		checkArgument(shuffledCiphertextsCprime.equals(computedShuffledCiphertextsCprime),
 				"The shuffled ciphertexts provided in the statement do not correspond to the re-encryption and shuffle of C under pi and rho.");
+
 		checkArgument(N == n * m, String.format("The ciphertexts vectors must be decomposable into m * n matrices: %d != %d * %d.", N, m, n));
 
 		// Algorithm operations.
@@ -138,10 +143,11 @@ class ShuffleArgumentService {
 
 		// Compute vector r, matrix A and vector c_A
 		final SameGroupVector<ZqElement, ZqGroup> r = new SameGroupVector<>(randomService.genRandomVector(q, m));
-		final SameGroupVector<ZqElement, ZqGroup> randomPermutationVector = IntStream.range(0, N)
-				.mapToObj(i -> ZqElement.create(BigInteger.valueOf(permutation.get(i)), zqGroup))
+		final SameGroupVector<ZqElement, ZqGroup> permutationVector = permutation.stream()
+				.mapToObj(BigInteger::valueOf)
+				.map(value -> ZqElement.create(value, zqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupMatrix<ZqElement, ZqGroup> matrixA = randomPermutationVector.toExponentMatrix(n, m);
+		final SameGroupMatrix<ZqElement, ZqGroup> matrixA = permutationVector.toExponentMatrix(n, m);
 		final SameGroupVector<GqElement, GqGroup> cA = getCommitmentMatrix(matrixA, r, commitmentKey);
 
 		// Compute x.
@@ -158,8 +164,9 @@ class ShuffleArgumentService {
 
 		// Compute vector s, vector b, matrix B and vector c_B.
 		final SameGroupVector<ZqElement, ZqGroup> s = new SameGroupVector<>(randomService.genRandomVector(q, m));
-		final SameGroupVector<ZqElement, ZqGroup> bVector = IntStream.range(0, N)
-				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(permutation.get(i))))
+		final SameGroupVector<ZqElement, ZqGroup> bVector = permutation.stream()
+				.mapToObj(BigInteger::valueOf)
+				.map(x::exponentiate)
 				.collect(toSameGroupVector());
 		final SameGroupMatrix<ZqElement, ZqGroup> matrixB = bVector.toExponentMatrix(n, m);
 		final SameGroupVector<GqElement, GqGroup> cB = getCommitmentMatrix(matrixB, s, commitmentKey);
@@ -192,28 +199,28 @@ class ShuffleArgumentService {
 		final ZqElement z = ZqElement.create(ConversionService.byteArrayToInteger(zHash), zqGroup);
 
 		// Compute Zneg, c_{-z}.
-		final SameGroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate).limit(N).collect(toSameGroupVector()).toExponentMatrix(n, m);
+		final SameGroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate)
+				.limit(N)
+				.collect(toSameGroupVector())
+				.toExponentMatrix(n, m);
 		final SameGroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toSameGroupVector());
 		final SameGroupVector<GqElement, GqGroup> cNegativeZ = getCommitmentMatrix(negativeZ, zeros, commitmentKey);
 
 		// Compute c_D.
-		final List<GqElement> exponentiatedCA = cA.stream().map(el -> el.exponentiate(y)).collect(toList());
-		final List<GqElement> cD = IntStream.range(0, exponentiatedCA.size())
-				.mapToObj(i -> exponentiatedCA.get(i).multiply(cB.get(i)))
+		final List<GqElement> cD = IntStream.range(0, cA.size())
+				.mapToObj(i -> cA.get(i).exponentiate(y).multiply(cB.get(i)))
 				.collect(toList());
 
 		// Compute matrix D.
-		final SameGroupMatrix<ZqElement, ZqGroup> matrixD = IntStream.range(0, matrixA.numRows())
-				.mapToObj(i -> IntStream.range(0, matrixA.numColumns())
-						.mapToObj(j -> y.multiply(matrixA.get(i, j))
-								.add(matrixB.get(i, j)))
-						.collect(toList()))
-				.collect(collectingAndThen(toList(), SameGroupMatrix::fromRows));
+		final SameGroupMatrix<ZqElement, ZqGroup> yTimesA = matrixA.stream()
+				.map(y::multiply)
+				.collect(collectingAndThen(toList(), SameGroupVector::new))
+				.toExponentMatrix(matrixA.numRows(), matrixB.numColumns());
+		final SameGroupMatrix<ZqElement, ZqGroup> matrixD = matrixSum(yTimesA, matrixB);
 
 		// Compute vector t.
 		final SameGroupVector<ZqElement, ZqGroup> t = IntStream.range(0, r.size())
-				.mapToObj(i -> y.multiply(r.get(i))
-						.add(s.get(i)))
+				.mapToObj(i -> y.multiply(r.get(i)).add(s.get(i)))
 				.collect(toSameGroupVector());
 
 		// Pre-compute x^i for i=0..N use multiple times.
@@ -224,9 +231,13 @@ class ShuffleArgumentService {
 
 		// Compute b.
 		final ZqElement b = IntStream.range(0, N)
-				.mapToObj(i -> y.multiply(ZqElement.create(BigInteger.valueOf(i), zqGroup))
-						.add(xPowers.get(i))
-						.subtract(z))
+				.boxed()
+				.flatMap(i -> Stream.of(i)
+						.map(BigInteger::valueOf)
+						.map(bi -> ZqElement.create(bi, zqGroup))
+						.map(y::multiply)
+						.map(elem -> elem.add(xPowers.get(i)))
+						.map(elem -> elem.subtract(z)))
 				.reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 
 		// Compute pStatement.
@@ -236,11 +247,7 @@ class ShuffleArgumentService {
 		final ProductStatement pStatement = new ProductStatement(pStatementCommitments, b);
 
 		// Compute pWitness.
-		final SameGroupMatrix<ZqElement, ZqGroup> pWitnessMatrix = IntStream.range(0, matrixD.numRows())
-				.mapToObj(i -> IntStream.range(0, matrixD.numColumns())
-						.mapToObj(j -> matrixD.get(i, j).add(negativeZ.get(i, j)))
-						.collect(toList()))
-				.collect(collectingAndThen(toList(), SameGroupMatrix::fromRows));
+		final SameGroupMatrix<ZqElement, ZqGroup> pWitnessMatrix = matrixSum(matrixD, negativeZ);
 		final ProductWitness pWitness = new ProductWitness(pWitnessMatrix, t);
 
 		// Compute productArgument.
@@ -257,8 +264,7 @@ class ShuffleArgumentService {
 
 		// Compute mStatement.
 		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(shuffledCiphertextsCprime.toCiphertextMatrix(m, n),
-				ciphertextC,
-				cB);
+				ciphertextC, cB);
 
 		// Compute mWitness.
 		final MultiExponentiationWitness mWitness = new MultiExponentiationWitness(matrixB, s, rho);
@@ -274,6 +280,22 @@ class ShuffleArgumentService {
 				.withProductArgument(productArgument)
 				.withMultiExponentiationArgument(multiExponentiationArgument)
 				.build();
+	}
+
+	private SameGroupMatrix<ZqElement, ZqGroup> matrixSum(final SameGroupMatrix<ZqElement, ZqGroup> first,
+			final SameGroupMatrix<ZqElement, ZqGroup> second) {
+
+		checkNotNull(first);
+		checkNotNull(second);
+		checkArgument(first.numRows() == second.numRows());
+		checkArgument(first.numColumns() == second.numColumns());
+		checkArgument(first.getGroup().equals(second.getGroup()));
+
+		return IntStream.range(0, first.numRows())
+				.mapToObj(i -> IntStream.range(0, first.numColumns())
+						.mapToObj(j -> first.get(i, j).add(second.get(i, j)))
+						.collect(toList()))
+				.collect(collectingAndThen(toList(), SameGroupMatrix::fromRows));
 	}
 
 }
