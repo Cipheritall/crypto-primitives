@@ -21,10 +21,9 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class ProductWitnessTest {
@@ -43,8 +42,7 @@ class ProductWitnessTest {
 	void setup() {
 		n = secureRandom.nextInt(MATRIX_BOUND) + 1;
 		m = secureRandom.nextInt(MATRIX_BOUND) + 1;
-		GqGroup gqGroup = GqGroupTestData.getGroup();
-		zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		zqGroup = GroupTestData.getZqGroup();
 		generator = new ZqGroupGenerator(zqGroup);
 		matrix = generator.genRandomZqElementMatrix(n, m);
 		exponents = generator.genRandomZqElementVector(m);
@@ -68,7 +66,7 @@ class ProductWitnessTest {
 	@Test
 	@DisplayName("Instantiating a ProductWitness with the matrix and the exponents from different groups throws an IllegalArgumentException")
 	void constructProductWitnessWithMatrixAndExponentsFromDifferentGroup() {
-		ZqGroup differentZqGroup = new ZqGroupGenerator(zqGroup).otherGroup();
+		ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 		ZqGroupGenerator differentGenerator = new ZqGroupGenerator(differentZqGroup);
 		SameGroupVector<ZqElement, ZqGroup> differentExponents = differentGenerator.genRandomZqElementVector(m);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, differentExponents));

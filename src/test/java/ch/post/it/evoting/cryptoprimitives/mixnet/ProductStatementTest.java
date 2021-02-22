@@ -22,7 +22,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -37,7 +37,7 @@ class ProductStatementTest {
 	@BeforeEach
 	void setup() {
 		numElements = secureRandom.nextInt(10) + 1;
-		GqGroup gqGroup = GqGroupTestData.getGroup();
+		GqGroup gqGroup = GroupTestData.getGqGroup();
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		GqGroupGenerator gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
@@ -55,7 +55,7 @@ class ProductStatementTest {
 	@Test
 	@DisplayName("Instantiating a ProductStatement with commitments and product having a different order q throws an IllegalArgumentException")
 	void constructProductStatementWithCommitmentsAndProductDifferentOrders() {
-		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitments.getGroup());
+		GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(commitments.getGroup());
 		commitments = new GqGroupGenerator(differentGqGroup).genRandomGqElementVector(numElements);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductStatement(commitments, product));
 		assertEquals("The commitments and the product must have the same order q.", exception.getMessage());

@@ -22,7 +22,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 @DisplayName("A ZeroStatement")
@@ -44,7 +44,7 @@ class ZeroStatementTest {
 	@BeforeAll
 	static void setUpAll() {
 		// GqGroup and corresponding ZqGroup set up.
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		gqGroupGenerator = new GqGroupGenerator(gqGroup);
 	}
@@ -109,7 +109,7 @@ class ZeroStatementTest {
 	@DisplayName("constructed with commitments from different group throws IllegalArgumentException")
 	void constructDiffGroupCommitments() {
 		// Generate commitmentsA from different group.
-		final GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+		final GqGroup differentGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 		final GqGroupGenerator otherGqGroupGenerator = new GqGroupGenerator(differentGroup);
 		final SameGroupVector<GqElement, GqGroup> diffCommitmentsA = otherGqGroupGenerator.genRandomGqElementVector(m);
 
@@ -121,8 +121,7 @@ class ZeroStatementTest {
 	@Test
 	@DisplayName("constructed with y from a group of different order throws IllegalArgumentException")
 	void constructDiffOrderGroupY() {
-		final GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-		final ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
+		final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 		final ZqElement differentZqGroupY = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,

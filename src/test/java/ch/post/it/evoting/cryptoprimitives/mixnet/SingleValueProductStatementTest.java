@@ -19,7 +19,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -34,7 +34,7 @@ class SingleValueProductStatementTest {
 
 	@BeforeEach
 	void setup() {
-		GqGroup gqGroup = GqGroupTestData.getGroup();
+		GqGroup gqGroup = GroupTestData.getGqGroup();
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
@@ -57,7 +57,7 @@ class SingleValueProductStatementTest {
 	@Test
 	@DisplayName("throw an IllegalArgumentException when the commitment and the product have different orders")
 	void constructSingleValueProductStatementWithCommitmentAndProductDifferentQThrows() {
-		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitment.getGroup());
+		GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(commitment.getGroup());
 		GqGroupGenerator generator = new GqGroupGenerator(differentGqGroup);
 		GqElement differentCommitment = generator.genMember();
 		assertThrows(IllegalArgumentException.class, () -> new SingleValueProductStatement(differentCommitment, product));

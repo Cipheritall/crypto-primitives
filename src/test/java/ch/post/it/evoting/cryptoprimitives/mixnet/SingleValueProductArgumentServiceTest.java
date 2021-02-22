@@ -35,7 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -60,7 +60,7 @@ class SingleValueProductArgumentServiceTest {
 
 	@BeforeAll
 	static void setupAll() {
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
@@ -117,29 +117,29 @@ class SingleValueProductArgumentServiceTest {
 		@Test
 		@DisplayName("with statement groups different from commitment key group throws IllegalArgumentException")
 		void getSingleValueProductArgumentWithStatementFromDifferentGroupsThrows () {
-		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitmentKey.getGroup());
-		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
-		GqElement differentCommitment = differentGqGroup.getIdentity();
-		ZqElement differentProduct = differentZqGroup.getIdentity();
-		SingleValueProductStatement differentStatement = new SingleValueProductStatement(differentCommitment, differentProduct);
-		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> argumentService.getSingleValueProductArgument(differentStatement, witness));
-		assertEquals("The statement's groups must have the same order as the commitment key's group.", exception.getMessage());
-	}
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(commitmentKey.getGroup());
+			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
+			GqElement differentCommitment = differentGqGroup.getIdentity();
+			ZqElement differentProduct = differentZqGroup.getIdentity();
+			SingleValueProductStatement differentStatement = new SingleValueProductStatement(differentCommitment, differentProduct);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> argumentService.getSingleValueProductArgument(differentStatement, witness));
+			assertEquals("The statement's groups must have the same order as the commitment key's group.", exception.getMessage());
+		}
 
 		@Test
 		@DisplayName("with witness group order different from commitment key group order throws IllegalArgumentException")
 		void getSingleValueProductArgumentWithWitnessFromDifferentGroupThrows () {
-		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(commitmentKey.getGroup());
-		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
-		ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
-		SameGroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
-		ZqElement differentRandomness = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
-		SingleValueProductWitness differentWitness = new SingleValueProductWitness(differentElements, differentRandomness);
-		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> argumentService.getSingleValueProductArgument(statement, differentWitness));
-		assertEquals("The witness' group must have the same order as the commitment key's group.", exception.getMessage());
-	}
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(commitmentKey.getGroup());
+			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
+			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
+			SameGroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
+			ZqElement differentRandomness = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
+			SingleValueProductWitness differentWitness = new SingleValueProductWitness(differentElements, differentRandomness);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> argumentService.getSingleValueProductArgument(statement, differentWitness));
+			assertEquals("The witness' group must have the same order as the commitment key's group.", exception.getMessage());
+		}
 
 		@Test
 		@DisplayName("with incorrect commitment throws IllegalArgumentException")
@@ -249,7 +249,7 @@ class SingleValueProductArgumentServiceTest {
 		@Test
 		@DisplayName("with statement and argument having different groups throws an IllegalArgumentException")
 		void verifySingleValueProductArgumentWithIncompatibleStatementAndArgument() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 			GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGqGroup);
 			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);

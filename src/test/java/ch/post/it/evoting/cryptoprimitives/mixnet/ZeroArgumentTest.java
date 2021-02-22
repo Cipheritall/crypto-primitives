@@ -20,7 +20,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 
 class ZeroArgumentTest {
 
@@ -29,7 +29,7 @@ class ZeroArgumentTest {
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class ZeroArgumentBuilderTest {
 
-		private final GqGroup gqGroup = GqGroupTestData.getGroup();
+		private final GqGroup gqGroup = GroupTestData.getGqGroup();
 		private final ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 
 		private final GqElement cA0 = GqElement.create(BigInteger.ONE, gqGroup);

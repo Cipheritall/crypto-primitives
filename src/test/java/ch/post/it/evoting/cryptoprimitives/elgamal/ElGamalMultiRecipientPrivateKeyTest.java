@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class ElGamalMultiRecipientPrivateKeyTest {
@@ -63,7 +64,7 @@ class ElGamalMultiRecipientPrivateKeyTest {
 
 		List<ZqElement> messageElementsDifferentGroups = new LinkedList<>();
 		messageElementsDifferentGroups.add(generator.genRandomZqElementMember());
-		ZqGroupGenerator otherGenerator = new ZqGroupGenerator(generator.otherGroup());
+		ZqGroupGenerator otherGenerator = new ZqGroupGenerator(GroupTestData.getDifferentZqGroup(validExponentGroup));
 		messageElementsDifferentGroups.add(otherGenerator.genRandomZqElementMember());
 
 		return Stream.of(

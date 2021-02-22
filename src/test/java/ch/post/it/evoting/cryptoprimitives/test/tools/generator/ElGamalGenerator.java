@@ -72,9 +72,8 @@ public class ElGamalGenerator {
 	}
 
 	public static ElGamalMultiRecipientCiphertext encryptMessage(ElGamalMultiRecipientMessage originalMessage, ElGamalMultiRecipientKeyPair keyPair,
-			GqGroup gqGroup) {
+			ZqGroup zqGroup) {
 		RandomService randomService = new RandomService();
-		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		ZqElement exponent = randomService.genRandomExponent(zqGroup);
 		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
 	}

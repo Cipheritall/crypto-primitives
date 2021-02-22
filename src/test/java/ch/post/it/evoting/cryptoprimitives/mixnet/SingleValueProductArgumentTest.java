@@ -17,14 +17,14 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class SingleValueProductArgumentTest {
 
 	@Test
 	void testEquals() {
-		GqGroup gqGroup = GqGroupTestData.getGroup();
+		GqGroup gqGroup = GroupTestData.getGqGroup();
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 
 		GqGroupGenerator generator = new GqGroupGenerator(gqGroup);

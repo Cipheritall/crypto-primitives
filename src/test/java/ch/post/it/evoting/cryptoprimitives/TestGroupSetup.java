@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -29,13 +29,13 @@ public class TestGroupSetup {
 	@BeforeAll
 	static void testGroupSetup() {
 		// GqGroup and corresponding ZqGroup set up.
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		gqGroupGenerator = new GqGroupGenerator(gqGroup);
-		otherGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+		otherGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 		otherGqGroupGenerator = new GqGroupGenerator(otherGqGroup);
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
-		otherZqGroup = zqGroupGenerator.otherGroup();
+		otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
 		otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 	}
 

@@ -19,10 +19,9 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 @DisplayName("A ZeroWitness")
@@ -42,9 +41,7 @@ class ZeroWitnessTest {
 
 	@BeforeAll
 	static void setUpAll() {
-		// GqGroup and corresponding ZqGroup set up.
-		final GqGroup gqGroup = GqGroupTestData.getGroup();
-		zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		zqGroup = GroupTestData.getZqGroup();
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 	}
 
@@ -147,7 +144,7 @@ class ZeroWitnessTest {
 	@DisplayName("constructed with matrices from different group throws IllegalArgumentException")
 	void constructMatricesDiffGroup() {
 		// Get another group.
-		final ZqGroup otherZqGroup = zqGroupGenerator.otherGroup();
+		final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 		final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 
 		final SameGroupMatrix<ZqElement, ZqGroup> otherZqGroupMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
@@ -161,7 +158,7 @@ class ZeroWitnessTest {
 	@DisplayName("constructed with exponents from different group throws IllegalArgumentException")
 	void constructExponentsDiffGroup() {
 		// Get another group.
-		final ZqGroup otherZqGroup = zqGroupGenerator.otherGroup();
+		final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 		final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 
 		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponents = otherZqGroupGenerator.genRandomZqElementVector(m);
@@ -175,7 +172,7 @@ class ZeroWitnessTest {
 	@DisplayName("constructed with matrices and exponents from different group throws IllegalArgumentException")
 	void constructMatricesExponentsDiffGroup() {
 		// Get another group.
-		final ZqGroup otherZqGroup = zqGroupGenerator.otherGroup();
+		final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 		final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 
 		final SameGroupVector<ZqElement, ZqGroup> otherZqGroupExponentsR = otherZqGroupGenerator.genRandomZqElementVector(m);

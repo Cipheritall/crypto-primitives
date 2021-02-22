@@ -16,8 +16,6 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 public class ZqGroupGenerator {
 
-	private static final BigInteger UPPER_BOUND_Q = BigInteger.valueOf(100);
-
 	private final ZqGroup group;
 	private final RandomService randomService;
 
@@ -29,14 +27,6 @@ public class ZqGroupGenerator {
 	public ZqElement genRandomZqElementMember() {
 		final BigInteger value = randomService.genRandomInteger(this.group.getQ());
 		return ZqElement.create(value, this.group);
-	}
-
-	public ZqGroup otherGroup() {
-		BigInteger q;
-		do {
-			q = this.randomService.genRandomIntegerWithinBounds(BigInteger.valueOf(2), UPPER_BOUND_Q);
-		} while (q.equals(group.getQ()));
-		return new ZqGroup(q);
 	}
 
 	/**

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class ProductArgumentTest {
@@ -18,7 +18,7 @@ class ProductArgumentTest {
 	@DisplayName("Constructing a ProductArgument with null arguments throws a NullPointerException")
 	void constructMultiValueProductArgumentWithNullArguments() {
 
-		GqGroup gqGroup = GqGroupTestData.getGroup();
+		GqGroup gqGroup = GroupTestData.getGqGroup();
 		GqElement commitmentB = new GqGroupGenerator(gqGroup).genMember();
 		HadamardArgument hadamardArgument = mock(HadamardArgument.class);
 		SingleValueProductArgument singleValueProductArgument = mock(SingleValueProductArgument.class);

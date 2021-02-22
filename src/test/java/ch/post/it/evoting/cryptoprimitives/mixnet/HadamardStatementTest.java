@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class HadamardStatementTest {
@@ -32,7 +32,7 @@ class HadamardStatementTest {
 	@BeforeEach
 	void setup() {
 		int n = secureRandom.nextInt(10) + 1;
-		group = GqGroupTestData.getGroup();
+		group = GroupTestData.getGqGroup();
 		generator = new GqGroupGenerator(group);
 		commitmentsA = generator.genRandomGqElementVector(n);
 		commitmentB = generator.genMember();
@@ -56,7 +56,7 @@ class HadamardStatementTest {
 	@Test
 	@DisplayName("Constructing a Hadamard statement with commitments A and commitment b of different groups should throw")
 	void constructStatementWithCommitmentsFromDifferentGroups() {
-		GqGroup differentGroup = GqGroupTestData.getDifferentGroup(group);
+		GqGroup differentGroup = GroupTestData.getDifferentGqGroup(group);
 		commitmentB = new GqGroupGenerator(differentGroup).genMember();
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardStatement(commitmentsA, commitmentB));
 		assertEquals("The commitments A and commitment b must have the same group.", exception.getMessage());

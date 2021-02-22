@@ -38,7 +38,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -64,7 +64,7 @@ class HadamardArgumentServiceTest {
 	static void setupAll() {
 		n = secureRandom.nextInt(MATRIX_BOUNDS) + 1;
 		m = secureRandom.nextInt(MATRIX_BOUNDS - 1) + 2; // The Hadamard argument only works with 2 or more columns
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, n, randomService);
 		publicKey = keyPair.getPublicKey();
 		GqGroupGenerator generator = new GqGroupGenerator(gqGroup);
@@ -106,7 +106,7 @@ class HadamardArgumentServiceTest {
 	@Test
 	@DisplayName("Instantiating a Hadamard argument provider with a public key and a commitment key from a different group throws")
 	void constructHadamardArgumentServiceWithKeysDifferentGroup() {
-		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+		GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(differentGqGroup, n, randomService);
 		ElGamalMultiRecipientPublicKey otherPublicKey = keyPair.getPublicKey();
 		Exception exception = assertThrows(IllegalArgumentException.class,
@@ -206,7 +206,7 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with the statement having a different group than the witness throws an IllegalArgumentException")
 		void getHadamardArgumentWithCommitmentsFromDifferentGroup() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			GqGroupGenerator generator = new GqGroupGenerator(differentGqGroup);
 			commitmentsA = generator.genRandomGqElementVector(m);
 			commitmentB = generator.genMember();

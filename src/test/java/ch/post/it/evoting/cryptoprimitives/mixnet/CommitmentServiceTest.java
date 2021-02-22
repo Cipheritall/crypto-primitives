@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class CommitmentServiceTest {
@@ -48,7 +48,7 @@ class CommitmentServiceTest {
 
 	@BeforeEach
 	void setup() {
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 		ckGenerator = new CommitmentKeyGenerator(gqGroup);
@@ -107,7 +107,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with elements to be committed to and commitment key in groups of different order throws IllegalArgumentException")
 		void getCommitmentWithCommitmentKeyGroupDifferentOrderThanValuesGroup() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(differentGqGroup);
 			CommitmentKey differentCommitmentKey = otherGenerator.genCommitmentKey(KEY_LENGTH);
 			assertThrows(IllegalArgumentException.class, () -> CommitmentService.getCommitment(validElements, randomValue, differentCommitmentKey));
@@ -222,7 +222,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with matrix group and commitment key group different order throws IllegalArgumentException")
 		void getCommitmentMatrixWithCommitmentKeyGroupDifferentOrderThanValuesGroup() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(differentGqGroup);
 			CommitmentKey differentCommitmentKey = otherGenerator.genCommitmentKey(n);
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -332,7 +332,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with elements to be committed to and commitment key in groups of different order throws IllegalArgumentException")
 		void getCommitmentVectorWithCommitmentKeyGroupDifferentOrderThanValuesGroup() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			CommitmentKeyGenerator otherCkGenerator = new CommitmentKeyGenerator(differentGqGroup);
 			CommitmentKey differentCommitmentKey = otherCkGenerator.genCommitmentKey(KEY_LENGTH);
 			assertThrows(IllegalArgumentException.class,
@@ -342,7 +342,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with elements to be committed to and random elements from different groups throws IllegalArgumentException")
 		void getCommitmentVectorWithRandomValueDifferentGroupThanValues() {
-			final ZqGroup differentZqGroup = getDifferentZqGroup();
+			final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 			final ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
 			final SameGroupVector<ZqElement, ZqGroup> differentRandomElements = differentZqGroupGenerator.genRandomZqElementVector(KEY_LENGTH);
 			assertThrows(IllegalArgumentException.class,
@@ -397,21 +397,5 @@ class CommitmentServiceTest {
 			assertEquals(new SameGroupVector<>(expected),
 					CommitmentService.getCommitmentVector(new SameGroupVector<>(a), new SameGroupVector<>(r), ck));
 		}
-	}
-
-	/**
-	 * Get a different ZqGroup from the one used before each test cases.
-	 *
-	 * @return a different {@link ZqGroup}.
-	 */
-	private ZqGroup getDifferentZqGroup() {
-		GqGroup otherGqGroup;
-		ZqGroup otherZqGroup;
-		do {
-			otherGqGroup = GqGroupTestData.getGroup();
-			otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
-		} while (otherZqGroup.equals(zqGroup));
-
-		return otherZqGroup;
 	}
 }

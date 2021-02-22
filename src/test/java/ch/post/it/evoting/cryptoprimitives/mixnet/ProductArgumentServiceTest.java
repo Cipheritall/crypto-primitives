@@ -38,7 +38,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -58,7 +58,7 @@ class ProductArgumentServiceTest {
 	@BeforeEach
 	void setup() throws NoSuchAlgorithmException {
 		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		gqGroupGenerator = new GqGroupGenerator(gqGroup);
 
 		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
@@ -90,7 +90,7 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with public key from different group than commitment key throws an IllegalArgumentException")
 		void constructProductArgumentWithPublicKeyGroupDifferentCommitmentKeyGroup() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(differentGqGroup, k, randomService);
 			publicKey = keyPair.getPublicKey();
 			Exception exception = assertThrows(IllegalArgumentException.class,
@@ -170,7 +170,7 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with statement and witness having incompatible groups throws IllegalArgumentException")
 		void getProductArgumentWithStatementAndWitnessDifferentGroup() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 			commitmentsA = new GqGroupGenerator(differentGqGroup).genRandomGqElementVector(m);
 			productB = new ZqGroupGenerator(differentZqGroup).genRandomZqElementMember();
@@ -182,7 +182,7 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with commitments and commitment key from different group throws IllegalArgumentException")
 		void getProductArgumentWithCommitmentsAndCommitmentKeyFromDifferentGroups() {
-			GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
 			ZqElement one = ZqElement.create(BigInteger.ONE, differentZqGroup);

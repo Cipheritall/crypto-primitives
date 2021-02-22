@@ -16,21 +16,17 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
-class HadamardWitnessTest {
+class HadamardWitnessTest extends TestGroupSetup {
 
 	private static final int MATRIX_BOUNDS = 10;
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private int n;
 	private int m;
-	private ZqGroupGenerator zqGenerator;
-	private ZqGroupGenerator otherZqGenerator;
 	private SameGroupMatrix<ZqElement, ZqGroup> matrix;
 	private SameGroupVector<ZqElement, ZqGroup> vector;
 	private SameGroupVector<ZqElement, ZqGroup> exponents;
@@ -41,19 +37,10 @@ class HadamardWitnessTest {
 		n = secureRandom.nextInt(MATRIX_BOUNDS) + 1;
 		m = secureRandom.nextInt(MATRIX_BOUNDS) + 1;
 
-		// GqGroup and corresponding ZqGroup set up.
-		final GqGroup gqGroup = GqGroupTestData.getGroup();
-		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		final GqGroup otherGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-		ZqGroup otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
-
-		zqGenerator = new ZqGroupGenerator(zqGroup);
-		otherZqGenerator = new ZqGroupGenerator(otherZqGroup);
-
-		matrix = zqGenerator.genRandomZqElementMatrix(n, m);
-		vector = zqGenerator.genRandomZqElementVector(n);
-		exponents = zqGenerator.genRandomZqElementVector(m);
-		randomness = zqGenerator.genRandomZqElementMember();
+		matrix = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+		vector = zqGroupGenerator.genRandomZqElementVector(n);
+		exponents = zqGroupGenerator.genRandomZqElementVector(m);
+		randomness = zqGroupGenerator.genRandomZqElementMember();
 	}
 
 	@Test
@@ -77,7 +64,7 @@ class HadamardWitnessTest {
 	@Test
 	@DisplayName("Constructing a Hadamard witness with matrix columns and vector of different sizes should throw")
 	void constructWitnessWithMatrixColumnsAndVectorOfDifferentSizes() {
-		vector = zqGenerator.genRandomZqElementVector(n + 1);
+		vector = zqGroupGenerator.genRandomZqElementVector(n + 1);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardWitness(matrix, vector, exponents, randomness));
 		assertEquals("The matrix A must have the same number of rows as the vector b has elements.", exception.getMessage());
 	}
@@ -85,7 +72,7 @@ class HadamardWitnessTest {
 	@Test
 	@DisplayName("Constructing a Hadamard witness with matrix and vector from different groups should throw")
 	void constructWitnessWithMatrixAndVectorFromDifferentGroups() {
-		vector = otherZqGenerator.genRandomZqElementVector(n);
+		vector = otherZqGroupGenerator.genRandomZqElementVector(n);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardWitness(matrix, vector, exponents, randomness));
 		assertEquals("The matrix A and the vector b must have the same group.", exception.getMessage());
 	}
@@ -93,7 +80,7 @@ class HadamardWitnessTest {
 	@Test
 	@DisplayName("Constructing a Hadamard witness with matrix rows and exponents of different sizes should throw")
 	void constructWitnessWithMatrixRowsAndExponentsOfDifferentSizes() {
-		exponents = zqGenerator.genRandomZqElementVector(m + 1);
+		exponents = zqGroupGenerator.genRandomZqElementVector(m + 1);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardWitness(matrix, vector, exponents, randomness));
 		assertEquals("The matrix A must have the same number of columns as the exponents r have elements.", exception.getMessage());
 	}
@@ -101,7 +88,7 @@ class HadamardWitnessTest {
 	@Test
 	@DisplayName("Constructing a Hadamard witness with matrix and exponents from different groups should throw")
 	void constructWitnessWithMatrixAndExponentsFromDifferentGroups() {
-		exponents = otherZqGenerator.genRandomZqElementVector(m);
+		exponents = otherZqGroupGenerator.genRandomZqElementVector(m);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardWitness(matrix, vector, exponents, randomness));
 		assertEquals("The matrix A and the exponents r must have the same group.", exception.getMessage());
 	}
@@ -109,7 +96,7 @@ class HadamardWitnessTest {
 	@Test
 	@DisplayName("Constructing a Hadamard witness with exponents and randomness from different groups should throw")
 	void constructWitnessWithExponentsAndRandomnessFromDifferentGroups() {
-		randomness = otherZqGenerator.genRandomZqElementMember();
+		randomness = otherZqGroupGenerator.genRandomZqElementMember();
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardWitness(matrix, vector, exponents, randomness));
 		assertEquals("The exponents r and the exponent s must have the same group.", exception.getMessage());
 	}

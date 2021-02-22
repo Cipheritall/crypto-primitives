@@ -43,7 +43,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -79,7 +79,7 @@ class ZeroArgumentServiceTest {
 	@BeforeAll
 	static void setUpAll() throws Exception {
 		// GqGroup and corresponding ZqGroup set up.
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 		gqGroupGenerator = new GqGroupGenerator(gqGroup);
@@ -132,7 +132,7 @@ class ZeroArgumentServiceTest {
 	@DisplayName("constructed with keys from different groups throws IllegalArgumentException")
 	void constructDiffGroupKeys() {
 		// Create public key from other group.
-		final GqGroupGenerator otherGqGroupGenerator = new GqGroupGenerator(GqGroupTestData.getDifferentGroup(gqGroup));
+		final GqGroupGenerator otherGqGroupGenerator = new GqGroupGenerator(GroupTestData.getDifferentGqGroup(gqGroup));
 		final List<GqElement> pkElements = Stream.generate(otherGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
 				.collect(Collectors.toList());
 		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
@@ -214,7 +214,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with second matrix having elements of different group than the first matrix throws IllegalArgumentException")
 		void computeDVectorMatricesDifferentGroup() {
 			// Get a second matrix in a different ZqGroup.
-			final ZqGroup otherZqGroup = getDifferentZqGroup();
+			final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 			final SameGroupMatrix<ZqElement, ZqGroup> differentGroupSecondMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
@@ -227,7 +227,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with y from a different group throws IllegalArgumentException")
 		void computeDVectorYDifferentGroup() {
 			// Get a different ZqGroup.
-			final ZqGroup differentZqGroup = getDifferentZqGroup();
+			final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 
 			// Create a y value from a different group.
 			final ZqElement differentGroupY = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
@@ -344,7 +344,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with second vector elements of different group than the first vector throws IllegalArgumentException")
 		void starMapVectorsDifferentGroup() {
 			// Second vector from different group.
-			final ZqGroup otherZqGroup = getDifferentZqGroup();
+			final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
 			final SameGroupVector<ZqElement, ZqGroup> secondVector = otherZqGroupGenerator.genRandomZqElementVector(n);
 
@@ -357,7 +357,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("constructed with value y from different group throws IllegalArgumentException")
 		void starMapYDifferentGroup() {
 			// Get another y from a different group.
-			final ZqGroup differentZqGroup = getDifferentZqGroup();
+			final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 			final ZqElement differentGroupY = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -457,7 +457,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with y and exponents of different group throws IllegalArgumentException")
 		void getZeroArgDiffGroupYAndExponents() {
 			// Create another witness in another group.
-			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(getDifferentZqGroup());
+			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(GroupTestData.getDifferentZqGroup(zqGroup));
 			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
 			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
 			final SameGroupVector<ZqElement, ZqGroup> exponentsR = otherZqGroupGenerator.genRandomZqElementVector(m);
@@ -620,91 +620,71 @@ class ZeroArgumentServiceTest {
 
 			assertEquals(simpleZeroArgument, zeroArgument);
 		}
+	}
 
-		@Nested
-		@DisplayName("VerifyZeroArgument")
-		class VerifyZeroArgument {
+	@Nested
+	@DisplayName("VerifyZeroArgument")
+	class VerifyZeroArgument {
 
-			@RepeatedTest(10)
-			void verifyZeroArgumentTest() {
-				// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-				final HashService hashServiceMock = mock(HashService.class);
-				when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
+		@RepeatedTest(10)
+		void verifyZeroArgumentTest() {
+			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
+			final HashService hashServiceMock = mock(HashService.class);
+			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
 
-				ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
-				ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
-				ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
-				ZeroStatement statement = testData.getZeroStatement();
-				ZeroWitness witness = testData.getZeroWitness();
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+			ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
+			ZeroStatement statement = testData.getZeroStatement();
+			ZeroWitness witness = testData.getZeroWitness();
 
-				ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
+			ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
 
-				assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument));
-			}
+			assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument));
+		}
 
-			@Test
-			void testNullInputParameters() {
+		@Test
+		void testNullInputParameters() {
 
-				ZeroArgument zeroArgument = mock(ZeroArgument.class);
-				ZeroStatement zeroStatement = mock(ZeroStatement.class);
+			ZeroArgument zeroArgument = mock(ZeroArgument.class);
+			ZeroStatement zeroStatement = mock(ZeroStatement.class);
 
-				assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(zeroStatement, null));
-				assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(null, zeroArgument));
-			}
+			assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(zeroStatement, null));
+			assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(null, zeroArgument));
+		}
 
-			@Test
-			void testInputParameterGroupSizes() {
+		@Test
+		void testInputParameterGroupSizes() {
 
-				ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
-				ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
+			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
+			ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
-				when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
-				when(zeroStatement.getCommitmentsA().getGroup()).thenReturn(gqGroup);
+			when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
+			when(zeroStatement.getCommitmentsA().getGroup()).thenReturn(gqGroup);
 
-				when(zeroArgument.getCd().size()).thenReturn(1);
-				when(zeroStatement.getCommitmentsA().size()).thenReturn(2);
+			when(zeroArgument.getCd().size()).thenReturn(1);
+			when(zeroStatement.getCommitmentsA().size()).thenReturn(2);
 
-				IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
-						() -> zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument));
-				assertEquals("The m of the statement should be equal to the m of the argument (2m+1)", invalidMException.getMessage());
-
-			}
-
-			@Test
-			void testInputParameterGroupMembership() {
-
-				ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
-				ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
-
-				when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
-				when(otherGroupStatement.getCommitmentsA().getGroup()).thenReturn(GqGroupTestData.getDifferentGroup(gqGroup));
-
-				IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
-						() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));
-				assertEquals("Statement and argument do not share the same group", wrongGroupException.getMessage());
-
-			}
+			IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
+					() -> zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument));
+			assertEquals("The m of the statement should be equal to the m of the argument (2m+1)", invalidMException.getMessage());
 
 		}
 
-	}
-	// ===============================================================================================================================================
-	// Utility methods
-	// ===============================================================================================================================================
+		@Test
+		void testInputParameterGroupMembership() {
 
-	/**
-	 * Get a different ZqGroup from the one used before each test cases.
-	 *
-	 * @return a different {@link ZqGroup}.
-	 */
-	private ZqGroup getDifferentZqGroup() {
-		GqGroup otherGqGroup;
-		ZqGroup otherZqGroup;
-		do {
-			otherGqGroup = GqGroupTestData.getGroup();
-			otherZqGroup = ZqGroup.sameOrderAs(otherGqGroup);
-		} while (otherZqGroup.equals(zqGroup));
+			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
+			ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
-		return otherZqGroup;
+			when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
+			when(otherGroupStatement.getCommitmentsA().getGroup()).thenReturn(GroupTestData.getDifferentGqGroup(gqGroup));
+
+			IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
+					() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));
+			assertEquals("Statement and argument do not share the same group", wrongGroupException.getMessage());
+
+		}
+
 	}
 }

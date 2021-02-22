@@ -26,7 +26,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
@@ -48,7 +48,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 	@BeforeAll
 	static void setUp() {
-		gqGroup = GqGroupTestData.getGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		gqIdentity = gqGroup.getIdentity();
 		gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
@@ -86,15 +86,15 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 	@Test
 	void testExponentFromDifferentQThrows() {
-		GqGroup otherGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(otherGroup));
+		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
+		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup);
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}
 
 	@Test
 	void testMessageAndPublicKeyFromDifferentGroupsThrows() {
-		GqGroup otherGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+		GqGroup otherGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 		ElGamalMultiRecipientPublicKey otherGroupPublicKey =
 				ElGamalMultiRecipientKeyPair.genKeyPair(otherGroup, 1, randomService).getPublicKey();
 
@@ -103,8 +103,8 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 	@Test
 	void testPublicKeyAndExponentFromDifferentGroupsThrows() {
-		GqGroup otherGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(otherGroup));
+		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
+		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup);
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}

@@ -15,11 +15,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 @DisplayName("Instantiating a SingleValueProductWitness should...")
@@ -28,14 +27,13 @@ class SingleValueProductWitnessTest {
 	private static final RandomService randomService = new RandomService();
 	private static final int NUM_ELEMENTS = 5;
 
-	private GqGroup gqGroup;
+	private ZqGroup zqGroup;
 	private SameGroupVector<ZqElement, ZqGroup> elements;
 	private ZqElement randomness;
 
 	@BeforeEach
 	void setup() {
-		gqGroup = GqGroupTestData.getGroup();
-		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
+		zqGroup = GroupTestData.getZqGroup();
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
 		elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
@@ -54,8 +52,7 @@ class SingleValueProductWitnessTest {
 	@Test
 	@DisplayName("throw an IllegalArgumentException when the elements and the randomness have different groups")
 	void constructSingleValueProductWitnessWithElementsAndRandomnessDifferentGroupThrows() {
-		GqGroup differentGqGroup = GqGroupTestData.getDifferentGroup(gqGroup);
-		ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
+		ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
 		ZqElement differentRandomness = differentZqGroup.getIdentity();
 		assertThrows(IllegalArgumentException.class, () -> new SingleValueProductWitness(elements, differentRandomness));
 	}

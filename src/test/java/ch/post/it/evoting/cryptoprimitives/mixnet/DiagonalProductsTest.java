@@ -26,7 +26,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
@@ -163,7 +163,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@DisplayName("with public key and ciphertexts of different group throws IllegalArgumentException")
 	void getDiagonalProductsDifferentGroupKeyAndCiphertexts() {
 		// Pick another group.
-		final GqGroup differentGroup = GqGroupTestData.getDifferentGroup(gqGroup);
+		final GqGroup differentGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 		final GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGroup);
 
 		// Generate ciphertexts from different group (a new key is also needed).
@@ -186,7 +186,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with ciphertexts of different group order than exponents throws IllegalArgumentException")
 	void getDiagonalProductsDifferentOrderCiphertextsAndExponents() {
-		final ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(ZqGroup.sameOrderAs(GqGroupTestData.getDifferentGroup(gqGroup)));
+		final ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(GroupTestData.getDifferentZqGroup(zqGroup));
 
 		final SameGroupMatrix<ZqElement, ZqGroup> differentGroupExponents = differentZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
