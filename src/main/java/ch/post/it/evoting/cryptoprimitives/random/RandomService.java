@@ -20,6 +20,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 public final class RandomService {
 
+	private static final int STRING_MAX_LENGTH = 1000;
+
 	private final SecureRandom secureRandom;
 
 	/**
@@ -68,13 +70,32 @@ public final class RandomService {
 	}
 
 	/**
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase16String(int)
+	 */
+	public String genRandomBase16String(final int length) {
+		checkArgument(length > 0 && length < STRING_MAX_LENGTH);
+
+		// One char can be represented by 4 bits in Base16 encoding.
+		final int lengthInBytes = bitToByteLength(length * 4);
+
+		// Generate the random bytes, b.
+		final byte[] randomBytes = randomBytes(lengthInBytes);
+
+		// Encode to a Base16 String.
+		final String encodedString = BaseEncoding.base16().encode(randomBytes);
+
+		// Truncate to desired length.
+		return encodedString.substring(0, length);
+	}
+
+	/**
 	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase32String(int)
 	 */
 	public String genRandomBase32String(final int length) {
-		checkArgument(length > 0 && length < 1000);
+		checkArgument(length > 0 && length < STRING_MAX_LENGTH);
 
-		// One char can be represented by 5 bits in Base32 encoding. Take advantage of integer truncate instead of ceiling function.
-		final int lengthInBytes = (length * 5 + (Byte.SIZE - 1)) / Byte.SIZE;
+		// One char can be represented by 5 bits in Base32 encoding.
+		final int lengthInBytes = bitToByteLength(length * 5);
 
 		// Generate the random bytes, b.
 		final byte[] randomBytes = randomBytes(lengthInBytes);
@@ -90,10 +111,10 @@ public final class RandomService {
 	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase64String(int)
 	 */
 	public String genRandomBase64String(final int length) {
-		checkArgument(length > 0 && length < 1000);
+		checkArgument(length > 0 && length < STRING_MAX_LENGTH);
 
-		// One char can be represented by 6 bits in Base64 encoding. Take advantage of integer truncate instead of ceiling function.
-		final int lengthInBytes = (length * 6 + (Byte.SIZE - 1)) / Byte.SIZE;
+		// One char can be represented by 6 bits in Base64 encoding.
+		final int lengthInBytes = bitToByteLength(length * 6);
 
 		// Generate the random bytes, b.
 		final byte[] randomBytes = randomBytes(lengthInBytes);
@@ -103,19 +124,6 @@ public final class RandomService {
 
 		// Truncate to desired length.
 		return encodedString.substring(0, length);
-	}
-
-	/**
-	 * Generate an array of {@code byteLength} random bytes.
-	 *
-	 * @param byteLength The number of bytes to generate.
-	 * @return An array of {@code byteLength} random bytes.
-	 */
-	private byte[] randomBytes(final int byteLength) {
-		final byte[] randomBytes = new byte[byteLength];
-		secureRandom.nextBytes(randomBytes);
-
-		return randomBytes;
 	}
 
 	/**
@@ -135,7 +143,7 @@ public final class RandomService {
 	 * Generates a vector (collection) of random {@link ZqElement}s between 0 (incl.) and {@code upperBound} (excl.).
 	 *
 	 * @param upperBound q
-	 * @param length n
+	 * @param length     n
 	 * @return {@code List<ZqElement>}
 	 */
 	public List<ZqElement> genRandomVector(final BigInteger upperBound, final int length) {
@@ -145,8 +153,32 @@ public final class RandomService {
 
 		final ZqGroup zqGroup = new ZqGroup(upperBound);
 
-		return  Stream.generate(()->ZqElement.create(genRandomInteger(upperBound),zqGroup))
+		return Stream.generate(() -> ZqElement.create(genRandomInteger(upperBound), zqGroup))
 				.limit(length)
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Converts a {@code bitLength} to its corresponding byte length, i.e. the number of bytes it takes to represent the bits. Takes advantage of
+	 * integer truncation instead of ceiling function.
+	 *
+	 * @param bitLength the bit length to convert.
+	 * @return the equivalent byte length for the given bit length.
+	 */
+	private int bitToByteLength(final int bitLength) {
+		return (bitLength + (Byte.SIZE - 1)) / Byte.SIZE;
+	}
+
+	/**
+	 * Generate an array of {@code byteLength} random bytes.
+	 *
+	 * @param byteLength The number of bytes to generate.
+	 * @return An array of {@code byteLength} random bytes.
+	 */
+	private byte[] randomBytes(final int byteLength) {
+		final byte[] randomBytes = new byte[byteLength];
+		secureRandom.nextBytes(randomBytes);
+
+		return randomBytes;
 	}
 }

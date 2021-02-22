@@ -30,9 +30,10 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 class RandomServiceTest {
 
-	// RFC 4648 Table 1 and Table 3.
+	// RFC 4648 Table 1, Table 3 and Table 5.
 	private static final Pattern base64Alphabet = Pattern.compile("^[A-Za-z0-9+/=]+$");
 	private static final Pattern base32Alphabet = Pattern.compile("^[A-Z2-7=]+$");
+	private static final Pattern base16Alphabet = Pattern.compile("^[A-F0-9=]+$");
 
 	private final RandomService randomService = new RandomService();
 	private static ZqGroup smallGroup;
@@ -122,6 +123,32 @@ class RandomServiceTest {
 		assertNotEquals(exponent1.getValue(), exponent2.getValue(), errorMessage);
 		assertNotEquals(exponent1.getValue(), exponent3.getValue(), errorMessage);
 		assertNotEquals(exponent2.getValue(), exponent3.getValue(), errorMessage);
+	}
+
+	@Test
+	void genRandomBase16StringTest() {
+		final String randomString1 = randomService.genRandomBase16String(6);
+		final String randomString2 = randomService.genRandomBase16String(8);
+		final String randomString3 = randomService.genRandomBase16String(1);
+
+		assertAll(
+				() -> assertEquals(6, randomString1.length()),
+				() -> assertEquals(8, randomString2.length()),
+				() -> assertEquals(1, randomString3.length())
+		);
+
+		// Check that the Strings chars are in the Base16 alphabet.
+		assertAll(
+				() -> assertTrue(base16Alphabet.matcher(randomString1).matches()),
+				() -> assertTrue(base16Alphabet.matcher(randomString2).matches()),
+				() -> assertTrue(base16Alphabet.matcher(randomString3).matches())
+		);
+	}
+
+	@Test
+	void genRandomBase16StringInvalidLengthShouldThrow() {
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase16String(0));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase16String(1200));
 	}
 
 	@Test
