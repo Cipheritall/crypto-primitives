@@ -211,13 +211,13 @@ class RandomServiceTest {
 
 		assertEquals(length, randomVector.size());
 		assertEquals(0, (int) randomVector.stream().filter(zq -> zq.getValue().compareTo(upperBound) >= 0).count());
-		assertTrue (randomVector.stream().distinct().count()> 1);
+		assertEquals(1, randomVector.stream().map(ZqElement::getGroup).distinct().count());
 	}
 
 	@Test
 	void checkGenRandomVectorParameterChecks() {
-		assertThrows(NullPointerException.class, () -> randomService.genRandomVector(null,1));
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ZERO,1));
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ONE,0));
+		assertThrows(NullPointerException.class, () -> randomService.genRandomVector(null, 1));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ZERO, 1));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ONE, 0));
 	}
 }
