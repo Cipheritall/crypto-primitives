@@ -18,7 +18,7 @@
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<lombok.version>1.18.16</lombok.version>
 		<mockito.version>3.7.0</mockito.version>
-		<jmh.version>1.23</jmh.version>
+		<jmh.version>1.27</jmh.version>
 
 		<!-- Plugins versions -->
 		<jacoco.version>0.8.6</jacoco.version>
