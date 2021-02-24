@@ -104,4 +104,12 @@ public class GroupTestData {
 	private static GqGroup getRandomGqGroupFrom(final List<GqGroup> groups) {
 		return groups.get(random.nextInt(groups.size()));
 	}
+
+	public static GqGroup getGroupP59() {
+		final BigInteger p4 = new BigInteger("59");
+		final BigInteger q4 = new BigInteger("29");
+		final BigInteger g4 = new BigInteger("3");
+		return new GqGroup(p4, q4, g4);
+	}
+
 }
