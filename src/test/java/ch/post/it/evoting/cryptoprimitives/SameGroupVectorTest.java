@@ -277,7 +277,7 @@ class SameGroupVectorTest {
 
 	@Nested
 	@DisplayName("Transforming a vector of ciphertext into a matrix of ciphertexts...")
-	class ToCiphertextMatrixTest {
+	class ToMatrixTest {
 
 		private static final int BOUND_MATRIX_SIZE = 10;
 
@@ -300,80 +300,28 @@ class SameGroupVectorTest {
 
 		@Test
 		@DisplayName("with negative number of rows or columns throws IllegalArgumentException")
-		void toCiphertextMatrixWithInvalidNumRowsOrColumns() {
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toCiphertextMatrix(-m, n));
+		void toMatrixWithInvalidNumRowsOrColumns() {
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toMatrix(-m, n));
 			assertEquals("The number of rows must be positive.", exception.getMessage());
-			exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toCiphertextMatrix(m, -n));
+			exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toMatrix(m, -n));
 			assertEquals("The number of columns must be positive.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with incompatible decomposition into rows and columns throws an IllegalArgumentException")
-		void toCiphertextMatrixWithWrongN() {
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toCiphertextMatrix(m + 1, n));
+		void toMatrixWithWrongN() {
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toMatrix(m + 1, n));
 			assertEquals("The vector of ciphertexts must be decomposable into m rows and n columns.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with valid input yields expected result")
-		void toCiphertextMatrixTest() {
-			SameGroupMatrix<TestSameGroupElement, TestGroup> ciphertextMatrix = sameGroupVector.toCiphertextMatrix(m, n);
+		void toMatrixTest() {
+			SameGroupMatrix<TestSameGroupElement, TestGroup> matrix = sameGroupVector.toMatrix(m, n);
 
 			for (int i = 0; i < m; i++) {
 				for (int j = 0; j < n; j++) {
-					assertEquals(sameGroupVector.get(i + m * j), ciphertextMatrix.get(i, j));
-				}
-			}
-		}
-	}
-
-	@Nested
-	@DisplayName("Transforming a vector of exponents into a matrix of exponents...")
-	class ToExponentMatrixTest {
-
-		private static final int BOUND_MATRIX_SIZE = 10;
-
-		private int m;
-		private int n;
-
-		private TestGroup group;
-		private SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector;
-
-		@BeforeEach
-		void setup() {
-			m = random.nextInt(BOUND_MATRIX_SIZE) + 1;
-			n = random.nextInt(BOUND_MATRIX_SIZE) + 1;
-
-			group = new TestGroup();
-			List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit((long) n * m)
-					.collect(Collectors.toList());
-			sameGroupVector = new SameGroupVector<>(elements);
-		}
-
-		@Test
-		@DisplayName("with negative number of rows or columns throws IllegalArgumentException")
-		void toExponentMatrixWithInvalidNumRowsOrColumns() {
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toExponentMatrix(-m, n));
-			assertEquals("The number of rows must be positive.", exception.getMessage());
-			exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toExponentMatrix(m, -n));
-			assertEquals("The number of columns must be positive.", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with incompatible decomposition into rows and columns throws an IllegalArgumentException")
-		void toExponentMatrixWithWrongN() {
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toExponentMatrix(n + 1, m));
-			assertEquals("The vector of exponents must be decomposable into n rows and m columns.", exception.getMessage());
-		}
-
-		@Test
-		@DisplayName("with valid input yields expected result")
-		void toExponentMatrixTest() {
-			SameGroupMatrix<TestSameGroupElement, TestGroup> exponentMatrix = sameGroupVector.toExponentMatrix(n, m);
-
-			for (int i = 0; i < n; i++) {
-				for (int j = 0; j < m; j++) {
-					assertEquals(sameGroupVector.get(m * i + j), exponentMatrix.get(i, j));
+					assertEquals(sameGroupVector.get(i + m * j), matrix.get(i, j));
 				}
 			}
 		}

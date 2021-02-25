@@ -6,12 +6,15 @@ package ch.post.it.evoting.cryptoprimitives;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -203,6 +206,48 @@ class SameGroupMatrixTest {
 		SameGroupMatrix<TestSameGroupElement, TestGroup> actual = SameGroupMatrix.fromColumns(columns);
 
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	void transposeCorrectlyTransposesMatrix() {
+		final List<List<TestSameGroupElement>> matrixElements = generateElementMatrix(numRows, numColumns, () -> new TestSameGroupElement(group));
+		final SameGroupMatrix<TestSameGroupElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
+		final SameGroupMatrix<TestSameGroupElement, TestGroup> transposedMatrix = matrix.transpose();
+
+		assertAll(
+				() -> assertEquals(matrix.numColumns(), transposedMatrix.numRows()),
+				() -> assertEquals(matrix.numRows(), transposedMatrix.numColumns()),
+				() -> assertEquals(matrix.rowStream().collect(Collectors.toList()), transposedMatrix.columnStream().collect(Collectors.toList()))
+		);
+	}
+
+	@Test
+	void transposeTwiceGivesOriginalMatrix() {
+		final List<List<TestSameGroupElement>> matrixElements = generateElementMatrix(numRows, numColumns, () -> new TestSameGroupElement(group));
+		final SameGroupMatrix<TestSameGroupElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
+		assertEquals(matrix, matrix.transpose().transpose());
+	}
+
+	@Test
+	void transposedMatrixContainsExpectedValues() {
+		List<List<TestValuedElement>> matrixElements = new ArrayList<>();
+		TestValuedElement zero = new TestValuedElement(BigInteger.ZERO, group);
+		TestValuedElement one = new TestValuedElement(BigInteger.ONE, group);
+		TestValuedElement ten = new TestValuedElement(BigInteger.TEN, group);
+		matrixElements.add(Arrays.asList(zero, one, ten));
+		matrixElements.add(Arrays.asList(one, ten, zero));
+
+		final SameGroupMatrix<TestValuedElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
+		final SameGroupMatrix<TestValuedElement, TestGroup> transposedMatrix = matrix.transpose();
+
+		assertAll(
+				() -> assertEquals(zero, transposedMatrix.get(0, 0)),
+				() -> assertEquals(one, transposedMatrix.get(0, 1)),
+				() -> assertEquals(one, transposedMatrix.get(1, 0)),
+				() -> assertEquals(ten, transposedMatrix.get(1, 1)),
+				() -> assertEquals(ten, transposedMatrix.get(2, 0)),
+				() -> assertEquals(zero, transposedMatrix.get(2, 1))
+		);
 	}
 
 	@RepeatedTest(10)

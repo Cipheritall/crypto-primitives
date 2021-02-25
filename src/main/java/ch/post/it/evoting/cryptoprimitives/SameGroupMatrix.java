@@ -29,6 +29,8 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  */
 public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> implements HasGroup<G>, HashableList {
 
+	private static final String OUT_OF_BOUNDS_MESSAGE = "Trying to access index out of bound.";
+
 	private final G group;
 	private final ImmutableList<SameGroupVector<E, G>> rows;
 	private final int numRows;
@@ -98,7 +100,15 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 		return new SameGroupMatrix<>(columns).transpose();
 	}
 
-	private SameGroupMatrix<E, G> transpose() {
+	/**
+	 * Transposes this matrix.
+	 * <p>
+	 * The transpose M<sup>t</sup> of matrix M is defined by M<sup>t</sup><sub>i,j</sub> = M<sub>j,i</sub>.
+	 * If M is a m &times; n matrix, its transpose M<sup>t</sup> is a n &times; m matrix.
+	 *
+	 * @return the transpose of this matrix
+	 */
+	public SameGroupMatrix<E, G> transpose() {
 		return new SameGroupMatrix<>(IntStream.range(0, numColumns).mapToObj(this::getColumn).collect(toImmutableList()));
 	}
 
@@ -140,8 +150,8 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 	 * @return the ith row. i must be within bounds.
 	 */
 	public SameGroupVector<E, G> getRow(int i) {
-		checkArgument(i >= 0, "Trying to access index out of bound.");
-		checkArgument(i < this.numRows, "Trying to access index out of bound.");
+		checkArgument(i >= 0, OUT_OF_BOUNDS_MESSAGE);
+		checkArgument(i < this.numRows, OUT_OF_BOUNDS_MESSAGE);
 		return this.rows.get(i);
 	}
 
@@ -149,8 +159,8 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 	 * @return the jth row. j must be within bounds.
 	 */
 	public SameGroupVector<E, G> getColumn(int j) {
-		checkArgument(j >= 0, "Trying to access index out of bound.");
-		checkArgument(j < this.numColumns, "Trying to access index out of bound.");
+		checkArgument(j >= 0, OUT_OF_BOUNDS_MESSAGE);
+		checkArgument(j < this.numColumns, OUT_OF_BOUNDS_MESSAGE);
 		return this.rows.stream().map(row -> row.get(j)).collect(toSameGroupVector());
 	}
 

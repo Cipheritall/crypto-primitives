@@ -147,7 +147,7 @@ class ShuffleArgumentService {
 				.mapToObj(BigInteger::valueOf)
 				.map(value -> ZqElement.create(value, zqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupMatrix<ZqElement, ZqGroup> matrixA = permutationVector.toExponentMatrix(n, m);
+		final SameGroupMatrix<ZqElement, ZqGroup> matrixA = permutationVector.toMatrix(m, n).transpose();
 		final SameGroupVector<GqElement, GqGroup> cA = getCommitmentMatrix(matrixA, r, commitmentKey);
 
 		// Compute x.
@@ -168,7 +168,7 @@ class ShuffleArgumentService {
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toSameGroupVector());
-		final SameGroupMatrix<ZqElement, ZqGroup> matrixB = bVector.toExponentMatrix(n, m);
+		final SameGroupMatrix<ZqElement, ZqGroup> matrixB = bVector.toMatrix(m, n).transpose();
 		final SameGroupVector<GqElement, GqGroup> cB = getCommitmentMatrix(matrixB, s, commitmentKey);
 
 		// Compute y.
@@ -202,7 +202,8 @@ class ShuffleArgumentService {
 		final SameGroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate)
 				.limit(N)
 				.collect(toSameGroupVector())
-				.toExponentMatrix(n, m);
+				.toMatrix(m, n)
+				.transpose();
 		final SameGroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toSameGroupVector());
 		final SameGroupVector<GqElement, GqGroup> cNegativeZ = getCommitmentMatrix(negativeZ, zeros, commitmentKey);
 
@@ -212,10 +213,9 @@ class ShuffleArgumentService {
 				.collect(toList());
 
 		// Compute matrix D.
-		final SameGroupMatrix<ZqElement, ZqGroup> yTimesA = matrixA.stream()
-				.map(y::multiply)
-				.collect(collectingAndThen(toList(), SameGroupVector::new))
-				.toExponentMatrix(matrixA.numRows(), matrixB.numColumns());
+		final SameGroupMatrix<ZqElement, ZqGroup> yTimesA = matrixA.rowStream()
+				.map(row -> row.stream().map(y::multiply).collect(toList()))
+				.collect(collectingAndThen(toList(), SameGroupMatrix::fromRows));
 		final SameGroupMatrix<ZqElement, ZqGroup> matrixD = matrixSum(yTimesA, matrixB);
 
 		// Compute vector t.
@@ -263,7 +263,7 @@ class ShuffleArgumentService {
 		final ElGamalMultiRecipientCiphertext ciphertextC = getCiphertextVectorExponentiation(ciphertextsC, xPowers);
 
 		// Compute mStatement.
-		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(shuffledCiphertextsCprime.toCiphertextMatrix(m, n),
+		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(shuffledCiphertextsCprime.toMatrix(m, n),
 				ciphertextC, cB);
 
 		// Compute mWitness.

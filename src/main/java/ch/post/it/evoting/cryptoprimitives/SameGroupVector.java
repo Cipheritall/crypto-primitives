@@ -152,16 +152,16 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	}
 
 	/**
-	 * Transforms this vector of ciphertexts into a matrix of ciphertexts.
+	 * Transforms this vector into a matrix.
 	 * <p>
-	 * The elements of this vector <b><i>C</i></b> of size <i>N</i> = <i>mn</i> are rearranged into a matrix of size <i>m</i> &times; <i>n</i>, where
-	 * element C<sub>i,j</sub> of the matrix corresponds to element C<sub>i + mj</sub> of the vector.
+	 * The elements of this vector <b><i>v</i></b> of size <i>N</i> = <i>mn</i> are rearranged into a matrix of size <i>m</i> &times; <i>n</i>, where
+	 * element M<sub>i,j</sub> of the matrix corresponds to element v<sub>i + mj</sub> of the vector.
 	 *
 	 * @param numRows    m, the number of rows of the matrix to be created
 	 * @param numColumns n, the number of columns of the matrix to be created
 	 * @return a {@link SameGroupMatrix} of size m &times; n
 	 */
-	public SameGroupMatrix<E, G> toCiphertextMatrix(final int numRows, final int numColumns) {
+	public SameGroupMatrix<E, G> toMatrix(final int numRows, final int numColumns) {
 		checkArgument(numRows > 0, "The number of rows must be positive.");
 		checkArgument(numColumns > 0, "The number of columns must be positive.");
 
@@ -172,31 +172,6 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 		return IntStream.range(0, numRows)
 				.mapToObj(i -> IntStream.range(0, numColumns)
 						.mapToObj(j -> this.get(i + numRows * j))
-						.collect(Collectors.toList()))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupMatrix::fromRows));
-	}
-
-	/**
-	 * Transforms this vector of exponents into matrix of exponents.
-	 * <p>
-	 * The elements of this vector <b><i>a</i></b> of size <i>N</i> = <i>nm</i> are rearranged into a matrix of size <i>n</i> &times; <i>m</i>, where
-	 * element A<sub>i,j</sub> of the matrix corresponds to element a<sub>mi + j</sub> of the vector.
-	 *
-	 * @param numRows    n, the number of rows of the matrix to be created
-	 * @param numColumns m, the number of columns of the matrix to be created
-	 * @return a {@link SameGroupMatrix} of size n &times; m
-	 */
-	public SameGroupMatrix<E, G> toExponentMatrix(final int numRows, final int numColumns) {
-		checkArgument(numRows > 0, "The number of rows must be positive.");
-		checkArgument(numColumns > 0, "The number of columns must be positive.");
-
-		// Ensure N = nm
-		checkArgument(this.size() == (numRows * numColumns), "The vector of exponents must be decomposable into n rows and m columns.");
-
-		// Create the matrix
-		return IntStream.range(0, numRows)
-				.mapToObj(i -> IntStream.range(0, numColumns)
-						.mapToObj(j -> this.get(numColumns * i + j))
 						.collect(Collectors.toList()))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupMatrix::fromRows));
 	}
