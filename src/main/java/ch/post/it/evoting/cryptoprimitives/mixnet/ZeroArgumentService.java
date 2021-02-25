@@ -31,7 +31,6 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroArgument.ZeroArgumentBuilder;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 /**
@@ -181,7 +180,7 @@ final class ZeroArgumentService {
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		// Construct the ZeroArgument with all computed parameters.
-		final ZeroArgumentBuilder zeroArgumentBuilder = new ZeroArgumentBuilder();
+		final ZeroArgument.Builder zeroArgumentBuilder = new ZeroArgument.Builder();
 		zeroArgumentBuilder
 				.withCA0(cA0)
 				.withCBm(cBm)

@@ -356,7 +356,7 @@ class HadamardArgumentServiceTest {
 			SameGroupVector<GqElement, GqGroup> cB = SameGroupVector.of(gqNine, gqFive, gqFour);
 
 			// Create the expected ZeroArgument
-			ZeroArgument zeroArgument = new ZeroArgument.ZeroArgumentBuilder()
+			ZeroArgument zeroArgument = new ZeroArgument.Builder()
 					.withCA0(gqFive)
 					.withCBm(gqOne)
 					.withCd(new SameGroupVector<>(Arrays.asList(gqFour, gqFour, gqNine, gqNine, gqOne, gqThree, gqOne)))
@@ -442,7 +442,7 @@ class HadamardArgumentServiceTest {
 		void verifyHadamardArgumentWithBadZeroArgument() {
 			ZeroArgument zeroArgument = argument.getZeroArgument();
 			GqElement badcA0 = zeroArgument.getCA0().multiply(gqGroup.getGenerator());
-			ZeroArgument badZeroArgument = new ZeroArgument.ZeroArgumentBuilder()
+			ZeroArgument badZeroArgument = new ZeroArgument.Builder()
 					.withCA0(badcA0)
 					.withCBm(zeroArgument.getCBm())
 					.withCd(zeroArgument.getCd())

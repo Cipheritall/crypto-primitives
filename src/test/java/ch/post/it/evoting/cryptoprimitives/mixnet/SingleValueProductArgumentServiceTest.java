@@ -142,6 +142,21 @@ class SingleValueProductArgumentServiceTest {
 		}
 
 		@Test
+		@DisplayName("with witness of size n < 2 throws IllegalArgumentException")
+		void getSingleValueProductArgumentWithNSmallerTwo() {
+			SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(1);
+			ZqElement randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
+			product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
+			commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);
+
+			statement = new SingleValueProductStatement(commitment, product);
+			witness = new SingleValueProductWitness(elements, randomness);
+
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> argumentService.getSingleValueProductArgument(statement, witness));
+			assertEquals("The size n of the witness must be at least 2.", exception.getMessage());
+		}
+
+		@Test
 		@DisplayName("with incorrect commitment throws IllegalArgumentException")
 		void getSingleValueProductArgumentWithWrongCommitmentThrows () {
 		GqElement wrongCommitment = commitment.multiply(commitment.getGroup().getGenerator());

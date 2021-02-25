@@ -72,7 +72,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setUp() {
-			k = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+			k = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
 
 			publicKey = elGamalGenerator.genRandomPublicKey(k);
 			commitmentKey = commitmentKeyGenerator.genCommitmentKey(k);
@@ -147,7 +147,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			// Because the test groups are small.
 			do {
 				m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-				n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+				n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
 			} while (BigInteger.valueOf((long) m * n).compareTo(zqGroup.getQ()) >= 0);
 			N = m * n;
 

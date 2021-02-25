@@ -3,6 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
@@ -26,6 +27,9 @@ class ZeroArgument {
 	private ZqElement rPrime;
 	private ZqElement sPrime;
 	private ZqElement tPrime;
+
+	private GqGroup group;
+	private int m;
 
 	private ZeroArgument() {
 	}
@@ -62,6 +66,14 @@ class ZeroArgument {
 		return tPrime;
 	}
 
+	int getM() {
+		return m;
+	}
+
+	GqGroup getGroup() {
+		return group;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -83,7 +95,7 @@ class ZeroArgument {
 	/**
 	 * Builder to construct a {@link ZeroArgument}.
 	 */
-	static class ZeroArgumentBuilder {
+	static class Builder {
 
 		private GqElement cA0;
 		private GqElement cBm;
@@ -94,42 +106,42 @@ class ZeroArgument {
 		private ZqElement sPrime;
 		private ZqElement tPrime;
 
-		ZeroArgumentBuilder withCA0(final GqElement cA0) {
+		Builder withCA0(final GqElement cA0) {
 			this.cA0 = cA0;
 			return this;
 		}
 
-		ZeroArgumentBuilder withCBm(final GqElement cBm) {
+		Builder withCBm(final GqElement cBm) {
 			this.cBm = cBm;
 			return this;
 		}
 
-		ZeroArgumentBuilder withCd(final SameGroupVector<GqElement, GqGroup> cd) {
+		Builder withCd(final SameGroupVector<GqElement, GqGroup> cd) {
 			this.cd = cd;
 			return this;
 		}
 
-		ZeroArgumentBuilder withAPrime(final SameGroupVector<ZqElement, ZqGroup> aPrime) {
+		Builder withAPrime(final SameGroupVector<ZqElement, ZqGroup> aPrime) {
 			this.aPrime = aPrime;
 			return this;
 		}
 
-		ZeroArgumentBuilder withBPrime(final SameGroupVector<ZqElement, ZqGroup> bPrime) {
+		Builder withBPrime(final SameGroupVector<ZqElement, ZqGroup> bPrime) {
 			this.bPrime = bPrime;
 			return this;
 		}
 
-		ZeroArgumentBuilder withRPrime(final ZqElement rPrime) {
+		Builder withRPrime(final ZqElement rPrime) {
 			this.rPrime = rPrime;
 			return this;
 		}
 
-		ZeroArgumentBuilder withSPrime(final ZqElement sPrime) {
+		Builder withSPrime(final ZqElement sPrime) {
 			this.sPrime = sPrime;
 			return this;
 		}
 
-		ZeroArgumentBuilder withTPrime(final ZqElement tPrime) {
+		Builder withTPrime(final ZqElement tPrime) {
 			this.tPrime = tPrime;
 			return this;
 		}
@@ -149,6 +161,10 @@ class ZeroArgument {
 			zeroArgument.rPrime = checkNotNull(this.rPrime);
 			zeroArgument.sPrime = checkNotNull(this.sPrime);
 			zeroArgument.tPrime = checkNotNull(this.tPrime);
+
+			checkArgument((cd.size() - 1) % 2 == 0, "cd must be of size 2m + 1.");
+			zeroArgument.m = (cd.size() - 1) / 2; // cd is of size 2m + 1
+			zeroArgument.group = cBm.getGroup();
 
 			return zeroArgument;
 		}

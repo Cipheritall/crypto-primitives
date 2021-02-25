@@ -3,14 +3,22 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.genProductWitness;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.getProductStatement;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -21,16 +29,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
+
+import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -38,38 +51,27 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 
-class ProductArgumentServiceTest {
+class ProductArgumentServiceTest extends TestGroupSetup {
 
 	private static final int BOUND_FOR_RANDOM_ELEMENTS = 10;
 	private static final RandomService randomService = new RandomService();
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private int k;
-	private GqGroup gqGroup;
-	private GqGroupGenerator gqGroupGenerator;
 	private HashService hashService;
 	private ElGamalMultiRecipientPublicKey publicKey;
 	private CommitmentKey commitmentKey;
 
 	@BeforeEach
 	void setup() throws NoSuchAlgorithmException {
-		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
-		gqGroup = GroupTestData.getGqGroup();
-		gqGroupGenerator = new GqGroupGenerator(gqGroup);
+		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
 
 		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(k);
 
-		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, k, randomService);
-		publicKey = keyPair.getPublicKey();
-
-		GqGroupGenerator generator = new GqGroupGenerator(gqGroup);
-		GqElement h = generator.genNonIdentityNonGeneratorMember();
-		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(k).collect(Collectors.toList());
-		commitmentKey = new CommitmentKey(h, gList);
+		commitmentKey = new CommitmentKeyGenerator(gqGroup).genCommitmentKey(k);
 	}
 
 	@Nested
@@ -90,11 +92,9 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with public key from different group than commitment key throws an IllegalArgumentException")
 		void constructProductArgumentWithPublicKeyGroupDifferentCommitmentKeyGroup() {
-			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(differentGqGroup, k, randomService);
-			publicKey = keyPair.getPublicKey();
+			ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(k);
 			Exception exception = assertThrows(IllegalArgumentException.class,
-					() -> new ProductArgumentService(randomService, hashService, publicKey, commitmentKey));
+					() -> new ProductArgumentService(randomService, hashService, otherPublicKey, commitmentKey));
 			assertEquals("The public key and the commitment key must belong to the same group.", exception.getMessage());
 		}
 	}
@@ -105,8 +105,6 @@ class ProductArgumentServiceTest {
 
 		private int n;
 		private int m;
-		private ZqGroup zqGroup;
-		private ZqGroupGenerator generator;
 		private SameGroupVector<GqElement, GqGroup> commitmentsA;
 		private ZqElement productB;
 		private ProductStatement statement;
@@ -118,20 +116,27 @@ class ProductArgumentServiceTest {
 
 		@BeforeEach
 		void setup() {
-			n = secureRandom.nextInt(k) + 1;
+			n = secureRandom.nextInt(k - 1) + 2;
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
-			zqGroup = ZqGroup.sameOrderAs(gqGroup);
-			generator = new ZqGroupGenerator(zqGroup);
 			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
 
-			matrixA = generator.genRandomZqElementMatrix(n, m);
-			exponentsR = generator.genRandomZqElementVector(m);
-			witness = new ProductWitness(matrixA, exponentsR);
-			commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
-			productB = matrixA.stream().reduce(one, ZqElement::multiply);
-			statement = new ProductStatement(commitmentsA, productB);
+			witness = genProductWitness(n, m, zqGroupGenerator);
+			matrixA = witness.getMatrix();
+			exponentsR = witness.getExponents();
+			statement = getProductStatement(witness, commitmentKey);
+			commitmentsA = statement.getCommitments();
+			productB = statement.getProduct();
+
 			mockHashService = mock(HashService.class);
-			when(mockHashService.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
+			when(mockHashService.recursiveHash(any())).thenAnswer(
+					(Answer<byte[]>) invocationOnMock -> {
+						Object[] args = invocationOnMock.getArguments();
+						ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
+						HashableList hashables = HashableList.from(argsList);
+						BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ().subtract(BigInteger.ONE))
+								.add(BigInteger.ONE);
+						return integerToByteArray(hashModQ);
+					});
 			productArgumentService = new ProductArgumentService(randomService, mockHashService, publicKey, commitmentKey);
 		}
 
@@ -151,9 +156,10 @@ class ProductArgumentServiceTest {
 		@Test
 		@DisplayName("with statement and witness having incompatible sizes throws IllegalArgumentException")
 		void getProductArgumentWithStatementAndWitnessDifferentSize() {
-			commitmentsA = gqGroupGenerator.genRandomGqElementVector(m + 1);
-			statement = new ProductStatement(commitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
+			SameGroupVector<GqElement, GqGroup> longerCommitmentsA = gqGroupGenerator.genRandomGqElementVector(m + 1);
+			ProductStatement differentSizeStatement = new ProductStatement(longerCommitmentsA, productB);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(differentSizeStatement, witness));
 			assertEquals("The commitments A and the exponents r must have the same size.", exception.getMessage());
 		}
 
@@ -161,78 +167,51 @@ class ProductArgumentServiceTest {
 		@DisplayName("with witness having a size incompatible with the commitment key throws an IllegalArgumentException")
 		void getProductArgumentWithWitnessSizeIncompatibleWithCommitmentKeySize() {
 			// Create a matrix with too many rows
-			SameGroupMatrix<ZqElement, ZqGroup> otherMatrixA = generator.genRandomZqElementMatrix(k + 1, m);
-			witness = new ProductWitness(otherMatrixA, exponentsR);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
+			SameGroupMatrix<ZqElement, ZqGroup> otherMatrixA = zqGroupGenerator.genRandomZqElementMatrix(k + 1, m);
+			ProductWitness otherWitness = new ProductWitness(otherMatrixA, exponentsR);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(statement, otherWitness));
 			assertEquals("The matrix' number of rows cannot be greater than the commitment key size.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with statement and witness having incompatible groups throws IllegalArgumentException")
 		void getProductArgumentWithStatementAndWitnessDifferentGroup() {
-			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
-			commitmentsA = new GqGroupGenerator(differentGqGroup).genRandomGqElementVector(m);
-			productB = new ZqGroupGenerator(differentZqGroup).genRandomZqElementMember();
-			statement = new ProductStatement(commitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
+			SameGroupVector<GqElement, GqGroup> otherCommitmentsA = otherGqGroupGenerator.genRandomGqElementVector(m);
+			ZqElement otherProductB = otherZqGroupGenerator.genRandomZqElementMember();
+			ProductStatement otherStatement = new ProductStatement(otherCommitmentsA, otherProductB);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(otherStatement, witness));
 			assertEquals("The product b and the matrix A must belong to the same group.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with commitments and commitment key from different group throws IllegalArgumentException")
 		void getProductArgumentWithCommitmentsAndCommitmentKeyFromDifferentGroups() {
-			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
-			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
-			ZqElement one = ZqElement.create(BigInteger.ONE, differentZqGroup);
-
-			matrixA = differentZqGroupGenerator.genRandomZqElementMatrix(n, m);
-			exponentsR = differentZqGroupGenerator.genRandomZqElementVector(m);
-			witness = new ProductWitness(matrixA, exponentsR);
-
-			GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGqGroup);
-			GqElement h = differentGqGroupGenerator.genNonIdentityNonGeneratorMember();
-			List<GqElement> gList = Stream.generate(differentGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(k)
-					.collect(Collectors.toList());
-			CommitmentKey differentCommitmentKey = new CommitmentKey(h, gList);
-			commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, differentCommitmentKey);
-			productB = matrixA.stream().reduce(one, ZqElement::multiply);
-			statement = new ProductStatement(commitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
+			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
+			CommitmentKey otherCommitmentKey = new CommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
+			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(otherStatement, otherWitness));
 			assertEquals("The commitment key and the commitments must have the same group.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with a matrix with 1 column returns only the SingleValueProductArgument")
 		void getProductArgumentWithOneColumnMatrix() {
-			matrixA = generator.genRandomZqElementMatrix(n, 1);
-			exponentsR = generator.genRandomZqElementVector(1);
-			witness = new ProductWitness(matrixA, exponentsR);
-			commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
-			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
-			productB = matrixA.stream().reduce(one, ZqElement::multiply);
-			statement = new ProductStatement(commitmentsA, productB);
+			ProductWitness smallWitness = genProductWitness(n, 1, zqGroupGenerator);
+			ProductStatement smallStatement = getProductStatement(smallWitness, commitmentKey);
 
-			// To compare with SingleValueProductArgument result, we need the same random numbers
-			RandomService mockRandomService = mock(RandomService.class);
-			when(mockRandomService.genRandomInteger(any())).thenReturn(BigInteger.ONE);
-			ProductArgumentService newProductArgumentService = new ProductArgumentService(mockRandomService, mockHashService, publicKey,
-					commitmentKey);
-
-			ProductArgument argument = assertDoesNotThrow(() -> newProductArgumentService.getProductArgument(statement, witness));
+			ProductArgument argument = assertDoesNotThrow(() -> productArgumentService.getProductArgument(smallStatement, smallWitness));
 
 			// Check that the output is the same as with getSingleValueProductArgument
-			SingleValueProductWitness singleValueProductWitness = new SingleValueProductWitness(matrixA.getColumn(0), exponentsR.get(0));
-			SingleValueProductStatement singleValueProductStatement = new SingleValueProductStatement(commitmentsA.get(0), productB);
-			SingleValueProductArgumentService singleValueProductArgumentService = new SingleValueProductArgumentService(mockRandomService,
-					mockHashService, publicKey, commitmentKey);
-			SingleValueProductArgument singleValueProductArgument = singleValueProductArgumentService
-					.getSingleValueProductArgument(singleValueProductStatement, singleValueProductWitness);
-
 			assertNull(argument.getCommitmentB());
 			assertNull(argument.getHadamardArgument());
-			assertEquals(singleValueProductArgument, argument.getSingleValueProductArgument());
+
+			SingleValueProductStatement sStatement = new SingleValueProductStatement(smallStatement.getCommitments().get(0),
+					smallStatement.getProduct());
+			assertTrue(new SingleValueProductArgumentService(randomService, mockHashService, publicKey, commitmentKey)
+					.verifySingleValueProductArgument(sStatement, argument.getSingleValueProductArgument()));
 		}
 
 		@Test
@@ -243,9 +222,10 @@ class ProductArgumentServiceTest {
 			GqElement first = commitmentList.get(0);
 			first = first.multiply(g);
 			commitmentList.set(0, first);
-			commitmentsA = new SameGroupVector<>(commitmentList);
-			statement = new ProductStatement(commitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
+			SameGroupVector<GqElement, GqGroup> badCommitmentsA = new SameGroupVector<>(commitmentList);
+			ProductStatement badStatement = new ProductStatement(badCommitmentsA, productB);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(badStatement, witness));
 			assertEquals("The commitment to matrix A with exponents r using the given commitment key must yield the commitments cA.",
 					exception.getMessage());
 		}
@@ -254,9 +234,10 @@ class ProductArgumentServiceTest {
 		@DisplayName("with a product that does not correspond to the matrix product throws a IllegalArgumentException")
 		void getProductArgumentWithBadProduct() {
 			ZqElement one = ZqElement.create(BigInteger.ONE, ZqGroup.sameOrderAs(gqGroup));
-			productB = productB.add(one);
-			statement = new ProductStatement(commitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
+			ZqElement badProductB = productB.add(one);
+			ProductStatement badStatement = new ProductStatement(commitmentsA, badProductB);
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(badStatement, witness));
 			assertEquals("The product of all elements in matrix A must be equal to b.",
 					exception.getMessage());
 		}
@@ -332,7 +313,7 @@ class ProductArgumentServiceTest {
 			ProductStatement productStatement = new ProductStatement(commitmentsA, product);
 
 			// Create the expected zeroArgument
-			ZeroArgument expectedZeroArgument = new ZeroArgument.ZeroArgumentBuilder().withCA0(gqFive)
+			ZeroArgument expectedZeroArgument = new ZeroArgument.Builder().withCA0(gqFive)
 					.withCBm(gqOne)
 					.withCd(SameGroupVector.of(gqNine, gqFive, gqThree, gqThree, gqOne, gqFour, gqFour))
 					.withAPrime(SameGroupVector.of(zqTwo, zqTwo))
@@ -363,5 +344,168 @@ class ProductArgumentServiceTest {
 
 			assertEquals(expectedProductArgument, specificProductArgumentService.getProductArgument(productStatement, productWitness));
 		}
+	}
+
+	@Nested
+	@DisplayName("verifyProductArgument...")
+	class VerifyProductArgumentTest {
+
+		private ProductArgumentService productArgumentService;
+
+		private int n;
+		private int m;
+		private ProductStatement longStatement;
+		private ProductArgument longArgument;
+		private ProductStatement shortStatement;
+		private ProductArgument shortArgument;
+
+		@BeforeEach
+		void setup() {
+			n = secureRandom.nextInt(k - 1) + 2;
+			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
+
+			HashService hashServiceMock = mock(HashService.class);
+			when(hashServiceMock.recursiveHash(any())).thenAnswer(
+					(Answer<byte[]>) invocationOnMock -> {
+						Object[] args = invocationOnMock.getArguments();
+						ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
+						HashableList hashables = HashableList.from(argsList);
+						BigInteger hashModQ = byteArrayToInteger(ProductArgumentServiceTest.this.hashService.recursiveHash(hashables))
+								.mod(gqGroup.getQ().subtract(BigInteger.ONE)).add(BigInteger.ONE);
+						return integerToByteArray(hashModQ);
+					});
+			productArgumentService = new ProductArgumentService(randomService, hashServiceMock, publicKey, commitmentKey);
+
+			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
+			longStatement = getProductStatement(longWitness, commitmentKey);
+			longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
+
+			ProductWitness shortWitness = genProductWitness(n, 1, zqGroupGenerator);
+			shortStatement = getProductStatement(shortWitness, commitmentKey);
+			shortArgument = productArgumentService.getProductArgument(shortStatement, shortWitness);
+		}
+
+		@Test
+		@DisplayName("with null arguments throws a NullPointerException")
+		void verifyProductArgumentWithNullArguments() {
+			assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(null, longArgument));
+			assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(longStatement, null));
+		}
+
+		@Test
+		@DisplayName("with null cb when m > 1 throws a NullPointerException")
+		void verifyProductArgumentWithNullCb() {
+			ProductArgument argumentWithNullCb = spy(longArgument);
+			when(argumentWithNullCb.getCommitmentB()).thenReturn(null);
+			Exception exception = assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullCb));
+			assertEquals("The product argument must contain a commitment b for m > 1.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with null HadamardArgument when m > 1 throws a NullPointerException")
+		void verifyProductArgumentWithNullHadamardArgument() {
+			ProductArgument argumentWithNullHadamard = spy(longArgument);
+			when(argumentWithNullHadamard.getHadamardArgument()).thenReturn(null);
+			Exception exception = assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullHadamard));
+			assertEquals("The product argument must contain a Hadamard argument for m > 1.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with statement and argument having different groups throws an IllegalArgumentException")
+		void verifyProductArgumentWithStatementAndArgumentFromDifferentGroups() {
+			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
+			CommitmentKey otherCommitmentKey = new CommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
+			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
+
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.verifyProductArgument(otherStatement, longArgument));
+			assertEquals("The statement and the argument must have compatible groups.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with statement and argument having different sizes throws an IllegalArgumentException")
+		void verifyProductArgumentWithStatementAndArgumentOfDifferentSizes() {
+			ProductWitness otherWitness = genProductWitness(n, m + 1, zqGroupGenerator);
+			ProductStatement otherStatement = getProductStatement(otherWitness, commitmentKey);
+
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.verifyProductArgument(otherStatement, longArgument));
+			assertEquals("The statement and the argument must have the same m.",
+					exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with correct input returns true")
+		void verifyProductArgumentWithCorrectInput() {
+			assertTrue(productArgumentService.verifyProductArgument(longStatement, longArgument));
+			assertTrue(productArgumentService.verifyProductArgument(shortStatement, shortArgument));
+		}
+
+		@Test
+		@DisplayName("with an incorrect c_b returns false")
+		void verifyProductArgumentWithBadCommitment() {
+			GqElement badCommitment = longArgument.getCommitmentB();
+			badCommitment = badCommitment.multiply(gqGroup.getGenerator());
+			ProductArgument badArgument = new ProductArgument(badCommitment, longArgument.getHadamardArgument(),
+					longArgument.getSingleValueProductArgument());
+			assertFalse(productArgumentService.verifyProductArgument(longStatement, badArgument));
+		}
+
+		@Test
+		@DisplayName("with an incorrect HadamardArgument returns false")
+		void verifyProductArgumentWithBadHadamardArgument() {
+			HadamardArgument hadamardArgument = longArgument.getHadamardArgument();
+			SameGroupVector<GqElement, GqGroup> cUpperB = hadamardArgument.getCommitmentsB();
+
+			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
+			SameGroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toSameGroupVector()).prepend(badcUpperB0);
+			HadamardArgument badHadamardArgument = new HadamardArgument(badcUpperB, hadamardArgument.getZeroArgument());
+			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), badHadamardArgument,
+					longArgument.getSingleValueProductArgument());
+
+			assertFalse(productArgumentService.verifyProductArgument(longStatement, badArgument));
+		}
+
+		@Test
+		@DisplayName("with an incorrect SingleValueProductArgument (m >= 2) returns false")
+		void verifyProductArgumentWithBadSingleValueProductArgumentMGreaterThanOne() {
+			SingleValueProductArgument sArgument = longArgument.getSingleValueProductArgument();
+			ZqElement rTilde = sArgument.getRTilde();
+
+			ZqElement badRTilde = rTilde.add(ZqElement.create(BigInteger.ONE, zqGroup));
+			SingleValueProductArgument badSArgument = new SingleValueProductArgument.Builder()
+					.withCd(sArgument.getCd())
+					.withCLowerDelta(sArgument.getCLowerDelta())
+					.withCUpperDelta(sArgument.getCUpperDelta())
+					.withATilde(sArgument.getATilde())
+					.withBTilde(sArgument.getBTilde())
+					.withRTilde(badRTilde)
+					.withSTilde(sArgument.getSTilde())
+					.build();
+			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), longArgument.getHadamardArgument(), badSArgument);
+			assertFalse(productArgumentService.verifyProductArgument(longStatement, badArgument));
+		}
+
+		@Test
+		@DisplayName("with an incorrect SingleValueProductArgument (m = 1) returns false")
+		void verifyProductArgumentWithBadSingleValueProductArgumentMEqualsOne() {
+			SingleValueProductArgument sArgument = shortArgument.getSingleValueProductArgument();
+			ZqElement rTilde = sArgument.getRTilde();
+
+			ZqElement badRTilde = rTilde.add(ZqElement.create(BigInteger.ONE, zqGroup));
+			SingleValueProductArgument badSArgument = new SingleValueProductArgument.Builder()
+					.withCd(sArgument.getCd())
+					.withCLowerDelta(sArgument.getCLowerDelta())
+					.withCUpperDelta(sArgument.getCUpperDelta())
+					.withATilde(sArgument.getATilde())
+					.withBTilde(sArgument.getBTilde())
+					.withRTilde(badRTilde)
+					.withSTilde(sArgument.getSTilde())
+					.build();
+			ProductArgument badArgument = new ProductArgument(badSArgument);
+
+			assertFalse(productArgumentService.verifyProductArgument(shortStatement, badArgument));
+		}
+
 	}
 }

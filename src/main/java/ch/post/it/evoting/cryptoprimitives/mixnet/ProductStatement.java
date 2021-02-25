@@ -20,6 +20,8 @@ class ProductStatement {
 
 	private final SameGroupVector<GqElement, GqGroup> commitments;
 	private final ZqElement product;
+	private final int m;
+	private final GqGroup group;
 
 	/**
 	 * Instantiates a {@link ProductStatement} with the given commitments and product.
@@ -32,11 +34,13 @@ class ProductStatement {
 	ProductStatement(final SameGroupVector<GqElement, GqGroup> commitments, final ZqElement product) {
 		checkNotNull(commitments);
 		checkNotNull(product);
-		checkArgument(commitments.getGroup().getQ().equals(product.getGroup().getQ()),
+		checkArgument(commitments.getGroup().hasSameOrderAs(product.getGroup()),
 				"The commitments and the product must have the same order q.");
 
 		this.commitments = commitments;
 		this.product = product;
+		this.m = commitments.size();
+		this.group = commitments.getGroup();
 	}
 
 	SameGroupVector<GqElement, GqGroup> getCommitments() {
@@ -45,6 +49,14 @@ class ProductStatement {
 
 	ZqElement getProduct() {
 		return product;
+	}
+
+	int getM() {
+		return this.m;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override

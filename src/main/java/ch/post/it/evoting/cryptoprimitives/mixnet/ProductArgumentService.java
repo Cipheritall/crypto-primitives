@@ -12,6 +12,9 @@ import java.math.BigInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
@@ -31,12 +34,14 @@ final class ProductArgumentService {
 	private final HadamardArgumentService hadamardArgumentService;
 	private final SingleValueProductArgumentService singleValueProductArgumentService;
 
+	private final Logger log = LoggerFactory.getLogger(ProductArgumentService.class);
+
 	/**
 	 * Constructs a ProductArgumentService.
 	 *
 	 * @param randomService the random service to be used for random integer generation.
-	 * @param hashService	the hash service that provides the recursive hash function to be used.
-	 * @param publicKey		the public key.
+	 * @param hashService   the hash service that provides the recursive hash function to be used.
+	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key to be used for commitments.
 	 */
 	ProductArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
@@ -70,7 +75,7 @@ final class ProductArgumentService {
 	 * </ul>
 	 *
 	 * @param statement the {@link ProductStatement}
-	 * @param witness	the {@link ProductWitness}
+	 * @param witness   the {@link ProductWitness}
 	 * @return a {@link ProductArgument}
 	 */
 	ProductArgument getProductArgument(final ProductStatement statement, final ProductWitness witness) {
@@ -136,9 +141,61 @@ final class ProductArgumentService {
 			// Get the single value product argument
 			SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
 			SingleValueProductWitness sWitness = new SingleValueProductWitness(A.getColumn(0), r.get(0));
-			SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService.getSingleValueProductArgument(sStatement, sWitness);
+			SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
+					.getSingleValueProductArgument(sStatement, sWitness);
 
 			return new ProductArgument(singleValueProdArgument);
+		}
+	}
+
+	/**
+	 * Verifies the correctness of a {@link ProductArgument} with respect to a given {@link ProductStatement}.
+	 *
+	 * @param statement the statement for which the argument is to be verified.
+	 * @param argument  the argument to be verified.
+	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 */
+	boolean verifyProductArgument(final ProductStatement statement, final ProductArgument argument) {
+		checkNotNull(statement, "The statement must be non-null.");
+		checkNotNull(argument, "The argument must be non-null.");
+
+		final SameGroupVector<GqElement, GqGroup> cA = statement.getCommitments();
+		final ZqElement b = statement.getProduct();
+		final int m = statement.getM();
+
+		final SingleValueProductArgument sArgument = argument.getSingleValueProductArgument();
+
+		// cross-check groups and dimensions
+		checkArgument(statement.getGroup().equals(sArgument.getGroup()),
+				"The statement and the argument must have compatible groups.");
+		checkArgument(statement.getM() == argument.getM(),
+				"The statement and the argument must have the same m.");
+
+		if (m > 1) {
+			checkNotNull(argument.getCommitmentB(), "The product argument must contain a commitment b for m > 1.");
+			checkNotNull(argument.getHadamardArgument(), "The product argument must contain a Hadamard argument for m > 1.");
+
+			final GqElement cb = argument.getCommitmentB();
+			final HadamardArgument hArgument = argument.getHadamardArgument();
+
+			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
+			if (hadamardArgumentService.verifyHadamardArgument(hStatement, hArgument) &&
+					singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)) {
+				return true;
+			} else {
+				log.error("Failed to verify the HadamardArgument and the SingleValueProductArgument.");
+				return false;
+			}
+		} else { // corresponds to the case m=1 (number of ciphertexts is prime), where we omit the Hadamard Argument.
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
+
+			if (singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)) {
+				return true;
+			} else {
+				log.error("Failed to verify the SingleValueProductArgument.");
+				return false;
+			}
 		}
 	}
 }

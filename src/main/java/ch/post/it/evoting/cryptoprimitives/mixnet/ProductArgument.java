@@ -8,12 +8,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 class ProductArgument {
 
+	private final SingleValueProductArgument singleValueProductArgument;
+	private final int n;
+	private final GqGroup group;
 	private GqElement commitmentB;
 	private HadamardArgument hadamardArgument;
-	private final SingleValueProductArgument singleValueProductArgument;
+	private int m;
 
 	/**
 	 * Constructs a ProductArgument.
@@ -24,13 +28,17 @@ class ProductArgument {
 	 */
 	ProductArgument(final GqElement commitmentB, final HadamardArgument hadamardArgument,
 			final SingleValueProductArgument singleValueProductArgument) {
+		this(singleValueProductArgument);
 		this.commitmentB = checkNotNull(commitmentB);
 		this.hadamardArgument = checkNotNull(hadamardArgument);
-		this.singleValueProductArgument = checkNotNull(singleValueProductArgument);
+		this.m = hadamardArgument.getM();
 	}
 
 	ProductArgument(final SingleValueProductArgument singleValueProductArgument) {
 		this.singleValueProductArgument = checkNotNull(singleValueProductArgument);
+		this.n = singleValueProductArgument.getN();
+		this.group = singleValueProductArgument.getGroup();
+		this.m = 1;
 	}
 
 	GqElement getCommitmentB() {
@@ -43,6 +51,18 @@ class ProductArgument {
 
 	SingleValueProductArgument getSingleValueProductArgument() {
 		return singleValueProductArgument;
+	}
+
+	int getM() {
+		return m;
+	}
+
+	int getN() {
+		return n;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override

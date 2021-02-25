@@ -580,7 +580,7 @@ class ZeroArgumentServiceTest {
 			final ZqElement sPrime = ZqElement.create(FOUR, simpleZqGroup);
 			final ZqElement tPrime = ZqElement.create(ONE, simpleZqGroup);
 
-			final ZeroArgument.ZeroArgumentBuilder zeroArgumentBuilder = new ZeroArgument.ZeroArgumentBuilder();
+			final ZeroArgument.Builder zeroArgumentBuilder = new ZeroArgument.Builder();
 			zeroArgumentBuilder
 					.withCA0(cA0)
 					.withCBm(cBm)

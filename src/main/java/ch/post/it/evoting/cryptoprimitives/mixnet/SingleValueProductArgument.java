@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -24,6 +25,9 @@ class SingleValueProductArgument {
 	private SameGroupVector<ZqElement, ZqGroup> bTilde;
 	private ZqElement rTilde;
 	private ZqElement sTilde;
+
+	private int n;
+	private GqGroup group;
 
 	private SingleValueProductArgument() {
 		//Intentionally left blank
@@ -55,6 +59,14 @@ class SingleValueProductArgument {
 
 	ZqElement getSTilde() {
 		return sTilde;
+	}
+
+	int getN() {
+		return n;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override
@@ -138,6 +150,8 @@ class SingleValueProductArgument {
 			argument.bTilde = checkNotNull(this.bTilde);
 			argument.rTilde = checkNotNull(this.rTilde);
 			argument.sTilde = checkNotNull(this.sTilde);
+			argument.n = argument.aTilde.size();
+			argument.group = argument.cd.getGroup();
 
 			return argument;
 		}

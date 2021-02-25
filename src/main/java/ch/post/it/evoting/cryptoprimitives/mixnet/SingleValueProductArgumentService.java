@@ -83,6 +83,8 @@ class SingleValueProductArgumentService {
 				"The witness' group must have the same order as the commitment key's group.");
 
 		// Ensure that the statement corresponds to the witness
+		int n = a.size();
+		checkArgument(n >= 2, "The size n of the witness must be at least 2.");
 		checkArgument(ca.equals(getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
 		ZqGroup group = b.getGroup();
@@ -91,7 +93,6 @@ class SingleValueProductArgumentService {
 				"The product of the provided elements does not give the provided product.");
 
 		// Start of the algorithm
-		int n = a.size();
 		BigInteger q = group.getQ();
 
 		// Calculate b_0, ..., b_(n-1)
@@ -109,11 +110,9 @@ class SingleValueProductArgumentService {
 		// Calculate δ
 		List<ZqElement> lowerDelta = new ArrayList<>(n);
 		lowerDelta.add(0, d.get(0));
-		if (n > 1) {
-			lowerDelta.addAll(1, Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
-					.collect(Collectors.toList()));
-			lowerDelta.add(n - 1, group.getIdentity());
-		}
+		lowerDelta.addAll(1, Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
+				.collect(Collectors.toList()));
+		lowerDelta.add(n - 1, group.getIdentity());
 
 		// Calculate s_0 and s_x
 		ZqElement s0 = ZqElement.create(randomService.genRandomInteger(q), group);
@@ -215,7 +214,7 @@ class SingleValueProductArgumentService {
 		}
 
 		// Verify B
-		final boolean verifB = ((bTilde.get(0).equals(aTilde.get(0))) && (bTilde.get(n - 1).equals(x.multiply(b))));
+		final boolean verifB = bTilde.get(0).equals(aTilde.get(0)) && bTilde.get(n - 1).equals(x.multiply(b));
 
 		if (!verifB) {
 			log.error("bTilde.get(0) {} must equal aTilde.get(0) {} and bTilde.get(n - 1) {} must equal x * b {}", bTilde.get(0), aTilde.get(0),
