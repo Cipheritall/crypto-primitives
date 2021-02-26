@@ -4,6 +4,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -15,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -38,7 +39,6 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
-import ch.post.it.evoting.cryptoprimitives.test.tools.math.Matrix;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
@@ -380,10 +380,10 @@ class ElGamalMultiRecipientCiphertextTest {
 		int noOfMessageElements = 5;
 		RandomService randomService = new RandomService();
 
-		List<ElGamalMultiRecipientMessage> originalMessages = Stream
+		SameGroupVector<ElGamalMultiRecipientMessage, GqGroup> originalMessages = Stream
 				.generate(() -> elGamalGenerator.genRandomMessage(noOfMessageElements))
 				.limit(noOfMessageElements)
-				.collect(toList());
+				.collect(toSameGroupVector());
 
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
 
@@ -403,19 +403,18 @@ class ElGamalMultiRecipientCiphertextTest {
 		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText =
 				ElGamalMultiRecipientMessage.getMessage(ciphertextVectorExponentiation, keyPair.getPrivateKey());
 
-		List<List<BigInteger>> exponentiatedOriginalMessageElements = IntStream.range(0, originalMessages.size())
-				.mapToObj(i -> originalMessages.get(i).stream().map(m -> m.exponentiate(exponents.get(i)).getValue()).collect(toList()))
+		List<List<GqElement>> exponentiatedOriginalMessageElements = IntStream.range(0, originalMessages.size())
+				.mapToObj(i -> originalMessages.get(i).stream()
+						.map(m -> m.exponentiate(exponents.get(i)))
+						.collect(toList()))
 				.collect(toList());
 
-		List<GqElement> reducedOriginalMessageElements = Matrix.transpose(exponentiatedOriginalMessageElements)
-				.stream()
-				.map(a -> a.stream()
-						.map(b -> GqElement.create(b, gqGroup))
-						.reduce(GqElement::multiply))
-				.map(Optional::get)
-				.collect(toList());
+		SameGroupMatrix<GqElement, GqGroup> matrix = SameGroupMatrix.fromRows(exponentiatedOriginalMessageElements);
 
-		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = new ElGamalMultiRecipientMessage(reducedOriginalMessageElements);
+		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = matrix.columnStream()
+				.map(col -> col.stream()
+						.reduce(gqGroup.getIdentity(), GqElement::multiply))
+				.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
 
 		assertEquals(exponentiatedOriginalMessage, decryptedExponentiatedCipherText);
 	}
