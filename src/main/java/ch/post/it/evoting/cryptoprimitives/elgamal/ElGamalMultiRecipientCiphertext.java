@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.Hashable;
@@ -151,7 +152,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *              <li>The list must not contain any null.</li>
 	 *              <li>All elements must be from the same Gq group as gamma.</li>
 	 */
-	static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
+	@VisibleForTesting
+	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
 		SameGroupVector<GqElement, GqGroup> phisVector = new SameGroupVector<>(phis);

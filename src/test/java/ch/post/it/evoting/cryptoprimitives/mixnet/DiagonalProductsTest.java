@@ -3,8 +3,10 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -195,4 +197,80 @@ class DiagonalProductsTest extends TestGroupSetup {
 		assertEquals("The exponents group must have the order of the ciphertexts group.", exception.getMessage());
 	}
 
+	@Test
+	@DisplayName("with specific values returns the expected result")
+	void getDiagonalProductsWithSpecificValues() throws NoSuchAlgorithmException {
+		// Create groups
+		BigInteger p = BigInteger.valueOf(23);
+		BigInteger q = BigInteger.valueOf(11);
+		BigInteger g = BigInteger.valueOf(2);
+		GqGroup gqGroup = new GqGroup(p, q, g);
+		ZqGroup zqGroup = new ZqGroup(q);
+
+		// Create BigIntegers
+		BigInteger ZERO = BigInteger.ZERO;
+		BigInteger ONE = BigInteger.ONE;
+		BigInteger THREE = BigInteger.valueOf(3);
+		BigInteger FOUR = BigInteger.valueOf(4);
+		BigInteger FIVE = BigInteger.valueOf(5);
+		BigInteger SIX = BigInteger.valueOf(6);
+		BigInteger EIGHT = BigInteger.valueOf(8);
+		BigInteger NINE = BigInteger.valueOf(9);
+
+		// Create GqElements
+		GqElement gOne = gqGroup.getIdentity();
+		GqElement gTwo = gqGroup.getGenerator();
+		GqElement gThree = GqElement.create(THREE, gqGroup);
+		GqElement gFour = GqElement.create(FOUR, gqGroup);
+		GqElement gSix = GqElement.create(SIX, gqGroup);
+		GqElement gEight = GqElement.create(EIGHT, gqGroup);
+		GqElement gNine = GqElement.create(NINE, gqGroup);
+		GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), gqGroup);
+		GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
+		GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), gqGroup);
+		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
+
+		// Create ZqElements
+		ZqElement zZero = ZqElement.create(ZERO, zqGroup);
+		ZqElement zOne = ZqElement.create(ONE, zqGroup);
+		ZqElement zThree = ZqElement.create(THREE, zqGroup);
+		ZqElement zFive = ZqElement.create(FIVE, zqGroup);
+		ZqElement zNine = ZqElement.create(NINE, zqGroup);
+
+		// Create the ciphertext matrix:
+		// C0 = [ {1, ( 3, 6,  4)} { 4, (12, 16, 6)} ]
+		// C1 = [ {1, (13, 4, 18)} {13, ( 2,  3, 1)} ]
+		ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThree, gSix, gFour));
+		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
+		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
+		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
+		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = SameGroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
+
+		// Create the exponent matrix
+		// A = [0 3 5]
+		// 	   [1 9 1]
+		SameGroupMatrix<ZqElement, ZqGroup> matrixA = SameGroupVector.of(zZero, zOne, zThree, zNine, zFive, zOne).toMatrix(2, 3);
+
+		// Create the expected output
+		// D = ( {13, (2, 3, 1)}, {12, (13, 9, 9)}, {8, (13, 16, 13)}, {4, (18, 9, 3)} )
+		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> expected = SameGroupVector.of(
+				ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne)),
+				ElGamalMultiRecipientCiphertext.create(gTwelve, Arrays.asList(gThirteen, gNine, gNine)),
+				ElGamalMultiRecipientCiphertext.create(gEight, Arrays.asList(gThirteen, gSixteen, gThirteen)),
+				ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gEighteen, gNine, gThree))
+		);
+
+		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
+		ElGamalMultiRecipientPublicKey publicKey = elGamalGenerator.genRandomPublicKey(3);
+
+		// The commitment key and the hash service are only needed for instantiating the service
+		// and are not relevant for the test itself
+		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
+		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),
+				hashService);
+
+		assertEquals(expected, service.getDiagonalProducts(ciphertextMatrix, matrixA));
+	}
 }

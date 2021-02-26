@@ -13,7 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -33,12 +35,15 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.Hashable;
 import ch.post.it.evoting.cryptoprimitives.HashableList;
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
@@ -238,6 +243,133 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
 		assertThrowsIllegalArgumentExceptionWithMessage("The ciphertexts must be smaller than the public key.",
 				() -> argumentService.getMultiExponentiationArgument(statement, witness));
+	}
+
+	@Test
+	void testWithSpecificValuesReturnsExpectedResult() {
+		// Create groups
+		BigInteger p = BigInteger.valueOf(23);
+		BigInteger q = BigInteger.valueOf(11);
+		BigInteger g = BigInteger.valueOf(2);
+		GqGroup gqGroup = new GqGroup(p, q, g);
+		ZqGroup zqGroup = new ZqGroup(q);
+
+		// Create BigIntegers
+		BigInteger ZERO = BigInteger.ZERO;
+		BigInteger ONE = BigInteger.ONE;
+		BigInteger TWO = BigInteger.valueOf(2);
+		BigInteger THREE = BigInteger.valueOf(3);
+		BigInteger FOUR = BigInteger.valueOf(4);
+		BigInteger FIVE = BigInteger.valueOf(5);
+		BigInteger SIX = BigInteger.valueOf(6);
+		BigInteger SEVEN = BigInteger.valueOf(7);
+		BigInteger EIGHT = BigInteger.valueOf(8);
+		BigInteger NINE = BigInteger.valueOf(9);
+		BigInteger TEN = BigInteger.valueOf(10);
+
+		// Create GqElements
+		GqElement gOne = gqGroup.getIdentity();
+		GqElement gTwo = gqGroup.getGenerator();
+		GqElement gThree = GqElement.create(THREE, gqGroup);
+		GqElement gFour = GqElement.create(FOUR, gqGroup);
+		GqElement gSix = GqElement.create(SIX, gqGroup);
+		GqElement gEight = GqElement.create(EIGHT, gqGroup);
+		GqElement gNine = GqElement.create(NINE, gqGroup);
+		GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), gqGroup);
+		GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
+		GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), gqGroup);
+		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
+
+		// Create ZqElements
+		ZqElement zOne = ZqElement.create(ONE, zqGroup);
+		ZqElement zTwo = ZqElement.create(TWO, zqGroup);
+		ZqElement zThree = ZqElement.create(THREE, zqGroup);
+		ZqElement zFour = ZqElement.create(FOUR, zqGroup);
+		ZqElement zFive = ZqElement.create(FIVE, zqGroup);
+		ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
+		ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
+		ZqElement zNine = ZqElement.create(NINE, zqGroup);
+
+		// Create the public key: pk = (8, 13, 4)
+		ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gEight, gThirteen, gFour));
+
+		// Create the ciphertext matrix:
+		// C0 = [ {1, ( 3, 6,  4)}, { 4, (12, 16, 6)} ]
+		// C1 = [ {1, (13, 4, 18)}, {13, ( 2,  3, 1)} ]
+		ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThree, gSix, gFour));
+		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
+		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
+		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
+		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = SameGroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
+
+		// Create the ciphertext: C = {9, (4, 13, 1)}
+		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gFour, gThirteen, gOne));
+
+		// Create the commitment: ca = (8, 18)
+		SameGroupVector<GqElement, GqGroup> ca = SameGroupVector.of(gEight, gEighteen);
+
+		// Create the statement
+		MultiExponentiationStatement statement = new MultiExponentiationStatement(ciphertextMatrix, ciphertext, ca);
+
+		// Create the matrix: a1 a2
+		//                   [3  5]
+		//		 	         [9  1]
+		SameGroupMatrix<ZqElement, ZqGroup> matrixA = SameGroupVector.of(zThree, zNine, zFive, zOne).toMatrix(2, 2);
+
+		// Create the exponents: r = (7, 8)
+		SameGroupVector<ZqElement, ZqGroup> r = SameGroupVector.of(zSeven, zEight);
+
+		// Create the exponent: rho = 2
+		ZqElement rho = zTwo;
+
+		// Create the witness
+		MultiExponentiationWitness witness = new MultiExponentiationWitness(matrixA, r, rho);
+
+		// Calculate the argument
+		// Create ShuffleArgumentService
+		// Create the commitment key: ck = {3, (6, 13, 12)}
+		CommitmentKey commitmentKey = new CommitmentKey(gThree, ImmutableList.of(gSix, gThirteen, gTwelve));
+		RandomService specificRandomService = spy(randomService);
+		// Multi: a0 = (0, 1), r0 = 6, b = (2, 3, 7, 9), s = (10, 1, 3, 4), tau = (5, 6, 8, 7)
+		doReturn(ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
+				.when(specificRandomService).genRandomInteger(q);
+		HashService specificHashService = mock(HashService.class);
+		when(specificHashService.recursiveHash(any())).thenAnswer(
+				(Answer<byte[]>) invocationOnMock -> {
+					Object[] args = invocationOnMock.getArguments();
+					ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
+					HashableList hashables = HashableList.from(argsList);
+					BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ());
+					return integerToByteArray(hashModQ);
+				});
+
+		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, specificRandomService,
+				specificHashService);
+		MultiExponentiationArgument actual = service.getMultiExponentiationArgument(statement, witness);
+
+		// Create the expected output
+		SameGroupVector<GqElement, GqGroup> cB = SameGroupVector.of(gTwelve, gFour, gOne, gEight);
+		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = SameGroupVector.of(
+				ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gThirteen, gTwo, gTwo)),
+				ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gEighteen, gEighteen, gSix)),
+				ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gFour, gThirteen, gOne)),
+				ElGamalMultiRecipientCiphertext.create(gSix, Arrays.asList(gEight, gThree, gSix))
+		);
+
+		// Argument: cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {9, (18, 18, 6)}, {9, (4, 13, 1)}, {6, (8, 3, 6)})
+		// a = (2, 4), r = 7, b = 1, s = 5, tau = 5
+		MultiExponentiationArgument expected = new MultiExponentiationArgument.Builder()
+				.withcA0(gOne)
+				.withcBVector(cB)
+				.withEVector(eVector)
+				.withaVector(SameGroupVector.of(zTwo, zFour))
+				.withr(zSeven)
+				.withb(zOne)
+				.withs(zFive)
+				.withtau(zFive)
+				.build();
+
+		assertEquals(expected, actual);
 	}
 
 	////////// Utilities

@@ -5,6 +5,8 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Objects;
+
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -37,6 +39,24 @@ class ShuffleArgument {
 
 	MultiExponentiationArgument getMultiExponentiationArgument() {
 		return multiExponentiationArgument;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ShuffleArgument that = (ShuffleArgument) o;
+		return cA.equals(that.cA) && cB.equals(that.cB) && productArgument.equals(that.productArgument) && multiExponentiationArgument
+				.equals(that.multiExponentiationArgument);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(cA, cB, productArgument, multiExponentiationArgument);
 	}
 
 	static class Builder {

@@ -201,8 +201,7 @@ final class MultiExponentiationArgumentService {
 
 		//For all the next computations we include the first element in the sum by starting at the index 0 instead of 1. This is possible since x^0
 		// is 1.
-		SameGroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> BigInteger.ONE)
-				.map(one -> ZqElement.create(one, zqGroup))
+		SameGroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
 				.limit(n)
 				.collect(toSameGroupVector());
 		SameGroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)

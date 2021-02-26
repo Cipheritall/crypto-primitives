@@ -5,6 +5,8 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Objects;
+
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -24,7 +26,25 @@ public class MultiExponentiationArgument {
 	private ZqElement b;
 	private ZqElement s;
 	private ZqElement tau;
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		MultiExponentiationArgument that = (MultiExponentiationArgument) o;
+		return cA0.equals(that.cA0) && cBVector.equals(that.cBVector) && EVector.equals(that.EVector) && aVector.equals(that.aVector) &&
+				r.equals(that.r) && b.equals(that.b) && s.equals(that.s) && tau.equals(that.tau);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(cA0, cBVector, EVector, aVector, r, b, s, tau);
+	}
+
 	static class Builder {
 		private GqElement cA0;
 		private SameGroupVector<GqElement, GqGroup> cBVector;
