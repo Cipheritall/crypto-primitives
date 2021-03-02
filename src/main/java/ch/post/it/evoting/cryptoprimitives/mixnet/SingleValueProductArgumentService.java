@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -192,9 +193,9 @@ class SingleValueProductArgumentService {
 		// Verify A
 		final GqElement prodCa = ca.exponentiate(x).multiply(cd);
 		final GqElement commA = getCommitment(aTilde, rTilde, commitmentKey);
-		final boolean verifA = prodCa.equals(commA);
+		final BooleanSupplier verifA = () -> prodCa.equals(commA);
 
-		if (!verifA) {
+		if (!verifA.getAsBoolean()) {
 			log.error("prodCa {} and commA {} are not equal", prodCa, commA);
 			return false;
 		}
@@ -206,23 +207,23 @@ class SingleValueProductArgumentService {
 						.subtract(bTilde.get(i).multiply(aTilde.get(i + 1))))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
 		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
-		final boolean verifDelta = prodDelta.equals(commDelta);
+		final BooleanSupplier verifDelta = () -> prodDelta.equals(commDelta);
 
-		if (!verifDelta) {
+		if (!verifDelta.getAsBoolean()) {
 			log.error("prodDelta {} and commDelta {} are not equal", prodDelta, commDelta);
 			return false;
 		}
 
 		// Verify B
-		final boolean verifB = bTilde.get(0).equals(aTilde.get(0)) && bTilde.get(n - 1).equals(x.multiply(b));
+		final BooleanSupplier verifB = () -> bTilde.get(0).equals(aTilde.get(0)) && bTilde.get(n - 1).equals(x.multiply(b));
 
-		if (!verifB) {
+		if (!verifB.getAsBoolean()) {
 			log.error("bTilde.get(0) {} must equal aTilde.get(0) {} and bTilde.get(n - 1) {} must equal x * b {}", bTilde.get(0), aTilde.get(0),
 					bTilde.get(n - 1), x.multiply(b));
 			return false;
 		}
 
-		return verifA && verifDelta && verifB;
+		return verifA.getAsBoolean() && verifDelta.getAsBoolean() && verifB.getAsBoolean();
 	}
 
 	private ZqElement hashAndConvertX(GqElement cUpperDelta, GqElement cLowerDelta, GqElement cd, ZqElement b, GqElement ca) {

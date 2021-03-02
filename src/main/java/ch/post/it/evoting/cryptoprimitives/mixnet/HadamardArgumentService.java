@@ -10,6 +10,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -274,8 +275,8 @@ public class HadamardArgumentService {
 
 		// Start verification
 		final int m = cA.size();
-		final boolean verifB = cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB);
-		if (!verifB) {
+		final BooleanSupplier verifB = () -> cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB);
+		if (!verifB.getAsBoolean()) {
 			log.error("cUpperB.get(0) {} must equal cA.get(0) {} and cUpperB.get(m - 1) {} must equal cLowerB {}",
 					cUpperB.get(0), cA.get(0), cUpperB.get(m - 1), cLowerB);
 			return false;
@@ -332,14 +333,14 @@ public class HadamardArgumentService {
 		final SameGroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
 		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		final ZeroArgument zArgument = argument.getZeroArgument();
-		final boolean verifZ = zeroArgumentService.verifyZeroArgument(zStatement, zArgument);
+		final BooleanSupplier verifZ = () -> zeroArgumentService.verifyZeroArgument(zStatement, zArgument);
 
-		if (!verifZ) {
+		if (!verifZ.getAsBoolean()) {
 			log.error("Failed to verify the ZeroArgument");
 			return false;
 		}
 
-		return verifB && verifZ;
+		return verifB.getAsBoolean() && verifZ.getAsBoolean();
 	}
 
 	/**
