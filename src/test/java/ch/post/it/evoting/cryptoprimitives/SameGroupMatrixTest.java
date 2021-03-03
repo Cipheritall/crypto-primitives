@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestSameGroupElement;
-import ch.post.it.evoting.cryptoprimitives.test.tools.TestVariableSizeElement;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestSizedElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
 class SameGroupMatrixTest {
@@ -119,9 +119,9 @@ class SameGroupMatrixTest {
 	@Test
 	void createGroupMatrixWithDifferentSizes() {
 		TestGroup group = new TestGroup();
-		TestVariableSizeElement first = new TestVariableSizeElement(group, 1);
-		TestVariableSizeElement second = new TestVariableSizeElement(group, 2);
-		List<List<TestVariableSizeElement>> elements = Collections.singletonList(Arrays.asList(first, second));
+		TestSizedElement first = new TestSizedElement(group, 1);
+		TestSizedElement second = new TestSizedElement(group, 2);
+		List<List<TestSizedElement>> elements = Collections.singletonList(Arrays.asList(first, second));
 		assertThrows(IllegalArgumentException.class, () -> SameGroupMatrix.fromRows(elements));
 	}
 
@@ -332,12 +332,12 @@ class SameGroupMatrixTest {
 		final int numRows = secureRandom.nextInt(BOUND_MATRIX_SIZE) + 1;
 		final int numColumns = secureRandom.nextInt(BOUND_MATRIX_SIZE) + 1;
 		final TestGroup group = new TestGroup();
-		final List<List<TestVariableSizeElement>> matrixElements =
-				generateElementMatrix(numRows, numColumns, () -> new TestVariableSizeElement(group, 1));
-		final SameGroupMatrix<TestVariableSizeElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
+		final List<List<TestSizedElement>> matrixElements =
+				generateElementMatrix(numRows, numColumns, () -> new TestSizedElement(group, 1));
+		final SameGroupMatrix<TestSizedElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
 
-		List<TestVariableSizeElement> elements = generateElementList(numRows, () -> new TestVariableSizeElement(group, 2));
-		final SameGroupVector<TestVariableSizeElement, TestGroup> vector = SameGroupVector.from(elements);
+		List<TestSizedElement> elements = generateElementList(numRows, () -> new TestSizedElement(group, 2));
+		final SameGroupVector<TestSizedElement, TestGroup> vector = SameGroupVector.from(elements);
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> matrix.appendColumn(vector));
 		assertEquals("The elements' size does not match this matrix's elements' size.",
@@ -398,12 +398,12 @@ class SameGroupMatrixTest {
 		final int numRows = secureRandom.nextInt(BOUND_MATRIX_SIZE) + 1;
 		final int numColumns = secureRandom.nextInt(BOUND_MATRIX_SIZE) + 1;
 		final TestGroup group = new TestGroup();
-		final List<List<TestVariableSizeElement>> matrixElements =
-				generateElementMatrix(numRows, numColumns, () -> new TestVariableSizeElement(group, 1));
-		final SameGroupMatrix<TestVariableSizeElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
+		final List<List<TestSizedElement>> matrixElements =
+				generateElementMatrix(numRows, numColumns, () -> new TestSizedElement(group, 1));
+		final SameGroupMatrix<TestSizedElement, TestGroup> matrix = SameGroupMatrix.fromRows(matrixElements);
 
-		List<TestVariableSizeElement> elements = generateElementList(numRows, () -> new TestVariableSizeElement(group, 2));
-		final SameGroupVector<TestVariableSizeElement, TestGroup> vector = SameGroupVector.from(elements);
+		List<TestSizedElement> elements = generateElementList(numRows, () -> new TestSizedElement(group, 2));
+		final SameGroupVector<TestSizedElement, TestGroup> vector = SameGroupVector.from(elements);
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> matrix.prependColumn(vector));
 		assertEquals("The elements' size does not match this matrix's elements' size.",

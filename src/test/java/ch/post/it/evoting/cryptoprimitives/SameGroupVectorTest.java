@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestSameGroupElement;
-import ch.post.it.evoting.cryptoprimitives.test.tools.TestVariableSizeElement;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestSizedElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
 class SameGroupVectorTest {
@@ -110,9 +110,9 @@ class SameGroupVectorTest {
 	@Test
 	void testElementsOfDifferentSizeThrows() {
 		TestGroup group = new TestGroup();
-		TestVariableSizeElement first = new TestVariableSizeElement(group, 1);
-		TestVariableSizeElement second = new TestVariableSizeElement(group, 2);
-		List<TestVariableSizeElement> elements = Arrays.asList(first, second);
+		TestSizedElement first = new TestSizedElement(group, 1);
+		TestSizedElement second = new TestSizedElement(group, 2);
+		List<TestSizedElement> elements = Arrays.asList(first, second);
 		assertThrows(IllegalArgumentException.class, () -> SameGroupVector.from(elements));
 	}
 
@@ -229,10 +229,10 @@ class SameGroupVectorTest {
 	void appendWithDifferentSizeThrows() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
-		List<TestVariableSizeElement> elements = Stream.generate(() -> new TestVariableSizeElement(group, 1)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestVariableSizeElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		List<TestSizedElement> elements = Stream.generate(() -> new TestSizedElement(group, 1)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestSizedElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
 
-		final TestVariableSizeElement element = new TestVariableSizeElement(group, 2);
+		final TestSizedElement element = new TestSizedElement(group, 2);
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.append(element));
 		assertEquals("The element to append must be the same size.", illegalArgumentException.getMessage());
 	}
@@ -269,10 +269,10 @@ class SameGroupVectorTest {
 	void prependWithDifferentSizeThrows() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
-		List<TestVariableSizeElement> elements = Stream.generate(() -> new TestVariableSizeElement(group, 1)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestVariableSizeElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		List<TestSizedElement> elements = Stream.generate(() -> new TestSizedElement(group, 1)).limit(n).collect(Collectors.toList());
+		SameGroupVector<TestSizedElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
 
-		final TestVariableSizeElement element = new TestVariableSizeElement(group, 2);
+		final TestSizedElement element = new TestSizedElement(group, 2);
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.prepend(element));
 		assertEquals("The element to prepend must be the same size.", illegalArgumentException.getMessage());
 	}

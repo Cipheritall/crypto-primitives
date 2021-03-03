@@ -7,12 +7,12 @@ import ch.post.it.evoting.cryptoprimitives.Hashable;
 import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
-public class TestVariableSizeElement implements GroupVectorElement<TestGroup>, HashableList {
+public class TestSizedElement implements GroupVectorElement<TestGroup>, HashableList {
 
 	private final int size;
 	private final TestGroup group;
 
-	public TestVariableSizeElement(TestGroup group, int size) {
+	public TestSizedElement(TestGroup group, int size) {
 		this.group = group;
 		this.size = size;
 	}

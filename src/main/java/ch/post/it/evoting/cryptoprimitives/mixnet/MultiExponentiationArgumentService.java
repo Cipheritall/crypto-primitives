@@ -291,8 +291,6 @@ final class MultiExponentiationArgumentService {
 				"The exponents matrix must have one more column than the ciphertexts matrix has rows.");
 		checkArgument(ciphertexts.get(0, 0).size() <= this.pk.size(),
 				"There must be at least the same number of key elements than ciphertexts' phis.");
-		checkArgument(ciphertexts.stream().map(ElGamalMultiRecipientCiphertext::size).distinct().count() <= 1,
-				"All ciphertexts must have the same number of phis.");
 
 		// Group checking.
 		checkArgument(pk.getGroup().equals(ciphertexts.getGroup()), "The public key and ciphertexts matrices must be part of the same group.");
