@@ -139,7 +139,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 			phis.add(compressedKey.exponentiate(exponent).multiply(message.get(n - 1)));
 		}
 
-		return new ElGamalMultiRecipientCiphertext(gamma, new SameGroupVector<>(phis));
+		return new ElGamalMultiRecipientCiphertext(gamma, SameGroupVector.from(phis));
 	}
 
 	/**
@@ -156,7 +156,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
-		SameGroupVector<GqElement, GqGroup> phisVector = new SameGroupVector<>(phis);
+		SameGroupVector<GqElement, GqGroup> phisVector = SameGroupVector.from(phis);
 		checkArgument(!phisVector.isEmpty(), "An ElGamalMultiRecipientCiphertext phis must be non empty.");
 		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");
 
@@ -203,7 +203,6 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		checkArgument(!ciphertexts.isEmpty(), "Ciphertexts should not be empty");
 		checkArgument(ciphertexts.size() == exponents.size(), "There should be a matching ciphertext for every exponent.");
 
-		checkArgument(ciphertexts.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same number of phi elements");
 		checkArgument(ciphertexts.getGroup().hasSameOrderAs(exponents.getGroup()), "Ciphertexts and exponents must be of the same group.");
 
 		int numberOfPhiElements = ciphertexts.get(0).size();

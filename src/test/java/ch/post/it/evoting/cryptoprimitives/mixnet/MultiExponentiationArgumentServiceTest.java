@@ -11,7 +11,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -22,10 +24,15 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.stubbing.Answer;
@@ -45,6 +52,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
+import ch.post.it.evoting.cryptoprimitives.test.tools.GroupMatrices;
+import ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 
@@ -61,12 +70,11 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 	private static RandomService randomService;
 	private static CommitmentKeyGenerator commitmentKeyGenerator;
 	private static HashService hashServiceMock;
-	private static HashService hashService;
+	private static MultiExponentiationArgumentGenerator argumentGenerator;
+	private static HashService delegateHashService;
 	private int n;
 	private int m;
 	private int l;
-	private MultiExponentiationStatement randomStatement;
-	private MultiExponentiationWitness randomWitness;
 
 	@BeforeAll
 	static void setUpAll() throws NoSuchAlgorithmException {
@@ -77,172 +85,25 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 		randomService = new RandomService();
 
-		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		delegateHashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		// Mock the hashService in order to have a hash value of length smaller than q (preconditions on hashService)
-		hashServiceMock = mock(HashService.class);
-		when(hashServiceMock.recursiveHash(any())).thenAnswer(
-				(Answer<byte[]>) invocationOnMock -> {
-					Object[] args = invocationOnMock.getArguments();
-					ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
-					HashableList hashables = HashableList.from(argsList);
-					BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ());
-					return integerToByteArray(hashModQ);
-				}
-		);
+		hashServiceMock = getHashServiceMock(delegateHashService, gqGroup.getQ());
 
-		argumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, hashService);
+		argumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
 
 		statementGenerator = new MultiExponentiationStatementGenerator(gqGroup);
 		witnessGenerator = new MultiExponentiationWitnessGenerator(zqGroup);
 		statementWitnessPairGenerator = new MultiExponentiationStatementWitnessPairGenerator(gqGroup, argumentService, commitmentKey);
+
+		argumentGenerator = new MultiExponentiationArgumentGenerator(gqGroup);
 	}
+
 
 	@BeforeEach
 	void setup() {
 		n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 		m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 		l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-
-		randomStatement = statementGenerator.genRandomStatement(n, m, l);
-		randomWitness = witnessGenerator.genRandomWitness(n, m);
-	}
-
-	@Test
-	void constructorDoesntAcceptNullValues() {
-		assertAll(
-				() -> assertThrows(NullPointerException.class,
-						() -> new MultiExponentiationArgumentService(null, commitmentKey, randomService, hashService)),
-				() -> assertThrows(NullPointerException.class,
-						() -> new MultiExponentiationArgumentService(publicKey, null, randomService, hashService)),
-				() -> assertThrows(NullPointerException.class,
-						() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, null, hashService)),
-				() -> assertThrows(NullPointerException.class,
-						() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, null))
-		);
-	}
-
-	@Test
-	void publicKeyAndCommitmentKeyFromDifferentGroupsThrows() {
-		CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(otherGqGroup);
-		CommitmentKey otherKey = otherGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
-		assertThrowsIllegalArgumentExceptionWithMessage("The public key and commitment key must belong to the same group",
-				() -> new MultiExponentiationArgumentService(publicKey, otherKey, randomService, hashService));
-	}
-
-	@Test
-	void publicKeyAndCommitmentKeyOfDifferentSizeThrows() {
-		CommitmentKey longerKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER + 1);
-		assertThrowsIllegalArgumentExceptionWithMessage("The commitment key and public key must be of the same size.",
-				() -> new MultiExponentiationArgumentService(publicKey, longerKey, randomService, hashService));
-	}
-
-	@Test
-	void testStatementAndWitnessOfGroupsOfDifferentOrderThrows() {
-		MultiExponentiationWitnessGenerator otherGroupWitnessGenerator = new MultiExponentiationWitnessGenerator(otherZqGroup);
-		MultiExponentiationWitness otherWitness = otherGroupWitnessGenerator.genRandomWitness(n, m);
-		assertThrowsIllegalArgumentExceptionWithMessage("The witness and argument must belong to groups of the same order.",
-				() -> argumentService.getMultiExponentiationArgument(randomStatement, otherWitness));
-	}
-
-	@Test
-	void testStatementAndKeysOfDifferentOrderThrows() {
-		MultiExponentiationStatementGenerator otherStatementGenerator = new MultiExponentiationStatementGenerator(otherGqGroup);
-		MultiExponentiationStatement otherGroupStatement = otherStatementGenerator.genRandomStatement(n, m, l);
-		assertThrowsIllegalArgumentExceptionWithMessage("The statement and argument must belong to the same group.",
-				() -> argumentService.getMultiExponentiationArgument(otherGroupStatement, randomWitness));
-	}
-
-	@Test
-	void testStatementAndWitnessWithDifferentMThrows() {
-		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
-		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m + 1);
-		assertThrowsIllegalArgumentExceptionWithMessage("Statement and witness do not have compatible m dimension.",
-				() -> argumentService.getMultiExponentiationArgument(statement, witness));
-	}
-
-	@Test
-	void testStatementAndWitnessWithDifferentNThrows() {
-		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
-		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n + 1, m);
-		assertThrowsIllegalArgumentExceptionWithMessage("Statement and witness do not have compatible n dimension.",
-				() -> argumentService.getMultiExponentiationArgument(statement, witness));
-	}
-
-	@Test
-	void testExponentsMatrixNSizeNotSmallerThanKeySizeThrows() {
-		int n = KEY_ELEMENTS_NUMBER + 1;
-		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
-		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
-		assertThrowsIllegalArgumentExceptionWithMessage("The number of rows of matrix A must be less than the size of the public key.",
-				() -> argumentService.getMultiExponentiationArgument(statement, witness));
-	}
-
-	@Test
-	void testNullValuesThrows() {
-		assertAll(
-				() -> assertThrows(NullPointerException.class, () -> argumentService.getMultiExponentiationArgument(null, randomWitness)),
-				() -> assertThrows(NullPointerException.class, () -> argumentService.getMultiExponentiationArgument(randomStatement, null))
-		);
-	}
-
-	@Test
-	void testCIsNotMultiExponentiationProductThrows() {
-		StatementWitnessPair statementWitnessPair = statementWitnessPairGenerator.genPair(n, m, l);
-		MultiExponentiationStatement statement = statementWitnessPair.getStatement();
-		MultiExponentiationWitness witness = statementWitnessPair.getWitness();
-
-		ElGamalMultiRecipientCiphertext computedC = statement.getC();
-		ElGamalMultiRecipientCiphertext differentC = Generators.genWhile(
-				() -> elGamalGenerator.genRandomCiphertext(l), ciphertext -> ciphertext.equals(computedC));
-		MultiExponentiationStatement statementWithInvalidC = new MultiExponentiationStatement(
-				statement.getCMatrix(), differentC, statement.getcA());
-
-		assertThrowsIllegalArgumentExceptionWithMessage(
-				"The computed multi exponentiation ciphertext does not correspond to the one provided in the statement.",
-				() -> argumentService.getMultiExponentiationArgument(statementWithInvalidC, witness));
-	}
-
-	@Test
-	void testCommitmentCAIsNotCommitmentOfMatrixAThrows() {
-		StatementWitnessPair statementWitnessPair = statementWitnessPairGenerator.genPair(n, m, l);
-		MultiExponentiationStatement statement = statementWitnessPair.getStatement();
-		MultiExponentiationWitness witness = statementWitnessPair.getWitness();
-
-		SameGroupVector<GqElement, GqGroup> computeCommitmentToA = statement.getcA();
-		GqElement firstElement = computeCommitmentToA.get(0);
-		GqElement differentFirstElement = Generators.genWhile(gqGroupGenerator::genMember, element -> element.equals(firstElement));
-
-		SameGroupVector<GqElement, GqGroup> differentCommitmentToA =
-				Stream.concat(
-						Stream.of(differentFirstElement),
-						computeCommitmentToA
-								.stream()
-								.skip(1)
-				).collect(toSameGroupVector());
-		MultiExponentiationStatement invalidStatement = new MultiExponentiationStatement(
-				statement.getCMatrix(), statement.getC(), differentCommitmentToA);
-
-		assertThrowsIllegalArgumentExceptionWithMessage("The commitment provided does not correspond to the matrix A.",
-				() -> argumentService.getMultiExponentiationArgument(invalidStatement, witness));
-	}
-
-	@Test
-	void sanityCheck() {
-		MultiExponentiationArgumentService argumentService = new MultiExponentiationArgumentService(
-				publicKey, commitmentKey, randomService, hashServiceMock);
-		StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
-		MultiExponentiationStatement statement = pair.getStatement();
-		MultiExponentiationWitness witness = pair.getWitness();
-		assertDoesNotThrow(() -> argumentService.getMultiExponentiationArgument(statement, witness));
-	}
-
-	@Test
-	void testThatLongerCiphertextsThanKeyThrows() {
-		int l = KEY_ELEMENTS_NUMBER + 1;
-		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
-		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
-		assertThrowsIllegalArgumentExceptionWithMessage("The ciphertexts must be smaller than the public key.",
-				() -> argumentService.getMultiExponentiationArgument(statement, witness));
 	}
 
 	@Test
@@ -251,7 +112,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		BigInteger p = BigInteger.valueOf(23);
 		BigInteger q = BigInteger.valueOf(11);
 		BigInteger g = BigInteger.valueOf(2);
-		GqGroup gqGroup = new GqGroup(p, q, g);
+		GqGroup specificGqGroup = new GqGroup(p, q, g);
 		ZqGroup zqGroup = new ZqGroup(q);
 
 		// Create BigIntegers
@@ -268,17 +129,17 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		BigInteger TEN = BigInteger.valueOf(10);
 
 		// Create GqElements
-		GqElement gOne = gqGroup.getIdentity();
-		GqElement gTwo = gqGroup.getGenerator();
-		GqElement gThree = GqElement.create(THREE, gqGroup);
-		GqElement gFour = GqElement.create(FOUR, gqGroup);
-		GqElement gSix = GqElement.create(SIX, gqGroup);
-		GqElement gEight = GqElement.create(EIGHT, gqGroup);
-		GqElement gNine = GqElement.create(NINE, gqGroup);
-		GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), gqGroup);
-		GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
-		GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), gqGroup);
-		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
+		GqElement gOne = specificGqGroup.getIdentity();
+		GqElement gTwo = specificGqGroup.getGenerator();
+		GqElement gThree = GqElement.create(THREE, specificGqGroup);
+		GqElement gFour = GqElement.create(FOUR, specificGqGroup);
+		GqElement gSix = GqElement.create(SIX, specificGqGroup);
+		GqElement gEight = GqElement.create(EIGHT, specificGqGroup);
+		GqElement gNine = GqElement.create(NINE, specificGqGroup);
+		GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), specificGqGroup);
+		GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), specificGqGroup);
+		GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), specificGqGroup);
+		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), specificGqGroup);
 
 		// Create ZqElements
 		ZqElement zOne = ZqElement.create(ONE, zqGroup);
@@ -333,15 +194,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		// Multi: a0 = (0, 1), r0 = 6, b = (2, 3, 7, 9), s = (10, 1, 3, 4), tau = (5, 6, 8, 7)
 		doReturn(ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
 				.when(specificRandomService).genRandomInteger(q);
-		HashService specificHashService = mock(HashService.class);
-		when(specificHashService.recursiveHash(any())).thenAnswer(
-				(Answer<byte[]>) invocationOnMock -> {
-					Object[] args = invocationOnMock.getArguments();
-					ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
-					HashableList hashables = HashableList.from(argsList);
-					BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ());
-					return integerToByteArray(hashModQ);
-				});
+		HashService specificHashService = getHashServiceMock(delegateHashService, specificGqGroup.getQ());
 
 		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, specificRandomService,
 				specificHashService);
@@ -378,4 +231,369 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		assertEquals(errorMsg, exception.getMessage());
 	}
 
+	@Nested
+	@DisplayName("getMultiExponentiationArgument...")
+	class GetMultiExponentiationArgument {
+		private MultiExponentiationStatement randomStatement;
+		private MultiExponentiationWitness randomWitness;
+
+		@BeforeEach
+		void setup() {
+			randomStatement = statementGenerator.genRandomStatement(n, m, l);
+			randomWitness = witnessGenerator.genRandomWitness(n, m);
+		}
+
+		@Test
+		void constructorDoesntAcceptNullValues() {
+			assertAll(
+					() -> assertThrows(NullPointerException.class,
+							() -> new MultiExponentiationArgumentService(null, commitmentKey, randomService, hashServiceMock)),
+					() -> assertThrows(NullPointerException.class,
+							() -> new MultiExponentiationArgumentService(publicKey, null, randomService, hashServiceMock)),
+					() -> assertThrows(NullPointerException.class,
+							() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, null, hashServiceMock)),
+					() -> assertThrows(NullPointerException.class,
+							() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, null))
+			);
+		}
+
+		@Test
+		void publicKeyAndCommitmentKeyFromDifferentGroupsThrows() {
+			CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(otherGqGroup);
+			CommitmentKey otherKey = otherGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
+			assertThrowsIllegalArgumentExceptionWithMessage("The public key and commitment key must belong to the same group",
+					() -> new MultiExponentiationArgumentService(publicKey, otherKey, randomService, hashServiceMock));
+		}
+
+		@Test
+		void publicKeyAndCommitmentKeyOfDifferentSizeThrows() {
+			CommitmentKey longerKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER + 1);
+			assertThrowsIllegalArgumentExceptionWithMessage("The commitment key and public key must be of the same size.",
+					() -> new MultiExponentiationArgumentService(publicKey, longerKey, randomService, hashServiceMock));
+		}
+
+		@Test
+		void testStatementAndWitnessOfGroupsOfDifferentOrderThrows() {
+			MultiExponentiationWitnessGenerator otherGroupWitnessGenerator = new MultiExponentiationWitnessGenerator(otherZqGroup);
+			MultiExponentiationWitness otherWitness = otherGroupWitnessGenerator.genRandomWitness(n, m);
+			assertThrowsIllegalArgumentExceptionWithMessage("The witness and argument must belong to groups of the same order.",
+					() -> argumentService.getMultiExponentiationArgument(randomStatement, otherWitness));
+		}
+
+		@Test
+		void testStatementAndKeysOfDifferentOrderThrows() {
+			MultiExponentiationStatementGenerator otherStatementGenerator = new MultiExponentiationStatementGenerator(otherGqGroup);
+			MultiExponentiationStatement otherGroupStatement = otherStatementGenerator.genRandomStatement(n, m, l);
+			assertThrowsIllegalArgumentExceptionWithMessage("The statement and argument must belong to the same group.",
+					() -> argumentService.getMultiExponentiationArgument(otherGroupStatement, randomWitness));
+		}
+
+		@Test
+		void testStatementAndWitnessWithDifferentMThrows() {
+			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
+			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m + 1);
+			assertThrowsIllegalArgumentExceptionWithMessage("Statement and witness do not have compatible m dimension.",
+					() -> argumentService.getMultiExponentiationArgument(statement, witness));
+		}
+
+		@Test
+		void testStatementAndWitnessWithDifferentNThrows() {
+			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
+			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n + 1, m);
+			assertThrowsIllegalArgumentExceptionWithMessage("Statement and witness do not have compatible n dimension.",
+					() -> argumentService.getMultiExponentiationArgument(statement, witness));
+		}
+
+		@Test
+		void testExponentsMatrixNSizeNotSmallerThanKeySizeThrows() {
+			int n = KEY_ELEMENTS_NUMBER + 1;
+			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
+			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
+			assertThrowsIllegalArgumentExceptionWithMessage("The number of rows of matrix A must be less than the size of the public key.",
+					() -> argumentService.getMultiExponentiationArgument(statement, witness));
+		}
+
+		@Test
+		void testNullValuesThrows() {
+			assertAll(
+					() -> assertThrows(NullPointerException.class, () -> argumentService.getMultiExponentiationArgument(null, randomWitness)),
+					() -> assertThrows(NullPointerException.class, () -> argumentService.getMultiExponentiationArgument(randomStatement, null))
+			);
+		}
+
+		@Test
+		void testCIsNotMultiExponentiationProductThrows() {
+			StatementWitnessPair statementWitnessPair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = statementWitnessPair.getStatement();
+			MultiExponentiationWitness witness = statementWitnessPair.getWitness();
+
+			ElGamalMultiRecipientCiphertext computedC = statement.getC();
+			ElGamalMultiRecipientCiphertext differentC = Generators.genWhile(
+					() -> elGamalGenerator.genRandomCiphertext(l), ciphertext -> ciphertext.equals(computedC));
+			MultiExponentiationStatement statementWithInvalidC = new MultiExponentiationStatement(
+					statement.getCMatrix(), differentC, statement.getcA());
+
+			assertThrowsIllegalArgumentExceptionWithMessage(
+					"The computed multi exponentiation ciphertext does not correspond to the one provided in the statement.",
+					() -> argumentService.getMultiExponentiationArgument(statementWithInvalidC, witness));
+		}
+
+		@Test
+		void testCommitmentCAIsNotCommitmentOfMatrixAThrows() {
+			StatementWitnessPair statementWitnessPair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = statementWitnessPair.getStatement();
+			MultiExponentiationWitness witness = statementWitnessPair.getWitness();
+
+			SameGroupVector<GqElement, GqGroup> computeCommitmentToA = statement.getcA();
+			GqElement firstElement = computeCommitmentToA.get(0);
+			GqElement differentFirstElement = Generators.genWhile(gqGroupGenerator::genMember, element -> element.equals(firstElement));
+
+			SameGroupVector<GqElement, GqGroup> differentCommitmentToA =
+					Stream.concat(
+							Stream.of(differentFirstElement),
+							computeCommitmentToA
+									.stream()
+									.skip(1)
+					).collect(toSameGroupVector());
+			MultiExponentiationStatement invalidStatement = new MultiExponentiationStatement(
+					statement.getCMatrix(), statement.getC(), differentCommitmentToA);
+
+			assertThrowsIllegalArgumentExceptionWithMessage("The commitment provided does not correspond to the matrix A.",
+					() -> argumentService.getMultiExponentiationArgument(invalidStatement, witness));
+		}
+
+		@Test
+		void sanityCheck() {
+			MultiExponentiationArgumentService argumentService = new MultiExponentiationArgumentService(
+					publicKey, commitmentKey, randomService, hashServiceMock);
+			StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = pair.getStatement();
+			MultiExponentiationWitness witness = pair.getWitness();
+			assertDoesNotThrow(() -> argumentService.getMultiExponentiationArgument(statement, witness));
+		}
+
+		@Test
+		void testThatLongerCiphertextsThanKeyThrows() {
+			int l = KEY_ELEMENTS_NUMBER + 1;
+			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
+			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
+			assertThrowsIllegalArgumentExceptionWithMessage("The ciphertexts must be smaller than the public key.",
+					() -> argumentService.getMultiExponentiationArgument(statement, witness));
+		}
+	}
+
+	@Nested
+	@DisplayName("verifyMultiExponentiationArgument...")
+	class VerifyMultiExponentiationArgument {
+		private MultiExponentiationArgument randomArgument;
+
+		@BeforeEach
+		void setup() {
+			randomArgument = argumentGenerator.genRandomArgument(n, m, l);
+		}
+
+		@Test
+		void testNullValuesThrows() {
+			assertAll(
+					() -> assertThrows(NullPointerException.class, () -> argumentService.verifyMultiExponentiationArgument(null, randomArgument)),
+					() -> assertThrows(NullPointerException.class, () -> argumentService.verifyMultiExponentiationArgument(null, randomArgument))
+			);
+		}
+
+		@Test
+		void testStatmentAndArgumentFromDifferentGroupsThrows() {
+			MultiExponentiationStatement otherStatement = new MultiExponentiationStatementGenerator(otherGqGroup).genRandomStatement(n, m, l);
+			assertThrowsIllegalArgumentExceptionWithMessage("Statement and argument must belong to the same group.",
+					() -> argumentService.verifyMultiExponentiationArgument(otherStatement, randomArgument));
+		}
+
+		@Test
+		void testStatmentAndArgumentWithDifferentNThrows() {
+			final MultiExponentiationStatement otherStatement = statementGenerator.genRandomStatement(n + 1, m, l);
+			assertThrowsIllegalArgumentExceptionWithMessage("n dimension doesn't match.",
+					() -> argumentService.verifyMultiExponentiationArgument(otherStatement, randomArgument));
+		}
+
+		@Test
+		void testStatmentAndArgumentWithDifferentMThrows() {
+			final MultiExponentiationStatement otherStatement = statementGenerator.genRandomStatement(n, m + 1, l);
+			assertThrowsIllegalArgumentExceptionWithMessage("m dimension doesn't match.",
+					() -> argumentService.verifyMultiExponentiationArgument(otherStatement, randomArgument));
+		}
+
+		@Test
+		void testStatmentAndArgumentWithDifferentLThrows() {
+			final MultiExponentiationStatement otherStatement = statementGenerator.genRandomStatement(n, m, l + 1);
+			assertThrowsIllegalArgumentExceptionWithMessage("l dimension doesn't match.",
+					() -> argumentService.verifyMultiExponentiationArgument(otherStatement, randomArgument));
+		}
+
+		@Test
+		void testArgumentGenerationAndVerificationIsVerified() {
+			StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = pair.getStatement();
+			MultiExponentiationWitness witness = pair.getWitness();
+			MultiExponentiationArgument argument = argumentService.getMultiExponentiationArgument(statement, witness);
+			assertTrue(argumentService.verifyMultiExponentiationArgument(statement, argument));
+		}
+
+		@Test
+		void testStatementWithModified_C_ElementDoesNotVerify() {
+			StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = pair.getStatement();
+			MultiExponentiationWitness witness = pair.getWitness();
+			MultiExponentiationArgument argument = argumentService.getMultiExponentiationArgument(statement, witness);
+
+			final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
+			int i = secureRandom.nextInt(CMatrix.numRows());
+			int j = secureRandom.nextInt(CMatrix.numColumns());
+			ElGamalMultiRecipientCiphertext element = CMatrix.get(i, j);
+			final ElGamalMultiRecipientCiphertext modifiedCiphertext = elGamalGenerator.otherCiphertext(element);
+			final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> modifiedCMatrix = GroupMatrices.set(CMatrix, i, j, modifiedCiphertext);
+
+			MultiExponentiationStatement invalidStatment = new MultiExponentiationStatement(modifiedCMatrix, statement.getC(), statement.getcA());
+
+			assertFalse(argumentService.verifyMultiExponentiationArgument(invalidStatment, argument));
+		}
+
+		@Test
+		void testStatementWithModified_C_DoesNotVerify() {
+			StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = pair.getStatement();
+			MultiExponentiationWitness witness = pair.getWitness();
+			MultiExponentiationArgument argument = argumentService.getMultiExponentiationArgument(statement, witness);
+
+			final ElGamalMultiRecipientCiphertext modifiedCiphertext = elGamalGenerator.otherCiphertext(statement.getC());
+
+			MultiExponentiationStatement invalidStatment =
+					new MultiExponentiationStatement(statement.getCMatrix(), modifiedCiphertext, statement.getcA());
+
+			assertFalse(argumentService.verifyMultiExponentiationArgument(invalidStatment, argument));
+		}
+
+		@Test
+		void testStatementWithModified_cA_ElementDoesNotVerify() {
+			StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = pair.getStatement();
+			MultiExponentiationWitness witness = pair.getWitness();
+			MultiExponentiationArgument argument = argumentService.getMultiExponentiationArgument(statement, witness);
+
+			SameGroupVector<GqElement, GqGroup> cA = statement.getcA();
+			int i = secureRandom.nextInt(cA.size());
+			final GqElement modifiedElement = gqGroupGenerator.otherElement(cA.get(i));
+			final SameGroupVector<GqElement, GqGroup> modifiedCA = GroupVectors.set(cA, i, modifiedElement);
+
+			MultiExponentiationStatement invalidStatment =
+					new MultiExponentiationStatement(statement.getCMatrix(), statement.getC(), modifiedCA);
+
+			assertFalse(argumentService.verifyMultiExponentiationArgument(invalidStatment, argument));
+		}
+
+		@Test
+		void testArgumentWithModified_cA0_ElementDoesNotVerify() {
+			testInvalidArgument(MultiExponentiationArgument::getcA0, gqGroupGenerator::otherElement, MultiExponentiationArgument.Builder::withcA0);
+		}
+
+		@Test
+		void testArgumentWithModified_cB_ElementDoesNotVerify() {
+			UnaryOperator<SameGroupVector<GqElement, GqGroup>> modifycBVector = cB -> {
+				int i = secureRandom.nextInt(cB.size());
+				final GqElement element = cB.get(i);
+				final GqElement modifiedElement = gqGroupGenerator.otherElement(element);
+				return GroupVectors.set(cB, i, modifiedElement);
+			};
+			testInvalidArgument(MultiExponentiationArgument::getcBVector, modifycBVector, MultiExponentiationArgument.Builder::withcBVector);
+		}
+
+		@Test
+		void testArgumentWithModified_E_ElementDoesNotVerify() {
+			UnaryOperator<SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup>> modifyEVector = E -> {
+				int i = secureRandom.nextInt(E.size());
+				final ElGamalMultiRecipientCiphertext element = E.get(i);
+				final ElGamalMultiRecipientCiphertext modifiedElement = elGamalGenerator.otherCiphertext(element);
+				return GroupVectors.set(E, i, modifiedElement);
+			};
+			testInvalidArgument(MultiExponentiationArgument::getEVector, modifyEVector, MultiExponentiationArgument.Builder::withEVector);
+		}
+
+		@Test
+		void testArgumentWithModified_a_ElementDoesNotVerify() {
+			UnaryOperator<SameGroupVector<ZqElement, ZqGroup>> modifyaVector = aVector -> {
+				int i = secureRandom.nextInt(aVector.size());
+				final ZqElement element = aVector.get(i);
+				ZqElement modifiedElement =  zqGroupGenerator.otherElement(element);
+				return GroupVectors.set(aVector, i, modifiedElement);
+			};
+			testInvalidArgument(MultiExponentiationArgument::getaVector, modifyaVector, MultiExponentiationArgument.Builder::withaVector);
+		}
+
+		@Test
+		void testArgumentWithModified_r_DoesNotVerify() {
+			testInvalidArgument(MultiExponentiationArgument::getR, zqGroupGenerator::otherElement, MultiExponentiationArgument.Builder::withr);
+		}
+
+		@Test
+		void testArgumentWithModified_b_ElementDoesNotVerify() {
+			testInvalidArgument(MultiExponentiationArgument::getB, zqGroupGenerator::otherElement, MultiExponentiationArgument.Builder::withb);
+		}
+
+		@Test
+		void testArgumentWithModified_s_DoesNotVerify() {
+			testInvalidArgument(MultiExponentiationArgument::getS, zqGroupGenerator::otherElement, MultiExponentiationArgument.Builder::withs);
+		}
+
+		@Test
+		void testArgumentWithModified_tau_DoesNotVerify() {
+			testInvalidArgument(MultiExponentiationArgument::getTau, zqGroupGenerator::otherElement, MultiExponentiationArgument.Builder::withtau);
+		}
+
+		// <F> type of field to modify
+		<F> void testInvalidArgument(
+				Function<MultiExponentiationArgument, F> getField,
+				UnaryOperator<F> modifyField,
+				BiConsumer<MultiExponentiationArgument.Builder, F> setField) {
+
+			StatementWitnessPair pair = statementWitnessPairGenerator.genPair(n, m, l);
+			MultiExponentiationStatement statement = pair.getStatement();
+			MultiExponentiationWitness witness = pair.getWitness();
+			MultiExponentiationArgument argument = argumentService.getMultiExponentiationArgument(statement, witness);
+
+			F field = getField.apply(argument);
+			F newField = modifyField.apply(field);
+
+			MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder()
+					.withb(argument.getB())
+					.withaVector(argument.getaVector())
+					.withr(argument.getR())
+					.withs(argument.getS())
+					.withtau(argument.getTau())
+					.withcA0(argument.getcA0())
+					.withcBVector(argument.getcBVector())
+					.withEVector(argument.getEVector());
+			setField.accept(builder, newField);
+
+			MultiExponentiationArgument invalidArgument = builder.build();
+
+			assertFalse(argumentService.verifyMultiExponentiationArgument(statement, invalidArgument));
+		}
+	}
+
+	/**
+	 * Mocks a HashService for test that returns the hash modulo q.
+	 * @param q the modulus
+	 * @return a HashService object with a mocked
+	 */
+	static private HashService getHashServiceMock(HashService delegate, BigInteger q) {
+		HashService hashServiceMock = mock(HashService.class);
+		when(hashServiceMock.recursiveHash(any())).thenAnswer(
+				(Answer<byte[]>) invocationOnMock -> {
+					Object[] args = invocationOnMock.getArguments();
+					ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
+					HashableList hashables = HashableList.from(argsList);
+					BigInteger hashModQ = byteArrayToInteger(delegate.recursiveHash(hashables)).mod(q);
+					return integerToByteArray(hashModQ);
+				}
+		);
+		return hashServiceMock;
+	}
 }

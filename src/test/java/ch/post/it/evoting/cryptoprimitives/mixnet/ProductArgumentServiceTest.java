@@ -222,10 +222,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			GqElement first = commitmentList.get(0);
 			first = first.multiply(g);
 			commitmentList.set(0, first);
-			SameGroupVector<GqElement, GqGroup> badCommitmentsA = new SameGroupVector<>(commitmentList);
-			ProductStatement badStatement = new ProductStatement(badCommitmentsA, productB);
-			Exception exception = assertThrows(IllegalArgumentException.class,
-					() -> productArgumentService.getProductArgument(badStatement, witness));
+			commitmentsA = SameGroupVector.from(commitmentList);
+			statement = new ProductStatement(commitmentsA, productB);
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> productArgumentService.getProductArgument(statement, witness));
 			assertEquals("The commitment to matrix A with exponents r using the given commitment key must yield the commitments cA.",
 					exception.getMessage());
 		}
@@ -302,7 +301,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			matrixColumns.add(1, Arrays.asList(zqTwo, zqFour));
 			matrixColumns.add(2, Arrays.asList(zqZero, zqOne));
 			SameGroupMatrix<ZqElement, ZqGroup> matrix = SameGroupMatrix.fromColumns(matrixColumns);
-			SameGroupVector<ZqElement, ZqGroup> exponents = new SameGroupVector<>(Arrays.asList(zqOne, zqTwo, zqFour));
+			SameGroupVector<ZqElement, ZqGroup> exponents = SameGroupVector.from(Arrays.asList(zqOne, zqTwo, zqFour));
 
 			ProductWitness productWitness = new ProductWitness(matrix, exponents);
 

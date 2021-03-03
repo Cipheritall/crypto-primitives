@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -173,11 +174,11 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
 
-			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(l, gqGroup);
+			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
 			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 					.mapToObj(i -> getCiphertext(ones, randomness.get(i), publicKey)
 							.multiply(ciphertexts.get(permutation.get(i))))
-					.collect(collectingAndThen(toList(), SameGroupVector::new));
+					.collect(collectingAndThen(toList(), SameGroupVector::from));
 
 			shuffleStatement = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
 		}
@@ -239,11 +240,11 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertexts = elGamalGenerator
 					.genRandomCiphertextVector(N, biggerL);
 
-			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(biggerL, gqGroup);
+			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, biggerL);
 			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 					.mapToObj(i -> getCiphertext(ones, shuffleWitness.getRandomness().get(i), longerPublicKey)
 							.multiply(longerCiphertexts.get(shuffleWitness.getPermutation().get(i))))
-					.collect(collectingAndThen(toList(), SameGroupVector::new));
+					.collect(collectingAndThen(toList(), SameGroupVector::from));
 
 			final ShuffleStatement longerCiphertextsStatement = new ShuffleStatement(longerCiphertexts, shuffledCiphertexts);
 
@@ -256,13 +257,13 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("re-encrypted and shuffled ciphertexts C different C' throws IllegalArgumentException")
 		void getShuffleArgumentCiphertextsShuffledCiphertextsDiff() {
 			// Modify the shuffled ciphertexts by replacing its first element by a different ciphertext.
-			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts().stream().collect(toList());
+			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = new ArrayList<>(shuffleStatement.getShuffledCiphertexts());
 			final ElGamalMultiRecipientCiphertext first = shuffledCiphertexts.get(0);
 			final ElGamalMultiRecipientCiphertext otherFirst = Generators.genWhile(() -> elGamalGenerator.genRandomCiphertext(l), first::equals);
 			shuffledCiphertexts.set(0, otherFirst);
 
 			// Recreate shuffled ciphertexts and statement.
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffledCiphertexts = new SameGroupVector<>(
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffledCiphertexts = SameGroupVector.from(
 					shuffledCiphertexts);
 			final ShuffleStatement differentShuffleStatement = new ShuffleStatement(this.shuffleStatement.getCiphertexts(),
 					differentShuffledCiphertexts);
@@ -357,7 +358,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			// Create the randomness: rho = (4, 9, 3, 2)
 			SameGroupVector<ZqElement, ZqGroup> rho = SameGroupVector.of(zFour, zNine, zThree, zTwo);
 
-			ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(3, gqGroup);
+			ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, 3);
 			// Create the vector of shuffled ciphertexts:
 			// C' = ({1, (3, 6, 4)}, {1, (13, 4, 18)}, {4, (12, 16, 6)}, {13, (2, 3, 1)})
 			SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> cPrime = IntStream.range(0, 4)

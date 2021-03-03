@@ -20,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -205,7 +205,7 @@ class SingleValueProductArgumentService {
 		final SameGroupVector<ZqElement, ZqGroup> eiVector = IntStream.range(0, n - 1)
 				.mapToObj(i -> x.multiply(bTilde.get(i + 1))
 						.subtract(bTilde.get(i).multiply(aTilde.get(i + 1))))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::from));
 		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
 		final BooleanSupplier verifDelta = () -> prodDelta.equals(commDelta);
 

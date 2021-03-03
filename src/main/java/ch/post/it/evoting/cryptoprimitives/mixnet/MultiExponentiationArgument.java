@@ -3,11 +3,16 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -26,6 +31,58 @@ public class MultiExponentiationArgument {
 	private ZqElement b;
 	private ZqElement s;
 	private ZqElement tau;
+	private int m;
+	private int n;
+	private int l;
+	private GqGroup group;
+
+	public GqElement getcA0() {
+		return cA0;
+	}
+
+	public SameGroupVector<GqElement, GqGroup> getcBVector() {
+		return cBVector;
+	}
+
+	public SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getEVector() {
+		return EVector;
+	}
+
+	public SameGroupVector<ZqElement, ZqGroup> getaVector() {
+		return aVector;
+	}
+
+	public ZqElement getR() {
+		return r;
+	}
+
+	public ZqElement getB() {
+		return b;
+	}
+
+	public ZqElement getS() {
+		return s;
+	}
+
+	public ZqElement getTau() {
+		return tau;
+	}
+
+	public int getM() {
+		return m;
+	}
+
+	public int getN() {
+		return n;
+	}
+
+	public int getL() {
+		return l;
+	}
+
+	public GqGroup getGroup() {
+		return group;
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -35,9 +92,10 @@ public class MultiExponentiationArgument {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
+
 		MultiExponentiationArgument that = (MultiExponentiationArgument) o;
-		return cA0.equals(that.cA0) && cBVector.equals(that.cBVector) && EVector.equals(that.EVector) && aVector.equals(that.aVector) &&
-				r.equals(that.r) && b.equals(that.b) && s.equals(that.s) && tau.equals(that.tau);
+		return cA0.equals(that.cA0) && cBVector.equals(that.cBVector) && EVector.equals(that.EVector) && aVector.equals(that.aVector)
+				&& r.equals(that.r) && b.equals(that.b) && s.equals(that.s) && tau.equals(that.tau);
 	}
 
 	@Override
@@ -100,15 +158,39 @@ public class MultiExponentiationArgument {
 		}
 
 		MultiExponentiationArgument build() {
+			checkNotNull(this.cA0);
+			checkNotNull(this.cBVector);
+			checkNotNull(this.EVector);
+			checkNotNull(this.aVector);
+			checkNotNull(this.r);
+			checkNotNull(this.b);
+			checkNotNull(this.s);
+			checkNotNull(this.tau);
+
+			//Group checking
+			List<GroupVectorElement<GqGroup>> gqGroups = Arrays.asList(cA0, cBVector, EVector);
+			List<GroupVectorElement<ZqGroup>> zqGroups = Arrays.asList(aVector, r, b, s, tau);
+			checkArgument(allEqual(gqGroups.stream(), GroupVectorElement::getGroup), "cA0, cBVector, EVector, aVector must belong to the same group.");
+			checkArgument(allEqual(zqGroups.stream(), GroupVectorElement::getGroup), "r, b, s, tau, must belong to the same group.");
+			checkArgument(cA0.getGroup().hasSameOrderAs(aVector.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
+
+			//Size checking
+			checkArgument(cBVector.size() == EVector.size(), "Arguments must have compatible size m.");
+
 			MultiExponentiationArgument argument = new MultiExponentiationArgument();
-			argument.cA0 = checkNotNull(this.cA0);
-			argument.cBVector = checkNotNull(this.cBVector);
-			argument.EVector = checkNotNull(this.EVector);
-			argument.aVector = checkNotNull(this.aVector);
-			argument.r = checkNotNull(this.r);
-			argument.b = checkNotNull(this.b);
-			argument.s = checkNotNull(this.s);
-			argument.tau = checkNotNull(this.tau);
+			argument.cA0 = this.cA0;
+			argument.cBVector = this.cBVector;
+			argument.EVector = this.EVector;
+			argument.aVector = this.aVector;
+			argument.r = this.r;
+			argument.b = this.b;
+			argument.s = this.s;
+			argument.tau = this.tau;
+			argument.group = cA0.getGroup();
+			argument.m = cBVector.size() / 2;
+			argument.n = aVector.size();
+			argument.l = EVector.getElementSize();
+
 			return argument;
 		}
 	}

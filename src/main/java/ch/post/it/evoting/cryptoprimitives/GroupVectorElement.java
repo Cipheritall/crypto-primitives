@@ -6,13 +6,18 @@ package ch.post.it.evoting.cryptoprimitives;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
- * Marker interface for types that have a mathematical group associated.
+ * Elements of a GroupVector or GroupMatrix.
  *
  * @param <G> the group type associated.
  */
-public interface HasGroup<G extends MathematicalGroup<G>> {
+public interface GroupVectorElement<G extends MathematicalGroup<G>> {
 	/**
 	 * @return the group this element belongs to.
 	 */
 	G getGroup();
+
+	/**
+	 * @return the size of this element.
+	 */
+	int size();
 }

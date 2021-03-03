@@ -35,24 +35,34 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	private final SameGroupVector<GqElement, GqGroup> messageElements;
 
 	public ElGamalMultiRecipientMessage(final List<GqElement> messageElements) {
-		this.messageElements = new SameGroupVector<>(messageElements);
+		this.messageElements = SameGroupVector.from(messageElements);
 		checkArgument(!this.messageElements.isEmpty(), "An ElGamal message must not be empty.");
 	}
 
 	/**
 	 * Generates an {@link ElGamalMultiRecipientMessage} of ones.
 	 *
-	 * @param size  the number of ones to be contained in the message
 	 * @param group the {@link GqGroup} of the message
+	 * @param size  the number of ones to be contained in the message
 	 * @return the message (1, ..., 1) with {@code size} elements
 	 */
-	public static ElGamalMultiRecipientMessage ones(final int size, final GqGroup group) {
-		checkNotNull(group);
-		checkArgument(size > 0, "The message of ones' size must be strictly greater than 0.");
+	public static ElGamalMultiRecipientMessage ones(final GqGroup group, final int size) {
+		return constantMessage(GqElement.create(BigInteger.ONE, group), size);
+	}
 
-		return Stream.generate(() -> BigInteger.ONE)
+	/**
+	 * Generates an {@link ElGamalMultiRecipientMessage} of constant value.
+	 *
+	 * @param constant the constant element of the message
+	 * @param size  the size of the message
+	 * @return the message of constants with {@code size} elements
+	 */
+	public static ElGamalMultiRecipientMessage constantMessage(final GqElement constant, final int size) {
+		checkNotNull(constant);
+		checkArgument(size > 0, "Cannot generate a message of constants of non positive length.");
+
+		return Stream.generate(() -> constant)
 				.limit(size)
-				.map(one -> GqElement.create(one, group))
 				.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
 	}
 

@@ -3,8 +3,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 
 import java.math.BigInteger;
 
@@ -29,6 +29,10 @@ public class ZqGroupGenerator {
 		return ZqElement.create(value, this.group);
 	}
 
+	public ZqElement otherElement(ZqElement element) {
+		return Generators.genWhile(this::genRandomZqElementMember, element::equals);
+	}
+
 	/**
 	 * Generate a random {@link SameGroupVector} of {@link ZqElement} in this {@code group}.
 	 *
@@ -36,7 +40,7 @@ public class ZqGroupGenerator {
 	 * @return a vector of {@code numElements} random {@link ZqElement}.
 	 */
 	public SameGroupVector<ZqElement, ZqGroup> genRandomZqElementVector(final int numElements) {
-		return new SameGroupVector<>(generateElementList(numElements, this::genRandomZqElementMember));
+		return SameGroupVector.from(generateElementList(numElements, this::genRandomZqElementMember));
 	}
 
 	/**
@@ -47,7 +51,7 @@ public class ZqGroupGenerator {
 	 * @return a vector of {@code numElements} defined {@link ZqElement}.
 	 */
 	public SameGroupVector<ZqElement, ZqGroup> initializeElementVectorWithElement(final int numElements, ZqElement element) {
-		return new SameGroupVector<>(generateElementList(numElements, () -> element));
+		return SameGroupVector.from(generateElementList(numElements, () -> element));
 	}
 
 	/**

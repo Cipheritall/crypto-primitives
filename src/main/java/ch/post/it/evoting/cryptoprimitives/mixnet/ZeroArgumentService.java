@@ -22,10 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -121,8 +121,8 @@ final class ZeroArgumentService {
 		// Algorithm operations.
 
 		final int n = matrixA.numRows();
-		final SameGroupVector<ZqElement, ZqGroup> a0 = new SameGroupVector<>(generateRandomZqElementList(n, zqGroup));
-		final SameGroupVector<ZqElement, ZqGroup> bm = new SameGroupVector<>(generateRandomZqElementList(n, zqGroup));
+		final SameGroupVector<ZqElement, ZqGroup> a0 = SameGroupVector.from(generateRandomZqElementList(n, zqGroup));
+		final SameGroupVector<ZqElement, ZqGroup> bm = SameGroupVector.from(generateRandomZqElementList(n, zqGroup));
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		final GqElement cA0 = getCommitment(a0, r0, commitmentKey);
@@ -137,7 +137,7 @@ final class ZeroArgumentService {
 		// Compute t and c_d.
 		final List<ZqElement> t = new ArrayList<>(generateRandomZqElementList(2 * m + 1, zqGroup));
 		t.set(m + 1, ZqElement.create(BigInteger.ZERO, zqGroup));
-		final SameGroupVector<GqElement, GqGroup> cd = getCommitmentVector(d, new SameGroupVector<>(t), commitmentKey);
+		final SameGroupVector<GqElement, GqGroup> cd = getCommitmentVector(d, SameGroupVector.from(t), commitmentKey);
 
 		// Compute x, later used to compute a', b', r', s' and t'.
 		final byte[] hash = getHash(commitmentsA, commitmentsB, cA0, cBm, cd);
@@ -243,7 +243,7 @@ final class ZeroArgumentService {
 			d.add(dk);
 		}
 
-		return new SameGroupVector<>(d);
+		return SameGroupVector.from(d);
 	}
 
 	/**

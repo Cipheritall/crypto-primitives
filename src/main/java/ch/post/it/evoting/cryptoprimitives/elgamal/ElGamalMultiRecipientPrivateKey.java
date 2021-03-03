@@ -34,7 +34,7 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	 *                    <li>no element must be equal to 1</li></p>
 	 */
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
-		this.privateKeyElements = new SameGroupVector<>(keyElements);
+		this.privateKeyElements = SameGroupVector.from(keyElements);
 		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ZERO) != 0),
 				"An ElGamal private key cannot contain a 0 valued element.");

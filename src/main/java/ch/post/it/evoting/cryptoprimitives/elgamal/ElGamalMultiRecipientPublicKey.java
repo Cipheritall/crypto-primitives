@@ -42,7 +42,7 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	 *                    <li>no element must be equal to the generator of the group they belong to</li></p>
 	 */
 	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
-		this.publicKeyElements = new SameGroupVector<>(keyElements);
+		this.publicKeyElements = SameGroupVector.from(keyElements);
 		checkArgument(!publicKeyElements.isEmpty(), "An ElGamal public key must not be empty.");
 		checkArgument(keyElements.stream().map(GqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
 				"An ElGamal public key cannot contain a 1 valued element.");

@@ -84,7 +84,7 @@ class ProductWitnessTest {
 		ZqElement first = exponentsValues.get(0);
 		first = first.add(one);
 		exponentsValues.set(0, first);
-		SameGroupVector<ZqElement, ZqGroup> differentExponents = new SameGroupVector<>(exponentsValues);
+		SameGroupVector<ZqElement, ZqGroup> differentExponents = SameGroupVector.from(exponentsValues);
 		ProductWitness witness3 = new ProductWitness(matrix, differentExponents);
 
 		List<List<ZqElement>> matrixValues = IntStream.range(0, m)

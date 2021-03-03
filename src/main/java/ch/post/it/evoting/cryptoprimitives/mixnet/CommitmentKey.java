@@ -65,7 +65,7 @@ class CommitmentKey implements HashableList {
 		//Validate gElements
 		checkNotNull(gElements);
 		checkArgument(gElements.stream().noneMatch(Objects::isNull), "A commitment key cannot contain null elements");
-		SameGroupVector<GqElement, GqGroup> gs = new SameGroupVector<>(gElements);
+		SameGroupVector<GqElement, GqGroup> gs = SameGroupVector.from(gElements);
 
 		checkArgument(!gs.isEmpty(), "No g element provided");
 		checkArgument(gs.getGroup().equals(h.getGroup()), "All g elements must have the same group as h");

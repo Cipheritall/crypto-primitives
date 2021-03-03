@@ -20,14 +20,14 @@ import com.google.common.collect.Streams;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
- * Matrix of {@link HasGroup} elements belonging to the same {@link MathematicalGroup}.
+ * Represents a matrix of {@link GroupVectorElement} elements belonging to the same {@link MathematicalGroup} and having the same size.
  *
  * <p>Instances of this class are immutable. </p>
  *
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */
-public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> implements HasGroup<G>, HashableList {
+public class SameGroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> implements HashableList {
 
 	private static final String OUT_OF_BOUNDS_MESSAGE = "Trying to access index out of bound.";
 
@@ -35,6 +35,7 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 	private final ImmutableList<SameGroupVector<E, G>> rows;
 	private final int numRows;
 	private final int numColumns;
+	private final int elementSize;
 
 	private SameGroupMatrix(final ImmutableList<SameGroupVector<E, G>> rows) {
 		// Null checking.
@@ -43,6 +44,7 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 
 		// Size checking.
 		checkArgument(allEqual(rows.stream(), SameGroupVector::size), "All rows of the matrix must have the same number of columns.");
+		checkArgument(allEqual(rows.stream().flatMap(SameGroupVector::stream), GroupVectorElement::size), "All matrix elements must have the same size.");
 
 		// Group checking.
 		if (!isEmpty(rows) && !rows.get(0).isEmpty()) {
@@ -53,6 +55,7 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 		this.numRows = isEmpty(rows) ? 0 : rows.size();
 		this.numColumns = isEmpty(rows) ? 0 : rows.get(0).size();
 		this.group = isEmpty(rows) ? null : rows.get(0).get(0).getGroup();
+		this.elementSize = isEmpty(rows) ? 0 : rows.get(0).get(0).size();
 	}
 
 	/**
@@ -65,15 +68,16 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 	 *             <li>the list must not contain any nulls</li>
 	 *             <li>all rows must have the same size</li>
 	 *             <li>all elements must be from the same {@link MathematicalGroup} </li>
+	 *             <li>all elements must be the same size</li>
 	 */
-	public static <L extends List<E>, E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>>
+	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromRows(List<L> rows) {
 		//Null checks
 		checkNotNull(rows);
 		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
 
 		final ImmutableList<SameGroupVector<E, G>> rowVectors = rows.stream()
-				.map(SameGroupVector::new)
+				.map(SameGroupVector::from)
 				.collect(toImmutableList());
 
 		return new SameGroupMatrix<>(rowVectors);
@@ -89,13 +93,14 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 	 *                <li>the list must not contain any nulls</li>
 	 *                <li>all columns must have the same size</li>
 	 *                <li>all elements must be from the same {@link MathematicalGroup} </li>
+	 *                <li>all elements must be the same size</li>
 	 */
-	public static <L extends List<E>, E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>>
+	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromColumns(List<L> columns) {
 		return fromRows(columns).transpose();
 	}
 
-	private static <E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>>
+	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
 	SameGroupMatrix<E, G> fromColumnVector(final ImmutableList<SameGroupVector<E, G>> columns) {
 		return new SameGroupMatrix<>(columns).transpose();
 	}
@@ -201,9 +206,11 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 		checkNotNull(column);
 		checkArgument(column.size() == numRows,
 				String.format("The new column size does not match size of matrix' columns. Size: %d, numRows: %d", column.size(), numRows));
+		checkArgument(column.getElementSize() == this.elementSize, "The elements' size does not match this matrix's elements' size.");
 		if (!column.isEmpty()) {
 			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
 		}
+
 
 		final ImmutableList<SameGroupVector<E, G>> newColumns = Streams.concat(this.columnStream(), Stream.of(column)).collect(toImmutableList());
 		return SameGroupMatrix.fromColumnVector(newColumns);
@@ -224,6 +231,7 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 		checkNotNull(column);
 		checkArgument(column.size() == numRows,
 				String.format("The new column size does not match size of matrix' columns. Size: %d, numRows: %d", column.size(), numRows));
+		checkArgument(column.getElementSize() == this.elementSize, "The elements' size does not match this matrix's elements' size.");
 		if (!column.isEmpty()) {
 			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
 		}
@@ -232,9 +240,15 @@ public class SameGroupMatrix<E extends HasGroup<G> & Hashable, G extends Mathema
 		return SameGroupMatrix.fromColumnVector(newColumns);
 	}
 
-	@Override
 	public G getGroup() {
 		return this.group;
+	}
+
+	/**
+	 * @return the size of the elements. 0 if the matrix is empty.
+	 */
+	public Integer getElementSize() {
+		return elementSize;
 	}
 
 	@Override

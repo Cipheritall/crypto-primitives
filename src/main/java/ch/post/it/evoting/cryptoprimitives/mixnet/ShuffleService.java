@@ -46,7 +46,7 @@ public class ShuffleService {
 		//Verify ciphertext input
 		checkNotNull(ciphertexts);
 		checkArgument(ciphertexts.stream().allMatch(Objects::nonNull));
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = new SameGroupVector<>(ciphertexts);
+		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = SameGroupVector.from(ciphertexts);
 
 		if (ciphertextsCopy.isEmpty()) {
 			return Shuffle.EMPTY;
@@ -69,7 +69,7 @@ public class ShuffleService {
 		//Generate shuffle
 		Permutation psi = this.permutationService.genPermutation(N);
 		ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
-		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(n, group);
+		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(group, n);
 
 		ImmutableList<ZqElement> exponents =
 				Stream.generate(() -> randomService.genRandomExponent(exponentGroup)).limit(N).collect(ImmutableList.toImmutableList());

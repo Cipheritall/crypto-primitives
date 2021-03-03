@@ -46,10 +46,7 @@ class ShuffleStatement {
 		checkArgument(!ciphertexts.isEmpty(), "The ciphertexts vector can not be empty.");
 		checkArgument(!shuffledCiphertexts.isEmpty(), "The shuffled ciphertexts vector can not be empty.");
 		checkArgument(ciphertexts.size() == shuffledCiphertexts.size(), "The ciphertexts and shuffled ciphertexts vectors must have the same size.");
-		checkArgument(ciphertexts.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same size.");
-		checkArgument(shuffledCiphertexts.allEqual(ElGamalMultiRecipientCiphertext::size),
-				"All shuffled ciphertexts must have the same size.");
-		checkArgument(ciphertexts.get(0).size() == shuffledCiphertexts.get(0).size(),
+		checkArgument(ciphertexts.getElementSize() == shuffledCiphertexts.getElementSize(),
 				"The ciphertexts and shuffled ciphertexts must have the same size.");
 
 		// Cross group checking.

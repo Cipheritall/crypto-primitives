@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -219,8 +219,8 @@ class SingleValueProductArgumentServiceTest {
 				.withCd(cd)
 				.withCLowerDelta(cdelta)
 				.withCUpperDelta(cDelta)
-				.withATilde(new SameGroupVector<>(aTilde))
-				.withBTilde(new SameGroupVector<>(bTilde))
+				.withATilde(SameGroupVector.from(aTilde))
+				.withBTilde(SameGroupVector.from(bTilde))
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();
@@ -233,7 +233,7 @@ class SingleValueProductArgumentServiceTest {
 						BigInteger.valueOf(4), BigInteger.valueOf(8));      // s_0, s_x
 
 		SingleValueProductStatement statement = new SingleValueProductStatement(commitment, product);
-		SingleValueProductWitness witness = new SingleValueProductWitness(new SameGroupVector<>(a), r);
+		SingleValueProductWitness witness = new SingleValueProductWitness(SameGroupVector.from(a), r);
 
 		HashService hashService = mock(HashService.class);
 		when(hashService.recursiveHash(any()))

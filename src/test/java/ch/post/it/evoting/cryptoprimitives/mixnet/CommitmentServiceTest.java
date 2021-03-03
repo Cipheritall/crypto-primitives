@@ -161,7 +161,7 @@ class CommitmentServiceTest {
 			// c = 3
 			GqElement expected = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
 
-			assertEquals(expected, CommitmentService.getCommitment(new SameGroupVector<>(a), r, ck));
+			assertEquals(expected, CommitmentService.getCommitment(SameGroupVector.from(a), r, ck));
 		}
 	}
 
@@ -284,7 +284,7 @@ class CommitmentServiceTest {
 			List<ZqElement> rValues = new ArrayList<>(2);
 			rValues.add(ZqElement.create(BigInteger.valueOf(5), specificZqGroup));
 			rValues.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
-			SameGroupVector<ZqElement, ZqGroup> r = new SameGroupVector<>(rValues);
+			SameGroupVector<ZqElement, ZqGroup> r = SameGroupVector.from(rValues);
 			// ck = (2, 3, 4)
 			List<GqElement> gElements = new ArrayList<>();
 			GqElement h = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
@@ -296,7 +296,7 @@ class CommitmentServiceTest {
 			expected.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
 			expected.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
 
-			assertEquals(new SameGroupVector<>(expected), CommitmentService.getCommitmentMatrix(a, r, ck));
+			assertEquals(SameGroupVector.from(expected), CommitmentService.getCommitmentMatrix(a, r, ck));
 		}
 	}
 
@@ -394,8 +394,8 @@ class CommitmentServiceTest {
 			expected.add(GqElement.create(BigInteger.valueOf(12), specificGqGroup));
 			expected.add(GqElement.create(BigInteger.valueOf(1), specificGqGroup));
 
-			assertEquals(new SameGroupVector<>(expected),
-					CommitmentService.getCommitmentVector(new SameGroupVector<>(a), new SameGroupVector<>(r), ck));
+			assertEquals(SameGroupVector.from(expected),
+					CommitmentService.getCommitmentVector(SameGroupVector.from(a), SameGroupVector.from(r), ck));
 		}
 	}
 }

@@ -17,9 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -138,27 +138,6 @@ class DiagonalProductsTest extends TestGroupSetup {
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(otherCiphertexts, otherExponents));
 		assertEquals("There must be at least the same number of key elements than ciphertexts' phis.", exception.getMessage());
-	}
-
-	@Test
-	@DisplayName("with ciphertexts of different size throws IllegalArgumentException")
-	void getDiagonalProductsDifferentSizeCiphertexts() {
-		// Create a row with ciphertexts having more phis.
-		ElGamalMultiRecipientPublicKey longerPublicKey = elGamalGenerator.genRandomPublicKey(l + 1);
-		final List<ElGamalMultiRecipientCiphertext> longerCiphertexts = elGamalGenerator.genRandomCiphertexts(longerPublicKey, l + 1, n);
-		// Convert matrix to a mutable one.
-		final List<List<ElGamalMultiRecipientCiphertext>> collect = ciphertexts.rowStream()
-				.map(l -> l.stream().collect(Collectors.toList()))
-				.collect(Collectors.toList());
-		// Add to have at least two rows.
-		collect.add(longerCiphertexts);
-		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertextsMatrix = SameGroupMatrix.fromRows(collect);
-
-		final SameGroupMatrix<ZqElement, ZqGroup> longerExponents = zqGroupGenerator.genRandomZqElementMatrix(n, m + 2);
-
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> multiExponentiationArgumentService.getDiagonalProducts(longerCiphertextsMatrix, longerExponents));
-		assertEquals("All ciphertexts must have the same number of phis.", exception.getMessage());
 	}
 
 	@Test

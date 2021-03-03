@@ -5,14 +5,14 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.HasGroup;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
  * Defines a common API for El Gamal multi-recipient objects.
  */
-interface ElGamalMultiRecipientObject<E extends GroupElement<G>, G extends MathematicalGroup<G>> extends HasGroup<G> {
+interface ElGamalMultiRecipientObject<E extends GroupElement<G>, G extends MathematicalGroup<G>> extends GroupVectorElement<G> {
 
 	 @Override
 	 G getGroup();

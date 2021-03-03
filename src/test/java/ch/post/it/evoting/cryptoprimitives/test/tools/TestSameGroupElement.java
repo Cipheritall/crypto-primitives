@@ -6,11 +6,11 @@ package ch.post.it.evoting.cryptoprimitives.test.tools;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import ch.post.it.evoting.cryptoprimitives.HasGroup;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
-public class TestSameGroupElement implements HasGroup<TestGroup>, HashableBigInteger {
+public class TestSameGroupElement implements GroupVectorElement<TestGroup>, HashableBigInteger {
 	private static final SecureRandom random = new SecureRandom();
 
 	private final TestGroup group;
@@ -23,6 +23,11 @@ public class TestSameGroupElement implements HasGroup<TestGroup>, HashableBigInt
 	@Override
 	public TestGroup getGroup() {
 		return this.group;
+	}
+
+	@Override
+	public int size() {
+		return 1;
 	}
 
 	@Override

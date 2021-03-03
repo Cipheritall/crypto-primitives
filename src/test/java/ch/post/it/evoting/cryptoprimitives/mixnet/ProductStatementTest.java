@@ -69,7 +69,7 @@ class ProductStatementTest {
 
 		List<GqElement> commitmentValues = commitments.stream().collect(Collectors.toList());
 		commitmentValues.add(commitments.getGroup().getIdentity());
-		SameGroupVector<GqElement, GqGroup> differentCommitments = new SameGroupVector<>(commitmentValues);
+		SameGroupVector<GqElement, GqGroup> differentCommitments = SameGroupVector.from(commitmentValues);
 		ProductStatement statement3 = new ProductStatement(differentCommitments, product);
 
 		ZqElement differentProduct = product.add(ZqElement.create(BigInteger.ONE, product.getGroup()));

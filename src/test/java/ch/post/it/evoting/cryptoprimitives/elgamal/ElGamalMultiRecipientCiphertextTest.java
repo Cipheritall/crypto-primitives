@@ -461,20 +461,6 @@ class ElGamalMultiRecipientCiphertextTest {
 
 		assertEquals("There should be a matching ciphertext for every exponent.", sizeIllegalArgumentException.getMessage());
 
-		SameGroupVector<ElGamalMultiRecipientMessage, GqGroup> unevenNumberOfMessageElements = IntStream.range(1, noOfMessageElements)
-				.mapToObj(i -> elGamalGenerator.genRandomMessage(i))
-				.limit(noOfMessageElements)
-				.collect(toSameGroupVector());
-
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> unevenNumberOfCipherTextElements = IntStream.range(1, noOfMessageElements)
-				.mapToObj(i -> ElGamalGenerator.encryptMessage(unevenNumberOfMessageElements.get(i - 1),
-						ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, i + 1, randomService), zqGroup))
-				.collect(toSameGroupVector());
-
-		IllegalArgumentException unevenIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(unevenNumberOfCipherTextElements, fourExponents));
-		assertEquals("All ciphertexts must have the same number of phi elements", unevenIllegalArgumentException.getMessage());
-
 		GqGroup differentgqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 
 		SameGroupVector<ZqElement, ZqGroup> fiveExponents = Stream
@@ -485,6 +471,5 @@ class ElGamalMultiRecipientCiphertextTest {
 		IllegalArgumentException differentQIllegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(fiveCipherTexts, fiveExponents));
 		assertEquals("Ciphertexts and exponents must be of the same group.", differentQIllegalArgumentException.getMessage());
-
 	}
 }

@@ -77,4 +77,5 @@ public final class GqElement extends GroupElement<GqGroup> {
 	public String toString() {
 		return "GqElement [value=" + value + "," + group.toString() + "]";
 	}
+
 }

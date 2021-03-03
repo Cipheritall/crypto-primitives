@@ -3,8 +3,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +53,7 @@ public class ElGamalGenerator {
 	}
 
 	public SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextVector(int size, int ciphertextSize) {
-		return new SameGroupVector<>(generateElementList(size, () -> genRandomCiphertext(ciphertextSize)));
+		return SameGroupVector.from(generateElementList(size, () -> genRandomCiphertext(ciphertextSize)));
 	}
 
 	public SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextMatrix(int numRows, int numColumns, int ciphertextSize) {
@@ -78,4 +78,7 @@ public class ElGamalGenerator {
 		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
 	}
 
+	public ElGamalMultiRecipientCiphertext otherCiphertext(ElGamalMultiRecipientCiphertext element) {
+		return Generators.genWhile(() -> genRandomCiphertext(element.size()), element::equals);
+	}
 }

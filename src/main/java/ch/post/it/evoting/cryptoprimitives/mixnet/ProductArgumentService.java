@@ -3,13 +3,13 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -119,7 +119,7 @@ final class ProductArgumentService {
 					.mapToObj(i -> IntStream.range(0, m)
 							.mapToObj(j -> A.get(i, j))
 							.reduce(one, ZqElement::multiply))
-					.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::new));
+					.collect(toSameGroupVector());
 			final GqElement cb = getCommitment(biList, s, commitmentKey);
 
 			// Get the Hadamard argument

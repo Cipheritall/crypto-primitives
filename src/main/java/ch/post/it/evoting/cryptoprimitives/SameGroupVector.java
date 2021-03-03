@@ -5,43 +5,55 @@ package ch.post.it.evoting.cryptoprimitives;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.RandomAccess;
+import java.util.Spliterator;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
+import com.google.common.collect.ForwardingList;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
- * Vector of {@link GroupElement} belonging to the same {@link MathematicalGroup}.
+ * Represents a vector of {@link GroupElement} belonging to the same {@link MathematicalGroup} and having the same size.
  *
- * <p>Instances of this class are immutable. </p>
+ * This is effectively a decorator for the ImmutableList class.
  *
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */
-public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> implements HashableList {
+public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> extends ForwardingList<E> implements HashableList,
+		RandomAccess, GroupVectorElement<G> {
 
-	private final G group;
 	private final ImmutableList<E> elements;
+	private final G group;
+	private final int elementSize;
+
+	private SameGroupVector(ImmutableList<E> elements) {
+		this.elements = elements;
+		this.group = elements.isEmpty() ? null : elements.get(0).getGroup();
+		this.elementSize = elements.isEmpty() ? 0 : elements.get(0).size();
+	}
 
 	/**
+	 * Returns a SameGroupVector of {@code elements}.
+	 *
 	 * @param elements the list of elements contained by this vector, which must respect the following:
 	 *                 <li>the list must be non-null</li>
 	 *                 <li>the list must not contain any nulls</li>
 	 *                 <li>all elements must be from the same {@link MathematicalGroup} </li>
+	 *                 <li>all elements must be of the same size</li>
 	 */
-	public SameGroupVector(List<E> elements) {
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> SameGroupVector<E, G> from(List<E> elements){
 		//Check null values
 		checkNotNull(elements);
 		checkArgument(elements.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
@@ -50,10 +62,12 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 		ImmutableList<E> elementsCopy = ImmutableList.copyOf(elements);
 
 		//Check same group
-		checkArgument(Validations.allEqual(elementsCopy.stream(), HasGroup::getGroup), "All elements must belong to the same group.");
+		checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::getGroup), "All elements must belong to the same group.");
 
-		this.group = elementsCopy.isEmpty() ? null : elementsCopy.get(0).getGroup();
-		this.elements = elementsCopy;
+		//Check same size
+		checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::size), "All vector elements must be the same size.");
+
+		return new SameGroupVector<>(elementsCopy);
 	}
 
 	/**
@@ -63,35 +77,18 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	 * @param <E>      The type of the elements.
 	 * @param <G>      The group of the elements.
 	 * @return A SameGroupVector containing {@code elements}.
-	 * @see #SameGroupVector(List)
 	 */
 	@SafeVarargs
-	public static <E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> SameGroupVector<E, G> of(final E... elements) {
-		//Check null values
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> SameGroupVector<E, G> of(final E... elements) {
 		checkNotNull(elements);
 		checkArgument(Arrays.stream(elements).allMatch(Objects::nonNull), "Elements must not contain nulls");
 
-		return new SameGroupVector<>(ImmutableList.copyOf(elements));
+		return SameGroupVector.from(ImmutableList.copyOf(elements));
 	}
 
-	/**
-	 * @return the number of elements this vector contains.
-	 */
-	public int size() {
-		return elements.size();
-	}
-
-	public boolean isEmpty() {
-		return elements.isEmpty();
-	}
-
-	/**
-	 * @return the ith element.
-	 */
-	public E get(int i) {
-		checkArgument(i >= 0, "Trying to access index out of bound.");
-		checkArgument(i < elements.size(), "Trying to access index out of bound.");
-		return elements.get(i);
+	@Override
+	protected List<E> delegate() {
+		return this.elements;
 	}
 
 	/**
@@ -107,10 +104,10 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	}
 
 	/**
-	 * @return an ordered sequential stream of the vector's elements.
+	 * @return the size of elements. 0 if the vector is empty.
 	 */
-	public Stream<E> stream() {
-		return this.elements.stream();
+	public int getElementSize() {
+		return elementSize;
 	}
 
 	/**
@@ -121,10 +118,14 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	 */
 	public SameGroupVector<E, G> append(final E element) {
 		checkNotNull(element);
-		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
+		checkArgument(element.getGroup().equals(this.group), "The element to append must be in the same group.");
+		checkArgument(element.size() == this.elementSize, "The element to append must be the same size.");
 
-		final List<E> newVector = Streams.concat(this.stream(), Stream.of(element)).collect(toList());
-		return new SameGroupVector<>(newVector);
+		return new SameGroupVector<>(
+				new ImmutableList.Builder<E>()
+						.addAll(this.elements)
+						.add(element)
+						.build());
 	}
 
 	/**
@@ -136,9 +137,13 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	public SameGroupVector<E, G> prepend(final E element) {
 		checkNotNull(element);
 		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
+		checkArgument(element.size() == this.elementSize, "The element to prepend must be the same size.");
 
-		final List<E> newVector = Streams.concat(Stream.of(element), this.stream()).collect(toList());
-		return new SameGroupVector<>(newVector);
+		return new SameGroupVector<>(
+				new ImmutableList.Builder<E>()
+						.add(element)
+						.addAll(this.elements)
+						.build());
 	}
 
 	/**
@@ -180,11 +185,10 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	 * Returns a Collector that accumulates the input elements into a SameGroupVector.
 	 *
 	 * @param <E> the type of elements this list contains.
-	 * @param <G> the group type the elements of the list belong to.
 	 * @return a {@code Collector} for accumulating the input elements into a SameGroupVector.
 	 */
-	public static <E extends HasGroup<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, SameGroupVector<E, G>> toSameGroupVector() {
-		return Collectors.collectingAndThen(toList(), SameGroupVector::new);
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, SameGroupVector<E, G>> toSameGroupVector() {
+		return Collectors.collectingAndThen(toImmutableList(), SameGroupVector::from);
 	}
 
 	@Override
@@ -207,6 +211,11 @@ public class SameGroupVector<E extends HasGroup<G> & Hashable, G extends Mathema
 	@Override
 	public int hashCode() {
 		return Objects.hash(elements);
+	}
+
+	@Override
+	public Spliterator<E> spliterator() {
+		return this.elements.spliterator();
 	}
 
 	@Override

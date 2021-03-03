@@ -18,11 +18,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.HashableString;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -121,7 +121,7 @@ class ShuffleArgumentService {
 
 		checkArgument(l <= publicKey.size(), "The ciphertexts must be smaller than the public key.");
 
-		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(l, gqGroup);
+		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
 		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = randomness.stream()
 				.map(rho -> getCiphertext(ones, rho, publicKey))
 				.collect(toList());
@@ -142,7 +142,7 @@ class ShuffleArgumentService {
 		final BigInteger q = gqGroup.getQ();
 
 		// Compute vector r, matrix A and vector c_A
-		final SameGroupVector<ZqElement, ZqGroup> r = new SameGroupVector<>(randomService.genRandomVector(q, m));
+		final SameGroupVector<ZqElement, ZqGroup> r = SameGroupVector.from(randomService.genRandomVector(q, m));
 		final SameGroupVector<ZqElement, ZqGroup> permutationVector = permutation.stream()
 				.mapToObj(BigInteger::valueOf)
 				.map(value -> ZqElement.create(value, zqGroup))
@@ -163,7 +163,7 @@ class ShuffleArgumentService {
 		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(xHash), zqGroup);
 
 		// Compute vector s, vector b, matrix B and vector c_B.
-		final SameGroupVector<ZqElement, ZqGroup> s = new SameGroupVector<>(randomService.genRandomVector(q, m));
+		final SameGroupVector<ZqElement, ZqGroup> s = SameGroupVector.from(randomService.genRandomVector(q, m));
 		final SameGroupVector<ZqElement, ZqGroup> bVector = permutation.stream()
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)

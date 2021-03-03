@@ -19,11 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.HashableString;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -153,7 +153,7 @@ public class HadamardArgumentService {
 				.mapToObj(j -> CommitmentService.getCommitment(bList.get(j), sList.get(j), commitmentKey))
 				.collect(Collectors.toList()));
 		cBList.add(m - 1, cb);
-		final SameGroupVector<GqElement, GqGroup> cBVector = new SameGroupVector<>(cBList);
+		final SameGroupVector<GqElement, GqGroup> cBVector = SameGroupVector.from(cBList);
 
 		// Calculate x
 		final byte[] hashX = hashService.recursiveHash(
@@ -243,7 +243,7 @@ public class HadamardArgumentService {
 		ZeroWitness zWitness = new ZeroWitness(zMatrixA, zMatrixB, zExponentsR, zExponentsS);
 
 		// Prepare Hadamard argument
-		SameGroupVector<GqElement, GqGroup> cB = new SameGroupVector<>(cBList);
+		SameGroupVector<GqElement, GqGroup> cB = SameGroupVector.from(cBList);
 		ZeroArgument zeroArgument = zeroArgumentService.getZeroArgument(zStatement, zWitness);
 
 		return new HadamardArgument(cB, zeroArgument);

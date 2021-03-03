@@ -3,14 +3,13 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -116,7 +115,7 @@ public class GqGroupGenerator {
 	 * @return a vector of {@code numElements} random {@link GqElement}.
 	 */
 	public SameGroupVector<GqElement, GqGroup> genRandomGqElementVector(final int numElements) {
-		return new SameGroupVector<GqElement, GqGroup>(generateElementList(numElements, this::genMember));
+		return SameGroupVector.from(generateElementList(numElements, this::genMember));
 	}
 
 	public SameGroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
@@ -131,5 +130,9 @@ public class GqGroupGenerator {
 
 	private Stream<BigInteger> integersModP() {
 		return IntStream.range(1, group.getP().intValue()).mapToObj(BigInteger::valueOf);
+	}
+
+	public GqElement otherElement(GqElement element) {
+		return Generators.genWhile(this::genMember, element::equals);
 	}
 }

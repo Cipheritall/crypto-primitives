@@ -47,8 +47,8 @@ class ShuffleStatementTest extends TestGroupSetup {
 		n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 		l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 
-		ciphertexts = new SameGroupVector<>(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
-		shuffledCiphertexts = new SameGroupVector<>(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
+		ciphertexts = SameGroupVector.from(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
+		shuffledCiphertexts = SameGroupVector.from(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
 	}
 
 	@Test
@@ -91,32 +91,6 @@ class ShuffleStatementTest extends TestGroupSetup {
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(longerCiphertexts, shuffledCiphertexts));
 		assertEquals("The ciphertexts and shuffled ciphertexts vectors must have the same size.", exception.getMessage());
-	}
-
-	@Test
-	@DisplayName("with not all ciphertexts having the same size throws IllegalArgumentException")
-	void constructDiffPhisCiphertexts() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diffPhisCiphertexts = ciphertexts
-				.append(elGamalGenerator.genRandomCiphertext(l + 1));
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerShuffledCiphertexts = ciphertexts
-				.append(elGamalGenerator.genRandomCiphertext(l));
-
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ShuffleStatement(diffPhisCiphertexts, longerShuffledCiphertexts));
-		assertEquals("All ciphertexts must have the same size.", exception.getMessage());
-	}
-
-	@Test
-	@DisplayName("with not all shuffled ciphertexts having the same size throws IllegalArgumentException")
-	void constructDiffPhisShuffledCiphertexts() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertexts = ciphertexts
-				.append(elGamalGenerator.genRandomCiphertext(l));
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diffPhisShuffledCiphertexts = ciphertexts
-				.append(elGamalGenerator.genRandomCiphertext(l + 1));
-
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ShuffleStatement(longerCiphertexts, diffPhisShuffledCiphertexts));
-		assertEquals("All shuffled ciphertexts must have the same size.", exception.getMessage());
 	}
 
 	@Test

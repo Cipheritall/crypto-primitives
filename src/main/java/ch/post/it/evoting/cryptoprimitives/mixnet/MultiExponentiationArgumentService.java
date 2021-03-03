@@ -3,19 +3,24 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation;
+import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.constantMessage;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.MoreCollectors.onlyElement;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -24,11 +29,10 @@ import java.util.stream.Stream;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.ConversionService;
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -121,12 +125,12 @@ final class MultiExponentiationArgumentService {
 		SameGroupVector<ZqElement, ZqGroup> rVector = witness.getR();
 		ZqElement rho = witness.getRho();
 
-		checkArgument(statement.getDimensionN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
-		checkArgument(statement.getDimensionM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
+		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
+		checkArgument(statement.getM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
 		checkArgument(witness.getDimensionN() <= pk.size(), "The number of rows of matrix A must be less than the size of the public key.");
 
-		int m = statement.getDimensionM();
-		int n = statement.getDimensionN();
+		int m = statement.getM();
+		int n = statement.getN();
 		int l = CMatrix.isEmpty() ? 0 : CMatrix.get(0, 0).size();
 
 		checkArgument(l <= pk.size(), "The ciphertexts must be smaller than the public key.");
@@ -141,7 +145,7 @@ final class MultiExponentiationArgumentService {
 
 		//Algorithm
 		//Generate a0, r0, bs, ss, taus,
-		SameGroupVector<ZqElement, ZqGroup> a0 = new SameGroupVector<>(randomService.genRandomVector(q, n));
+		SameGroupVector<ZqElement, ZqGroup> a0 = SameGroupVector.from(randomService.genRandomVector(q, n));
 		ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		List<ZqElement> mutableBs = randomService.genRandomVector(q, 2 * m);
 		List<ZqElement> mutableSs = randomService.genRandomVector(q, 2 * m);
@@ -150,9 +154,9 @@ final class MultiExponentiationArgumentService {
 		mutableBs.set(m, zero);
 		mutableSs.set(m, zero);
 		mutableTaus.set(m, rho);
-		SameGroupVector<ZqElement, ZqGroup> bVector = new SameGroupVector<>(mutableBs);
-		SameGroupVector<ZqElement, ZqGroup> sVector = new SameGroupVector<>(mutableSs);
-		SameGroupVector<ZqElement, ZqGroup> tauVector = new SameGroupVector<>(mutableTaus);
+		SameGroupVector<ZqElement, ZqGroup> bVector = SameGroupVector.from(mutableBs);
+		SameGroupVector<ZqElement, ZqGroup> sVector = SameGroupVector.from(mutableSs);
+		SameGroupVector<ZqElement, ZqGroup> tauVector = SameGroupVector.from(mutableTaus);
 
 		//Compute cA0
 		GqElement cA0 = getCommitment(a0, r0, ck);
@@ -167,16 +171,16 @@ final class MultiExponentiationArgumentService {
 				.collect(toSameGroupVector());
 
 		//Compute re-encrypted diagonal products
-		IntFunction<ElGamalMultiRecipientMessage> gPowBk =
-				index -> Stream.generate(() -> gqGroup.getGenerator().exponentiate(bVector.get(index)))
-						.limit(l)
-						.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
 		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
 				IntStream.range(0, 2 * m)
-						.mapToObj(k ->
-								getCiphertext(gPowBk.apply(k), tauVector.get(k), pk)
-										.multiply(diagonalProducts.get(k)))
-						.collect(collectingAndThen(toList(), SameGroupVector::new));
+						.boxed()
+						.flatMap(k -> Stream.of(k)
+								.map(bVector::get)
+								.map(gqGroup.getGenerator()::exponentiate)
+								.map(gPowBk -> constantMessage(gPowBk, l))
+								.map(gPowBkMessage -> getCiphertext(gPowBkMessage, tauVector.get(k), pk)
+										.multiply(diagonalProducts.get(k))))
+						.collect(toSameGroupVector());
 
 		//Compute challenge hash
 		byte[] hash = hashService.recursiveHash(
@@ -191,7 +195,7 @@ final class MultiExponentiationArgumentService {
 				cBVector,
 				EVector
 		);
-		ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(hash), zqGroup);
+		ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
 
 		//Compute as, r, b, s, tau
 		ImmutableList<ZqElement> xPowI = LongStream.range(0, 2L * m)
@@ -248,7 +252,7 @@ final class MultiExponentiationArgumentService {
 				.mapToObj(i -> getCiphertextVectorExponentiation(CMatrix.getRow(i), AMatrix.getColumn(i)))
 				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
 
-		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(ciphertextSize, gqGroup);
+		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, ciphertextSize);
 		final ElGamalMultiRecipientCiphertext onesCiphertext = getCiphertext(ones, rho, pk);
 		return onesCiphertext.multiply(multiExponentiationProduct);
 	}
@@ -328,6 +332,92 @@ final class MultiExponentiationArgumentService {
 				.collect(toSameGroupVector());
 	}
 
+	boolean verifyMultiExponentiationArgument(final MultiExponentiationStatement statement, final MultiExponentiationArgument argument) {
+		checkNotNull(statement);
+		checkNotNull(argument);
+
+		//Group checking
+		checkArgument(statement.getGroup().equals(argument.getGroup()), "Statement and argument must belong to the same group.");
+
+		//Size checking
+		checkArgument(statement.getM() == argument.getM(), "m dimension doesn't match.");
+		checkArgument(statement.getN() == argument.getN(), "n dimension doesn't match.");
+		checkArgument(statement.getL() == argument.getL(), "l dimension doesn't match.");
+
+		//Extract variables from statement and argument
+		int m = statement.getM();
+		int l = statement.getL();
+		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
+		final ElGamalMultiRecipientCiphertext C = statement.getC();
+		final SameGroupVector<GqElement, GqGroup> cA = statement.getcA();
+
+		final GqElement cA0 = argument.getcA0();
+		final SameGroupVector<GqElement, GqGroup> cBVector = argument.getcBVector();
+		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector = argument.getEVector();
+		final SameGroupVector<ZqElement, ZqGroup> aVector = argument.getaVector();
+		final ZqElement r = argument.getR();
+		final ZqElement b = argument.getB();
+		final ZqElement s = argument.getS();
+		final ZqElement tau = argument.getTau();
+
+		//Algorithm
+		byte[] hash = hashService.recursiveHash(
+				HashableBigInteger.from(this.gqGroup.getP()),
+				HashableBigInteger.from(this.gqGroup.getQ()),
+				this.pk,
+				this.ck,
+				CMatrix,
+				C,
+				cA,
+				cA0,
+				cBVector,
+				EVector);
+
+		//Hash value is guaranteed to be smaller than q
+		ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
+
+		BooleanSupplier verifCbm = () -> cBVector.get(m).equals(gqGroup.getIdentity());
+		BooleanSupplier verifEm = () -> EVector.get(m).equals(C);
+
+		Memoizer<ZqElement> xPowI = new Memoizer<>(i -> x.exponentiate(BigInteger.valueOf(i)));
+
+		BooleanSupplier verifA = () -> {
+			GqElement prodCa = prodExp(cA.prepend(cA0), xPowI);
+			GqElement commA = getCommitment(aVector, r, ck);
+			return prodCa.equals(commA);
+		};
+
+		BooleanSupplier verifB = () -> {
+			GqElement prodCb = prodExp(cBVector, xPowI);
+			GqElement commB = getCommitment(SameGroupVector.of(b), s, ck);
+			return prodCb.equals(commB);
+		};
+
+		BooleanSupplier verifEC = () -> {
+			ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, EVector.size())
+					.boxed()
+					.flatMap(i -> Stream.of(i)
+							.map(EVector::get)
+							.map(Ek -> Ek.exponentiate(xPowI.apply(i))))
+					.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
+			ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
+					.map(gqGroup.getGenerator()::exponentiate)
+					.map(gPowB -> constantMessage(gPowB, l))
+					.map(gPowBMessage -> getCiphertext(gPowBMessage, tau, pk))
+					.collect(onlyElement());
+			ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
+					.boxed()
+					.flatMap(j -> Stream.of(j)
+							.map(i -> xPowI.apply(m - i - 1))
+							.map(xExponentiated -> vectorScalarMultiplication(xExponentiated, aVector))
+							.map(powers -> getCiphertextVectorExponentiation(CMatrix.getRow(j), powers)))
+					.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
+			return prodE.equals(encryptedGb.multiply(prodC));
+		};
+
+		return verifCbm.getAsBoolean() && verifEm.getAsBoolean() && verifA.getAsBoolean() && verifB.getAsBoolean() && verifEC.getAsBoolean();
+	}
+
 	private static SameGroupVector<ZqElement, ZqGroup> vectorSum(SameGroupVector<ZqElement, ZqGroup> first,
 			SameGroupVector<ZqElement, ZqGroup> second) {
 		checkNotNull(first);
@@ -341,5 +431,48 @@ final class MultiExponentiationArgumentService {
 
 	private static SameGroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(ZqElement value, SameGroupVector<ZqElement, ZqGroup> vector) {
 		return vector.stream().map(element -> element.multiply(value)).collect(toSameGroupVector());
+	}
+
+	/**
+	 * Calculate Π<sub>i</sub> base<sub>i</sub> <sup>pow_i</sup>
+	 * @param bases the bases
+	 * @param powers a function that maps from index to power
+	 * @return the product of the bases exponentiated to the matching power. 
+	 */
+	private GqElement prodExp(SameGroupVector<GqElement, GqGroup> bases, IntFunction<ZqElement> powers) {
+		return IntStream.range(0, bases.size())
+				.boxed()
+				.flatMap(i -> Stream.of(i)
+						.map(bases::get)
+						.map(base -> base.exponentiate(powers.apply(i))))
+				.reduce(gqGroup.getIdentity(), GqElement::multiply);
+	}
+
+	/**
+	 * Thread safe memoizer for a integer indexed computation.
+	 *
+	 * @param <R> the output type of the computation being memoized
+	 */
+	private static class Memoizer<R> implements IntFunction<R> {
+		private final Function<Integer, R> function;
+		private final Map<Integer, R> cache = new ConcurrentHashMap<>();
+
+		/**
+		 * @param function the function to memoize.
+		 */
+		Memoizer(Function<Integer, R> function) {
+			this.function = function;
+		}
+
+		/**
+		 * Get the result of the function applied on the input.
+		 *
+		 * @param input the input to the function
+		 * @return the result of applying this function to the input.
+		 */
+		@Override
+		public R apply(int input) {
+			return cache.computeIfAbsent(input, function);
+		}
 	}
 }

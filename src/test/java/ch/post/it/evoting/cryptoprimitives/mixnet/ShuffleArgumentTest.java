@@ -29,19 +29,20 @@ class ShuffleArgumentTest extends TestGroupSetup {
 
 	@BeforeAll
 	static void setUp() {
+		final int m = secureRandom.nextInt(NUM_ELEMENTS) + 1;
 		final int n = secureRandom.nextInt(NUM_ELEMENTS) + 1;
 		final int l = secureRandom.nextInt(NUM_ELEMENTS) + 1;
 		final ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
 
-		cA = gqGroupGenerator.genRandomGqElementVector(NUM_ELEMENTS);
-		cB = gqGroupGenerator.genRandomGqElementVector(NUM_ELEMENTS);
+		cA = gqGroupGenerator.genRandomGqElementVector(m);
+		cB = gqGroupGenerator.genRandomGqElementVector(m);
 
 		final SingleValueProductArgument singleValueProductArgument = new SingleValueProductArgument.Builder()
 				.withCd(gqGroupGenerator.genMember())
 				.withCLowerDelta(gqGroupGenerator.genMember())
 				.withCUpperDelta(gqGroupGenerator.genMember())
-				.withATilde(zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS))
-				.withBTilde(zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS))
+				.withATilde(zqGroupGenerator.genRandomZqElementVector(n))
+				.withBTilde(zqGroupGenerator.genRandomZqElementVector(n))
 				.withRTilde(zqGroupGenerator.genRandomZqElementMember())
 				.withSTilde(zqGroupGenerator.genRandomZqElementMember())
 				.build();
@@ -49,9 +50,9 @@ class ShuffleArgumentTest extends TestGroupSetup {
 
 		multiExponentiationArgument = new MultiExponentiationArgument.Builder()
 				.withcA0(gqGroupGenerator.genMember())
-				.withcBVector(gqGroupGenerator.genRandomGqElementVector(NUM_ELEMENTS))
-				.withEVector(elGamalGenerator.genRandomCiphertextVector(n, l))
-				.withaVector(zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS))
+				.withcBVector(gqGroupGenerator.genRandomGqElementVector(2 * m))
+				.withEVector(elGamalGenerator.genRandomCiphertextVector(2 * m, l))
+				.withaVector(zqGroupGenerator.genRandomZqElementVector(n))
 				.withr(zqGroupGenerator.genRandomZqElementMember())
 				.withb(zqGroupGenerator.genRandomZqElementMember())
 				.withs(zqGroupGenerator.genRandomZqElementMember())

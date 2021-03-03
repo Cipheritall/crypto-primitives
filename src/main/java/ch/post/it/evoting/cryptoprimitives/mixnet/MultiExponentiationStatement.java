@@ -26,8 +26,9 @@ final class MultiExponentiationStatement {
 	private final SameGroupVector<GqElement, GqGroup> cA;
 
 	private final GqGroup group;
-	private final int dimensionM;
-	private final int dimensionN;
+	private final int m;
+	private final int n;
+	private final int l;
 
 	/**
 	 * <p>Create a multi exponentiation statement.</p>
@@ -53,7 +54,7 @@ final class MultiExponentiationStatement {
 		checkNotNull(commitmentA);
 
 		//Dimension checking
-		checkArgument(ciphertextMatrix.isEmpty() && commitmentA.size() == 0 || ciphertextMatrix.numRows() == commitmentA.size(),
+		checkArgument(ciphertextMatrix.isEmpty() && commitmentA.isEmpty() || ciphertextMatrix.numRows() == commitmentA.size(),
 				"The commitment must be the same size as the number of rows of the ciphertext matrix.");
 
 		//Group checking
@@ -70,8 +71,9 @@ final class MultiExponentiationStatement {
 		this.cA = commitmentA;
 
 		this.group = ciphertextMatrix.getGroup();
-		this.dimensionM = ciphertextMatrix.numRows();
-		this.dimensionN = ciphertextMatrix.numColumns();
+		this.m = ciphertextMatrix.numRows();
+		this.n = ciphertextMatrix.numColumns();
+		this.l = ciphertextMatrix.getElementSize();
 	}
 
 	SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> getCMatrix() {
@@ -90,12 +92,12 @@ final class MultiExponentiationStatement {
 		return group;
 	}
 
-	int getDimensionM() {
-		return dimensionM;
+	int getM() {
+		return m;
 	}
 
-	int getDimensionN() {
-		return dimensionN;
+	int getN() {
+		return n;
 	}
 
 	@Override
@@ -113,5 +115,9 @@ final class MultiExponentiationStatement {
 	@Override
 	public int hashCode() {
 		return Objects.hash(CMatrix, C, cA);
+	}
+
+	public int getL() {
+		return l;
 	}
 }

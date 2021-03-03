@@ -105,7 +105,7 @@ class ElGamalMultiRecipientMessageTest {
 	@DisplayName("create from ones contains only 1s")
 	void onesTest() {
 		int n = new SecureRandom().nextInt(10) + 1;
-		ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(n, gqGroup);
+		ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, n);
 
 		List<GqElement> onesList = Stream.generate(gqGroup::getIdentity).limit(n).collect(Collectors.toList());
 
@@ -116,9 +116,32 @@ class ElGamalMultiRecipientMessageTest {
 	@Test
 	@DisplayName("create from ones with bad input throws")
 	void onesWithBadInputTest() {
-		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientMessage.ones(1, null));
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientMessage.ones(0, gqGroup));
-		assertEquals("The message of ones' size must be strictly greater than 0.", exception.getMessage());
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientMessage.ones(null, 1));
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientMessage.ones(gqGroup, 0));
+		assertEquals("Cannot generate a message of constants of non positive length.", exception.getMessage());
+	}
+
+	@Test
+	@DisplayName("create from constant contains only constant")
+	void constantsTest() {
+		int n = new SecureRandom().nextInt(10) + 1;
+		GqElement constant = generator.genMember();
+		ElGamalMultiRecipientMessage constants = ElGamalMultiRecipientMessage.constantMessage(constant, n);
+
+		List<GqElement> constantsList = Stream.generate(() -> constant).limit(n).collect(Collectors.toList());
+
+		assertEquals(constantsList, constants.stream().collect(Collectors.toList()));
+		assertEquals(n, constants.size());
+	}
+
+	@Test
+	@DisplayName("create from constant with bad input throws")
+	void constantsWithBadInputTest() {
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientMessage.constantMessage(null, 1));
+		GqElement constant = generator.genMember();
+		Exception exception =
+				assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientMessage.constantMessage(constant, 0));
+		assertEquals("Cannot generate a message of constants of non positive length.", exception.getMessage());
 	}
 
 	// Provides parameters for the invalid decryption parameters test.
@@ -161,7 +184,7 @@ class ElGamalMultiRecipientMessageTest {
 
 	@Test
 	void whenGetMessageFromUnityCiphertextTest() {
-		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(2, gqGroup);
+		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(gqGroup, 2);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		ZqElement zero = zqGroup.getIdentity();
 		ElGamalMultiRecipientCiphertext unityCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(onesMessage, zero, keyPair.getPublicKey());
