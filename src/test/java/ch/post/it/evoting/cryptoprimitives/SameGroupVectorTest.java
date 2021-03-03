@@ -143,7 +143,7 @@ class SameGroupVectorTest {
 		int n = random.nextInt(100) + 1;
 		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
 		SameGroupVector<TestSameGroupElement, TestGroup> actor = SameGroupVector.from(elements);
-		assertThrows(ArrayIndexOutOfBoundsException.class, () -> actor.get(n));
+		assertThrows(IndexOutOfBoundsException.class, () -> actor.get(n));
 	}
 
 	@Test
@@ -152,7 +152,7 @@ class SameGroupVectorTest {
 		int n = random.nextInt(100) + 1;
 		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
 		SameGroupVector<TestSameGroupElement, TestGroup> actor = SameGroupVector.from(elements);
-		assertThrows(ArrayIndexOutOfBoundsException.class, () -> actor.get(-1));
+		assertThrows(IndexOutOfBoundsException.class, () -> actor.get(-1));
 	}
 
 	@Test
