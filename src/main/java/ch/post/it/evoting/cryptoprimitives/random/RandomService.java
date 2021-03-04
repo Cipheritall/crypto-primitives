@@ -20,8 +20,6 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 public final class RandomService {
 
-	private static final int STRING_MAX_LENGTH = 1000;
-
 	private final SecureRandom secureRandom;
 
 	/**
@@ -73,7 +71,7 @@ public final class RandomService {
 	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase16String(int)
 	 */
 	public String genRandomBase16String(final int length) {
-		checkArgument(length > 0 && length < STRING_MAX_LENGTH);
+		checkArgument(length > 0);
 
 		// One char can be represented by 4 bits in Base16 encoding.
 		final int lengthInBytes = bitToByteLength(length * 4);
@@ -92,7 +90,7 @@ public final class RandomService {
 	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase32String(int)
 	 */
 	public String genRandomBase32String(final int length) {
-		checkArgument(length > 0 && length < STRING_MAX_LENGTH);
+		checkArgument(length > 0);
 
 		// One char can be represented by 5 bits in Base32 encoding.
 		final int lengthInBytes = bitToByteLength(length * 5);
@@ -111,7 +109,7 @@ public final class RandomService {
 	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitiveService#genRandomBase64String(int)
 	 */
 	public String genRandomBase64String(final int length) {
-		checkArgument(length > 0 && length < STRING_MAX_LENGTH);
+		checkArgument(length > 0);
 
 		// One char can be represented by 6 bits in Base64 encoding.
 		final int lengthInBytes = bitToByteLength(length * 6);

@@ -148,7 +148,6 @@ class RandomServiceTest {
 	@Test
 	void genRandomBase16StringInvalidLengthShouldThrow() {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase16String(0));
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase16String(1200));
 	}
 
 	@Test
@@ -174,7 +173,6 @@ class RandomServiceTest {
 	@Test
 	void genRandomBase32StringInvalidLengthShouldThrow() {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase32String(0));
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase32String(1200));
 	}
 
 	@Test
@@ -199,8 +197,7 @@ class RandomServiceTest {
 
 	@Test
 	void genRandomBase64StringInvalidLengthShouldThrow() {
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(-1));
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(4000));
+		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase64String(0));
 	}
 
 	@Test
