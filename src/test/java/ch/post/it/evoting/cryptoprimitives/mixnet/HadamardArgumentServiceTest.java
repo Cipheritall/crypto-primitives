@@ -48,7 +48,7 @@ class HadamardArgumentServiceTest {
 	private static final SecureRandom secureRandom = new SecureRandom();
 	private static final RandomService randomService = new RandomService();
 
-	private static HashService hashService;
+	private static MixnetHashService hashService;
 	private static int n;
 	private static int m;
 
@@ -70,9 +70,7 @@ class HadamardArgumentServiceTest {
 		GqGroupGenerator generator = new GqGroupGenerator(gqGroup);
 		commitmentKey = new CommitmentKey(generator.genNonIdentityNonGeneratorMember(),
 				IntStream.range(0, n).mapToObj(i -> generator.genNonIdentityNonGeneratorMember()).collect(Collectors.toList()));
-		hashService = mock(HashService.class);
-		when(hashService.recursiveHash(any()))
-				.thenReturn(new byte[] { 0b10 });
+		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
 		hadamardArgumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 	}
 
@@ -310,7 +308,7 @@ class HadamardArgumentServiceTest {
 			ElGamalMultiRecipientPublicKey hadamardPublicKey = keyPair.getPublicKey();
 			CommitmentKey hadamardCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
 			RandomService hadamardRandomService = mock(RandomService.class);
-			HashService hadamardHashService = mock(HashService.class);
+			MixnetHashService hadamardHashService = mock(MixnetHashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
 			BigInteger one = BigInteger.ONE;
@@ -328,7 +326,8 @@ class HadamardArgumentServiceTest {
 					);
 			when(hadamardHashService.recursiveHash(any()))
 					.thenReturn(new byte[] { 0b10 });
-			HadamardArgumentService specificHadamardArgumentService = new HadamardArgumentService(hadamardRandomService, hadamardHashService, hadamardPublicKey, hadamardCommitmentKey);
+			HadamardArgumentService specificHadamardArgumentService = new HadamardArgumentService(hadamardRandomService, hadamardHashService,
+					hadamardPublicKey, hadamardCommitmentKey);
 
 			// Create A
 			List<List<ZqElement>> matrixColumns = new ArrayList<>(m);

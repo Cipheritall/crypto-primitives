@@ -1,11 +1,12 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,18 +29,15 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class DiagonalProductsTest extends TestGroupSetup {
 
 	private static final int KEY_SIZE = 10;
 
-	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static MultiExponentiationArgumentService multiExponentiationArgumentService;
 	private static ElGamalGenerator elGamalGenerator;
+	private static MixnetHashService hashService;
 
 	private int n;
 	private int m;
@@ -48,13 +46,13 @@ class DiagonalProductsTest extends TestGroupSetup {
 	private SameGroupMatrix<ZqElement, ZqGroup> exponents;
 
 	@BeforeAll
-	static void setUpAll() throws NoSuchAlgorithmException {
+	static void setUpAll() {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
-		publicKey = elGamalGenerator.genRandomPublicKey(KEY_SIZE);
+		final ElGamalMultiRecipientPublicKey publicKey = elGamalGenerator.genRandomPublicKey(KEY_SIZE);
 
-		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
-		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
-		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		final CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
+		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
 		multiExponentiationArgumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(), hashService);
 
 	}
@@ -143,15 +141,11 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with public key and ciphertexts of different group throws IllegalArgumentException")
 	void getDiagonalProductsDifferentGroupKeyAndCiphertexts() {
-		// Pick another group.
-		final GqGroup differentGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-		final GqGroupGenerator differentGqGroupGenerator = new GqGroupGenerator(differentGroup);
-
 		// Generate ciphertexts from different group (a new key is also needed).
-		final List<GqElement> pkElements = Stream.generate(differentGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(l)
+		final List<GqElement> pkElements = Stream.generate(otherGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(l)
 				.collect(Collectors.toList());
 		final ElGamalMultiRecipientPublicKey differentGroupPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
-		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(differentGroup);
+		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(otherGqGroup);
 		final List<List<ElGamalMultiRecipientCiphertext>> otherGroupRandomCiphertexts = Stream.generate(
 				() -> elGamalGenerator.genRandomCiphertexts(differentGroupPublicKey, l, n))
 				.limit(m)
@@ -167,9 +161,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with ciphertexts of different group order than exponents throws IllegalArgumentException")
 	void getDiagonalProductsDifferentOrderCiphertextsAndExponents() {
-		final ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(GroupTestData.getDifferentZqGroup(zqGroup));
-
-		final SameGroupMatrix<ZqElement, ZqGroup> differentGroupExponents = differentZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+		final SameGroupMatrix<ZqElement, ZqGroup> differentGroupExponents = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(ciphertexts, differentGroupExponents));
@@ -178,7 +170,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 	@Test
 	@DisplayName("with specific values returns the expected result")
-	void getDiagonalProductsWithSpecificValues() throws NoSuchAlgorithmException {
+	void getDiagonalProductsWithSpecificValues() {
 		// Create groups
 		BigInteger p = BigInteger.valueOf(23);
 		BigInteger q = BigInteger.valueOf(11);
@@ -246,7 +238,6 @@ class DiagonalProductsTest extends TestGroupSetup {
 		// and are not relevant for the test itself
 		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
 		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
-		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),
 				hashService);
 

@@ -34,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 public class HadamardArgumentService {
 
 	private final RandomService randomService;
-	private final HashService hashService;
+	private final MixnetHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
@@ -55,7 +55,7 @@ public class HadamardArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key for calculating the commitments.
 	 */
-	HadamardArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	HadamardArgumentService(final RandomService randomService, final MixnetHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		checkNotNull(randomService);
 		checkNotNull(hashService);

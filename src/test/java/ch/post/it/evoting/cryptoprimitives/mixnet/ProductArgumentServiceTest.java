@@ -3,12 +3,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.genProductWitness;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.getProductStatement;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,8 +19,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,13 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 
-import com.google.common.collect.ImmutableList;
-
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.Hashable;
-import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
@@ -60,15 +49,15 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private int k;
-	private HashService hashService;
+	private MixnetHashService hashService;
 	private ElGamalMultiRecipientPublicKey publicKey;
 	private CommitmentKey commitmentKey;
 
 	@BeforeEach
-	void setup() throws NoSuchAlgorithmException {
+	void setup() {
 		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
 
-		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
 		publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(k);
 
 		commitmentKey = new CommitmentKeyGenerator(gqGroup).genCommitmentKey(k);
@@ -111,14 +100,12 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		private SameGroupMatrix<ZqElement, ZqGroup> matrixA;
 		private SameGroupVector<ZqElement, ZqGroup> exponentsR;
 		private ProductWitness witness;
-		private HashService mockHashService;
 		private ProductArgumentService productArgumentService;
 
 		@BeforeEach
 		void setup() {
 			n = secureRandom.nextInt(k - 1) + 2;
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
-			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
 
 			witness = genProductWitness(n, m, zqGroupGenerator);
 			matrixA = witness.getMatrix();
@@ -127,17 +114,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			commitmentsA = statement.getCommitments();
 			productB = statement.getProduct();
 
-			mockHashService = mock(HashService.class);
-			when(mockHashService.recursiveHash(any())).thenAnswer(
-					(Answer<byte[]>) invocationOnMock -> {
-						Object[] args = invocationOnMock.getArguments();
-						ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
-						HashableList hashables = HashableList.from(argsList);
-						BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ().subtract(BigInteger.ONE))
-								.add(BigInteger.ONE);
-						return integerToByteArray(hashModQ);
-					});
-			productArgumentService = new ProductArgumentService(randomService, mockHashService, publicKey, commitmentKey);
+			productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 		}
 
 		@Test
@@ -210,7 +187,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 			SingleValueProductStatement sStatement = new SingleValueProductStatement(smallStatement.getCommitments().get(0),
 					smallStatement.getProduct());
-			assertTrue(new SingleValueProductArgumentService(randomService, mockHashService, publicKey, commitmentKey)
+			assertTrue(new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey)
 					.verifySingleValueProductArgument(sStatement, argument.getSingleValueProductArgument()));
 		}
 
@@ -271,7 +248,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ElGamalMultiRecipientPublicKey productPublicKey = keyPair.getPublicKey();
 			CommitmentKey productCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
 			RandomService productRandomService = mock(RandomService.class);
-			HashService productHashService = mock(HashService.class);
+			MixnetHashService productHashService = mock(MixnetHashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
 			BigInteger one = BigInteger.ONE;
@@ -363,17 +340,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			n = secureRandom.nextInt(k - 1) + 2;
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
 
-			HashService hashServiceMock = mock(HashService.class);
-			when(hashServiceMock.recursiveHash(any())).thenAnswer(
-					(Answer<byte[]>) invocationOnMock -> {
-						Object[] args = invocationOnMock.getArguments();
-						ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
-						HashableList hashables = HashableList.from(argsList);
-						BigInteger hashModQ = byteArrayToInteger(ProductArgumentServiceTest.this.hashService.recursiveHash(hashables))
-								.mod(gqGroup.getQ().subtract(BigInteger.ONE)).add(BigInteger.ONE);
-						return integerToByteArray(hashModQ);
-					});
-			productArgumentService = new ProductArgumentService(randomService, hashServiceMock, publicKey, commitmentKey);
+			productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 
 			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
 			longStatement = getProductStatement(longWitness, commitmentKey);
@@ -396,7 +363,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		void verifyProductArgumentWithNullCb() {
 			ProductArgument argumentWithNullCb = spy(longArgument);
 			when(argumentWithNullCb.getCommitmentB()).thenReturn(null);
-			Exception exception = assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullCb));
+			Exception exception = assertThrows(NullPointerException.class,
+					() -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullCb));
 			assertEquals("The product argument must contain a commitment b for m > 1.", exception.getMessage());
 		}
 
@@ -405,7 +373,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		void verifyProductArgumentWithNullHadamardArgument() {
 			ProductArgument argumentWithNullHadamard = spy(longArgument);
 			when(argumentWithNullHadamard.getHadamardArgument()).thenReturn(null);
-			Exception exception = assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullHadamard));
+			Exception exception = assertThrows(NullPointerException.class,
+					() -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullHadamard));
 			assertEquals("The product argument must contain a Hadamard argument for m > 1.", exception.getMessage());
 		}
 

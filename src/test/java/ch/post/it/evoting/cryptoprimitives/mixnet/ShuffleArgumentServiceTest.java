@@ -3,10 +3,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -20,8 +17,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,13 +29,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.Hashable;
-import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -66,13 +57,13 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 	private static ElGamalGenerator elGamalGenerator;
 	private static CommitmentKeyGenerator commitmentKeyGenerator;
-	private static HashService hashService;
+	private static MixnetHashService hashService;
 
 	@BeforeAll
-	static void setUpAll() throws NoSuchAlgorithmException {
+	static void setUpAll() {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
 		commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
-		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
 	}
 
 	@Nested
@@ -150,9 +141,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			final CommitmentKey commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 
-			final HashService hashServiceMock = mock(HashService.class);
-			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
-			shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, hashService);
 		}
 
 		@BeforeEach
@@ -380,15 +369,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					FOUR, NINE, ZERO, ONE, SEVEN,
 					ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
 					.when(shuffleRandomService).genRandomInteger(q);
-			HashService shuffleHashService = mock(HashService.class);
-			when(shuffleHashService.recursiveHash(any())).thenAnswer(
-					(Answer<byte[]>) invocationOnMock -> {
-						Object[] args = invocationOnMock.getArguments();
-						ImmutableList<Hashable> argsList = Arrays.stream(args).map(arg -> (Hashable) arg).collect(toImmutableList());
-						HashableList hashables = HashableList.from(argsList);
-						BigInteger hashModQ = byteArrayToInteger(hashService.recursiveHash(hashables)).mod(gqGroup.getQ());
-						return integerToByteArray(hashModQ);
-					});
+			MixnetHashService shuffleHashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
 			ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey,
 					shuffleRandomService, shuffleHashService);
 

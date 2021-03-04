@@ -15,7 +15,6 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -28,7 +27,7 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 final class ProductArgumentService {
 
 	private final RandomService randomService;
-	private final HashService hashService;
+	private final MixnetHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final HadamardArgumentService hadamardArgumentService;
@@ -44,7 +43,7 @@ final class ProductArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key to be used for commitments.
 	 */
-	ProductArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	ProductArgumentService(final RandomService randomService, final MixnetHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		this.randomService = checkNotNull(randomService);
 		this.hashService = checkNotNull(hashService);

@@ -29,6 +29,8 @@ import java.util.stream.Stream;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
@@ -50,7 +52,7 @@ final class MultiExponentiationArgumentService {
 	private final ElGamalMultiRecipientPublicKey pk;
 	private final CommitmentKey ck;
 	private final RandomService randomService;
-	private final HashService hashService;
+	private final MixnetHashService hashService;
 	private final GqGroup gqGroup;
 	private final ZqGroup zqGroup;
 
@@ -70,7 +72,7 @@ final class MultiExponentiationArgumentService {
 	 * @param hashService   the service providing hashing
 	 */
 	MultiExponentiationArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-			final RandomService randomService, final HashService hashService) {
+			final RandomService randomService, final MixnetHashService hashService) {
 
 		//Null checking
 		checkNotNull(publicKey);
@@ -435,7 +437,7 @@ final class MultiExponentiationArgumentService {
 	 * Calculate Π<sub>i</sub> base<sub>i</sub> <sup>pow_i</sup>
 	 * @param bases the bases
 	 * @param powers a function that maps from index to power
-	 * @return the product of the bases exponentiated to the matching power. 
+	 * @return the product of the bases exponentiated to the matching power.
 	 */
 	private GqElement prodExp(SameGroupVector<GqElement, GqGroup> bases, IntFunction<ZqElement> powers) {
 		return IntStream.range(0, bases.size())

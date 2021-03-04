@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -17,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +72,7 @@ class ZeroArgumentServiceTest {
 	private static CommitmentKey commitmentKey;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static RandomService randomService;
-	private static HashService hashService;
+	private static MixnetHashService hashService;
 
 	@BeforeAll
 	static void setUpAll() throws Exception {
@@ -96,7 +94,7 @@ class ZeroArgumentServiceTest {
 
 		// Init services.
 		randomService = new RandomService();
-		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
 
 		zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 	}
@@ -416,11 +414,7 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with valid statement and witness does not throw")
 		void getZeroArgValidStatementAndWitness() {
-			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-			final HashService hashServiceMock = mock(HashService.class);
-			doReturn(new byte[] { 0x2 }).when(hashServiceMock).recursiveHash(any());
-
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
 			ZeroStatement zeroStatement = testData.getZeroStatement();
 			ZeroWitness zeroWitness = testData.getZeroWitness();
@@ -606,9 +600,8 @@ class ZeroArgumentServiceTest {
 			doReturn(ONE, THREE, TWO, ONE, FOUR, ZERO, ZERO, ONE, THREE, FOUR, TWO, ONE, TWO).when(randomServiceMock)
 					.genRandomInteger(simpleZqGroup.getQ());
 
-			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-			final HashService hashServiceMock = mock(HashService.class);
-			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
+			// Mock the hashService.
+			final MixnetHashService hashServiceMock = TestHashService.create(BigInteger.ZERO, simpleGqGroup.getQ());
 
 			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
 					hashServiceMock);
@@ -616,7 +609,6 @@ class ZeroArgumentServiceTest {
 			// Verification.
 			final ZeroArgument zeroArgument = simpleZeroArgumentService.getZeroArgument(simpleZeroStatement, simpleZeroWitness);
 			verify(randomServiceMock, times(13)).genRandomInteger(simpleZqGroup.getQ());
-			verify(hashServiceMock, times(1)).recursiveHash(any());
 
 			assertEquals(simpleZeroArgument, zeroArgument);
 		}
@@ -628,11 +620,7 @@ class ZeroArgumentServiceTest {
 
 		@RepeatedTest(10)
 		void verifyZeroArgumentTest() {
-			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-			final HashService hashServiceMock = mock(HashService.class);
-			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
-
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
 			ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
 			ZeroStatement statement = testData.getZeroStatement();
@@ -645,7 +633,6 @@ class ZeroArgumentServiceTest {
 
 		@Test
 		void testNullInputParameters() {
-
 			ZeroArgument zeroArgument = mock(ZeroArgument.class);
 			ZeroStatement zeroStatement = mock(ZeroStatement.class);
 
@@ -655,7 +642,6 @@ class ZeroArgumentServiceTest {
 
 		@Test
 		void testInputParameterGroupSizes() {
-
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
@@ -673,7 +659,6 @@ class ZeroArgumentServiceTest {
 
 		@Test
 		void testInputParameterGroupMembership() {
-
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 

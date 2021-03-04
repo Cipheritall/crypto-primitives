@@ -20,9 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -36,13 +35,13 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 class SingleValueProductArgumentService {
 
 	private final RandomService randomService;
-	private final HashService hashService;
+	private final MixnetHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 
 	private final Logger log = LoggerFactory.getLogger(SingleValueProductArgumentService.class);
 
-	SingleValueProductArgumentService(final RandomService randomService, final HashService hashService,
+	SingleValueProductArgumentService(final RandomService randomService, final MixnetHashService hashService,
 			final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey) {
 		this.randomService = checkNotNull(randomService);
 		this.hashService = checkNotNull(hashService);

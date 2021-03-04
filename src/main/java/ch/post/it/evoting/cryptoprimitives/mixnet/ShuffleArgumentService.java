@@ -42,7 +42,7 @@ class ShuffleArgumentService {
 	private final CommitmentKey commitmentKey;
 
 	private final RandomService randomService;
-	private final HashService hashService;
+	private final MixnetHashService hashService;
 	private final ProductArgumentService productArgumentService;
 	private final MultiExponentiationArgumentService multiExponentiationArgumentService;
 
@@ -53,7 +53,7 @@ class ShuffleArgumentService {
 	 * @param commitmentKey ck, the commitment key used to compute commitments.
 	 */
 	ShuffleArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey, final RandomService randomService,
-			final HashService hashService) {
+			final MixnetHashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);

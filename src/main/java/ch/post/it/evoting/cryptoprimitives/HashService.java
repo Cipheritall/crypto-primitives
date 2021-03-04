@@ -16,16 +16,19 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 
 public class HashService {
+
 	private final UnaryOperator<byte[]> hashFunction;
+	private final int hashLength;
 
 	/**
 	 * Instantiate a recursive hash service.
 	 *
 	 * @param messageDigest with which to hash.
 	 */
-	public HashService(MessageDigest messageDigest) {
+	public HashService(final MessageDigest messageDigest) {
 		checkNotNull(messageDigest);
 		this.hashFunction = messageDigest::digest;
+		this.hashLength = messageDigest.getDigestLength();
 	}
 
 	/**
@@ -85,6 +88,13 @@ public class HashService {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}
 		}
+	}
+
+	/**
+	 * @return this message digest length in bytes.
+	 */
+	public int getHashLength() {
+		return this.hashLength;
 	}
 
 }
