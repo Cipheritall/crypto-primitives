@@ -5,6 +5,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,6 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,10 +38,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
+import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
-import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -106,17 +109,6 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 				() -> assertThrows(NullPointerException.class,
 						() -> new ZeroArgumentService(publicKey, commitmentKey, randomService, null))
 		);
-	}
-
-	@Test
-	@DisplayName("constructed with keys having incompatible sizes throws IllegalArgumentException")
-	void constructIncompatibleSizeKeys() {
-		// Create public key of different size.
-		final ElGamalMultiRecipientPublicKey otherPublicKey = elGamalGenerator.genRandomPublicKey(1);
-
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
-		assertEquals("The public and commitment keys do not have compatible sizes.", exception.getMessage());
 	}
 
 	@Test
@@ -641,6 +633,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 	@Nested
 	@DisplayName("VerifyZeroArgument")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifyZeroArgument {
 
 		@RepeatedTest(10)
@@ -694,6 +687,115 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 					() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));
 			assertEquals("Statement and argument do not share the same group", wrongGroupException.getMessage());
 
+		}
+
+		@ParameterizedTest
+		@MethodSource("verifyZeroArgumentRealValuesProvider")
+		@DisplayName("with real values gives expected result")
+		void verifyZeroArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
+				final ZeroStatement zeroStatement, final ZeroArgument zeroArgument, final boolean expectedOutput, String description)
+				throws NoSuchAlgorithmException {
+			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, mixnetHashService);
+			assertEquals(expectedOutput, service.verifyZeroArgument(zeroStatement, zeroArgument),
+					String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> verifyZeroArgumentRealValuesProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-za-argument.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData context = testParameters.getContext();
+
+				final BigInteger p = context.get("p", BigInteger.class);
+				final BigInteger q = context.get("q", BigInteger.class);
+				final BigInteger g = context.get("g", BigInteger.class);
+
+				final GqGroup gqGroup = new GqGroup(p, q, g);
+				final ZqGroup zqGroup = new ZqGroup(q);
+
+				final BigInteger[] pkValues = context.get("pk", BigInteger[].class);
+				final List<GqElement> keyElements = Arrays.stream(pkValues)
+						.map(bi -> GqElement.create(bi, gqGroup))
+						.collect(toList());
+				final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(keyElements);
+
+				final BigInteger hValue = context.getJsonData("ck").get("h", BigInteger.class);
+				final BigInteger[] gValues = context.getJsonData("ck").get("g", BigInteger[].class);
+				final GqElement h = GqElement.create(hValue, gqGroup);
+				final List<GqElement> gElements = Arrays.stream(gValues)
+						.map(bi -> GqElement.create(bi, gqGroup))
+						.collect(toList());
+				final CommitmentKey commitmentKey = new CommitmentKey(h, gElements);
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				ZeroStatement zeroStatement = parseZeroStatement(gqGroup, zqGroup, input);
+				ZeroArgument zeroArgument = parseZeroArgument(gqGroup, zqGroup, input);
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final boolean outputValue = output.get("verif_result", Boolean.class);
+
+				return Arguments.of(publicKey, commitmentKey, zeroStatement, zeroArgument, outputValue, testParameters.getDescription());
+			});
+		}
+
+		private ZeroStatement parseZeroStatement(GqGroup gqGroup, ZqGroup zqGroup, JsonData input) {
+			final JsonData zeroStatementJsonData = input.getJsonData("statement");
+			final BigInteger[] cAValues = zeroStatementJsonData.get("c_a", BigInteger[].class);
+			final BigInteger[] cBValues = zeroStatementJsonData.get("c_b", BigInteger[].class);
+			final BigInteger yValue = zeroStatementJsonData.get("y", BigInteger.class);
+
+			final SameGroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
+					.map(bi -> GqElement.create(bi, gqGroup))
+					.collect(toSameGroupVector());
+			final SameGroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
+					.map(bi -> GqElement.create(bi, gqGroup))
+					.collect(toSameGroupVector());
+			final ZqElement y = ZqElement.create(yValue, zqGroup);
+
+			return new ZeroStatement(cA, cB, y);
+		}
+
+		private ZeroArgument parseZeroArgument(GqGroup gqGroup, ZqGroup zqGroup, JsonData input) {
+			final JsonData zeroArgumentJsonData = input.getJsonData("argument");
+			final BigInteger cA0Value = zeroArgumentJsonData.get("c_a0", BigInteger.class);
+			final BigInteger cBmValue = zeroArgumentJsonData.get("c_bm", BigInteger.class);
+			final BigInteger[] cdValues = zeroArgumentJsonData.get("c_d", BigInteger[].class);
+			final BigInteger[] aValues = zeroArgumentJsonData.get("a", BigInteger[].class);
+			final BigInteger[] bValues = zeroArgumentJsonData.get("b", BigInteger[].class);
+			final BigInteger rValue = zeroArgumentJsonData.get("r", BigInteger.class);
+			final BigInteger sValue = zeroArgumentJsonData.get("s", BigInteger.class);
+			final BigInteger tValue = zeroArgumentJsonData.get("t", BigInteger.class);
+
+			final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
+			final GqElement cBm = GqElement.create(cBmValue, gqGroup);
+			final SameGroupVector<GqElement, GqGroup> cd = Arrays.stream(cdValues)
+					.map(bi -> GqElement.create(bi, gqGroup))
+					.collect(toSameGroupVector());
+			final SameGroupVector<ZqElement, ZqGroup> aPrime = Arrays.stream(aValues)
+					.map(bi -> ZqElement.create(bi, zqGroup))
+					.collect(toSameGroupVector());
+			final SameGroupVector<ZqElement, ZqGroup> bPrime = Arrays.stream(bValues)
+					.map(bi -> ZqElement.create(bi, zqGroup))
+					.collect(toSameGroupVector());
+			final ZqElement r = ZqElement.create(rValue, zqGroup);
+			final ZqElement s = ZqElement.create(sValue, zqGroup);
+			final ZqElement t = ZqElement.create(tValue, zqGroup);
+
+			return new ZeroArgument.Builder()
+					.withCA0(cA0)
+					.withCBm(cBm)
+					.withCd(cd)
+					.withAPrime(aPrime)
+					.withBPrime(bPrime)
+					.withRPrime(r)
+					.withSPrime(s)
+					.withTPrime(t)
+					.build();
 		}
 
 	}

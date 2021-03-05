@@ -54,9 +54,6 @@ final class ZeroArgumentService {
 		checkNotNull(randomService);
 		checkNotNull(hashService);
 
-		// Dimensions checking.
-		checkArgument(publicKey.size() == commitmentKey.size(), "The public and commitment keys do not have compatible sizes.");
-
 		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public and commitment keys are not from the same group.");
 

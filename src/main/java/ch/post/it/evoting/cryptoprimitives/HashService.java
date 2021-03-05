@@ -71,6 +71,10 @@ public class HashService {
 
 				checkArgument(!listOfHashables.isEmpty(), "Cannot hash an empty list.");
 
+				if (listOfHashables.size() == 1) {
+					return recursiveHash(listOfHashables.get(0));
+				}
+
 				//Compute hashes of list elements
 				List<byte[]> subHashes = listOfHashables.stream().map(this::recursiveHash).collect(Collectors.toList());
 				int totalSize = subHashes.size() * subHashes.get(0).length;

@@ -33,6 +33,7 @@ public final class JsonData {
 	 * <li>BigInteger[][]</li>
 	 * <li>String</li>
 	 * <li>byte[]</li>
+	 * <li>Boolean</li>
 	 *
 	 * @param field The name of the field to search for.
 	 * @param clazz The target class to convert the field to.
@@ -53,6 +54,8 @@ public final class JsonData {
 			return clazz.cast(jsonNode.get(field).asText());
 		} else if (clazz.equals(byte[].class)) {
 			return clazz.cast(Base64.getDecoder().decode(jsonNode.get(field).asText()));
+		} else if (clazz.equals(Boolean.class)) {
+			return clazz.cast(jsonNode.get(field).asBoolean());
 		} else {
 			throw new IllegalArgumentException("Unsupported target class.");
 		}

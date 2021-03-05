@@ -156,8 +156,9 @@ class HashServiceTest {
 	void testRecursiveHashOfListOfOneElementReturnsHashOfElement() {
 		byte[] bytes = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes);
-		ImmutableList<Hashable> list = ImmutableList.of(HashableByteArray.from(bytes));
-		byte[] expected = messageDigest.digest(messageDigest.digest(bytes));
+		HashableByteArray byteArray = HashableByteArray.from(bytes);
+		ImmutableList<Hashable> list = ImmutableList.of(byteArray);
+		byte[] expected = hashService.recursiveHash(byteArray);
 		byte[] hash = hashService.recursiveHash(HashableList.from(list));
 		assertArrayEquals(expected, hash);
 	}
