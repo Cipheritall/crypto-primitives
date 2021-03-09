@@ -23,7 +23,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -194,7 +193,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with incompatible commitment and matrix throws an IllegalArgumentException")
 		void getProductArgumentWithBadCommitment() {
-			List<GqElement> commitmentList = commitmentsA.stream().collect(Collectors.toCollection(ArrayList::new));
+			List<GqElement> commitmentList = new ArrayList<>(commitmentsA);
 			GqElement g = commitmentsA.getGroup().getGenerator();
 			GqElement first = commitmentList.get(0);
 			first = first.multiply(g);

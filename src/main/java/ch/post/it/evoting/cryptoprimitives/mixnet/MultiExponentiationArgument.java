@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -23,6 +23,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * Value class representing the result of a multi exponentiation proof.
  */
 public class MultiExponentiationArgument {
+
 	private GqElement cA0;
 	private SameGroupVector<GqElement, GqGroup> cBVector;
 	private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
@@ -31,10 +32,15 @@ public class MultiExponentiationArgument {
 	private ZqElement b;
 	private ZqElement s;
 	private ZqElement tau;
+
 	private int m;
 	private int n;
 	private int l;
 	private GqGroup group;
+
+	private MultiExponentiationArgument() {
+		// Intentionally left blank.
+	}
 
 	public GqElement getcA0() {
 		return cA0;
@@ -68,19 +74,19 @@ public class MultiExponentiationArgument {
 		return tau;
 	}
 
-	public int getM() {
+	int getM() {
 		return m;
 	}
 
-	public int getN() {
+	int getN() {
 		return n;
 	}
 
-	public int getL() {
+	int getL() {
 		return l;
 	}
 
-	public GqGroup getGroup() {
+	GqGroup getGroup() {
 		return group;
 	}
 
@@ -104,6 +110,7 @@ public class MultiExponentiationArgument {
 	}
 
 	static class Builder {
+
 		private GqElement cA0;
 		private SameGroupVector<GqElement, GqGroup> cBVector;
 		private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
@@ -113,7 +120,7 @@ public class MultiExponentiationArgument {
 		private ZqElement s;
 		private ZqElement tau;
 
-		Builder(){
+		Builder() {
 			//Intentionally left blank
 		}
 
@@ -157,7 +164,21 @@ public class MultiExponentiationArgument {
 			return this;
 		}
 
+		/**
+		 * Builds the {@link MultiExponentiationArgument}. Upon calling this method, all fields must have been set to non null values.
+		 * <p>
+		 * Additionally, the fields must comply with the following:
+		 * <ul>
+		 *     <li>cA0, cBVector, EVector, aVector must belong to the same GqGroup</li>
+		 *     <li>r, b, s, tau, must belong to the same ZqGroup</li>
+		 *     <li>GqGroup and ZqGroup must have the same order</li>
+		 *     <li>cB and E must have the same size</li>
+		 * </ul>
+		 *
+		 * @return A valid Multi Exponentiation Argument.
+		 */
 		MultiExponentiationArgument build() {
+			// Null checking.
 			checkNotNull(this.cA0);
 			checkNotNull(this.cBVector);
 			checkNotNull(this.EVector);
@@ -167,17 +188,22 @@ public class MultiExponentiationArgument {
 			checkNotNull(this.s);
 			checkNotNull(this.tau);
 
-			//Group checking
-			List<GroupVectorElement<GqGroup>> gqGroups = Arrays.asList(cA0, cBVector, EVector);
-			List<GroupVectorElement<ZqGroup>> zqGroups = Arrays.asList(aVector, r, b, s, tau);
-			checkArgument(allEqual(gqGroups.stream(), GroupVectorElement::getGroup), "cA0, cBVector, EVector, aVector must belong to the same group.");
-			checkArgument(allEqual(zqGroups.stream(), GroupVectorElement::getGroup), "r, b, s, tau, must belong to the same group.");
+			// Cross group checking.
+			final List<GroupVectorElement<GqGroup>> gqGroups = Arrays.asList(cA0, cBVector, EVector);
+			final List<GroupVectorElement<ZqGroup>> zqGroups = Arrays.asList(aVector, r, b, s, tau);
+			checkArgument(allEqual(gqGroups.stream(), GroupVectorElement::getGroup),
+					"cA0, cBVector, EVector must belong to the same group.");
+			checkArgument(allEqual(zqGroups.stream(), GroupVectorElement::getGroup), "aVector, r, b, s, tau, must belong to the same group.");
 			checkArgument(cA0.getGroup().hasSameOrderAs(aVector.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
 
-			//Size checking
-			checkArgument(cBVector.size() == EVector.size(), "Arguments must have compatible size m.");
+			// Cross dimensions checking.
+			checkArgument(cBVector.size() == EVector.size(), "The vectors cB and E must have the same size.");
 
-			MultiExponentiationArgument argument = new MultiExponentiationArgument();
+			// Dimensions checking.
+			checkArgument(this.cBVector.size() % 2 == 0, "cB and E must be of size 2 * m.");
+
+			// Build the argument.
+			final MultiExponentiationArgument argument = new MultiExponentiationArgument();
 			argument.cA0 = this.cA0;
 			argument.cBVector = this.cBVector;
 			argument.EVector = this.EVector;
@@ -186,10 +212,11 @@ public class MultiExponentiationArgument {
 			argument.b = this.b;
 			argument.s = this.s;
 			argument.tau = this.tau;
+
+			argument.m = this.cBVector.size() / 2;
+			argument.n = this.aVector.size();
+			argument.l = this.EVector.getElementSize();
 			argument.group = cA0.getGroup();
-			argument.m = cBVector.size() / 2;
-			argument.n = aVector.size();
-			argument.l = EVector.getElementSize();
 
 			return argument;
 		}

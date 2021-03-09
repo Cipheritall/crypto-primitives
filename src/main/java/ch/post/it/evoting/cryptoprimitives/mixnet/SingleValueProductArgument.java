@@ -3,10 +3,15 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -30,7 +35,7 @@ class SingleValueProductArgument {
 	private GqGroup group;
 
 	private SingleValueProductArgument() {
-		//Intentionally left blank
+		// Intentionally left blank.
 	}
 
 	GqElement getCd() {
@@ -102,10 +107,6 @@ class SingleValueProductArgument {
 		private ZqElement rTilde;
 		private ZqElement sTilde;
 
-		Builder() {
-
-		}
-
 		Builder withCd(final GqElement cd) {
 			this.cd = cd;
 			return this;
@@ -141,15 +142,54 @@ class SingleValueProductArgument {
 			return this;
 		}
 
+		/**
+		 * Builds the {@link SingleValueProductArgument}. Upon calling this method, all fields must have be set to non null values.
+		 * <p>
+		 * Additionally, the fields must comply with the following:
+		 * <ul>
+		 *     <li>c<sub>d</sub>, c<sub>δ</sub>, c<sub>Δ</sub> must belong to the same GqGroup</li>
+		 *     <li>aTilde, bTilde, rTilde, sTilde must belong to the same ZqGroup</li>
+		 *     <li>these GqGroup and ZqGroup must have the same order</li>
+		 *     <li>vectors aTilde and bTilde must have the same size n greater than or equal to 2</li>
+		 * </ul>
+		 *
+		 * @return A valid Single Value Product Argument.
+		 */
 		SingleValueProductArgument build() {
-			SingleValueProductArgument argument = new SingleValueProductArgument();
-			argument.cd = checkNotNull(this.cd);
-			argument.cLowerDelta = checkNotNull(this.cLowerDelta);
-			argument.cUpperDelta = checkNotNull(this.cUpperDelta);
-			argument.aTilde = checkNotNull(this.aTilde);
-			argument.bTilde = checkNotNull(this.bTilde);
-			argument.rTilde = checkNotNull(this.rTilde);
-			argument.sTilde = checkNotNull(this.sTilde);
+			// Null checking.
+			checkNotNull(this.cd);
+			checkNotNull(this.cLowerDelta);
+			checkNotNull(this.cUpperDelta);
+			checkNotNull(this.aTilde);
+			checkNotNull(this.bTilde);
+			checkNotNull(this.rTilde);
+			checkNotNull(this.sTilde);
+
+			// Cross group checking.
+			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(cd, cLowerDelta, cUpperDelta);
+			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(aTilde, bTilde, rTilde, sTilde);
+			checkArgument(allEqual(gqGroupMembers.stream(), GroupVectorElement::getGroup),
+					"cd, cLowerDelta, cUpperDelta must belong to the same group.");
+			checkArgument(allEqual(zqGroupMembers.stream(), GroupVectorElement::getGroup),
+					"aTilde, bTilde, rTilde, sTilde must belong to the same group.");
+			checkArgument(cd.getGroup().hasSameOrderAs(aTilde.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
+
+			// Cross dimensions checking.
+			checkArgument(aTilde.size() == bTilde.size(), "The vectors aTilde and bTilde must have the same size.");
+
+			// Dimensions checking.
+			checkArgument(this.aTilde.size() >= 2, "The size of vectors aTilde and bTilde must be greater than or equal to 2.");
+
+			// Build the argument.
+			final SingleValueProductArgument argument = new SingleValueProductArgument();
+			argument.cd = this.cd;
+			argument.cLowerDelta = this.cLowerDelta;
+			argument.cUpperDelta = this.cUpperDelta;
+			argument.aTilde = this.aTilde;
+			argument.bTilde = this.bTilde;
+			argument.rTilde = this.rTilde;
+			argument.sTilde = this.sTilde;
+
 			argument.n = argument.aTilde.size();
 			argument.group = argument.cd.getGroup();
 

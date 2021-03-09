@@ -3,11 +3,15 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -28,10 +32,12 @@ class ZeroArgument {
 	private ZqElement sPrime;
 	private ZqElement tPrime;
 
-	private GqGroup group;
 	private int m;
+	private int n;
+	private GqGroup group;
 
 	private ZeroArgument() {
+		// Intentionally left blank.
 	}
 
 	GqElement getCA0() {
@@ -68,6 +74,10 @@ class ZeroArgument {
 
 	int getM() {
 		return m;
+	}
+
+	int getN() {
+		return n;
 	}
 
 	GqGroup getGroup() {
@@ -147,24 +157,57 @@ class ZeroArgument {
 		}
 
 		/**
-		 * Build the {@link ZeroArgument}. Upon calling this method, all fields must have be set to non null values.
+		 * Builds the {@link ZeroArgument}. Upon calling this method, all fields must have be set to non null values.
+		 * <p>
+		 * Additionally the fields must comply with the following:
+		 * <ul>
+		 *     <li>cA0, cBm, cd must belong to the same GqGroup</li>
+		 *     <li>aPrime, bPrime, rPrime, sPrime, tPrime must belong to the same ZqGroup</li>
+		 *     <li>these GqGroup and ZqGroup must have the same order</li>
+		 *     <li>vectors aPrime and bPrime must have the same size</li>
+		 * </ul>
 		 *
-		 * @return The built Zero Argument.
+		 * @return A valid Zero Argument.
 		 */
 		ZeroArgument build() {
-			final ZeroArgument zeroArgument = new ZeroArgument();
-			zeroArgument.cA0 = checkNotNull(this.cA0);
-			zeroArgument.cBm = checkNotNull(this.cBm);
-			zeroArgument.cd = checkNotNull(this.cd);
-			zeroArgument.aPrime = checkNotNull(this.aPrime);
-			zeroArgument.bPrime = checkNotNull(this.bPrime);
-			zeroArgument.rPrime = checkNotNull(this.rPrime);
-			zeroArgument.sPrime = checkNotNull(this.sPrime);
-			zeroArgument.tPrime = checkNotNull(this.tPrime);
+			// Null checking.
+			checkNotNull(this.cA0);
+			checkNotNull(this.cBm);
+			checkNotNull(this.cd);
+			checkNotNull(this.aPrime);
+			checkNotNull(this.bPrime);
+			checkNotNull(this.rPrime);
+			checkNotNull(this.sPrime);
+			checkNotNull(this.tPrime);
 
+			// Cross group checking.
+			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(cA0, cBm, cd);
+			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(aPrime, bPrime, rPrime, sPrime, tPrime);
+			checkArgument(allEqual(gqGroupMembers.stream(), GroupVectorElement::getGroup), "cA0, cBm, cd must belong to the same group.");
+			checkArgument(allEqual(zqGroupMembers.stream(), GroupVectorElement::getGroup),
+					"aPrime, bPrime, rPrime, sPrime, tPrime must belong to the same group.");
+			checkArgument(cA0.getGroup().hasSameOrderAs(aPrime.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
+
+			// Cross dimensions checking.
+			checkArgument(aPrime.size() == bPrime.size(), "The vectors aPrime and bPrime must have the same size.");
+
+			// Dimensions checking.
 			checkArgument((cd.size() - 1) % 2 == 0, "cd must be of size 2m + 1.");
-			zeroArgument.m = (cd.size() - 1) / 2; // cd is of size 2m + 1
-			zeroArgument.group = cBm.getGroup();
+
+			// Build the argument.
+			final ZeroArgument zeroArgument = new ZeroArgument();
+			zeroArgument.cA0 = this.cA0;
+			zeroArgument.cBm = this.cBm;
+			zeroArgument.cd = this.cd;
+			zeroArgument.aPrime = this.aPrime;
+			zeroArgument.bPrime = this.bPrime;
+			zeroArgument.rPrime = this.rPrime;
+			zeroArgument.sPrime = this.sPrime;
+			zeroArgument.tPrime = this.tPrime;
+
+			zeroArgument.m = (cd.size() - 1) / 2;
+			zeroArgument.n = aPrime.size();
+			zeroArgument.group = cA0.getGroup();
 
 			return zeroArgument;
 		}

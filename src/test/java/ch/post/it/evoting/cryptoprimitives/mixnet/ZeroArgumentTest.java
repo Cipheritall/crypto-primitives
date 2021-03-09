@@ -1,10 +1,16 @@
+/*
+ * HEADER_LICENSE_OPEN_SOURCE
+ */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.mixnet.ZeroArgument.Builder;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,24 +26,45 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@DisplayName("A ZeroArgument")
 class ZeroArgumentTest extends TestGroupSetup {
 
-	@Nested
-	@DisplayName("A zeroArgumentBuilder")
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-	class ZeroArgumentBuilderTest {
+	private static final int UPPER_BOUND = 10;
 
-		private final GqElement cA0 = gqGroupGenerator.genMember();
-		private final GqElement cBm = gqGroupGenerator.genMember();
-		private final SameGroupVector<GqElement, GqGroup> cd = gqGroupGenerator.genRandomGqElementVector(3);
-		private final SameGroupVector<ZqElement, ZqGroup> aPrime = zqGroupGenerator.genRandomZqElementVector(2);
-		private final SameGroupVector<ZqElement, ZqGroup> bPrime = zqGroupGenerator.genRandomZqElementVector(2);
-		private final ZqElement rPrime = zqGroupGenerator.genRandomZqElementMember();
-		private final ZqElement sPrime = zqGroupGenerator.genRandomZqElementMember();
-		private final ZqElement tPrime = zqGroupGenerator.genRandomZqElementMember();
+	private static int n;
+
+	private static GqElement cA0;
+	private static GqElement cBm;
+	private static SameGroupVector<GqElement, GqGroup> cd;
+	private static SameGroupVector<ZqElement, ZqGroup> aPrime;
+	private static SameGroupVector<ZqElement, ZqGroup> bPrime;
+	private static ZqElement rPrime;
+	private static ZqElement sPrime;
+	private static ZqElement tPrime;
+
+	@BeforeAll
+	static void setUpAll() {
+		final int m = secureRandom.nextInt(UPPER_BOUND) + 1;
+		n = secureRandom.nextInt(UPPER_BOUND) + 1;
+		final ZeroArgument zeroArgument = new ArgumentGenerator(gqGroup).genZeroArgument(m, n);
+
+		cA0 = zeroArgument.getCA0();
+		cBm = zeroArgument.getCBm();
+		cd = zeroArgument.getCd();
+		aPrime = zeroArgument.getAPrime();
+		bPrime = zeroArgument.getBPrime();
+		rPrime = zeroArgument.getRPrime();
+		sPrime = zeroArgument.getSPrime();
+		tPrime = zeroArgument.getTPrime();
+	}
+
+	@Nested
+	@DisplayName("built with")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	class BuilderTest {
 
 		@Test
-		@DisplayName("built with all initialized fields does not throw")
+		@DisplayName("all initialized fields does not throw")
 		void zeroArgumentBuilderValidFields() {
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
 					.withCA0(cA0)
@@ -67,7 +94,7 @@ class ZeroArgumentTest extends TestGroupSetup {
 
 		@ParameterizedTest
 		@MethodSource("nullArgumentsProvider")
-		@DisplayName("built with null fields throws NullPointerException")
+		@DisplayName("null fields throws NullPointerException")
 		void zeroArgumentBuilderBuildNullFields(final GqElement cA0, final GqElement cBm, final SameGroupVector<GqElement, GqGroup> cd,
 				final SameGroupVector<ZqElement, ZqGroup> aPrime, final SameGroupVector<ZqElement, ZqGroup> bPrime, final ZqElement rPrime,
 				final ZqElement sPrime, final ZqElement tPrime) {
@@ -83,6 +110,86 @@ class ZeroArgumentTest extends TestGroupSetup {
 					.withTPrime(tPrime);
 
 			assertThrows(NullPointerException.class, builder::build);
+		}
+
+		@Test
+		@DisplayName("inputs from different GqGroup throws IllegalArgumentException")
+		void zeroArgumentBuilderDiffGqGroup() {
+			final GqElement otherGroupCA0 = otherGqGroupGenerator.genMember();
+
+			final Builder builder = new Builder()
+					.withCA0(otherGroupCA0)
+					.withCBm(cBm)
+					.withCd(cd)
+					.withAPrime(aPrime)
+					.withBPrime(bPrime)
+					.withRPrime(rPrime)
+					.withSPrime(sPrime)
+					.withTPrime(tPrime);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
+			assertEquals("cA0, cBm, cd must belong to the same group.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("inputs from different ZqGroup throws IllegalArgumentException")
+		void zeroArgumentBuilderDiffZqGroup() {
+			final ZqElement otherGroupRPrime = otherZqGroupGenerator.genRandomZqElementMember();
+
+			final Builder builder = new Builder()
+					.withCA0(cA0)
+					.withCBm(cBm)
+					.withCd(cd)
+					.withAPrime(aPrime)
+					.withBPrime(bPrime)
+					.withRPrime(otherGroupRPrime)
+					.withSPrime(sPrime)
+					.withTPrime(tPrime);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
+			assertEquals("aPrime, bPrime, rPrime, sPrime, tPrime must belong to the same group.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("not compatible GqGroup and ZqGroup throws IllegalArgumentException")
+		void zeroArgumentBuilderDiffGqGroupAndZqGroup() {
+			final SameGroupVector<ZqElement, ZqGroup> otherGroupAPrime = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final SameGroupVector<ZqElement, ZqGroup> otherGroupBPrime = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final ZqElement otherGroupRPrime = otherZqGroupGenerator.genRandomZqElementMember();
+			final ZqElement otherGroupSPrime = otherZqGroupGenerator.genRandomZqElementMember();
+			final ZqElement otherGroupTPrime = otherZqGroupGenerator.genRandomZqElementMember();
+
+			final Builder builder = new Builder()
+					.withCA0(cA0)
+					.withCBm(cBm)
+					.withCd(cd)
+					.withAPrime(otherGroupAPrime)
+					.withBPrime(otherGroupBPrime)
+					.withRPrime(otherGroupRPrime)
+					.withSPrime(otherGroupSPrime)
+					.withTPrime(otherGroupTPrime);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
+			assertEquals("GqGroup and ZqGroup of argument inputs are not compatible.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("aPrime and bPrime of different size throws IllegalArgumentException")
+		void zeroArgumentBuilderDiffSizeAPrimeBPrime() {
+			final SameGroupVector<ZqElement, ZqGroup> longerAPrime = zqGroupGenerator.genRandomZqElementVector(n + 1);
+
+			final Builder builder = new Builder()
+					.withCA0(cA0)
+					.withCBm(cBm)
+					.withCd(cd)
+					.withAPrime(longerAPrime)
+					.withBPrime(bPrime)
+					.withRPrime(rPrime)
+					.withSPrime(sPrime)
+					.withTPrime(tPrime);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
+			assertEquals("The vectors aPrime and bPrime must have the same size.", exception.getMessage());
 		}
 
 		@Test

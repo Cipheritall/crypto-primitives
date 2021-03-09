@@ -3,8 +3,12 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
@@ -86,12 +90,45 @@ class ShuffleArgument {
 			return this;
 		}
 
+		/**
+		 * Builds the {@link ShuffleArgument}. Upon calling this method, all fields must have been set to non null values.
+		 * <p>
+		 * Additionally, the fields must comply with the following:
+		 * <ul>
+		 *     <li>cA, cB, the product and multi exponentiation arguments must belong to the same group</li>
+		 *     <li>cA, cB, the product and multi exponentiation arguments must have identical dimension m</li>
+		 *     <li>the product and multi exponentiation arguments must have identical dimension n</li>
+		 * </ul>
+		 *
+		 * @return A valid Shuffle Argument.
+		 */
 		ShuffleArgument build() {
+			// Null checking.
+			checkNotNull(this.cA);
+			checkNotNull(this.cB);
+			checkNotNull(this.productArgument);
+			checkNotNull(this.multiExponentiationArgument);
+
+			// Cross group checking.
+			final List<GqGroup> gqGroups = Arrays
+					.asList(this.cA.getGroup(), this.cB.getGroup(), this.productArgument.getGroup(), this.multiExponentiationArgument.getGroup());
+			checkArgument(allEqual(gqGroups.stream(), g -> g),
+					"The commitments cA, cB, the product and the multi exponentiation arguments must belong to the same group.");
+
+			// Cross dimensions checking.
+			final int m = this.cA.size();
+			checkArgument(this.cB.size() == m && productArgument.getM() == m && multiExponentiationArgument.getM() == m,
+					"The commitments cA, cB and the product and multi exponentiation arguments must have the same dimension m.");
+
+			checkArgument(this.productArgument.getN() == this.multiExponentiationArgument.getN(),
+					"The product and multi exponentiation arguments must have the same dimension n.");
+
+			// Build the argument.
 			final ShuffleArgument shuffleArgument = new ShuffleArgument();
-			shuffleArgument.cA = checkNotNull(this.cA);
-			shuffleArgument.cB = checkNotNull(this.cB);
-			shuffleArgument.productArgument = checkNotNull(this.productArgument);
-			shuffleArgument.multiExponentiationArgument = checkNotNull(this.multiExponentiationArgument);
+			shuffleArgument.cA = this.cA;
+			shuffleArgument.cB = this.cB;
+			shuffleArgument.productArgument = this.productArgument;
+			shuffleArgument.multiExponentiationArgument = this.multiExponentiationArgument;
 
 			return shuffleArgument;
 		}

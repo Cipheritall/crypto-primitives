@@ -16,14 +16,22 @@ class HadamardArgument {
 
 	private final SameGroupVector<GqElement, GqGroup> commitmentsB;
 	private final ZeroArgument zeroArgument;
+
 	private final int m;
+	private final int n;
 	private final GqGroup group;
 
 	/**
 	 * Constructs a {@code HadamardArgument}.
+	 * <p>
+	 * The {@code commitmentsB} and {@code zeroArgument} must comply with the following:
+	 * <ul>
+	 *     <li>the commitments must be of the same size as the zero argument dimension {@code m}</li>
+	 *     <li>the commitments and zero argument must belong to the same group</li>
+	 * </ul>
 	 *
-	 * @param commitmentsB a {@link SameGroupVector} of {@code GqElements}
-	 * @param zeroArgument a {@link ZeroArgument}
+	 * @param commitmentsB a {@link SameGroupVector} of {@link GqElement}s. Non-null.
+	 * @param zeroArgument a {@link ZeroArgument}. Non-null.
 	 */
 	HadamardArgument(final SameGroupVector<GqElement, GqGroup> commitmentsB, final ZeroArgument zeroArgument) {
 		checkNotNull(commitmentsB);
@@ -36,8 +44,9 @@ class HadamardArgument {
 
 		this.commitmentsB = commitmentsB;
 		this.zeroArgument = zeroArgument;
-		this.group = commitmentsB.getGroup();
 		this.m = commitmentsB.size();
+		this.n = zeroArgument.getN();
+		this.group = commitmentsB.getGroup();
 	}
 
 	SameGroupVector<GqElement, GqGroup> getCommitmentsB() {
@@ -48,12 +57,16 @@ class HadamardArgument {
 		return zeroArgument;
 	}
 
-	GqGroup getGroup() {
-		return group;
-	}
-
 	int getM() {
 		return m;
+	}
+
+	int getN() {
+		return n;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override
