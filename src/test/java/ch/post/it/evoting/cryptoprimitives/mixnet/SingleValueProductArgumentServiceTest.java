@@ -3,6 +3,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,9 +16,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -25,9 +29,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -38,6 +46,8 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 class SingleValueProductArgumentServiceTest {
 
@@ -248,6 +258,7 @@ class SingleValueProductArgumentServiceTest {
 
 	@Nested
 	@DisplayName("verifySingleValueProductArgument...")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifySingleValueProductArgumentServiceTest {
 
 		private SingleValueProductArgument argument;
@@ -294,12 +305,109 @@ class SingleValueProductArgumentServiceTest {
 			statement = new SingleValueProductStatement(commitment, product);
 			assertFalse(argumentService.verifySingleValueProductArgument(statement, argument));
 		}
+
+		@ParameterizedTest
+		@MethodSource("verifySingleValueProductArgumentRealValuesProvider")
+		@DisplayName("with real values gives expected result")
+		void verifySingleValueProductArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
+				final SingleValueProductStatement singleValueProductStatement, final SingleValueProductArgument singleValueProductArgument,
+				final boolean expectedOutput, String description) throws NoSuchAlgorithmException {
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, mixnetHashService, publicKey,
+					commitmentKey);
+
+			assertEquals(expectedOutput, service.verifySingleValueProductArgument(singleValueProductStatement, singleValueProductArgument),
+					String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> verifySingleValueProductArgumentRealValuesProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-single-value-product-argument.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData context = testParameters.getContext();
+
+				final BigInteger p = context.get("p", BigInteger.class);
+				final BigInteger q = context.get("q", BigInteger.class);
+				final BigInteger g = context.get("g", BigInteger.class);
+
+				final GqGroup gqGroup = new GqGroup(p, q, g);
+				final ZqGroup zqGroup = new ZqGroup(q);
+
+				final BigInteger[] pkValues = context.get("pk", BigInteger[].class);
+				final List<GqElement> keyElements = Arrays.stream(pkValues)
+						.map(bi -> GqElement.create(bi, gqGroup))
+						.collect(toList());
+				final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(keyElements);
+
+				final BigInteger hValue = context.getJsonData("ck").get("h", BigInteger.class);
+				final BigInteger[] gValues = context.getJsonData("ck").get("g", BigInteger[].class);
+				final GqElement h = GqElement.create(hValue, gqGroup);
+				final List<GqElement> gElements = Arrays.stream(gValues)
+						.map(bi -> GqElement.create(bi, gqGroup))
+						.collect(toList());
+				final CommitmentKey commitmentKey = new CommitmentKey(h, gElements);
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				final SingleValueProductStatement singleValueProductStatement = parseSingleValueProductStatement(gqGroup, zqGroup, input);
+				final SingleValueProductArgument singleValueProductArgument = parseSingleValueProductArgument(gqGroup, zqGroup, input);
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final boolean outputValue = output.get("verif_result", Boolean.class);
+
+				return Arguments.of(publicKey, commitmentKey, singleValueProductStatement, singleValueProductArgument, outputValue,
+						testParameters.getDescription());
+			});
+		}
+
+		private SingleValueProductStatement parseSingleValueProductStatement(final GqGroup gqGroup, final ZqGroup zqGroup, final JsonData input) {
+			final JsonData svpStatement = input.getJsonData("statement");
+			final BigInteger caValue = svpStatement.get("c_a", BigInteger.class);
+			final BigInteger bValue = svpStatement.get("b", BigInteger.class);
+
+			final GqElement ca = GqElement.create(caValue, gqGroup);
+			final ZqElement b = ZqElement.create(bValue, zqGroup);
+
+			return new SingleValueProductStatement(ca, b);
+		}
+
+		private SingleValueProductArgument parseSingleValueProductArgument(final GqGroup gqGroup, final ZqGroup zqGroup, final JsonData input) {
+			final JsonData svpArgument = input.getJsonData("argument");
+			final BigInteger cdValue = svpArgument.get("c_d", BigInteger.class);
+			final BigInteger cLowerDeltaValue = svpArgument.get("c_lower_delta", BigInteger.class);
+			final BigInteger cUpperDeltaValue = svpArgument.get("c_upper_delta", BigInteger.class);
+			final BigInteger[] aTildeValues = svpArgument.get("a_tilde", BigInteger[].class);
+			final BigInteger[] bTildeValues = svpArgument.get("b_tilde", BigInteger[].class);
+			final BigInteger rTildeValue = svpArgument.get("r_tilde", BigInteger.class);
+			final BigInteger sTildeValue = svpArgument.get("s_tilde", BigInteger.class);
+
+			final GqElement cd = GqElement.create(cdValue, gqGroup);
+			final GqElement cLowerDelta = GqElement.create(cLowerDeltaValue, gqGroup);
+			final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
+			final SameGroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
+					.map(bi -> ZqElement.create(bi, zqGroup))
+					.collect(toSameGroupVector());
+			final SameGroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
+					.map(bi -> ZqElement.create(bi, zqGroup))
+					.collect(toSameGroupVector());
+			final ZqElement rTilde = ZqElement.create(rTildeValue, zqGroup);
+			final ZqElement sTilde = ZqElement.create(sTildeValue, zqGroup);
+
+			return new SingleValueProductArgument.Builder()
+					.withCd(cd)
+					.withCLowerDelta(cLowerDelta)
+					.withCUpperDelta(cUpperDelta)
+					.withATilde(aTilde)
+					.withBTilde(bTilde)
+					.withRTilde(rTilde)
+					.withSTilde(sTilde)
+					.build();
+		}
 	}
 
-	protected static CommitmentKey genCommitmentKey(GqGroup group, int k) {
-		GqGroupGenerator generator = new GqGroupGenerator(group);
-		GqElement h = generator.genNonIdentityNonGeneratorMember();
-		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(k).collect(Collectors.toList());
-		return new CommitmentKey(h, gList);
-	}
 }
