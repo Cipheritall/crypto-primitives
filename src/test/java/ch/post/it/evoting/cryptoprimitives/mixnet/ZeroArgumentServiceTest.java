@@ -5,7 +5,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -703,37 +702,21 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		}
 
 		Stream<Arguments> verifyZeroArgumentRealValuesProvider() {
-			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-za-argument.json");
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-zero-argument.json");
 
 			return parametersList.stream().parallel().map(testParameters -> {
 				// Context.
-				final JsonData context = testParameters.getContext();
+				final JsonData contextData = testParameters.getContext();
+				final Context context = new Context(contextData);
+				final GqGroup realGqGroup = context.getGqGroup();
 
-				final BigInteger p = context.get("p", BigInteger.class);
-				final BigInteger q = context.get("q", BigInteger.class);
-				final BigInteger g = context.get("g", BigInteger.class);
-
-				final GqGroup gqGroup = new GqGroup(p, q, g);
-				final ZqGroup zqGroup = new ZqGroup(q);
-
-				final BigInteger[] pkValues = context.get("pk", BigInteger[].class);
-				final List<GqElement> keyElements = Arrays.stream(pkValues)
-						.map(bi -> GqElement.create(bi, gqGroup))
-						.collect(toList());
-				final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(keyElements);
-
-				final BigInteger hValue = context.getJsonData("ck").get("h", BigInteger.class);
-				final BigInteger[] gValues = context.getJsonData("ck").get("g", BigInteger[].class);
-				final GqElement h = GqElement.create(hValue, gqGroup);
-				final List<GqElement> gElements = Arrays.stream(gValues)
-						.map(bi -> GqElement.create(bi, gqGroup))
-						.collect(toList());
-				final CommitmentKey commitmentKey = new CommitmentKey(h, gElements);
+				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
+				final CommitmentKey commitmentKey = context.parseCommitmentKey();
 
 				// Inputs.
 				final JsonData input = testParameters.getInput();
-				ZeroStatement zeroStatement = parseZeroStatement(gqGroup, zqGroup, input);
-				ZeroArgument zeroArgument = parseZeroArgument(gqGroup, zqGroup, input);
+				final ZeroStatement zeroStatement = parseZeroStatement(realGqGroup, input);
+				final ZeroArgument zeroArgument = new ArgumentParser(realGqGroup).parseZeroArgument(input.getJsonData("argument"));
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
@@ -743,60 +726,21 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			});
 		}
 
-		private ZeroStatement parseZeroStatement(GqGroup gqGroup, ZqGroup zqGroup, JsonData input) {
+		private ZeroStatement parseZeroStatement(final GqGroup realGqGroup, final JsonData input) {
 			final JsonData zeroStatementJsonData = input.getJsonData("statement");
 			final BigInteger[] cAValues = zeroStatementJsonData.get("c_a", BigInteger[].class);
 			final BigInteger[] cBValues = zeroStatementJsonData.get("c_b", BigInteger[].class);
 			final BigInteger yValue = zeroStatementJsonData.get("y", BigInteger.class);
 
 			final SameGroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
-					.map(bi -> GqElement.create(bi, gqGroup))
+					.map(bi -> GqElement.create(bi, realGqGroup))
 					.collect(toSameGroupVector());
 			final SameGroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
-					.map(bi -> GqElement.create(bi, gqGroup))
+					.map(bi -> GqElement.create(bi, realGqGroup))
 					.collect(toSameGroupVector());
-			final ZqElement y = ZqElement.create(yValue, zqGroup);
+			final ZqElement y = ZqElement.create(yValue, ZqGroup.sameOrderAs(realGqGroup));
 
 			return new ZeroStatement(cA, cB, y);
 		}
-
-		private ZeroArgument parseZeroArgument(GqGroup gqGroup, ZqGroup zqGroup, JsonData input) {
-			final JsonData zeroArgumentJsonData = input.getJsonData("argument");
-			final BigInteger cA0Value = zeroArgumentJsonData.get("c_a0", BigInteger.class);
-			final BigInteger cBmValue = zeroArgumentJsonData.get("c_bm", BigInteger.class);
-			final BigInteger[] cdValues = zeroArgumentJsonData.get("c_d", BigInteger[].class);
-			final BigInteger[] aValues = zeroArgumentJsonData.get("a", BigInteger[].class);
-			final BigInteger[] bValues = zeroArgumentJsonData.get("b", BigInteger[].class);
-			final BigInteger rValue = zeroArgumentJsonData.get("r", BigInteger.class);
-			final BigInteger sValue = zeroArgumentJsonData.get("s", BigInteger.class);
-			final BigInteger tValue = zeroArgumentJsonData.get("t", BigInteger.class);
-
-			final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
-			final GqElement cBm = GqElement.create(cBmValue, gqGroup);
-			final SameGroupVector<GqElement, GqGroup> cd = Arrays.stream(cdValues)
-					.map(bi -> GqElement.create(bi, gqGroup))
-					.collect(toSameGroupVector());
-			final SameGroupVector<ZqElement, ZqGroup> aPrime = Arrays.stream(aValues)
-					.map(bi -> ZqElement.create(bi, zqGroup))
-					.collect(toSameGroupVector());
-			final SameGroupVector<ZqElement, ZqGroup> bPrime = Arrays.stream(bValues)
-					.map(bi -> ZqElement.create(bi, zqGroup))
-					.collect(toSameGroupVector());
-			final ZqElement r = ZqElement.create(rValue, zqGroup);
-			final ZqElement s = ZqElement.create(sValue, zqGroup);
-			final ZqElement t = ZqElement.create(tValue, zqGroup);
-
-			return new ZeroArgument.Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(r)
-					.withSPrime(s)
-					.withTPrime(t)
-					.build();
-		}
-
 	}
 }

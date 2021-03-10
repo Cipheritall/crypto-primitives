@@ -19,11 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.HashableString;
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -65,8 +64,6 @@ public class HadamardArgumentService {
 		// Check group and dimension of the public and commitment key
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()),
 				"The public key and the commitment key must belong to the same group.");
-		checkArgument(publicKey.size() == commitmentKey.size(),
-				"The public key and the commitment key must have the same size.");
 
 		this.randomService = randomService;
 		this.hashService = hashService;
@@ -234,7 +231,7 @@ public class HadamardArgumentService {
 		ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		// Create witness
 		final SameGroupMatrix<ZqElement, ZqGroup> zMatrixA = SameGroupMatrix
-				.fromColumns(A.appendColumn(minusOnes).columnStream().skip(1).map(a -> a.stream().collect(Collectors.toList()))
+				.fromColumns(A.appendColumn(minusOnes).columnStream().skip(1).map(ArrayList::new)
 						.collect(Collectors.toList()));
 		final SameGroupMatrix<ZqElement, ZqGroup> zMatrixB = SameGroupMatrix.fromColumns(diList).appendColumn(dElements);
 		final SameGroupVector<ZqElement, ZqGroup> zExponentsR = r.append(zero).stream().skip(1)
