@@ -111,7 +111,7 @@ public class HadamardArgumentService {
 		final int n = A.numRows();
 		final int k = commitmentKey.size();
 		checkArgument(cA.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
-		checkArgument(cA.getGroup().getQ().equals(A.getGroup().getQ()), "The matrix A and its commitments must have the same group order q.");
+		checkArgument(cA.getGroup().hasSameOrderAs(A.getGroup()), "The matrix A and its commitments must have the same group order q.");
 		checkArgument(n <= k, "The number of rows in the matrix must be smaller than the commitment key size.");
 
 		// Ensure statement corresponds to witness
@@ -266,6 +266,11 @@ public class HadamardArgumentService {
 		final GqElement cLowerB = statement.getCommitmentB();
 		final SameGroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
 		final SameGroupVector<ZqElement, ZqGroup> aPrime = argument.getZeroArgument().getAPrime();
+
+		// Cross-check groups and dimensions
+		checkArgument(statement.getGroup().equals(argument.getGroup()),
+				"The statement's and the argument's groups must have the same order.");
+		checkArgument(statement.getM() == argument.getM(), "The statement and the argument must have the same size m.");
 
 		final ZqGroup zqGroup = aPrime.getGroup();
 		final GqGroup gqGroup = cA.getGroup();

@@ -14,6 +14,8 @@ class HadamardStatement {
 
 	private final SameGroupVector<GqElement, GqGroup> commitmentsA;
 	private final GqElement commitmentB;
+	private final GqGroup group;
+	private final int m;
 
 	/**
 	 * Constructs a {@code HadamardStatement} object.
@@ -33,6 +35,8 @@ class HadamardStatement {
 
 		this.commitmentsA = commitmentsA;
 		this.commitmentB = commitmentB;
+		this.group = commitmentsA.getGroup();
+		this.m = commitmentsA.size();
 
 		checkArgument(this.commitmentsA.getGroup().equals(this.commitmentB.getGroup()),
 				"The commitments A and commitment b must have the same group.");
@@ -44,5 +48,13 @@ class HadamardStatement {
 
 	GqElement getCommitmentB() {
 		return commitmentB;
+	}
+
+	GqGroup getGroup() {
+		return group;
+	}
+
+	int getM() {
+		return m;
 	}
 }
