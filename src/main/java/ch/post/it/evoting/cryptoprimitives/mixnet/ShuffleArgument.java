@@ -25,6 +25,10 @@ class ShuffleArgument {
 	private ProductArgument productArgument;
 	private MultiExponentiationArgument multiExponentiationArgument;
 
+	private int m;
+	private int n;
+	private GqGroup group;
+
 	private ShuffleArgument() {
 		// Intentionally left blank.
 	}
@@ -43,6 +47,18 @@ class ShuffleArgument {
 
 	MultiExponentiationArgument getMultiExponentiationArgument() {
 		return multiExponentiationArgument;
+	}
+
+	int getM() {
+		return m;
+	}
+
+	int getN() {
+		return n;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override
@@ -116,8 +132,9 @@ class ShuffleArgument {
 					"The commitments cA, cB, the product and the multi exponentiation arguments must belong to the same group.");
 
 			// Cross dimensions checking.
-			final int m = this.cA.size();
-			checkArgument(this.cB.size() == m && productArgument.getM() == m && multiExponentiationArgument.getM() == m,
+			final List<Integer> mDimensions = Arrays
+					.asList(this.cA.size(), this.cB.size(), this.productArgument.getM(), this.multiExponentiationArgument.getM());
+			checkArgument(allEqual(mDimensions.stream(), d -> d),
 					"The commitments cA, cB and the product and multi exponentiation arguments must have the same dimension m.");
 
 			checkArgument(this.productArgument.getN() == this.multiExponentiationArgument.getN(),
@@ -129,6 +146,10 @@ class ShuffleArgument {
 			shuffleArgument.cB = this.cB;
 			shuffleArgument.productArgument = this.productArgument;
 			shuffleArgument.multiExponentiationArgument = this.multiExponentiationArgument;
+
+			shuffleArgument.m = productArgument.getM();
+			shuffleArgument.n = productArgument.getN();
+			shuffleArgument.group = productArgument.getGroup();
 
 			return shuffleArgument;
 		}

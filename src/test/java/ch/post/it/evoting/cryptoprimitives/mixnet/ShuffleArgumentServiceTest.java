@@ -4,12 +4,15 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.ShuffleArgumentGenerator.ShuffleArgumentPair;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -44,6 +47,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
+import ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 
@@ -146,7 +150,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setUp() {
-			// Because the test groups are small.
+			// getShuffleArgument needs a permutation vector constructed with a permutation having values in [0, N]. Because test groups are small,
+			// we need to ensure N < q. The loop stays fast because of small test groups and bounds.
 			do {
 				m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 				n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
@@ -449,4 +454,236 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		}
 	}
 
+	@Nested
+	@DisplayName("calling verifyShuffleArgument with")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	class VerifyShuffleArgumentTest {
+
+		private ElGamalGenerator elGamalGenerator;
+		private ElGamalMultiRecipientPublicKey publicKey;
+		private ShuffleArgumentService shuffleArgumentService;
+
+		private ShuffleStatement shuffleStatement;
+		private ShuffleArgument shuffleArgument;
+		private int m;
+		private int n;
+		private int N;
+		private int l;
+
+		@BeforeAll
+		void setUpAll() {
+			elGamalGenerator = new ElGamalGenerator(gqGroup);
+			final CommitmentKeyGenerator commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
+
+			publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
+			final CommitmentKey commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
+
+			// Necessary to return a constant value, otherwise some assertFalse tests can return true because of changes compensating each other (due
+			// to small test groups).
+			final MixnetHashService hashServiceMock = mock(MixnetHashService.class);
+			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
+
+			shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+		}
+
+		@BeforeEach
+		void setUp() {
+			// getShuffleArgument needs a permutation vector constructed with a permutation having values in [0, N]. Because test groups are small,
+			// we need to ensure N < q. The loop stays fast because of small test groups and bounds.
+			do {
+				m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+				n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			} while (BigInteger.valueOf((long) m * n).compareTo(zqGroup.getQ()) >= 0);
+			N = m * n;
+			l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+
+			final ShuffleArgumentGenerator shuffleArgumentGenerator = new ShuffleArgumentGenerator(gqGroup);
+			final ShuffleArgumentPair shuffleArgumentPair = shuffleArgumentGenerator.genShuffleArgumentPair(N, l, publicKey);
+			shuffleStatement = shuffleArgumentPair.getStatement();
+			final ShuffleWitness shuffleWitness = shuffleArgumentPair.getWitness();
+
+			shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
+		}
+
+		@Test
+		@DisplayName("any null parameter throws NullPointerException")
+		void verifyShuffleArgumentNullParams() {
+			assertThrows(NullPointerException.class, () -> shuffleArgumentService.verifyShuffleArgument(null, shuffleArgument, m, n));
+			assertThrows(NullPointerException.class, () -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, null, m, n));
+		}
+
+		@Test
+		@DisplayName("valid parameters returns true")
+		void verifyShuffleArgumentValidParams() {
+			assertTrue(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n));
+		}
+
+		@Test
+		@DisplayName("invalid number of rows or columns throws IllegalArgumentException")
+		void verifyShuffleArgumentInvalidRowsCols() {
+			final IllegalArgumentException rowsIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, 0, n));
+			assertEquals("The number of rows for the ciphertext matrices must be strictly positive.", rowsIllegalArgumentException.getMessage());
+
+			final IllegalArgumentException columnsIllegalArgumentException = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, 0));
+			assertEquals("The number of columns for the ciphertext matrices must be strictly positive.",
+					columnsIllegalArgumentException.getMessage());
+		}
+
+		@Test
+		@DisplayName("m different from commitment vectors size throws IllegalArgumentException")
+		void verifyShuffleArgumentMDiffSizeCommitments() {
+			final int tooBigM = shuffleArgument.getcA().size() + 1;
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, tooBigM, n));
+			assertEquals("The m dimension of the argument must be equal to the input parameter m.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("m * n different from ciphertexts size throws IllegalArgumentException")
+		void verifyShuffleArgumentMTimesNDiffCiphertextsSize() {
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n + 1));
+			assertEquals("The product m * n must be equal to the statement's ciphertexts' size.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("statement and argument having incompatible groups throws IllegalArgumentException")
+		void verifyShuffleArgumentDiffGroup() {
+			final ShuffleArgumentGenerator shuffleArgumentGenerator = new ShuffleArgumentGenerator(otherGqGroup);
+			final ShuffleStatement otherShuffleStatement = shuffleArgumentGenerator.genShuffleStatement(N, l);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.verifyShuffleArgument(otherShuffleStatement, shuffleArgument, m, n));
+			assertEquals("The statement and the argument must have compatible groups.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("incorrect ciphertexts C throws IllegalArgumentException")
+		void verifyShuffleArgumentIncorrectC() {
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = shuffleStatement.getCiphertexts();
+			final int randomIndex = secureRandom.nextInt(ciphertexts.size());
+			final ElGamalMultiRecipientCiphertext ciphertext = ciphertexts.get(randomIndex);
+			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(ciphertext);
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = GroupVectors
+					.set(ciphertexts, randomIndex, otherCiphertext);
+
+			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.getShuffledCiphertexts());
+
+			assertFalse(shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n));
+		}
+
+		@Test
+		@DisplayName("incorrect shuffled ciphertexts C' throws IllegalArgumentException")
+		void verifyShuffleArgumentIncorrectShuffledCPrime() {
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts();
+			final int randomIndex = secureRandom.nextInt(shuffledCiphertexts.size());
+			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(randomIndex);
+			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(shuffledCiphertext);
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts = GroupVectors
+					.set(shuffledCiphertexts, randomIndex, otherCiphertext);
+
+			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.getShuffledCiphertexts(), badShuffledCiphertexts);
+
+			assertFalse(shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n));
+		}
+
+		@Test
+		@DisplayName("incorrect commitment vector c_A throws IllegalArgumentException")
+		void verifyShuffleArgumentIncorrectCA() {
+			final SameGroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.getcA();
+
+			final GqElement badCA0 = commitmentA.get(0).multiply(gqGroup.getGenerator());
+			final SameGroupVector<GqElement, GqGroup> badCommitmentA = GroupVectors.set(commitmentA, 0, badCA0);
+			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
+					.withCA(badCommitmentA)
+					.withCB(shuffleArgument.getcB())
+					.withProductArgument(shuffleArgument.getProductArgument())
+					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
+					.build();
+
+			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+		}
+
+		@Test
+		@DisplayName("incorrect commitment vector c_B throws IllegalArgumentException")
+		void verifyShuffleArgumentIncorrectCB() {
+			final SameGroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.getcB();
+
+			final GqElement badCBm = commitmentB.get(0).multiply(gqGroup.getGenerator());
+			final SameGroupVector<GqElement, GqGroup> badCommitmentB = GroupVectors.set(commitmentB, 0, badCBm);
+			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
+					.withCA(shuffleArgument.getcA())
+					.withCB(badCommitmentB)
+					.withProductArgument(shuffleArgument.getProductArgument())
+					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
+					.build();
+
+			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+		}
+
+		@Test
+		@DisplayName("incorrect product argument returns false")
+		void verifyShuffleArgumentFailedProductVerif() {
+			final ProductArgument productArgument = shuffleArgument.getProductArgument();
+
+			final SingleValueProductArgument singleValueProductArgument = productArgument.getSingleValueProductArgument();
+			final ZqElement badRTilde = zqGroupGenerator.otherElement(singleValueProductArgument.getRTilde());
+			final SingleValueProductArgument badSingleValueProductArgument = new SingleValueProductArgument.Builder()
+					.withCd(singleValueProductArgument.getCd())
+					.withCLowerDelta(singleValueProductArgument.getCLowerDelta())
+					.withCUpperDelta(singleValueProductArgument.getCUpperDelta())
+					.withATilde(singleValueProductArgument.getATilde())
+					.withBTilde(singleValueProductArgument.getBTilde())
+					.withRTilde(badRTilde)
+					.withSTilde(singleValueProductArgument.getSTilde())
+					.build();
+
+			ProductArgument badProductArgument;
+			if (m == 1) {
+				badProductArgument = new ProductArgument(badSingleValueProductArgument);
+			} else {
+				badProductArgument = new ProductArgument(productArgument.getCommitmentB(), productArgument.getHadamardArgument(),
+						badSingleValueProductArgument);
+			}
+
+			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
+					.withCA(shuffleArgument.getcA())
+					.withCB(shuffleArgument.getcB())
+					.withProductArgument(badProductArgument)
+					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
+					.build();
+
+			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+		}
+
+		@Test
+		@DisplayName("incorrect multi-exponentiation argument returns false")
+		void verifyShuffleArgumentFailedMultiExpVerif() {
+			final MultiExponentiationArgument multiExponentiationArgument = shuffleArgument.getMultiExponentiationArgument();
+
+			final GqElement badCA0 = multiExponentiationArgument.getcA0().multiply(gqGroup.getGenerator());
+			final MultiExponentiationArgument badMultiExponentiationArgument = new MultiExponentiationArgument.Builder()
+					.withcA0(badCA0)
+					.withcBVector(multiExponentiationArgument.getcBVector())
+					.withEVector(multiExponentiationArgument.getEVector())
+					.withaVector(multiExponentiationArgument.getaVector())
+					.withr(multiExponentiationArgument.getR())
+					.withb(multiExponentiationArgument.getB())
+					.withs(multiExponentiationArgument.getS())
+					.withtau(multiExponentiationArgument.getTau())
+					.build();
+
+			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
+					.withCA(shuffleArgument.getcA())
+					.withCB(shuffleArgument.getcB())
+					.withProductArgument(shuffleArgument.getProductArgument())
+					.withMultiExponentiationArgument(badMultiExponentiationArgument)
+					.build();
+
+			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+		}
+	}
 }

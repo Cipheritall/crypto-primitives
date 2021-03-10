@@ -21,6 +21,9 @@ class ShuffleStatement {
 	private final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
 	private final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
 
+	private final int N;
+	private final GqGroup group;
+
 	/**
 	 * Instantiates a shuffle statement. The vector of input ciphertexts and the vector of shuffled, re-encrypted ciphertexts must comply with the
 	 * following:
@@ -55,6 +58,8 @@ class ShuffleStatement {
 
 		this.ciphertexts = ciphertexts;
 		this.shuffledCiphertexts = shuffledCiphertexts;
+		this.N = ciphertexts.size();
+		this.group = ciphertexts.getGroup();
 	}
 
 	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getCiphertexts() {
@@ -63,6 +68,14 @@ class ShuffleStatement {
 
 	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getShuffledCiphertexts() {
 		return shuffledCiphertexts;
+	}
+
+	int getN() {
+		return N;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override
