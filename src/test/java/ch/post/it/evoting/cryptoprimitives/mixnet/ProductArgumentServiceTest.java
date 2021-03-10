@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -246,7 +247,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, n, randomService);
 			ElGamalMultiRecipientPublicKey productPublicKey = keyPair.getPublicKey();
 			CommitmentKey productCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
-			RandomService productRandomService = mock(RandomService.class);
+			RandomService productRandomService = spy(RandomService.class);
 			MixnetHashService productHashService = mock(MixnetHashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
@@ -255,17 +256,16 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			BigInteger three = BigInteger.valueOf(3);
 			BigInteger four = BigInteger.valueOf(4);
 
-			when(productRandomService.genRandomInteger(any()))
-					.thenReturn(four, // s
-							three, // s_1
-							one, three, // a_0
-							two, one, // b_m
-							four, // r_0
-							zero, // s_m
-							zero, one, three, four, two, one, two, // t
-							four, one, zero, // d_0, d_1, r_d
-							one, two // s_0, s_x
-					);
+			doReturn(four, // s
+					three, // s_1
+					one, three, // a_0
+					two, one, // b_m
+					four, // r_0
+					zero, // s_m
+					zero, one, three, four, two, one, two, // t
+					four, one, zero, // d_0, d_1, r_d
+					one, two // s_0, s_x
+			).when(productRandomService).genRandomInteger(any());
 			when(productHashService.recursiveHash(any()))
 					.thenReturn(new byte[] { 0b10 }, new byte[] { 0b11 }, new byte[] { 0b01 }, new byte[] { 0b10 });
 			ProductArgumentService specificProductArgumentService = new ProductArgumentService(productRandomService, productHashService,

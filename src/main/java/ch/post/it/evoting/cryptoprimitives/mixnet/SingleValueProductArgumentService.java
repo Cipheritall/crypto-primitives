@@ -14,10 +14,11 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
@@ -101,18 +102,17 @@ class SingleValueProductArgumentService {
 				.collect(Collectors.toList());
 
 		// Calculate d and r_d
-		SameGroupVector<ZqElement, ZqGroup> d = Stream.generate(() -> randomService.genRandomInteger(q))
-				.map(value -> ZqElement.create(value, group))
-				.limit(n)
-				.collect(toSameGroupVector());
+		SameGroupVector<ZqElement, ZqGroup> d = SameGroupVector.from(randomService.genRandomVector(q, n));
 		ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ
-		List<ZqElement> lowerDelta = new ArrayList<>(n);
-		lowerDelta.add(0, d.get(0));
-		lowerDelta.addAll(1, Stream.generate(() -> randomService.genRandomInteger(q)).map(value -> ZqElement.create(value, group)).limit(n - 2L)
-				.collect(Collectors.toList()));
-		lowerDelta.add(n - 1, group.getIdentity());
+		List<ZqElement> lowerDeltaElements = new ArrayList<>(n);
+		lowerDeltaElements.add(0, d.get(0));
+		if (n > 2) {
+			lowerDeltaElements.addAll(1, randomService.genRandomVector(q, n - 2));
+		}
+		lowerDeltaElements.add(n - 1, group.getIdentity());
+		ImmutableList<ZqElement> lowerDelta = ImmutableList.copyOf(lowerDeltaElements);
 
 		// Calculate s_0 and s_x
 		ZqElement s0 = ZqElement.create(randomService.genRandomInteger(q), group);

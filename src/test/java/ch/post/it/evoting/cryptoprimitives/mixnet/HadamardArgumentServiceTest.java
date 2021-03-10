@@ -11,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -306,7 +308,7 @@ class HadamardArgumentServiceTest {
 			ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, n, randomService);
 			ElGamalMultiRecipientPublicKey hadamardPublicKey = keyPair.getPublicKey();
 			CommitmentKey hadamardCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
-			RandomService hadamardRandomService = mock(RandomService.class);
+			RandomService hadamardRandomService = spy(RandomService.class);
 			MixnetHashService hadamardHashService = mock(MixnetHashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
@@ -315,14 +317,13 @@ class HadamardArgumentServiceTest {
 			BigInteger three = BigInteger.valueOf(3);
 			BigInteger four = BigInteger.valueOf(4);
 
-			when(hadamardRandomService.genRandomInteger(any()))
-					.thenReturn(three, // s_1
-							one, three, // a_0
-							two, one, // b_m
-							four, // r_0
-							zero, // s_m
-							zero, one, three, four, two, one, two // t
-					);
+			doReturn(three, // s_1
+					one, three, // a_0
+					two, one, // b_m
+					four, // r_0
+					zero, // s_m
+					zero, one, three, four, two, one, two // t
+			).when(hadamardRandomService).genRandomInteger(any());
 			when(hadamardHashService.recursiveHash(any()))
 					.thenReturn(new byte[] { 0b10 });
 			HadamardArgumentService specificHadamardArgumentService = new HadamardArgumentService(hadamardRandomService, hadamardHashService,

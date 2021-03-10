@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,10 +116,11 @@ final class ZeroArgumentService {
 		// Algorithm operations.
 
 		final int n = matrixA.numRows();
-		final SameGroupVector<ZqElement, ZqGroup> a0 = SameGroupVector.from(generateRandomZqElementList(n, zqGroup));
-		final SameGroupVector<ZqElement, ZqGroup> bm = SameGroupVector.from(generateRandomZqElementList(n, zqGroup));
-		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
-		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
+		final BigInteger q = zqGroup.getQ();
+		final SameGroupVector<ZqElement, ZqGroup> a0 = SameGroupVector.from(randomService.genRandomVector(q, n));
+		final SameGroupVector<ZqElement, ZqGroup> bm = SameGroupVector.from(randomService.genRandomVector(q, n));
+		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
+		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		final GqElement cA0 = getCommitment(a0, r0, commitmentKey);
 		final GqElement cBm = getCommitment(bm, sm, commitmentKey);
 
@@ -131,7 +131,7 @@ final class ZeroArgumentService {
 		final SameGroupVector<ZqElement, ZqGroup> d = computeDVector(augmentedMatrixA, augmentedMatrixB, y);
 
 		// Compute t and c_d.
-		final List<ZqElement> t = new ArrayList<>(generateRandomZqElementList(2 * m + 1, zqGroup));
+		final List<ZqElement> t = new ArrayList<>(randomService.genRandomVector(q, (2 * m) + 1));
 		t.set(m + 1, ZqElement.create(BigInteger.ZERO, zqGroup));
 		final SameGroupVector<GqElement, GqGroup> cd = getCommitmentVector(d, SameGroupVector.from(t), commitmentKey);
 
@@ -281,17 +281,6 @@ final class ZeroArgumentService {
 						.multiply(secondVector.get(j))
 						.multiply(y.exponentiate(BigInteger.valueOf(j + 1L))))
 				.reduce(group.getIdentity(), ZqElement::add);
-	}
-
-	/**
-	 * Generate a random immutable vector of {@link ZqElement} in the specified {@code group}.
-	 *
-	 * @param numElements the number of elements to generate.
-	 * @return a vector of {@code numElements} random {@link ZqElement}.
-	 */
-	private List<ZqElement> generateRandomZqElementList(final int numElements, final ZqGroup group) {
-		return Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(group.getQ()), group)).limit(numElements)
-				.collect(Collectors.toList());
 	}
 
 	/**

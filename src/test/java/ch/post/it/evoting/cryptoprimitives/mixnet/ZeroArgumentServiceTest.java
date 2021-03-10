@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -612,7 +613,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			// Mock random elements. There are 13 values to mock:
 			// a0=(1,3) bm=(2,1) r0=4 sm=0 t=(0,1,3,4,2,1,2)
-			final RandomService randomServiceMock = mock(RandomService.class);
+			final RandomService randomServiceMock = spy(randomService);
 			doReturn(ONE, THREE, TWO, ONE, FOUR, ZERO, ZERO, ONE, THREE, FOUR, TWO, ONE, TWO).when(randomServiceMock)
 					.genRandomInteger(simpleZqGroup.getQ());
 

@@ -12,7 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -239,11 +241,11 @@ class SingleValueProductArgumentServiceTest {
 					.build();
 
 			//Mock random integers
-			RandomService randomService = mock(RandomService.class);
-			when(randomService.genRandomInteger(specificZqGroup.getQ()))
-					.thenReturn(BigInteger.valueOf(3), BigInteger.valueOf(7), // d_0, d_1
-							BigInteger.valueOf(10),                              // r_d
-							BigInteger.valueOf(4), BigInteger.valueOf(8));      // s_0, s_x
+			RandomService randomService = spy(new RandomService());
+			doReturn(BigInteger.valueOf(3), BigInteger.valueOf(7), // d_0, d_1
+					BigInteger.valueOf(10),                        // r_d
+					BigInteger.valueOf(4), BigInteger.valueOf(8))  // s_0, s_x
+					.when(randomService).genRandomInteger(specificZqGroup.getQ());
 
 			SingleValueProductStatement statement = new SingleValueProductStatement(commitment, product);
 			SingleValueProductWitness witness = new SingleValueProductWitness(SameGroupVector.from(a), r);

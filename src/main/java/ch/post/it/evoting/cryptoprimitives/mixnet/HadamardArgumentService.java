@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.HashableString;
@@ -135,13 +137,13 @@ public class HadamardArgumentService {
 				.collect(Collectors.toList());
 
 		// Calculate s_0, ..., s_(m-1)
-		final List<ZqElement> sList = new ArrayList<>(m);
-		sList.add(0, r.get(0));
-		sList.addAll(1,
-				Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(q), zqGroup))
-						.limit(m - 2L)
-						.collect(Collectors.toList()));
-		sList.add(m - 1, s);
+		final List<ZqElement> sElements = new ArrayList<>(m);
+		sElements.add(0, r.get(0));
+		if (m > 2) {
+			sElements.addAll(1, randomService.genRandomVector(q, m - 2));
+		}
+		sElements.add(m - 1, s);
+		ImmutableList<ZqElement> sList = ImmutableList.copyOf(sElements);
 
 		// Calculate c_(B_0), ..., c_(B_(m-1))
 		final List<GqElement> cBList = new ArrayList<>(m);
