@@ -1,0 +1,70 @@
+#!/usr/bin/env groovy
+
+// builds opc and executes JUnit-tests of tt.
+// param: boolean create dcf
+
+properties properties: [
+        disableConcurrentBuilds()
+]
+
+properties([
+        parameters([
+                string(
+                        defaultValue: 'develop',
+                        description: 'Set branch to build.',
+                        name: 'BRANCH_NAME'
+                )
+        ])
+])
+
+node {
+    timestamps {
+        env.JAVA_HOME = "${tool 'jdk-8u131'}"
+        env.PATH = "${tool 'Fortify_20.1.0'}/Fortify_SCA_and_Apps_20.1.0/bin:${tool 'maven-3.3.9'}/bin:${env.PATH}"
+
+        step([$class: 'StashNotifier'])
+        currentBuild.result = 'SUCCESS'
+        WORKSPACE = pwd()
+        PROJECT_NAME = 'crypto-primitives'
+        SCM_URL = "https://gitit.post.ch/scm/evotingecosystem/crypto-primitives.git"
+        END_URL = "gitit.post.ch/scm/evotingecosystem/crypto-primitives.git"
+
+        step([$class: 'WsCleanup'])
+
+        sh "wget -O ./jenkins-build-pipeline.groovy http://artifactory.tools.post.ch/artifactory/libs-release-local/ch/post/it/common/jenkins/pipeline/00.03.11.00/pipeline-00.03.11.00.jar!jenkins-build-pipeline.groovy"
+        def commonPipelineLib = load 'jenkins-build-pipeline.groovy'
+
+        // Checkout all repositories
+        try {
+            withCredentials([usernamePassword(credentialsId: '32b1c695-9ddc-4114-a025-07fce287494c', passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
+                stage('Checkout all repositories') {
+                    sh "rm -rf *"
+                    sh "git clone https://${GIT_USER}:${GIT_PASS}@${END_URL} ."
+                }
+            }
+        } catch (Exception err) {
+            echo "Checkout withCredentials failed"
+            currentBuild.result = 'FAILURE'
+        }
+
+        stage('Fortify analysis') {
+            sh '''
+                SSC_PROJ_NAME=crypto-primitives
+                SSC_PROJ_VERSION=1.0
+                sourceanalyzer -b "${JOB_NAME}" -clean
+                sourceanalyzer -b "${JOB_NAME}" -verbose -Xmx6096M -64 -exclude "**/*Test.java" -exclude "**/Test*.java" "**/*.java" "**/*.jsp"  "**/custom/**/*.js"
+                sourceanalyzer -b "${JOB_NAME}" -verbose -Xmx8G -64 -f "${JOB_NAME}.fpr" -logfile "${JOB_NAME}_sourceanalyser.log" -scan
+                fortifyclient uploadFPR -file "${JOB_NAME}.fpr" -project "${SSC_PROJ_NAME}" -version "${SSC_PROJ_VERSION}" -authtoken "${SSCProd_UploadToken}" -url "${SSCProd_URL}"
+            '''
+        }
+
+        stage('Sending emails informations') {
+            commonPipelineLib.sendEmail(PROJECT_NAME, BRANCH_NAME, "jenkinsfortify", "Please check the latest build and fix the error.", false, "mathias.meier@post.ch", true)
+        }
+    
+        commit = sh(script: 'git rev-parse HEAD', returnStdout: true)
+    
+        step([$class: 'StashNotifier',
+              commitSha1: "${commit.trim()}"])
+    }
+}

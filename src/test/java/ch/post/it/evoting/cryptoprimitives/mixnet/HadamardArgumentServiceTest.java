@@ -1,9 +1,23 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestHadamardGenerators.generateHadamardStatement;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestHadamardGenerators.generateHadamardWitness;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,48 +25,56 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
-class HadamardArgumentServiceTest {
+class HadamardArgumentServiceTest extends TestGroupSetup {
 
 	private static final int MATRIX_BOUNDS = 10;
-	private static final SecureRandom secureRandom = new SecureRandom();
 	private static final RandomService randomService = new RandomService();
 
-	private static HashService hashService;
+	private static MixnetHashService hashService;
+
 	private static int n;
 	private static int m;
 
-	private static GqGroup gqGroup;
+	private static TestCommitmentKeyGenerator commitmentKeyGenerator;
+
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
 	private static HadamardArgumentService hadamardArgumentService;
@@ -64,15 +86,11 @@ class HadamardArgumentServiceTest {
 	static void setupAll() {
 		n = secureRandom.nextInt(MATRIX_BOUNDS) + 1;
 		m = secureRandom.nextInt(MATRIX_BOUNDS - 1) + 2; // The Hadamard argument only works with 2 or more columns
-		gqGroup = GroupTestData.getGqGroup();
-		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, n, randomService);
-		publicKey = keyPair.getPublicKey();
-		GqGroupGenerator generator = new GqGroupGenerator(gqGroup);
-		commitmentKey = new CommitmentKey(generator.genNonIdentityNonGeneratorMember(),
-				IntStream.range(0, n).mapToObj(i -> generator.genNonIdentityNonGeneratorMember()).collect(Collectors.toList()));
-		hashService = mock(HashService.class);
-		when(hashService.recursiveHash(any()))
-				.thenReturn(new byte[] { 0b10 });
+		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
+		publicKey = elGamalGenerator.genRandomPublicKey(n);
+		commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
+		commitmentKey = commitmentKeyGenerator.genCommitmentKey(n);
+		hashService = TestHashService.create(gqGroup.getQ());
 		hadamardArgumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 	}
 
@@ -94,21 +112,9 @@ class HadamardArgumentServiceTest {
 	}
 
 	@Test
-	@DisplayName("Instantiating a Hadamard argument provider with a public key and a commitment key of different sizes throws")
-	void constructHadamardArgumentServiceWithKeysDifferentSize() {
-		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, n + 1, randomService);
-		ElGamalMultiRecipientPublicKey otherPublicKey = keyPair.getPublicKey();
-		Exception exception = assertThrows(IllegalArgumentException.class,
-				() -> new HadamardArgumentService(randomService, hashService, otherPublicKey, commitmentKey));
-		assertEquals("The public key and the commitment key must have the same size.", exception.getMessage());
-	}
-
-	@Test
 	@DisplayName("Instantiating a Hadamard argument provider with a public key and a commitment key from a different group throws")
 	void constructHadamardArgumentServiceWithKeysDifferentGroup() {
-		GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(differentGqGroup, n, randomService);
-		ElGamalMultiRecipientPublicKey otherPublicKey = keyPair.getPublicKey();
+		ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(n);
 		Exception exception = assertThrows(IllegalArgumentException.class,
 				() -> new HadamardArgumentService(randomService, hashService, otherPublicKey, commitmentKey));
 		assertEquals("The public key and the commitment key must belong to the same group.", exception.getMessage());
@@ -118,34 +124,26 @@ class HadamardArgumentServiceTest {
 	@DisplayName("Calculating a Hadamard argument...")
 	class GetHadamardArgumentTest {
 
-		private ZqGroup zqGroup;
-		private ZqGroupGenerator zqGenerator;
-
-		private SameGroupVector<GqElement, GqGroup> commitmentsA;
+		private GroupVector<GqElement, GqGroup> commitmentsA;
 		private GqElement commitmentB;
-		private SameGroupMatrix<ZqElement, ZqGroup> matrix;
-		private SameGroupVector<ZqElement, ZqGroup> vector;
-		private SameGroupVector<ZqElement, ZqGroup> exponents;
+		private GroupMatrix<ZqElement, ZqGroup> matrix;
+		private GroupVector<ZqElement, ZqGroup> vector;
+		private GroupVector<ZqElement, ZqGroup> exponents;
 		private ZqElement randomness;
 
 		@BeforeEach
 		void setup() {
-			zqGroup = ZqGroup.sameOrderAs(gqGroup);
-			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
+			witness = generateHadamardWitness(n, m, zqGroup);
 
-			// Generate the Hadamard witness
-			zqGenerator = new ZqGroupGenerator(zqGroup);
-			matrix = zqGenerator.genRandomZqElementMatrix(n, m);
-			vector = IntStream.range(0, n).mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
-					.collect(toSameGroupVector());
-			exponents = zqGenerator.genRandomZqElementVector(m);
-			randomness = zqGenerator.genRandomZqElementMember();
-			witness = new HadamardWitness(matrix, vector, exponents, randomness);
+			matrix = witness.getMatrixA();
+			vector = witness.getVectorB();
+			exponents = witness.getExponentsR();
+			randomness = witness.getExponentS();
 
-			// Generate the Hadamard statement
-			commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, commitmentKey);
-			commitmentB = CommitmentService.getCommitment(vector, randomness, commitmentKey);
-			statement = new HadamardStatement(commitmentsA, commitmentB);
+			statement = generateHadamardStatement(witness, commitmentKey);
+
+			commitmentsA = statement.getCommitmentsA();
+			commitmentB = statement.getCommitmentB();
 		}
 
 		@Test
@@ -164,19 +162,8 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with too few columns throws an IllegalArgumentException")
 		void getHadamardArgumentWithTooFewColumns() {
-
-			// Generate the Hadamard witness
-			SameGroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, 1);
-			SameGroupVector<ZqElement, ZqGroup> vector = zqGenerator.genRandomZqElementVector(n);
-			SameGroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(1);
-			ZqElement randomness = zqGenerator.genRandomZqElementMember();
-			witness = new HadamardWitness(matrix, vector, exponents, randomness);
-
-			// Generate the Hadamard statement
-			SameGroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, commitmentKey);
-			GqElement commitmentB = CommitmentService.getCommitment(vector, randomness, commitmentKey);
-			statement = new HadamardStatement(commitmentsA, commitmentB);
-
+			witness = generateHadamardWitness(n, 1, zqGroup);
+			statement = generateHadamardStatement(witness, commitmentKey);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
 			assertEquals("The matrix must have at least 2 columns.", exception.getMessage());
 		}
@@ -184,9 +171,9 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with too long commitments for A throws an IllegalArgumentException")
 		void getHadamardArgumentWithTooLongCommitmentsA() {
-			List<GqElement> commitmentsAList = commitmentsA.stream().collect(Collectors.toList());
+			List<GqElement> commitmentsAList = new ArrayList<>(commitmentsA);
 			commitmentsAList.add(gqGroup.getIdentity());
-			commitmentsA = new SameGroupVector<>(commitmentsAList);
+			commitmentsA = GroupVector.from(commitmentsAList);
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
 			assertEquals("The commitments for A must have as many elements as matrix A has rows.", exception.getMessage());
@@ -195,9 +182,9 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with too short commitments for A throws an IllegalArgumentException")
 		void getHadamardArgumentWithTooShortCommitmentsA() {
-			List<GqElement> commitmentsAList = commitmentsA.stream().collect(Collectors.toList());
+			List<GqElement> commitmentsAList = new ArrayList<>(commitmentsA);
 			commitmentsAList.remove(0);
-			commitmentsA = new SameGroupVector<>(commitmentsAList);
+			commitmentsA = GroupVector.from(commitmentsAList);
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
 			assertEquals("The commitments for A must have as many elements as matrix A has rows.", exception.getMessage());
@@ -206,10 +193,8 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with the statement having a different group than the witness throws an IllegalArgumentException")
 		void getHadamardArgumentWithCommitmentsFromDifferentGroup() {
-			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			GqGroupGenerator generator = new GqGroupGenerator(differentGqGroup);
-			commitmentsA = generator.genRandomGqElementVector(m);
-			commitmentB = generator.genMember();
+			commitmentsA = otherGqGroupGenerator.genRandomGqElementVector(m);
+			commitmentB = otherGqGroupGenerator.genMember();
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
 			assertEquals("The matrix A and its commitments must have the same group order q.", exception.getMessage());
@@ -218,24 +203,8 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with too short public key and commitment key throws an IllegalArgumentException")
 		void getHadamardArgumentWithTooShortKeys() {
-			zqGroup = ZqGroup.sameOrderAs(gqGroup);
-			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
-
-			// Generate the Hadamard witness
-			zqGenerator = new ZqGroupGenerator(zqGroup);
-			matrix = zqGenerator.genRandomZqElementMatrix(n + 1, m);
-			vector = IntStream.range(0, n + 1).mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
-					.collect(toSameGroupVector());
-			exponents = zqGenerator.genRandomZqElementVector(m);
-			randomness = zqGenerator.genRandomZqElementMember();
-			witness = new HadamardWitness(matrix, vector, exponents, randomness);
-
-			// Generate the Hadamard statement
-			GqGroupGenerator gqGenerator = new GqGroupGenerator(gqGroup);
-			commitmentsA = gqGenerator.genRandomGqElementVector(m);
-			commitmentB = gqGenerator.genMember();
-			statement = new HadamardStatement(commitmentsA, commitmentB);
-
+			witness = generateHadamardWitness(n + 1, m, zqGroup);
+			statement = generateHadamardStatement(witness, commitmentKeyGenerator.genCommitmentKey(n + 1));
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
 			assertEquals("The number of rows in the matrix must be smaller than the commitment key size.", exception.getMessage());
 		}
@@ -243,11 +212,11 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with wrong commitments for b throws an IllegalArgumentException")
 		void getHadamardArgumentWithWrongCommitmentsA() {
-			List<GqElement> commitmentsAList = commitmentsA.stream().collect(Collectors.toCollection(ArrayList::new));
+			List<GqElement> commitmentsAList = new ArrayList<>(commitmentsA);
 			GqElement first = commitmentsAList.get(0);
 			first = first.multiply(gqGroup.getGenerator());
 			commitmentsAList.set(0, first);
-			commitmentsA = new SameGroupVector<>(commitmentsAList);
+			commitmentsA = GroupVector.from(commitmentsAList);
 			statement = new HadamardStatement(commitmentsA, commitmentB);
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
 			assertEquals("The commitments A must correspond to the commitment to matrix A with exponents r and the given commitment key.",
@@ -267,11 +236,11 @@ class HadamardArgumentServiceTest {
 		@Test
 		@DisplayName("with a wrong product b throws an IllegalArgumentException")
 		void getHadamardArgumentWithWrongProduct() {
-			List<ZqElement> vectorElements = vector.stream().collect(Collectors.toCollection(ArrayList::new));
+			List<ZqElement> vectorElements = new ArrayList<>(vector);
 			ZqElement first = vectorElements.get(0);
 			first = first.add(ZqElement.create(BigInteger.ONE, zqGroup));
 			vectorElements.set(0, first);
-			vector = new SameGroupVector<>(vectorElements);
+			vector = GroupVector.from(vectorElements);
 			witness = new HadamardWitness(matrix, vector, exponents, randomness);
 			commitmentB = CommitmentService.getCommitment(vector, randomness, commitmentKey);
 			statement = new HadamardStatement(commitmentsA, commitmentB);
@@ -304,13 +273,11 @@ class HadamardArgumentServiceTest {
 			ZqElement zqFour = ZqElement.create(BigInteger.valueOf(4), zqGroup);
 
 			// Create HadamardArgumentService
-			int n = 2;
 			int m = 3;
-			ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, n, randomService);
-			ElGamalMultiRecipientPublicKey hadamardPublicKey = keyPair.getPublicKey();
+			ElGamalMultiRecipientPublicKey hadamardPublicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gqNine, gqFour));
 			CommitmentKey hadamardCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
-			RandomService hadamardRandomService = mock(RandomService.class);
-			HashService hadamardHashService = mock(HashService.class);
+			RandomService hadamardRandomService = spy(RandomService.class);
+			MixnetHashService hadamardHashService = mock(MixnetHashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
 			BigInteger one = BigInteger.ONE;
@@ -318,50 +285,50 @@ class HadamardArgumentServiceTest {
 			BigInteger three = BigInteger.valueOf(3);
 			BigInteger four = BigInteger.valueOf(4);
 
-			when(hadamardRandomService.genRandomInteger(any()))
-					.thenReturn(three, // s_1
-							one, three, // a_0
-							two, one, // b_m
-							four, // r_0
-							zero, // s_m
-							zero, one, three, four, two, one, two // t
-					);
+			doReturn(three, // s_1
+					one, three, // a_0
+					two, one, // b_m
+					four, // r_0
+					zero, // s_m
+					zero, one, three, four, two, one, two // t
+			).when(hadamardRandomService).genRandomInteger(any());
 			when(hadamardHashService.recursiveHash(any()))
 					.thenReturn(new byte[] { 0b10 });
-			HadamardArgumentService specificHadamardArgumentService = new HadamardArgumentService(hadamardRandomService, hadamardHashService, hadamardPublicKey, hadamardCommitmentKey);
+			HadamardArgumentService specificHadamardArgumentService = new HadamardArgumentService(hadamardRandomService, hadamardHashService,
+					hadamardPublicKey, hadamardCommitmentKey);
 
 			// Create A
 			List<List<ZqElement>> matrixColumns = new ArrayList<>(m);
 			matrixColumns.add(0, Arrays.asList(zqFour, zqZero));
 			matrixColumns.add(1, Arrays.asList(zqTwo, zqTwo));
 			matrixColumns.add(2, Arrays.asList(zqZero, zqFour));
-			SameGroupMatrix<ZqElement, ZqGroup> matrix = SameGroupMatrix.fromColumns(matrixColumns);
+			GroupMatrix<ZqElement, ZqGroup> matrix = GroupMatrix.fromColumns(matrixColumns);
 
 			// Create b
-			SameGroupVector<ZqElement, ZqGroup> vector = new SameGroupVector<>(Arrays.asList(zqZero, zqZero));
+			GroupVector<ZqElement, ZqGroup> vector = GroupVector.of(zqZero, zqZero);
 
 			// Create r
-			SameGroupVector<ZqElement, ZqGroup> exponents = new SameGroupVector<>(Arrays.asList(zqThree, zqThree, zqFour));
+			GroupVector<ZqElement, ZqGroup> exponents = GroupVector.of(zqThree, zqThree, zqFour);
 
 			// Create s
 			ZqElement randomness = zqTwo;
 			HadamardWitness hadamardWitness = new HadamardWitness(matrix, vector, exponents, randomness);
 
 			// Calculate c_A and c_b
-			SameGroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, hadamardCommitmentKey);
+			GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, hadamardCommitmentKey);
 			GqElement commitmentB = CommitmentService.getCommitment(vector, randomness, hadamardCommitmentKey);
 			HadamardStatement hadamardStatement = new HadamardStatement(commitmentsA, commitmentB);
 
 			// Create the expected c_B
-			SameGroupVector<GqElement, GqGroup> cB = SameGroupVector.of(gqNine, gqFive, gqFour);
+			GroupVector<GqElement, GqGroup> cB = GroupVector.of(gqNine, gqFive, gqFour);
 
 			// Create the expected ZeroArgument
-			ZeroArgument zeroArgument = new ZeroArgument.ZeroArgumentBuilder()
+			ZeroArgument zeroArgument = new ZeroArgument.Builder()
 					.withCA0(gqFive)
 					.withCBm(gqOne)
-					.withCd(new SameGroupVector<>(Arrays.asList(gqFour, gqFour, gqNine, gqNine, gqOne, gqThree, gqOne)))
-					.withAPrime(new SameGroupVector<>(Arrays.asList(zqTwo, zqZero)))
-					.withBPrime(new SameGroupVector<>(Arrays.asList(zqOne, zqOne)))
+					.withCd(GroupVector.of(gqFour, gqFour, gqNine, gqNine, gqOne, gqThree, gqOne))
+					.withAPrime(GroupVector.of(zqTwo, zqZero))
+					.withBPrime(GroupVector.of(zqOne, zqOne))
 					.withRPrime(zqOne)
 					.withSPrime(zqFour)
 					.withTPrime(zqOne)
@@ -378,30 +345,12 @@ class HadamardArgumentServiceTest {
 	@DisplayName("Verifying a Hadamard argument...")
 	class VerifyHadamardArgumentTest {
 
-		private ZqGroup zqGroup;
-
 		private HadamardArgument argument;
 
 		@BeforeEach
 		void setup() {
-			zqGroup = ZqGroup.sameOrderAs(gqGroup);
-			ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
-
-			// Generate the Hadamard witness
-			ZqGroupGenerator zqGenerator = new ZqGroupGenerator(zqGroup);
-			SameGroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, m);
-			SameGroupVector<ZqElement, ZqGroup> vector = IntStream.range(0, n)
-					.mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
-					.collect(toSameGroupVector());
-			SameGroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(m);
-			ZqElement randomness = zqGenerator.genRandomZqElementMember();
-			HadamardWitness witness = new HadamardWitness(matrix, vector, exponents, randomness);
-
-			// Generate the Hadamard statement
-			SameGroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, commitmentKey);
-			GqElement commitmentB = CommitmentService.getCommitment(vector, randomness, commitmentKey);
-			statement = new HadamardStatement(commitmentsA, commitmentB);
-
+			witness = generateHadamardWitness(n, m, zqGroup);
+			statement = generateHadamardStatement(witness, commitmentKey);
 			argument = hadamardArgumentService.getHadamardArgument(statement, witness);
 		}
 
@@ -413,28 +362,60 @@ class HadamardArgumentServiceTest {
 		}
 
 		@Test
+		@DisplayName("with the statement and the argument having different group orders throws an IllegalArgumentException")
+		void verifyHadamardArgumentWithStatementAndArgumentFromDifferentGroups() {
+			HadamardWitness otherWitness = generateHadamardWitness(n, m, otherZqGroup);
+			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(n);
+			HadamardStatement otherStatement = generateHadamardStatement(otherWitness, otherCommitmentKey);
+
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> hadamardArgumentService.verifyHadamardArgument(otherStatement, argument));
+			assertEquals("The statement's and the argument's groups must have the same order.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with the statement and the argument having different sizes m throws an IllegalArgumentException")
+		void verifyHadamardArgumentWithStatementAndArgumentOfDifferentSizes() {
+			HadamardWitness otherWitness = generateHadamardWitness(n, m + 1, zqGroup);
+			HadamardStatement otherStatement = generateHadamardStatement(otherWitness, commitmentKey);
+
+			Exception exception = assertThrows(IllegalArgumentException.class,
+					() -> hadamardArgumentService.verifyHadamardArgument(otherStatement, argument));
+			assertEquals("The statement and the argument must have the same size m.", exception.getMessage());
+		}
+
+		@Test
 		@DisplayName("with correct input returns true")
 		void verifyHadamardArgumentWithCorrectInput() {
-			assertTrue(hadamardArgumentService.verifyHadamardArgument(statement, argument));
+			final VerificationResult verificationResult = hadamardArgumentService.verifyHadamardArgument(statement, argument).verify();
+			assertTrue(verificationResult.isVerified());
 		}
 
 		@Test
 		@DisplayName("with bad values for cUpperB returns false")
-		void verifyHadamardArgumentWithBadcUpperB() {
-			SameGroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
+		void verifyHadamardArgumentWithBad_cUpperB() {
+			GroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
-			SameGroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toSameGroupVector()).prepend(badcUpperB0);
+			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
 			HadamardArgument badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
 
-			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+			final VerificationResult verificationResult = hadamardArgumentService.verifyHadamardArgument(statement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			String expectedError = String
+					.format("cUpperB.get(0) %s must equal cA.get(0) %s and cUpperB.get(m - 1) %s must equal cLowerB %s", badcUpperB0,
+							statement.getCommitmentsA().get(0), cUpperB.get(m - 1), statement.getCommitmentB());
+			assertEquals(expectedError, verificationResult.getErrorMessages().getFirst());
 
 			int m = cUpperB.size();
 			GqElement badcUpperBmMinusOne = cUpperB.get(m - 1).multiply(gqGroup.getGenerator());
-			badcUpperB = new SameGroupVector<>(cUpperB.stream().collect(Collectors.toList()).subList(0, m - 1)).append(badcUpperBmMinusOne);
+			badcUpperB = GroupVector.from(new ArrayList<>(cUpperB).subList(0, m - 1)).append(badcUpperBmMinusOne);
 			badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
 
-			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument).verify().isVerified());
 		}
 
 		@Test
@@ -442,7 +423,7 @@ class HadamardArgumentServiceTest {
 		void verifyHadamardArgumentWithBadZeroArgument() {
 			ZeroArgument zeroArgument = argument.getZeroArgument();
 			GqElement badcA0 = zeroArgument.getCA0().multiply(gqGroup.getGenerator());
-			ZeroArgument badZeroArgument = new ZeroArgument.ZeroArgumentBuilder()
+			ZeroArgument badZeroArgument = new ZeroArgument.Builder()
 					.withCA0(badcA0)
 					.withCBm(zeroArgument.getCBm())
 					.withCd(zeroArgument.getCd())
@@ -453,15 +434,23 @@ class HadamardArgumentServiceTest {
 					.withTPrime(zeroArgument.getTPrime())
 					.build();
 			HadamardArgument badArgument = new HadamardArgument(argument.getCommitmentsB(), badZeroArgument);
-			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
+
+			final VerificationResult verificationResult = argumentService.verifyHadamardArgument(statement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify the ZeroArgument.", verificationResult.getErrorMessages().element());
 		}
 	}
 
 	@Nested
 	@DisplayName("Calculating the Hadamard product...")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class GetHadamardProductTest {
 
-		private SameGroupMatrix<ZqElement, ZqGroup> matrix;
+		private GroupMatrix<ZqElement, ZqGroup> matrix;
 
 		@BeforeEach
 		void setup() {
@@ -512,22 +501,77 @@ class HadamardArgumentServiceTest {
 			column3.add(ZqElement.create(BigInteger.valueOf(5), group));
 			column3.add(ZqElement.create(BigInteger.valueOf(6), group));
 			columns.add(column3);
-			SameGroupMatrix<ZqElement, ZqGroup> columnMatrix = SameGroupMatrix.fromColumns(columns);
+			GroupMatrix<ZqElement, ZqGroup> columnMatrix = GroupMatrix.fromColumns(columns);
 
 			// getHadamardProduct with j = 0 yields the first column vector
-			assertEquals(new SameGroupVector<>(column1), hadamardArgumentService.getHadamardProduct(columnMatrix, 0));
+			assertEquals(GroupVector.from(column1), hadamardArgumentService.getHadamardProduct(columnMatrix, 0));
 
 			// getHadamardProduct with j = 1 yields the vector [3, 8]
 			List<ZqElement> result2 = new ArrayList<>(2);
 			result2.add(ZqElement.create(BigInteger.valueOf(3), group));
 			result2.add(ZqElement.create(BigInteger.valueOf(8), group));
-			assertEquals(new SameGroupVector<>(result2), hadamardArgumentService.getHadamardProduct(columnMatrix, 1));
+			assertEquals(GroupVector.from(result2), hadamardArgumentService.getHadamardProduct(columnMatrix, 1));
 
 			// getHadamardProduct with j = 2 yields the vector [3, 8]
 			List<ZqElement> result3 = new ArrayList<>(2);
 			result3.add(ZqElement.create(BigInteger.valueOf(4), group));
 			result3.add(ZqElement.create(BigInteger.valueOf(4), group));
-			assertEquals(new SameGroupVector<>(result3), hadamardArgumentService.getHadamardProduct(columnMatrix, 2));
+			assertEquals(GroupVector.from(result3), hadamardArgumentService.getHadamardProduct(columnMatrix, 2));
+		}
+
+		@ParameterizedTest
+		@MethodSource("verifyHadamardArgumentRealValuesProvider")
+		@DisplayName("with real values gives expected result")
+		void verifyHadamardArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
+				final HadamardStatement hadamardStatement, final HadamardArgument hadamardArgument, final boolean expectedOutput, String description)
+				throws NoSuchAlgorithmException {
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final HadamardArgumentService service = new HadamardArgumentService(randomService, mixnetHashService, publicKey, commitmentKey);
+
+			assertEquals(expectedOutput, service.verifyHadamardArgument(hadamardStatement, hadamardArgument).verify().isVerified(),
+					String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> verifyHadamardArgumentRealValuesProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-hadamard-argument.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final TestContextParser context = new TestContextParser(testParameters.getContext());
+
+				final GqGroup gqGroup = context.getGqGroup();
+				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
+				final CommitmentKey commitmentKey = context.parseCommitmentKey();
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				HadamardStatement hadamardStatement = parseHadamardStatement(gqGroup, input);
+
+				JsonData hadamardArgumentJsonData = input.getJsonData("argument");
+				HadamardArgument hadamardArgument = new TestArgumentParser(gqGroup).parseHadamardArgument(hadamardArgumentJsonData);
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final boolean outputValue = output.get("verif_result", Boolean.class);
+
+				return Arguments.of(publicKey, commitmentKey, hadamardStatement, hadamardArgument, outputValue, testParameters.getDescription());
+			});
+		}
+
+		private HadamardStatement parseHadamardStatement(GqGroup gqGroup, JsonData input) {
+			final JsonData hadamardStatementJsonData = input.getJsonData("statement");
+			final BigInteger[] cAValues = hadamardStatementJsonData.get("c_a", BigInteger[].class);
+			final BigInteger cBValue = hadamardStatementJsonData.get("c_b", BigInteger.class);
+
+			final GroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
+					.map(bi -> GqElement.create(bi, gqGroup))
+					.collect(toGroupVector());
+			final GqElement cB = GqElement.create(cBValue, gqGroup);
+
+			return new HadamardStatement(cA, cB);
 		}
 	}
 }

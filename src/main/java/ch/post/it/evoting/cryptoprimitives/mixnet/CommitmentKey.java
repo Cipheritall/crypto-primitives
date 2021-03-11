@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -8,16 +20,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.Hashable;
-import ch.post.it.evoting.cryptoprimitives.HashableList;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -28,9 +49,10 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  */
 class CommitmentKey implements HashableList {
 
+	static final String HASH_CONSTANT = "commitmentKey";
 	private final GqGroup group;
 	private final GqElement h;
-	private final SameGroupVector<GqElement, GqGroup> gElements;
+	private final GroupVector<GqElement, GqGroup> gElements;
 
 	/**
 	 * Creates a {@link CommitmentKey} object.
@@ -55,7 +77,7 @@ class CommitmentKey implements HashableList {
 		//Validate gElements
 		checkNotNull(gElements);
 		checkArgument(gElements.stream().noneMatch(Objects::isNull), "A commitment key cannot contain null elements");
-		SameGroupVector<GqElement, GqGroup> gs = new SameGroupVector<>(gElements);
+		final GroupVector<GqElement, GqGroup> gs = GroupVector.from(gElements);
 
 		checkArgument(!gs.isEmpty(), "No g element provided");
 		checkArgument(gs.getGroup().equals(h.getGroup()), "All g elements must have the same group as h");
@@ -88,12 +110,12 @@ class CommitmentKey implements HashableList {
 	 *
 	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>k</sub> in that order
 	 */
-	public Stream<GqElement> stream() {
+	Stream<GqElement> stream() {
 		return Stream.concat(Stream.of(this.h), this.gElements.stream());
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -113,12 +135,61 @@ class CommitmentKey implements HashableList {
 
 	@Override
 	public String toString() {
-		List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
+		final List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
 		return "CommitmentKey{" + "h=" + h + ", g elements=" + simpleGElements + '}';
 	}
 
 	@Override
 	public ImmutableList<Hashable> toHashableForm() {
 		return this.stream().collect(toImmutableList());
+	}
+
+	/**
+	 * Creates a commitment key, with the {@code numberOfCommitmentElements} specifying the commitment key's desired number of elements.
+	 *
+	 * @param numberOfElements k, the desired number of elements of the commitment key. Must be strictly positive.
+	 * @param gqGroup          the gqGroup to which the commitment key belongs. Must be non null.
+	 * @return the created commitment key.
+	 */
+	static CommitmentKey getVerifiableCommitmentKey(final int numberOfElements, final GqGroup gqGroup) throws NoSuchAlgorithmException {
+
+		checkArgument(numberOfElements > 0, "The desired number of commitment elements must be greater than zero");
+		checkNotNull(gqGroup);
+
+		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+
+		int count = 0;
+		int i = 0;
+
+		// Using a Set to prevent duplicates.
+		final Set<BigInteger> v = new LinkedHashSet<>();
+
+		final Predicate<BigInteger> validElement = w -> !w.equals(BigInteger.ZERO)
+				&& !w.equals(BigInteger.ONE)
+				&& !w.equals(gqGroup.getGenerator().getValue())
+				&& !v.contains(w);
+
+		while (count <= numberOfElements) {
+
+			final BigInteger u = ConversionService.byteArrayToInteger(hashService.recursiveHash(
+					HashableBigInteger.from(gqGroup.getQ()),
+					HashableString.from(HASH_CONSTANT),
+					HashableBigInteger.from(BigInteger.valueOf(i)),
+					HashableBigInteger.from(BigInteger.valueOf(count))));
+
+			final BigInteger w = u.modPow(BigInteger.valueOf(2), gqGroup.getP());
+
+			if (validElement.test(w)) {
+				v.add(w);
+				count++;
+			}
+			i++;
+
+		}
+
+		final List<GqElement> commitmentKeyElements = v.stream().map(e -> GqElement.create(e, gqGroup)).collect(Collectors.toList());
+
+		return new CommitmentKey(commitmentKeyElements.get(0), commitmentKeyElements.subList(1, commitmentKeyElements.size()));
+
 	}
 }

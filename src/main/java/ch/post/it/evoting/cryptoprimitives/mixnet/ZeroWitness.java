@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -8,8 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -18,13 +30,13 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 class ZeroWitness {
 
-	private final SameGroupMatrix<ZqElement, ZqGroup> matrixA;
-	private final SameGroupMatrix<ZqElement, ZqGroup> matrixB;
-	private final SameGroupVector<ZqElement, ZqGroup> exponentsR;
-	private final SameGroupVector<ZqElement, ZqGroup> exponentsS;
+	private final GroupMatrix<ZqElement, ZqGroup> matrixA;
+	private final GroupMatrix<ZqElement, ZqGroup> matrixB;
+	private final GroupVector<ZqElement, ZqGroup> exponentsR;
+	private final GroupVector<ZqElement, ZqGroup> exponentsS;
 
 	/**
-	 * Instantiate a zero witness. The matrices and exponents must comply with the following:
+	 * Instantiates a zero witness. The matrices and exponents must comply with the following:
 	 *
 	 * <ul>
 	 *     <li>be non null</li>
@@ -38,8 +50,8 @@ class ZeroWitness {
 	 * @param exponentsR r, a vector of {@link ZqElement}s.
 	 * @param exponentsS s, a vector of {@link ZqElement}s.
 	 */
-	ZeroWitness(final SameGroupMatrix<ZqElement, ZqGroup> matrixA, final SameGroupMatrix<ZqElement, ZqGroup> matrixB,
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR, SameGroupVector<ZqElement, ZqGroup> exponentsS) {
+	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> matrixA, final GroupMatrix<ZqElement, ZqGroup> matrixB,
+			final GroupVector<ZqElement, ZqGroup> exponentsR, final GroupVector<ZqElement, ZqGroup> exponentsS) {
 
 		// Null checking.
 		this.matrixA = checkNotNull(matrixA);
@@ -63,31 +75,31 @@ class ZeroWitness {
 		}
 	}
 
-	SameGroupMatrix<ZqElement, ZqGroup> getMatrixA() {
+	GroupMatrix<ZqElement, ZqGroup> getMatrixA() {
 		return matrixA;
 	}
 
-	SameGroupMatrix<ZqElement, ZqGroup> getMatrixB() {
+	GroupMatrix<ZqElement, ZqGroup> getMatrixB() {
 		return matrixB;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getExponentsR() {
+	GroupVector<ZqElement, ZqGroup> getExponentsR() {
 		return exponentsR;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getExponentsS() {
+	GroupVector<ZqElement, ZqGroup> getExponentsS() {
 		return exponentsS;
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ZeroWitness that = (ZeroWitness) o;
+		final ZeroWitness that = (ZeroWitness) o;
 		return matrixA.equals(that.matrixA) && matrixB.equals(that.matrixB) && exponentsR.equals(that.exponentsR) && exponentsS
 				.equals(that.exponentsS);
 	}

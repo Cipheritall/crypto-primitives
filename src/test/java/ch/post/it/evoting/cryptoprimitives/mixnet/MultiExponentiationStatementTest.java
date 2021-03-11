@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -12,8 +24,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -28,9 +40,9 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 	private int n;
 	private int m;
 	private int l;
-	private SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix;
+	private GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix;
 	private ElGamalMultiRecipientCiphertext C;
-	private SameGroupVector<GqElement, GqGroup> cA;
+	private GroupVector<GqElement, GqGroup> cA;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -44,7 +56,7 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 		m = secureRandom.nextInt(UPPER_BOUND_TEST_SIZE) + 1;
 		l = secureRandom.nextInt(UPPER_BOUND_TEST_SIZE) + 1;
 
-		MultiExponentiationStatementGenerator statementGenerator = new MultiExponentiationStatementGenerator(gqGroup);
+		TestMultiExponentiationStatementGenerator statementGenerator = new TestMultiExponentiationStatementGenerator(gqGroup);
 		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
 		this.CMatrix = statement.getCMatrix();
 		this.C = statement.getC();
@@ -62,7 +74,7 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 
 	@Test
 	void ciphertextAndCiphertextMatrixAreNotFromSameGroupThrows() {
-		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> otherMatrix = otherGroupElGamalGenerator.genRandomCiphertextMatrix(m, n, l);
+		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> otherMatrix = otherGroupElGamalGenerator.genRandomCiphertextMatrix(m, n, l);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationStatement(otherMatrix, C, cA));
 		assertEquals("The ciphertext matrix and the ciphertext C must be from the same group.", exception.getMessage());
 	}
@@ -76,15 +88,16 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 
 	@Test
 	void ciphertextMatrixAndCommitmentVectorAreNotFromSameGroupThrows() {
-		SameGroupVector<GqElement, GqGroup> otherCommitmentVector = otherGqGroupGenerator.genRandomGqElementVector(m);
+		GroupVector<GqElement, GqGroup> otherCommitmentVector = otherGqGroupGenerator.genRandomGqElementVector(m);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationStatement(CMatrix, C, otherCommitmentVector));
 		assertEquals("The ciphertext matrix and the commitment must be from the same group.", exception.getMessage());
 	}
 
 	@Test
 	void ciphertextMatrixRowSizeIsNotCommitmentVectorSizeThrows() {
-		SameGroupVector<GqElement, GqGroup> longerCommitmentVector = gqGroupGenerator.genRandomGqElementVector(m + 1);
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationStatement(CMatrix, C, longerCommitmentVector));
+		GroupVector<GqElement, GqGroup> longerCommitmentVector = gqGroupGenerator.genRandomGqElementVector(m + 1);
+		Exception exception = assertThrows(IllegalArgumentException.class,
+				() -> new MultiExponentiationStatement(CMatrix, C, longerCommitmentVector));
 		assertEquals("The commitment must be the same size as the number of rows of the ciphertext matrix.", exception.getMessage());
 	}
 
