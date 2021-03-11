@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
@@ -20,7 +32,7 @@ public interface MathematicalGroup<G extends MathematicalGroup<G>> {
 	 * @param value group element to check.
 	 * @return true if the value is a member of the group and false otherwise.
 	 */
-	boolean isGroupMember(BigInteger value);
+	boolean isGroupMember(final BigInteger value);
 
 	/**
 	 * Returns the identity element of the group.
@@ -37,11 +49,12 @@ public interface MathematicalGroup<G extends MathematicalGroup<G>> {
 	BigInteger getQ();
 
 	/**
-	 * Compare mathematical groups based on order.
+	 * Compares mathematical groups based on their order.
+	 *
 	 * @param other mathematical group
 	 * @return true if both mathematical groups are of the same order, false otherwise.
 	 */
-	default boolean hasSameOrderAs(MathematicalGroup<?> other) {
+	default boolean hasSameOrderAs(final MathematicalGroup<?> other) {
 		return this.getQ().equals(other.getQ());
 	}
 }

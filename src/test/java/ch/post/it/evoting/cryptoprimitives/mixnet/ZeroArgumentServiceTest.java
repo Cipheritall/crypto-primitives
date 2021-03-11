@@ -1,27 +1,42 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCommitment;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -30,26 +45,31 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
-import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 @DisplayName("A ZeroArgumentService")
-@ExtendWith(MockitoExtension.class)
-class ZeroArgumentServiceTest {
+class ZeroArgumentServiceTest extends TestGroupSetup {
 
 	private static final BigInteger ZERO = BigInteger.valueOf(0);
 	private static final BigInteger ONE = BigInteger.valueOf(1);
@@ -66,37 +86,24 @@ class ZeroArgumentServiceTest {
 	private static final int KEY_ELEMENTS_NUMBER = 10;
 	private static final SecureRandom secureRandom = new SecureRandom();
 
-	private static ZqGroup zqGroup;
-	private static GqGroup gqGroup;
-	private static ZqGroupGenerator zqGroupGenerator;
-	private static GqGroupGenerator gqGroupGenerator;
 	private static ZeroArgumentService zeroArgumentService;
 	private static CommitmentKey commitmentKey;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static RandomService randomService;
-	private static HashService hashService;
+	private static MixnetHashService hashService;
 
 	@BeforeAll
 	static void setUpAll() throws Exception {
-		// GqGroup and corresponding ZqGroup set up.
-		gqGroup = GroupTestData.getGqGroup();
-		zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
-		gqGroupGenerator = new GqGroupGenerator(gqGroup);
-
 		// Generate publicKey and commitmentKey.
-		final GqElement h = gqGroupGenerator.genNonIdentityNonGeneratorMember();
-		final List<GqElement> g = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
-				.collect(Collectors.toList());
-		commitmentKey = new CommitmentKey(h, g);
+		final TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
+		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 
-		final List<GqElement> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
-				.collect(Collectors.toList());
-		publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
+		final ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
+		publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
 
 		// Init services.
 		randomService = new RandomService();
-		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		hashService = TestHashService.create(gqGroup.getQ());
 
 		zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 	}
@@ -117,25 +124,10 @@ class ZeroArgumentServiceTest {
 	}
 
 	@Test
-	@DisplayName("constructed with keys having incompatible sizes throws IllegalArgumentException")
-	void constructIncompatibleSizeKeys() {
-		// Create public key of different size.
-		final List<GqElement> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(1).collect(Collectors.toList());
-		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
-
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
-		assertEquals("The public and commitment keys do not have compatible sizes.", exception.getMessage());
-	}
-
-	@Test
 	@DisplayName("constructed with keys from different groups throws IllegalArgumentException")
 	void constructDiffGroupKeys() {
 		// Create public key from other group.
-		final GqGroupGenerator otherGqGroupGenerator = new GqGroupGenerator(GroupTestData.getDifferentGqGroup(gqGroup));
-		final List<GqElement> pkElements = Stream.generate(otherGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_ELEMENTS_NUMBER)
-				.collect(Collectors.toList());
-		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
+		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(KEY_ELEMENTS_NUMBER);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
@@ -150,8 +142,8 @@ class ZeroArgumentServiceTest {
 
 		private int n;
 		private int m;
-		private SameGroupMatrix<ZqElement, ZqGroup> firstMatrix;
-		private SameGroupMatrix<ZqElement, ZqGroup> secondMatrix;
+		private GroupMatrix<ZqElement, ZqGroup> firstMatrix;
+		private GroupMatrix<ZqElement, ZqGroup> secondMatrix;
 		private ZqElement y;
 
 		@BeforeEach
@@ -166,7 +158,7 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with any null parameter throws NullPointerException")
 		void computeDVectorNullParams() {
-			final SameGroupMatrix<ZqElement, ZqGroup> emptyMatrix = SameGroupMatrix.fromRows(Collections.emptyList());
+			final GroupMatrix<ZqElement, ZqGroup> emptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
 
 			assertAll(
 					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(null, secondMatrix, y)),
@@ -182,14 +174,14 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with matrices having unequal number of rows throws IllegalArgumentException")
 		void computeDVectorDifferentSizeLines() {
 			// Generate a first matrix with an additional row.
-			final SameGroupMatrix<ZqElement, ZqGroup> otherMatrix = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m + 1);
+			final GroupMatrix<ZqElement, ZqGroup> otherMatrix = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(otherMatrix, secondMatrix, y));
 			assertEquals("The two matrices must have the same number of rows.", exception.getMessage());
 
 			// With empty matrices.
-			final SameGroupMatrix<ZqElement, ZqGroup> emptyMatrix = SameGroupMatrix.fromRows(Collections.emptyList());
+			final GroupMatrix<ZqElement, ZqGroup> emptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
 			final IllegalArgumentException exceptionSecondEmpty = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(otherMatrix, emptyMatrix, y));
 			assertEquals("The two matrices must have the same number of rows.", exceptionSecondEmpty.getMessage());
@@ -202,8 +194,8 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with matrices with different number of columns throws IllegalArgumentException")
 		void computeDVectorDifferentSizeColumns() {
-			final SameGroupMatrix<ZqElement, ZqGroup> otherFirstMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m);
-			final SameGroupMatrix<ZqElement, ZqGroup> otherSecondMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			final GroupMatrix<ZqElement, ZqGroup> otherFirstMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+			final GroupMatrix<ZqElement, ZqGroup> otherSecondMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(otherFirstMatrix, otherSecondMatrix, y));
@@ -214,9 +206,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with second matrix having elements of different group than the first matrix throws IllegalArgumentException")
 		void computeDVectorMatricesDifferentGroup() {
 			// Get a second matrix in a different ZqGroup.
-			final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
-			final SameGroupMatrix<ZqElement, ZqGroup> differentGroupSecondMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			final GroupMatrix<ZqElement, ZqGroup> differentGroupSecondMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(firstMatrix, differentGroupSecondMatrix, y));
@@ -226,11 +216,8 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with y from a different group throws IllegalArgumentException")
 		void computeDVectorYDifferentGroup() {
-			// Get a different ZqGroup.
-			final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-
 			// Create a y value from a different group.
-			final ZqElement differentGroupY = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
+			final ZqElement differentGroupY = ZqElement.create(randomService.genRandomInteger(otherZqGroup.getQ()), otherZqGroup);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(firstMatrix, secondMatrix, differentGroupY));
@@ -246,9 +233,9 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with empty matrices gives empty result vector")
 		void computeDVectorEmptyMatrices() {
-			final SameGroupVector<ZqElement, ZqGroup> emptyD = SameGroupVector.of();
-			final SameGroupMatrix<ZqElement, ZqGroup> firstEmptyMatrix = SameGroupMatrix.fromRows(Collections.emptyList());
-			final SameGroupMatrix<ZqElement, ZqGroup> secondEmptyMatrix = SameGroupMatrix.fromRows(Collections.emptyList());
+			final GroupVector<ZqElement, ZqGroup> emptyD = GroupVector.of();
+			final GroupMatrix<ZqElement, ZqGroup> firstEmptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
+			final GroupMatrix<ZqElement, ZqGroup> secondEmptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
 
 			assertEquals(emptyD, zeroArgumentService.computeDVector(firstEmptyMatrix, secondEmptyMatrix, y));
 		}
@@ -256,9 +243,9 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with matrices with empty columns gives empty result vector")
 		void computeDVectorEmptyColumns() {
-			final SameGroupVector<ZqElement, ZqGroup> emptyD = SameGroupVector.of();
-			final SameGroupMatrix<ZqElement, ZqGroup> firstEmptyMatrix = SameGroupMatrix.fromColumns(Collections.emptyList());
-			final SameGroupMatrix<ZqElement, ZqGroup> secondEmptyMatrix = SameGroupMatrix.fromColumns(Collections.emptyList());
+			final GroupVector<ZqElement, ZqGroup> emptyD = GroupVector.of();
+			final GroupMatrix<ZqElement, ZqGroup> firstEmptyMatrix = GroupMatrix.fromColumns(Collections.emptyList());
+			final GroupMatrix<ZqElement, ZqGroup> secondEmptyMatrix = GroupMatrix.fromColumns(Collections.emptyList());
 
 			assertEquals(emptyD, zeroArgumentService.computeDVector(firstEmptyMatrix, secondEmptyMatrix, y));
 		}
@@ -274,12 +261,12 @@ class ZeroArgumentServiceTest {
 			final List<ZqElement> a1 = asList(ZqElement.create(FOUR, group), ZqElement.create(SIX, group));
 			final List<ZqElement> b0 = asList(ZqElement.create(ONE, group), ZqElement.create(THREE, group));
 			final List<ZqElement> b1 = asList(ZqElement.create(FIVE, group), ZqElement.create(SEVEN, group));
-			final SameGroupMatrix<ZqElement, ZqGroup> firstMatrix = SameGroupMatrix.fromRows(asList(a0, a1));
-			final SameGroupMatrix<ZqElement, ZqGroup> secondMatrix = SameGroupMatrix.fromRows(asList(b0, b1));
+			final GroupMatrix<ZqElement, ZqGroup> firstMatrix = GroupMatrix.fromRows(asList(a0, a1));
+			final GroupMatrix<ZqElement, ZqGroup> secondMatrix = GroupMatrix.fromRows(asList(b0, b1));
 			final ZqElement y = ZqElement.create(EIGHT, group);
 
 			// Expected d vector.
-			final SameGroupVector<ZqElement, ZqGroup> expected = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> expected = GroupVector.of(
 					ZqElement.create(TEN, group), ZqElement.create(ONE, group), ZqElement.create(ZERO, group));
 
 			assertEquals(expected, zeroArgumentService.computeDVector(firstMatrix, secondMatrix, y));
@@ -288,13 +275,14 @@ class ZeroArgumentServiceTest {
 
 	@Nested
 	@DisplayName("starMap")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class StarMapTest {
 
 		private static final int RANDOM_UPPER_BOUND = 10;
 
 		private int n;
-		private SameGroupVector<ZqElement, ZqGroup> firstVector;
-		private SameGroupVector<ZqElement, ZqGroup> secondVector;
+		private GroupVector<ZqElement, ZqGroup> firstVector;
+		private GroupVector<ZqElement, ZqGroup> secondVector;
 		private ZqElement y;
 
 		@BeforeEach
@@ -308,7 +296,7 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with any null parameter throws NullPointerException")
 		void starMapNullParams() {
-			final SameGroupVector<ZqElement, ZqGroup> emptyVector = SameGroupVector.of();
+			final GroupVector<ZqElement, ZqGroup> emptyVector = GroupVector.of();
 
 			assertAll(
 					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.starMap(null, secondVector, y)),
@@ -323,14 +311,14 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with vectors of different size throws IllegalArgumentException")
 		void starMapVectorsDifferentSize() {
-			final SameGroupVector<ZqElement, ZqGroup> secondVector = zqGroupGenerator.genRandomZqElementVector(n + 1);
+			final GroupVector<ZqElement, ZqGroup> secondVector = zqGroupGenerator.genRandomZqElementVector(n + 1);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.starMap(firstVector, secondVector, y));
 			assertEquals("The provided vectors must have the same size.", exception.getMessage());
 
 			// With empty vectors.
-			final SameGroupVector<ZqElement, ZqGroup> emptyVector = SameGroupVector.of();
+			final GroupVector<ZqElement, ZqGroup> emptyVector = GroupVector.of();
 			final IllegalArgumentException exceptionSecondEmpty = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.starMap(firstVector, emptyVector, y));
 			assertEquals("The provided vectors must have the same size.", exceptionSecondEmpty.getMessage());
@@ -344,9 +332,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with second vector elements of different group than the first vector throws IllegalArgumentException")
 		void starMapVectorsDifferentGroup() {
 			// Second vector from different group.
-			final ZqGroup otherZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(otherZqGroup);
-			final SameGroupVector<ZqElement, ZqGroup> secondVector = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final GroupVector<ZqElement, ZqGroup> secondVector = otherZqGroupGenerator.genRandomZqElementVector(n);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.starMap(firstVector, secondVector, y));
@@ -357,8 +343,7 @@ class ZeroArgumentServiceTest {
 		@DisplayName("constructed with value y from different group throws IllegalArgumentException")
 		void starMapYDifferentGroup() {
 			// Get another y from a different group.
-			final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-			final ZqElement differentGroupY = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
+			final ZqElement differentGroupY = otherZqGroupGenerator.genRandomZqElementMember();
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.starMap(firstVector, secondVector, differentGroupY));
@@ -368,8 +353,8 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with empty vectors returns identity")
 		void starMapEmptyVectors() {
-			final SameGroupVector<ZqElement, ZqGroup> firstVector = SameGroupVector.of();
-			final SameGroupVector<ZqElement, ZqGroup> secondVector = SameGroupVector.of();
+			final GroupVector<ZqElement, ZqGroup> firstVector = GroupVector.of();
+			final GroupVector<ZqElement, ZqGroup> secondVector = GroupVector.of();
 
 			assertEquals(zqGroup.getIdentity(), zeroArgumentService.starMap(firstVector, secondVector, y));
 		}
@@ -381,9 +366,9 @@ class ZeroArgumentServiceTest {
 			final ZqGroup group = new ZqGroup(ELEVEN);
 
 			// Construct the two vectors and value y.
-			final SameGroupVector<ZqElement, ZqGroup> firstVector = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> firstVector = GroupVector.of(
 					ZqElement.create(TWO, group), ZqElement.create(SIX, group));
-			final SameGroupVector<ZqElement, ZqGroup> secondVector = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> secondVector = GroupVector.of(
 					ZqElement.create(THREE, group), ZqElement.create(SEVEN, group));
 			final ZqElement y = ZqElement.create(EIGHT, group);
 
@@ -391,6 +376,52 @@ class ZeroArgumentServiceTest {
 			final ZqElement expected = ZqElement.create(EIGHT, group);
 
 			assertEquals(expected, zeroArgumentService.starMap(firstVector, secondVector, y));
+		}
+
+		@ParameterizedTest
+		@MethodSource("starMapRealValuesProvider")
+		@DisplayName("with real values gives expected result")
+		void starMapRealValues(final GroupVector<ZqElement, ZqGroup> firstVector, final GroupVector<ZqElement, ZqGroup> secondVector,
+				final ZqElement y, final ZqElement expectedOutput, final String description) {
+
+			final ZqElement actualOutput = zeroArgumentService.starMap(firstVector, secondVector, y);
+
+			assertEquals(actualOutput, expectedOutput, String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> starMapRealValuesProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/bilinearMap.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData context = testParameters.getContext();
+				final BigInteger q = context.get("q", BigInteger.class);
+
+				final ZqGroup zqGroup = new ZqGroup(q);
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+
+				final BigInteger[] aVector = input.get("a", BigInteger[].class);
+				final GroupVector<ZqElement, ZqGroup> firstVector = Arrays.stream(aVector)
+						.map(bi -> ZqElement.create(bi, zqGroup))
+						.collect(toGroupVector());
+
+				final BigInteger[] bVector = input.get("b", BigInteger[].class);
+				final GroupVector<ZqElement, ZqGroup> secondVector = Arrays.stream(bVector)
+						.map(bi -> ZqElement.create(bi, zqGroup))
+						.collect(toGroupVector());
+
+				final BigInteger yValue = input.get("y", BigInteger.class);
+				final ZqElement y = ZqElement.create(yValue, zqGroup);
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final BigInteger outputValue = output.get("value", BigInteger.class);
+				final ZqElement expectedOutput = ZqElement.create(outputValue, zqGroup);
+
+				return Arguments.of(firstVector, secondVector, y, expectedOutput, testParameters.getDescription());
+			});
 		}
 	}
 
@@ -416,11 +447,7 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with valid statement and witness does not throw")
 		void getZeroArgValidStatementAndWitness() {
-			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-			final HashService hashServiceMock = mock(HashService.class);
-			doReturn(new byte[] { 0x2 }).when(hashServiceMock).recursiveHash(any());
-
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
 			ZeroStatement zeroStatement = testData.getZeroStatement();
 			ZeroWitness zeroWitness = testData.getZeroWitness();
@@ -441,10 +468,10 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with commitments and exponents of different size throws IllegalArgumentException ")
 		void getZeroArgDiffComExp() {
 			// Create another witness with an additional element.
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.genRandomZqElementVector(m + 1);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.genRandomZqElementVector(m + 1);
+			final GroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			final GroupMatrix<ZqElement, ZqGroup> matrixB = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+			final GroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.genRandomZqElementVector(m + 1);
+			final GroupVector<ZqElement, ZqGroup> exponentsS = zqGroupGenerator.genRandomZqElementVector(m + 1);
 
 			final ZeroWitness addElemZeroWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
@@ -458,10 +485,10 @@ class ZeroArgumentServiceTest {
 		void getZeroArgDiffGroupYAndExponents() {
 			// Create another witness in another group.
 			final ZqGroupGenerator otherZqGroupGenerator = new ZqGroupGenerator(GroupTestData.getDifferentZqGroup(zqGroup));
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR = otherZqGroupGenerator.genRandomZqElementVector(m);
-			final SameGroupVector<ZqElement, ZqGroup> exponentsS = otherZqGroupGenerator.genRandomZqElementVector(m);
+			final GroupMatrix<ZqElement, ZqGroup> matrixA = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
+			final GroupMatrix<ZqElement, ZqGroup> matrixB = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
+			final GroupVector<ZqElement, ZqGroup> exponentsR = otherZqGroupGenerator.genRandomZqElementVector(m);
+			final GroupVector<ZqElement, ZqGroup> exponentsS = otherZqGroupGenerator.genRandomZqElementVector(m);
 
 			final ZeroWitness otherZqGroupZeroWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
@@ -474,15 +501,13 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with Ca commitments not equal to commitment matrix of A throws IllegalArgumentException")
 		void getZeroArgDiffCaCommitments() {
-			final SameGroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();
+			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();
 
 			// Generate a different commitment.
-			SameGroupVector<GqElement, GqGroup> otherCommitments;
-			do {
-				otherCommitments = gqGroupGenerator.genRandomGqElementVector(m);
-			} while (otherCommitments.equals(commitmentsA));
+			final GroupVector<GqElement, GqGroup> otherCommitments = Generators
+					.genWhile(() -> gqGroupGenerator.genRandomGqElementVector(m), commitments -> commitments.equals(commitmentsA));
 
-			final SameGroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
+			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
 			final ZeroStatement otherStatement = new ZeroStatement(otherCommitments, commitmentsB, zeroStatement.getY());
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -493,15 +518,13 @@ class ZeroArgumentServiceTest {
 		@Test
 		@DisplayName("with Cb commitments not equal to commitment matrix of B throws IllegalArgumentException")
 		void getZeroArgDiffCbCommitments() {
-			final SameGroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
+			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
 
 			// Generate a different commitment.
-			SameGroupVector<GqElement, GqGroup> otherCommitments;
-			do {
-				otherCommitments = gqGroupGenerator.genRandomGqElementVector(m);
-			} while (otherCommitments.equals(commitmentsB));
+			GroupVector<GqElement, GqGroup> otherCommitments = Generators
+					.genWhile(() -> gqGroupGenerator.genRandomGqElementVector(m), commitments -> commitments.equals(commitmentsB));
 
-			final SameGroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();
+			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();
 			final ZeroStatement otherStatement = new ZeroStatement(commitmentsA, otherCommitments, zeroStatement.getY());
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -513,18 +536,18 @@ class ZeroArgumentServiceTest {
 		@DisplayName("with starMap sum not equal to 0 throws IllegalArgumentException")
 		void getZeroArgStarMapNotZero() {
 			// Create a simple witness.
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixA = SameGroupMatrix
+			final GroupMatrix<ZqElement, ZqGroup> matrixA = GroupMatrix
 					.fromRows(Collections.singletonList(Collections.singletonList(ZqElement.create(ONE, zqGroup))));
-			final SameGroupMatrix<ZqElement, ZqGroup> matrixB = SameGroupMatrix
+			final GroupMatrix<ZqElement, ZqGroup> matrixB = GroupMatrix
 					.fromRows(Collections.singletonList(Collections.singletonList(ZqElement.create(ONE, zqGroup))));
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR = SameGroupVector.of(ZqElement.create(ONE, zqGroup));
-			final SameGroupVector<ZqElement, ZqGroup> exponentsS = SameGroupVector.of(ZqElement.create(ONE, zqGroup));
+			final GroupVector<ZqElement, ZqGroup> exponentsR = GroupVector.of(ZqElement.create(ONE, zqGroup));
+			final GroupVector<ZqElement, ZqGroup> exponentsS = GroupVector.of(ZqElement.create(ONE, zqGroup));
 			final ZeroWitness otherWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
 			// Derive statement from it.
-			final SameGroupVector<GqElement, GqGroup> commitmentsA = CommitmentService
+			final GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService
 					.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
-			final SameGroupVector<GqElement, GqGroup> commitmentsB = CommitmentService
+			final GroupVector<GqElement, GqGroup> commitmentsB = CommitmentService
 					.getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
 			// Fix y to 1 so the starMap gives 1 (because A and B are 1).
 			final ZqElement y = ZqElement.create(ONE, zqGroup);
@@ -543,24 +566,24 @@ class ZeroArgumentServiceTest {
 			final ZqGroup simpleZqGroup = ZqGroup.sameOrderAs(simpleGqGroup);
 
 			// Statement.
-			final SameGroupVector<GqElement, GqGroup> commitmentsA = SameGroupVector.of(
+			final GroupVector<GqElement, GqGroup> commitmentsA = GroupVector.of(
 					GqElement.create(FIVE, simpleGqGroup), GqElement.create(THREE, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup));
-			final SameGroupVector<GqElement, GqGroup> commitmentsB = SameGroupVector.of(
+			final GroupVector<GqElement, GqGroup> commitmentsB = GroupVector.of(
 					GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup), GqElement.create(NINE, simpleGqGroup));
 			final ZqElement y = ZqElement.create(TWO, simpleZqGroup);
 
 			final ZeroStatement simpleZeroStatement = new ZeroStatement(commitmentsA, commitmentsB, y);
 
 			// Witness.
-			final SameGroupMatrix<ZqElement, ZqGroup> simpleMatrixA = SameGroupMatrix.fromRows(asList(
+			final GroupMatrix<ZqElement, ZqGroup> simpleMatrixA = GroupMatrix.fromRows(asList(
 					asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup)),
 					asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup))));
-			final SameGroupMatrix<ZqElement, ZqGroup> simpleMatrixB = SameGroupMatrix.fromRows(asList(
+			final GroupMatrix<ZqElement, ZqGroup> simpleMatrixB = GroupMatrix.fromRows(asList(
 					asList(ZqElement.create(THREE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup)),
 					asList(ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup))));
-			final SameGroupVector<ZqElement, ZqGroup> simpleExponentsR = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> simpleExponentsR = GroupVector.of(
 					ZqElement.create(THREE, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
-			final SameGroupVector<ZqElement, ZqGroup> simpleExponentsS = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> simpleExponentsS = GroupVector.of(
 					ZqElement.create(ONE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup));
 
 			final ZeroWitness simpleZeroWitness = new ZeroWitness(simpleMatrixA, simpleMatrixB, simpleExponentsR, simpleExponentsS);
@@ -568,19 +591,19 @@ class ZeroArgumentServiceTest {
 			// Argument.
 			final GqElement cA0 = GqElement.create(FIVE, simpleGqGroup);
 			final GqElement cBm = GqElement.create(ONE, simpleGqGroup);
-			final SameGroupVector<GqElement, GqGroup> cd = SameGroupVector.of(
+			final GroupVector<GqElement, GqGroup> cd = GroupVector.of(
 					GqElement.create(FOUR, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup),
 					GqElement.create(NINE, simpleGqGroup), GqElement.create(ONE, simpleGqGroup), GqElement.create(THREE, simpleGqGroup),
 					GqElement.create(ONE, simpleGqGroup));
-			final SameGroupVector<ZqElement, ZqGroup> aPrime = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> aPrime = GroupVector.of(
 					ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
-			final SameGroupVector<ZqElement, ZqGroup> bPrime = SameGroupVector.of(
+			final GroupVector<ZqElement, ZqGroup> bPrime = GroupVector.of(
 					ZqElement.create(ONE, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup));
 			final ZqElement rPrime = ZqElement.create(ONE, simpleZqGroup);
 			final ZqElement sPrime = ZqElement.create(FOUR, simpleZqGroup);
 			final ZqElement tPrime = ZqElement.create(ONE, simpleZqGroup);
 
-			final ZeroArgument.ZeroArgumentBuilder zeroArgumentBuilder = new ZeroArgument.ZeroArgumentBuilder();
+			final ZeroArgument.Builder zeroArgumentBuilder = new ZeroArgument.Builder();
 			zeroArgumentBuilder
 					.withCA0(cA0)
 					.withCBm(cBm)
@@ -602,13 +625,12 @@ class ZeroArgumentServiceTest {
 
 			// Mock random elements. There are 13 values to mock:
 			// a0=(1,3) bm=(2,1) r0=4 sm=0 t=(0,1,3,4,2,1,2)
-			final RandomService randomServiceMock = mock(RandomService.class);
+			final RandomService randomServiceMock = spy(randomService);
 			doReturn(ONE, THREE, TWO, ONE, FOUR, ZERO, ZERO, ONE, THREE, FOUR, TWO, ONE, TWO).when(randomServiceMock)
 					.genRandomInteger(simpleZqGroup.getQ());
 
-			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-			final HashService hashServiceMock = mock(HashService.class);
-			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
+			// Mock the hashService.
+			final MixnetHashService hashServiceMock = TestHashService.create(simpleGqGroup.getQ());
 
 			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
 					hashServiceMock);
@@ -616,7 +638,6 @@ class ZeroArgumentServiceTest {
 			// Verification.
 			final ZeroArgument zeroArgument = simpleZeroArgumentService.getZeroArgument(simpleZeroStatement, simpleZeroWitness);
 			verify(randomServiceMock, times(13)).genRandomInteger(simpleZqGroup.getQ());
-			verify(hashServiceMock, times(1)).recursiveHash(any());
 
 			assertEquals(simpleZeroArgument, zeroArgument);
 		}
@@ -624,15 +645,12 @@ class ZeroArgumentServiceTest {
 
 	@Nested
 	@DisplayName("VerifyZeroArgument")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifyZeroArgument {
 
 		@RepeatedTest(10)
 		void verifyZeroArgumentTest() {
-			// Mock the hashService in order to have a hash value of compatible length (because of small q of test groups).
-			final HashService hashServiceMock = mock(HashService.class);
-			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0x2 });
-
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
+			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
 			ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
 			ZeroStatement statement = testData.getZeroStatement();
@@ -640,12 +658,11 @@ class ZeroArgumentServiceTest {
 
 			ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
 
-			assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument));
+			assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument).verify().isVerified());
 		}
 
 		@Test
 		void testNullInputParameters() {
-
 			ZeroArgument zeroArgument = mock(ZeroArgument.class);
 			ZeroStatement zeroStatement = mock(ZeroStatement.class);
 
@@ -655,7 +672,6 @@ class ZeroArgumentServiceTest {
 
 		@Test
 		void testInputParameterGroupSizes() {
-
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
@@ -673,7 +689,6 @@ class ZeroArgumentServiceTest {
 
 		@Test
 		void testInputParameterGroupMembership() {
-
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
@@ -686,5 +701,57 @@ class ZeroArgumentServiceTest {
 
 		}
 
+		@ParameterizedTest
+		@MethodSource("verifyZeroArgumentRealValuesProvider")
+		@DisplayName("with real values gives expected result")
+		void verifyZeroArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
+				final ZeroStatement zeroStatement, final ZeroArgument zeroArgument, final boolean expectedOutput, String description)
+				throws NoSuchAlgorithmException {
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, mixnetHashService);
+
+			assertEquals(expectedOutput, service.verifyZeroArgument(zeroStatement, zeroArgument).verify().isVerified(),
+					String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> verifyZeroArgumentRealValuesProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-zero-argument.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData contextData = testParameters.getContext();
+				final TestContextParser context = new TestContextParser(contextData);
+				final GqGroup realGqGroup = context.getGqGroup();
+
+				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
+				final CommitmentKey commitmentKey = context.parseCommitmentKey();
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				final ZeroStatement zeroStatement = parseZeroStatement(realGqGroup, input);
+				final ZeroArgument zeroArgument = new TestArgumentParser(realGqGroup).parseZeroArgument(input.getJsonData("argument"));
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final boolean outputValue = output.get("verif_result", Boolean.class);
+
+				return Arguments.of(publicKey, commitmentKey, zeroStatement, zeroArgument, outputValue, testParameters.getDescription());
+			});
+		}
+
+		private ZeroStatement parseZeroStatement(final GqGroup realGqGroup, final JsonData input) {
+			final JsonData zeroStatementJsonData = input.getJsonData("statement");
+
+			final GroupVector<GqElement, GqGroup> cA = parseCommitment(zeroStatementJsonData, "c_a", realGqGroup);
+			final GroupVector<GqElement, GqGroup> cB = parseCommitment(zeroStatementJsonData, "c_b", realGqGroup);
+
+			final BigInteger yValue = zeroStatementJsonData.get("y", BigInteger.class);
+			final ZqElement y = ZqElement.create(yValue, ZqGroup.sameOrderAs(realGqGroup));
+
+			return new ZeroStatement(cA, cB, y);
+		}
 	}
 }

@@ -1,22 +1,33 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementList;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.HasGroupElementGenerator.generateElementMatrix;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -110,20 +121,19 @@ public class GqGroupGenerator {
 	}
 
 	/**
-	 * Generate a random {@link SameGroupVector} of {@link GqElement} in this {@code group}.
+	 * Generate a random {@link GroupVector} of {@link GqElement} in this {@code group}.
 	 *
 	 * @param numElements the number of elements to generate.
 	 * @return a vector of {@code numElements} random {@link GqElement}.
 	 */
-	public SameGroupVector<GqElement, GqGroup> genRandomGqElementVector(final int numElements) {
-		return new SameGroupVector<GqElement, GqGroup>(generateElementList(numElements, this::genMember));
+	public GroupVector<GqElement, GqGroup> genRandomGqElementVector(final int numElements) {
+		return GroupVector.from(generateElementList(numElements, this::genMember));
 	}
 
-	public SameGroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
+	public GroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
 		List<List<GqElement>> elements = generateElementMatrix(numRows, numColumns, this::genMember);
-		return SameGroupMatrix.fromRows(elements);
+		return GroupMatrix.fromRows(elements);
 	}
-
 
 	private BigInteger randomBigInteger(int bitLength) {
 		return new BigInteger(bitLength, random);
@@ -131,5 +141,9 @@ public class GqGroupGenerator {
 
 	private Stream<BigInteger> integersModP() {
 		return IntStream.range(1, group.getP().intValue()).mapToObj(BigInteger::valueOf);
+	}
+
+	public GqElement otherElement(GqElement element) {
+		return Generators.genWhile(this::genMember, element::equals);
 	}
 }
