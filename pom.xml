@@ -27,10 +27,18 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!--  Sonar  -->
+		<sonar.scm.disabled>true</sonar.scm.disabled>
+		<sonar.host.url>https://sonar.tools.pnet.ch</sonar.host.url>
+		<sonar.skipDesign>true</sonar.skipDesign>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports/</sonar.junit.reportPaths>
+		<sonar.javascript.lcov.reportPaths>${project.basedir}/coverage/lcov.info</sonar.javascript.lcov.reportPaths>
+		<sonar.coverage.exclusions>**/test/**/*,**/tests/**/*</sonar.coverage.exclusions>
 		<sonar.java.source>${maven.compiler.source}</sonar.java.source>
 		<sonar.java.target>${maven.compiler.target}</sonar.java.target>
+
 	</properties>
 
 	<dependencyManagement>
