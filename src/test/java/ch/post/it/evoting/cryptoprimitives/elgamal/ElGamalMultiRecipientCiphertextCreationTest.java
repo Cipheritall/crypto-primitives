@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
@@ -23,9 +35,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -87,7 +99,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@Test
 	void testExponentFromDifferentQThrows() {
 		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup);
+		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup.getQ());
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}
@@ -104,7 +116,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@Test
 	void testPublicKeyAndExponentFromDifferentGroupsThrows() {
 		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup);
+		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup.getQ());
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}

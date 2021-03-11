@@ -1,12 +1,29 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,5 +119,57 @@ class CommitmentKeyTest {
 
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(generator, gs));
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, elementsWithIdentity));
+	}
+
+	@Test
+	void getVerifiableCommitmentKey() throws NoSuchAlgorithmException {
+
+		final int numberOfCommitmentElements = 15;
+		final GqGroup gqGroup = GroupTestData.getGroupP59();
+		final CommitmentKey verifiableCommitmentKey = CommitmentKey.getVerifiableCommitmentKey(numberOfCommitmentElements, gqGroup);
+
+		assertNotNull(verifiableCommitmentKey.getGroup());
+
+		final GqElement h = GqElement.create(BigInteger.valueOf(16), gqGroup);
+
+		final List<GqElement> gqElements = Arrays.asList(
+				GqElement.create(BigInteger.valueOf(4), gqGroup),
+				GqElement.create(BigInteger.valueOf(57), gqGroup),
+				GqElement.create(BigInteger.valueOf(20), gqGroup),
+				GqElement.create(BigInteger.valueOf(25), gqGroup),
+				GqElement.create(BigInteger.valueOf(46), gqGroup),
+				GqElement.create(BigInteger.valueOf(12), gqGroup),
+				GqElement.create(BigInteger.valueOf(15), gqGroup),
+				GqElement.create(BigInteger.valueOf(27), gqGroup),
+				GqElement.create(BigInteger.valueOf(17), gqGroup),
+				GqElement.create(BigInteger.valueOf(41), gqGroup),
+				GqElement.create(BigInteger.valueOf(51), gqGroup),
+				GqElement.create(BigInteger.valueOf(22), gqGroup),
+				GqElement.create(BigInteger.valueOf(35), gqGroup),
+				GqElement.create(BigInteger.valueOf(45), gqGroup),
+				GqElement.create(BigInteger.valueOf(21), gqGroup));
+
+		final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gqElements);
+
+		assertEquals(expectedCommitmentKey, verifiableCommitmentKey);
+	}
+
+	@Test
+	void testGetVerifiableCommitmentKeyNullGpGroup() {
+		assertThrows(NullPointerException.class, () -> CommitmentKey.getVerifiableCommitmentKey(1, null));
+	}
+
+	@Test
+	void testGetVerifiableCommitmentKeyIncorrectNumberOfCommitmentElements() {
+		GqGroup gqGroup = mock(GqGroup.class);
+
+		IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> CommitmentKey.getVerifiableCommitmentKey(0, gqGroup));
+		assertEquals("The desired number of commitment elements must be greater than zero", illegalArgumentException.getMessage());
+
+		illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> CommitmentKey.getVerifiableCommitmentKey(-1, gqGroup));
+
+		assertEquals("The desired number of commitment elements must be greater than zero", illegalArgumentException.getMessage());
 	}
 }

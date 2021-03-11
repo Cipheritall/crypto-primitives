@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.data;
 
@@ -104,4 +116,12 @@ public class GroupTestData {
 	private static GqGroup getRandomGqGroupFrom(final List<GqGroup> groups) {
 		return groups.get(random.nextInt(groups.size()));
 	}
+
+	public static GqGroup getGroupP59() {
+		final BigInteger p4 = new BigInteger("59");
+		final BigInteger q4 = new BigInteger("29");
+		final BigInteger g4 = new BigInteger("3");
+		return new GqGroup(p4, q4, g4);
+	}
+
 }

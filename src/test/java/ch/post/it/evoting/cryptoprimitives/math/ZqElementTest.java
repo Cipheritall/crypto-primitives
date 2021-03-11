@@ -1,5 +1,17 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
@@ -11,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigInteger;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class ZqElementTest {
@@ -95,6 +109,58 @@ class ZqElementTest {
 		ZqElement exponent = ZqElement.create(exponentValue, smallQGroup);
 
 		assertEquals(expectedQ, exponent.getGroup().getQ(), "The q is not the expected one");
+	}
+
+	@Nested
+	@DisplayName("Constructing a ZqElement with")
+	class IntConstructorTest {
+
+		@Test
+		@DisplayName("a valid int value and a null group throws a NullPointerException.")
+		void givenNullGroupAndValidValueWhenAttemptToCreateExponentThenException() {
+			final int value = 10;
+			assertThrows(NullPointerException.class, () -> ZqElement.create(value, null));
+		}
+
+		@Test
+		@DisplayName("a valid int value less than q returns the expected exponent.")
+		void givenANonRandomExponentValueLessThanQGetExponentValue() {
+			final int value = 1;
+			final BigInteger exponentValue = new BigInteger(String.valueOf(value));
+			final ZqElement exponent = ZqElement.create(value, smallQGroup);
+
+			assertEquals(exponentValue, exponent.getValue(), "The exponent value is not the expected one.");
+		}
+
+		@Test
+		@DisplayName("a negative value throws an IllegalArgumentException.")
+		void givenANegativeValueShouldThrow() {
+			assertThrows(IllegalArgumentException.class, () -> ZqElement.create(-1, smallQGroup));
+		}
+
+		@Test
+		@DisplayName("an int value equal to q throws an IllegalArgumentException.")
+		void givenAValueEqualToQShouldThrow() {
+			final int value = smallQGroup.getQ().intValue();
+			assertThrows(IllegalArgumentException.class, () -> ZqElement.create(value, smallQGroup));
+		}
+
+		@Test
+		@DisplayName("an int value above q throws an IllegalArgumentException.")
+		void givenAValueAboveQShouldThrow() {
+			final int value = smallQGroup.getQ().add(BigInteger.TEN).intValue();
+			assertThrows(IllegalArgumentException.class, () -> ZqElement.create(value, smallQGroup));
+		}
+
+		@Test
+		@DisplayName("a valid int returns the expected q value when getting q.")
+		void givenAnExponentWhenGetQThenExpectedQReturned() {
+			final int value = 2;
+			final BigInteger expectedQ = new BigInteger("11");
+			final ZqElement exponent = ZqElement.create(value, smallQGroup);
+
+			assertEquals(expectedQ, exponent.getGroup().getQ(), "The q is not the expected one.");
+		}
 	}
 
 	@Test

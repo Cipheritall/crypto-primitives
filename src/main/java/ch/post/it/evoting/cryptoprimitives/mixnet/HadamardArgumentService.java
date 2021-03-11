@@ -1,9 +1,22 @@
 /*
- * HEADER_LICENSE_OPEN_SOURCE
+ * Copyright 2021 Post CH Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -14,31 +27,28 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
-import ch.post.it.evoting.cryptoprimitives.HashableString;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 public class HadamardArgumentService {
 
 	private final RandomService randomService;
-	private final HashService hashService;
+	private final MixnetHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
-
-	private final Logger log = LoggerFactory.getLogger(HadamardArgumentService.class);
 
 	/**
 	 * Constructs a {code HadamardArgumentService}.
@@ -54,7 +64,7 @@ public class HadamardArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key for calculating the commitments.
 	 */
-	HadamardArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	HadamardArgumentService(final RandomService randomService, final MixnetHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		checkNotNull(randomService);
 		checkNotNull(hashService);
@@ -64,8 +74,6 @@ public class HadamardArgumentService {
 		// Check group and dimension of the public and commitment key
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()),
 				"The public key and the commitment key must belong to the same group.");
-		checkArgument(publicKey.size() == commitmentKey.size(),
-				"The public key and the commitment key must have the same size.");
 
 		this.randomService = randomService;
 		this.hashService = hashService;
@@ -98,12 +106,12 @@ public class HadamardArgumentService {
 		checkNotNull(witness);
 
 		// Extract commitments, matrix, vector and exponents
-		final SameGroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
+		final GroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
 		final GqElement cb = statement.getCommitmentB();
 		@SuppressWarnings("squid:S00117")
-		final SameGroupMatrix<ZqElement, ZqGroup> A = witness.getMatrixA();
-		final SameGroupVector<ZqElement, ZqGroup> b = witness.getVectorB();
-		final SameGroupVector<ZqElement, ZqGroup> r = witness.getExponentsR();
+		final GroupMatrix<ZqElement, ZqGroup> A = witness.getMatrixA();
+		final GroupVector<ZqElement, ZqGroup> b = witness.getVectorB();
+		final GroupVector<ZqElement, ZqGroup> r = witness.getExponentsR();
 		final ZqElement s = witness.getExponentS();
 
 		// Check dimensions and groups
@@ -111,12 +119,12 @@ public class HadamardArgumentService {
 		final int n = A.numRows();
 		final int k = commitmentKey.size();
 		checkArgument(cA.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
-		checkArgument(cA.getGroup().getQ().equals(A.getGroup().getQ()), "The matrix A and its commitments must have the same group order q.");
+		checkArgument(cA.getGroup().hasSameOrderAs(A.getGroup()), "The matrix A and its commitments must have the same group order q.");
 		checkArgument(n <= k, "The number of rows in the matrix must be smaller than the commitment key size.");
 
 		// Ensure statement corresponds to witness
 		checkArgument(m >= 2, "The matrix must have at least 2 columns.");
-		final SameGroupVector<GqElement, GqGroup> commitments = CommitmentService.getCommitmentMatrix(A, r, commitmentKey);
+		final GroupVector<GqElement, GqGroup> commitments = CommitmentService.getCommitmentMatrix(A, r, commitmentKey);
 		checkArgument(cA.equals(commitments),
 				"The commitments A must correspond to the commitment to matrix A with exponents r and the given commitment key.");
 		final GqElement commitment = CommitmentService.getCommitment(b, s, commitmentKey);
@@ -132,18 +140,18 @@ public class HadamardArgumentService {
 		final BigInteger p = gqGroup.getP();
 
 		// Calculate b_0, ..., b_(m-1)
-		final List<SameGroupVector<ZqElement, ZqGroup>> bList = IntStream.range(0, m)
+		final List<GroupVector<ZqElement, ZqGroup>> bList = IntStream.range(0, m)
 				.mapToObj(j -> getHadamardProduct(A, j))
 				.collect(Collectors.toList());
 
 		// Calculate s_0, ..., s_(m-1)
-		final List<ZqElement> sList = new ArrayList<>(m);
-		sList.add(0, r.get(0));
-		sList.addAll(1,
-				Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(q), zqGroup))
-						.limit(m - 2L)
-						.collect(Collectors.toList()));
-		sList.add(m - 1, s);
+		final List<ZqElement> sElements = new ArrayList<>(m);
+		sElements.add(0, r.get(0));
+		if (m > 2) {
+			sElements.addAll(1, randomService.genRandomVector(q, m - 2));
+		}
+		sElements.add(m - 1, s);
+		final ImmutableList<ZqElement> sList = ImmutableList.copyOf(sElements);
 
 		// Calculate c_(B_0), ..., c_(B_(m-1))
 		final List<GqElement> cBList = new ArrayList<>(m);
@@ -152,7 +160,7 @@ public class HadamardArgumentService {
 				.mapToObj(j -> CommitmentService.getCommitment(bList.get(j), sList.get(j), commitmentKey))
 				.collect(Collectors.toList()));
 		cBList.add(m - 1, cb);
-		final SameGroupVector<GqElement, GqGroup> cBVector = new SameGroupVector<>(cBList);
+		final GroupVector<GqElement, GqGroup> cBVector = GroupVector.from(cBList);
 
 		// Calculate x
 		final byte[] hashX = hashService.recursiveHash(
@@ -192,21 +200,21 @@ public class HadamardArgumentService {
 				.collect(Collectors.toList());
 
 		// Calculate c_(D_0), ..., c_(D_(m-2))
-		final SameGroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
+		final GroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
 				.mapToObj(i -> cBVector.get(i).exponentiate(xExpI.get(i + 1)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate t_0, ..., t_(m-2)
-		final SameGroupVector<ZqElement, ZqGroup> tiList = IntStream.range(0, m - 1)
+		final GroupVector<ZqElement, ZqGroup> tiList = IntStream.range(0, m - 1)
 				.mapToObj(i -> xExpI.get(i + 1).multiply(sList.get(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate d
-		final SameGroupVector<ZqElement, ZqGroup> dElements = IntStream.range(0, n)
+		final GroupVector<ZqElement, ZqGroup> dElements = IntStream.range(0, n)
 				.mapToObj(i -> IntStream.range(1, m)
 						.mapToObj(j -> xExpI.get(j).multiply(bList.get(j).get(i)))
 						.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_D
 		final GqElement cD = IntStream.range(1, m)
@@ -219,7 +227,7 @@ public class HadamardArgumentService {
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		// (-1, ..., -1) and c_(-1)
-		final SameGroupVector<ZqElement, ZqGroup> minusOnes = getMinusOnes(n, zqGroup);
+		final GroupVector<ZqElement, ZqGroup> minusOnes = getMinusOnes(n, zqGroup);
 		final ZqElement zero = zqGroup.getIdentity();
 		final GqElement cMinusOne = CommitmentService.getCommitment(minusOnes, zero, commitmentKey);
 
@@ -227,23 +235,23 @@ public class HadamardArgumentService {
 		// Beware that we name the variables as they are called within the zero argument (and not how they are called in the Hadamard argument).
 		// Therefore, D becomes B and T becomes S.
 		// Create statement
-		final SameGroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1)
-				.collect(toSameGroupVector());
-		final SameGroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
-		ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
+		final GroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1)
+				.collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
+		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		// Create witness
-		final SameGroupMatrix<ZqElement, ZqGroup> zMatrixA = SameGroupMatrix
-				.fromColumns(A.appendColumn(minusOnes).columnStream().skip(1).map(a -> a.stream().collect(Collectors.toList()))
+		final GroupMatrix<ZqElement, ZqGroup> zMatrixA = GroupMatrix
+				.fromColumns(A.appendColumn(minusOnes).columnStream().skip(1).map(ArrayList::new)
 						.collect(Collectors.toList()));
-		final SameGroupMatrix<ZqElement, ZqGroup> zMatrixB = SameGroupMatrix.fromColumns(diList).appendColumn(dElements);
-		final SameGroupVector<ZqElement, ZqGroup> zExponentsR = r.append(zero).stream().skip(1)
-				.collect(toSameGroupVector());
-		final SameGroupVector<ZqElement, ZqGroup> zExponentsS = tiList.append(t);
-		ZeroWitness zWitness = new ZeroWitness(zMatrixA, zMatrixB, zExponentsR, zExponentsS);
+		final GroupMatrix<ZqElement, ZqGroup> zMatrixB = GroupMatrix.fromColumns(diList).appendColumn(dElements);
+		final GroupVector<ZqElement, ZqGroup> zExponentsR = r.append(zero).stream().skip(1)
+				.collect(toGroupVector());
+		final GroupVector<ZqElement, ZqGroup> zExponentsS = tiList.append(t);
+		final ZeroWitness zWitness = new ZeroWitness(zMatrixA, zMatrixB, zExponentsR, zExponentsS);
 
 		// Prepare Hadamard argument
-		SameGroupVector<GqElement, GqGroup> cB = new SameGroupVector<>(cBList);
-		ZeroArgument zeroArgument = zeroArgumentService.getZeroArgument(zStatement, zWitness);
+		final GroupVector<GqElement, GqGroup> cB = GroupVector.from(cBList);
+		final ZeroArgument zeroArgument = zeroArgumentService.getZeroArgument(zStatement, zWitness);
 
 		return new HadamardArgument(cB, zeroArgument);
 	}
@@ -255,17 +263,22 @@ public class HadamardArgumentService {
 	 *
 	 * @param statement the statement for which the argument is to be verified.
 	 * @param argument  the argument to be verified.
-	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	boolean verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
+	Verifiable verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
 		// Retrieve elements for verification
-		final SameGroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
+		final GroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
 		final GqElement cLowerB = statement.getCommitmentB();
-		final SameGroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
-		final SameGroupVector<ZqElement, ZqGroup> aPrime = argument.getZeroArgument().getAPrime();
+		final GroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
+		final GroupVector<ZqElement, ZqGroup> aPrime = argument.getZeroArgument().getAPrime();
+
+		// Cross-check groups and dimensions
+		checkArgument(statement.getGroup().equals(argument.getGroup()),
+				"The statement's and the argument's groups must have the same order.");
+		checkArgument(statement.getM() == argument.getM(), "The statement and the argument must have the same size m.");
 
 		final ZqGroup zqGroup = aPrime.getGroup();
 		final GqGroup gqGroup = cA.getGroup();
@@ -274,12 +287,9 @@ public class HadamardArgumentService {
 
 		// Start verification
 		final int m = cA.size();
-		final boolean verifB = cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB);
-		if (!verifB) {
-			log.error("cUpperB.get(0) {} must equal cA.get(0) {} and cUpperB.get(m - 1) {} must equal cLowerB {}",
-					cUpperB.get(0), cA.get(0), cUpperB.get(m - 1), cLowerB);
-			return false;
-		}
+		final Verifiable verifB = create(() -> cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB),
+				String.format("cUpperB.get(0) %s must equal cA.get(0) %s and cUpperB.get(m - 1) %s must equal cLowerB %s", cUpperB.get(0),
+						cA.get(0), cUpperB.get(m - 1), cLowerB));
 
 		// Calculate x
 		final byte[] hashX = hashService.recursiveHash(
@@ -307,14 +317,14 @@ public class HadamardArgumentService {
 		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(hashY), zqGroup);
 
 		// Pre-calculate the powers of x
-		final SameGroupVector<ZqElement, ZqGroup> xPowers = IntStream.range(0, m)
+		final GroupVector<ZqElement, ZqGroup> xPowers = IntStream.range(0, m)
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_(D_0), ..., c_(D_(m-2))
-		final SameGroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
+		final GroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
 				.mapToObj(i -> cUpperB.get(i).exponentiate(xPowers.get(i + 1)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_D
 		final GqElement cD = IntStream.range(1, m)
@@ -323,23 +333,18 @@ public class HadamardArgumentService {
 
 		// (-1, ..., -1) and c_(-1)
 		final int n = aPrime.size();
-		final SameGroupVector<ZqElement, ZqGroup> minusOnes = getMinusOnes(n, zqGroup);
+		final GroupVector<ZqElement, ZqGroup> minusOnes = getMinusOnes(n, zqGroup);
 		final ZqElement zero = zqGroup.getIdentity();
 		final GqElement cMinusOne = CommitmentService.getCommitment(minusOnes, zero, commitmentKey);
 
 		// Create zero statement
-		final SameGroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1).collect(toSameGroupVector());
-		final SameGroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
+		final GroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
 		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		final ZeroArgument zArgument = argument.getZeroArgument();
-		final boolean verifZ = zeroArgumentService.verifyZeroArgument(zStatement, zArgument);
+		final Verifiable verifZ = zeroArgumentService.verifyZeroArgument(zStatement, zArgument).addErrorMessage("Failed to verify the ZeroArgument.");
 
-		if (!verifZ) {
-			log.error("Failed to verify the ZeroArgument");
-			return false;
-		}
-
-		return verifB && verifZ;
+		return verifB.and(verifZ);
 	}
 
 	/**
@@ -352,30 +357,31 @@ public class HadamardArgumentService {
 	 * @param j      the index &le; m-1 of the last column to include in the product
 	 * @return &prod;<sub>i=0</sub><sup>j</sup> a<sub>i</sub>
 	 */
-	SameGroupVector<ZqElement, ZqGroup> getHadamardProduct(final SameGroupMatrix<ZqElement, ZqGroup> matrix, final int j) {
+	@VisibleForTesting
+	GroupVector<ZqElement, ZqGroup> getHadamardProduct(final GroupMatrix<ZqElement, ZqGroup> matrix, final int j) {
 		checkNotNull(matrix);
 		checkArgument(j >= 0, "The column index must be greater than or equal to 0.");
 		checkArgument(j < matrix.numColumns(), "The column index must be smaller than the number of rows in the matrix.");
-		ZqElement one = ZqElement.create(BigInteger.ONE, matrix.getGroup());
-		int n = matrix.numRows();
+		ZqElement one = ZqElement.create(1, matrix.getGroup());
+		final int n = matrix.numRows();
 		return IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream()
 						.limit(j + 1L)
 						.reduce(one, ZqElement::multiply))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 
 	/**
-	 * Creates a {@link SameGroupVector} with <i>n</i> elements of value <i>q - 1</i>.
+	 * Creates a {@link GroupVector} with <i>n</i> elements of value <i>q - 1</i>.
 	 *
 	 * @param size    the size of the vector
 	 * @param zqGroup the {@link ZqGroup} of the vector
 	 * @return a vector of {@code size} elements with value {@code zqGroup.getQ() - 1}
 	 */
-	private SameGroupVector<ZqElement, ZqGroup> getMinusOnes(final int size, final ZqGroup zqGroup) {
-		BigInteger q = zqGroup.getQ();
+	private GroupVector<ZqElement, ZqGroup> getMinusOnes(final int size, final ZqGroup zqGroup) {
+		final BigInteger q = zqGroup.getQ();
 
 		return Stream.generate(() -> ZqElement.create(q.subtract(BigInteger.ONE), zqGroup)).limit(size)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 }
