@@ -27,6 +27,7 @@ import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -36,6 +37,8 @@ import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 public class ElGamalGenerator {
 
+	private static final RandomService randomService = new RandomService();
+
 	private final GqGroup group;
 	private final GqGroupGenerator groupGenerator;
 
@@ -43,8 +46,6 @@ public class ElGamalGenerator {
 		this.group = group;
 		this.groupGenerator = new GqGroupGenerator(group);
 	}
-
-	private static final RandomService randomService = new RandomService();
 
 	private List<GqElement> genRandomMessageElements(int size) {
 		return generateElementList(size, this.groupGenerator::genMember);
@@ -56,6 +57,10 @@ public class ElGamalGenerator {
 
 	public ElGamalMultiRecipientPublicKey genRandomPublicKey(int size) {
 		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPublicKey();
+	}
+
+	public ElGamalMultiRecipientPrivateKey genRandomPrivateKey(int size) {
+		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPrivateKey();
 	}
 
 	public ElGamalMultiRecipientCiphertext genRandomCiphertext(int ciphertextSize) {

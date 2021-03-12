@@ -18,6 +18,8 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +36,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -43,6 +46,7 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -55,20 +59,18 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 @DisplayName("A ciphertext")
-class ElGamalMultiRecipientCiphertextTest {
-
-	private static GqGroup gqGroup;
-	private static GqGroupGenerator gqGroupGenerator;
+class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 
 	private static ImmutableList<GqElement> validPhis;
 	private static GqElement validGamma;
 	private static ElGamalGenerator elGamalGenerator;
 
+	private static RandomService randomService;
+
 	@BeforeAll
 	static void setUpAll() {
-		gqGroup = GroupTestData.getGqGroup();
-		gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
+		randomService = new RandomService();
 	}
 
 	@BeforeEach
@@ -102,11 +104,9 @@ class ElGamalMultiRecipientCiphertextTest {
 
 		final List<GqElement> invalidPhis = Arrays.asList(GqElement.create(BigInteger.ONE, gqGroup), null);
 
-		final GqGroup differentGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-		final GqGroupGenerator differentGenerator = new GqGroupGenerator(differentGroup);
-		final List<GqElement> differentGroupPhis = Arrays.asList(gqGroupGenerator.genMember(), differentGenerator.genMember());
+		final List<GqElement> differentGroupPhis = Arrays.asList(gqGroupGenerator.genMember(), otherGqGroupGenerator.genMember());
 
-		final GqElement otherGroupGamma = genOtherGroupGamma(differentGroup);
+		final GqElement otherGroupGamma = genOtherGroupGamma(otherGqGroup);
 
 		return Stream.of(
 				Arguments.of(null, validPhis, NullPointerException.class),
@@ -318,7 +318,6 @@ class ElGamalMultiRecipientCiphertextTest {
 
 		// Create first ciphertext.
 		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
-		RandomService randomService = new RandomService();
 		ZqElement exponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(group));
 		ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
 		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
@@ -365,7 +364,6 @@ class ElGamalMultiRecipientCiphertextTest {
 	@DisplayName("exponentiate the ciphertext")
 	void decryptedExponentiatedCiphertextAndExponentiatedMessageShouldBeEqual() {
 		int noOfMessageElements = 5;
-		RandomService randomService = new RandomService();
 
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		ZqElement exponent = randomService.genRandomExponent(zqGroup);
@@ -390,7 +388,6 @@ class ElGamalMultiRecipientCiphertextTest {
 	@DisplayName("test vector ciphertext exponentiation")
 	void compressedExponentiatedMessagesShouldEqualDecryptedExponentiatedCiphertextVector() {
 		int noOfMessageElements = 5;
-		RandomService randomService = new RandomService();
 
 		SameGroupVector<ElGamalMultiRecipientMessage, GqGroup> originalMessages = Stream
 				.generate(() -> elGamalGenerator.genRandomMessage(noOfMessageElements))
@@ -449,7 +446,6 @@ class ElGamalMultiRecipientCiphertextTest {
 	@Test
 	void testCiphertextVectorExponentiationParameterValidation() {
 		int noOfMessageElements = 5;
-		RandomService randomService = new RandomService();
 
 		List<ElGamalMultiRecipientMessage> originalMessages = Stream
 				.generate(() -> elGamalGenerator.genRandomMessage(noOfMessageElements))
@@ -483,5 +479,64 @@ class ElGamalMultiRecipientCiphertextTest {
 		IllegalArgumentException differentQIllegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(fiveCipherTexts, fiveExponents));
 		assertEquals("Ciphertexts and exponents must be of the same group.", differentQIllegalArgumentException.getMessage());
+	}
+
+	@Nested
+	@DisplayName("calling getPartialDecryption with")
+	class PartialDecryptionTest {
+		private int secretKeySize;
+
+		private ElGamalMultiRecipientCiphertext ciphertext;
+		private ElGamalMultiRecipientPrivateKey secretKey;
+
+		@BeforeEach
+		void setUpEach() {
+			ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
+
+			secretKeySize = ciphertext.size();
+			secretKey = elGamalGenerator.genRandomPrivateKey(secretKeySize);
+		}
+
+		@Test
+		@DisplayName("a null secret key parameter throws a NullPointerException.")
+		void getPartialDecryptionParametersShouldBeNotNull() {
+			assertThrows(NullPointerException.class, () -> ciphertext.getPartialDecryption(null));
+		}
+
+		@Test
+		@DisplayName("a ciphertext and a secret key with different order throws an IllegalArgumentException.")
+		void getPartialDecryptionCiphertextAndSecretKeyShouldBePartOfSameGroup() {
+
+			final ElGamalMultiRecipientPrivateKey secretKey =
+					new ElGamalGenerator(GroupTestData.getDifferentGqGroup(gqGroup)).genRandomPrivateKey(secretKeySize);
+
+			final IllegalArgumentException illegalArgumentException =
+					assertThrows(IllegalArgumentException.class, () -> ciphertext.getPartialDecryption(secretKey));
+
+			assertEquals("Ciphertext and secret key must belong to groups of same order.", illegalArgumentException.getMessage());
+		}
+
+		@Test
+		@DisplayName("a ciphertext containing more message elements than private key elements throws an IllegalArgumentException.")
+		void getPartialDecryptionSecretKeySizeShouldBeAtLeastSameAsCiphertextSize() {
+
+			final ElGamalMultiRecipientPrivateKey secretKey = elGamalGenerator.genRandomPrivateKey(ciphertext.size() - 1);
+
+			final IllegalArgumentException illegalArgumentException =
+					assertThrows(IllegalArgumentException.class, () -> ciphertext.getPartialDecryption(secretKey));
+
+			assertEquals("There cannot be more message elements than private key elements.", illegalArgumentException.getMessage());
+		}
+
+		@Test
+		@DisplayName("with correct parameters returns the expected result.")
+		void getPartialDecryptionReturnsExpectedResult() {
+
+			final ElGamalMultiRecipientCiphertext partialDecryption = assertDoesNotThrow(() -> ciphertext.getPartialDecryption(secretKey));
+
+			assertAll(
+					() -> assertEquals(ciphertext.getGamma(), partialDecryption.getGamma()),
+					() -> assertEquals(ciphertext.size(), partialDecryption.size()));
+		}
 	}
 }

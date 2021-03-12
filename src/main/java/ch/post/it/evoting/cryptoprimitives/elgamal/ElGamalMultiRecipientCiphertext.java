@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.getMessage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -225,6 +226,34 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 				.range(0, exponents.size())
 				.mapToObj(i -> ciphertexts.get(i).exponentiate(exponents.get(i)))
 				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
+	}
+
+	/**
+	 * Partially decrypts the ciphertext.
+	 * <p>
+	 * The {@code secretKey} parameter must comply with the following:
+	 * <ul>
+	 *     <li>the secret key and the ciphertext belong to groups of same order.</li>
+	 *     <li>the secret key size is at least the size of the ciphertext size.</li>
+	 * </ul>
+	 *
+	 * @param secretKey sk, the secret key to be used for decrypting. Non-null.
+	 * @return a new ciphertext with the partially decrypted plaintext message.
+	 */
+	public ElGamalMultiRecipientCiphertext getPartialDecryption(final ElGamalMultiRecipientPrivateKey secretKey) {
+
+		checkNotNull(secretKey);
+		checkArgument(this.getGroup().hasSameOrderAs(secretKey.getGroup()), "Ciphertext and secret key must belong to groups of same order.");
+
+		final int l = this.size();
+		final int k = secretKey.size();
+
+		// 0 < l is ensured by the inputs validations when creating the ElGamalMultiRecipientCiphertext ciphertext.
+		checkArgument(l <= k, "There cannot be more message elements than private key elements.");
+
+		final ElGamalMultiRecipientMessage message = getMessage(this, secretKey);
+
+		return new ElGamalMultiRecipientCiphertext(this.getGamma(), message.stream().collect(toSameGroupVector()));
 	}
 
 	public final GqElement getGamma() {
