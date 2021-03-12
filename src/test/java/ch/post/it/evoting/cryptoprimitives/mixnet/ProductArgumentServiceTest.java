@@ -79,7 +79,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	void setup() {
 		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
 
-		hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+		hashService = TestHashService.create(gqGroup.getQ());
 		publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(k);
 
 		commitmentKey = new CommitmentKeyGenerator(gqGroup).genCommitmentKey(k);
@@ -119,7 +119,6 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		private SameGroupVector<GqElement, GqGroup> commitmentsA;
 		private ZqElement productB;
 		private ProductStatement statement;
-		private SameGroupMatrix<ZqElement, ZqGroup> matrixA;
 		private SameGroupVector<ZqElement, ZqGroup> exponentsR;
 		private ProductWitness witness;
 		private ProductArgumentService productArgumentService;
@@ -130,7 +129,6 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
 
 			witness = genProductWitness(n, m, zqGroupGenerator);
-			matrixA = witness.getMatrix();
 			exponentsR = witness.getExponents();
 			statement = getProductStatement(witness, commitmentKey);
 			commitmentsA = statement.getCommitments();
@@ -438,7 +436,11 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			badCommitment = badCommitment.multiply(gqGroup.getGenerator());
 			ProductArgument badArgument = new ProductArgument(badCommitment, longArgument.getHadamardArgument(),
 					longArgument.getSingleValueProductArgument());
-			assertFalse(productArgumentService.verifyProductArgument(longStatement, badArgument));
+
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyProductArgument(longStatement, badArgument));
 		}
 
 		@Test
@@ -453,7 +455,10 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), badHadamardArgument,
 					longArgument.getSingleValueProductArgument());
 
-			assertFalse(productArgumentService.verifyProductArgument(longStatement, badArgument));
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyProductArgument(longStatement, badArgument));
 		}
 
 		@Test
@@ -473,7 +478,11 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 					.withSTilde(sArgument.getSTilde())
 					.build();
 			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), longArgument.getHadamardArgument(), badSArgument);
-			assertFalse(productArgumentService.verifyProductArgument(longStatement, badArgument));
+
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyProductArgument(longStatement, badArgument));
 		}
 
 		@Test
@@ -494,7 +503,10 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 					.build();
 			ProductArgument badArgument = new ProductArgument(badSArgument);
 
-			assertFalse(productArgumentService.verifyProductArgument(shortStatement, badArgument));
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyProductArgument(shortStatement, badArgument));
 		}
 
 		@ParameterizedTest(name = "{5}")

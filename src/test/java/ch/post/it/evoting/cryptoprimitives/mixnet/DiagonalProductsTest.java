@@ -49,7 +49,6 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 	private static MultiExponentiationArgumentService multiExponentiationArgumentService;
 	private static ElGamalGenerator elGamalGenerator;
-	private static MixnetHashService hashService;
 
 	private int n;
 	private int m;
@@ -64,7 +63,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 		final CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
 		final CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
-		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
+		MixnetHashService hashService = TestHashService.create(gqGroup.getQ());
 		multiExponentiationArgumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(), hashService);
 
 	}
@@ -250,6 +249,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 		// and are not relevant for the test itself
 		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
 		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
+		MixnetHashService hashService = TestHashService.create(q);
 		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),
 				hashService);
 

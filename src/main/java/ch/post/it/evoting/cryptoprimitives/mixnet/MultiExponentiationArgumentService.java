@@ -127,8 +127,8 @@ final class MultiExponentiationArgumentService {
 		checkNotNull(witness);
 
 		//Group checking
-		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement and argument must belong to the same group.");
-		checkArgument(this.gqGroup.hasSameOrderAs(witness.getGroup()), "The witness and argument must belong to groups of the same order.");
+		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement must belong to the same group as the public key and commitment key.");
+		checkArgument(this.gqGroup.hasSameOrderAs(witness.getGroup()), "The witness must belong to a ZqGroup of order q.");
 		BigInteger q = this.gqGroup.getQ();
 
 		//Dimension checking

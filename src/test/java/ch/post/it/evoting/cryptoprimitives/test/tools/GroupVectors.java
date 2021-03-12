@@ -17,7 +17,11 @@ package ch.post.it.evoting.cryptoprimitives.test.tools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.Hashable;
@@ -35,9 +39,26 @@ public class GroupVectors {
 	 * @return a new SameGroupVector with the ith element replaced.
 	 */
 	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	SameGroupVector<E, G> set(SameGroupVector<E, G> vector, int i, E element) {
+	SameGroupVector<E, G> with(SameGroupVector<E, G> vector, int i, E element) {
 		List<E> modifiedElements = new ArrayList<>(vector);
 		modifiedElements.set(i, element);
 		return SameGroupVector.from(modifiedElements);
+	}
+
+	/**
+	 * Returns a new Matrix with the element (i, j) replaced
+	 * @param matrix the matrix to copy and modify
+	 * @param i the row index of the value to modify
+	 * @param j the column index of the value to modify
+	 * @param element the new value
+	 * @param <E> the matrix element type
+	 * @param <G> the matrix element mathematical group type
+	 * @return a new matrix with all elements copied from the initial matrix except element (i,j) with the new value
+	 */
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
+	SameGroupMatrix<E, G> with(SameGroupMatrix<E, G> matrix, int i, int j, E element) {
+		List<List<E>> modifiedElements = matrix.rowStream().map(ArrayList::new).collect(Collectors.toList());
+		modifiedElements.get(i).set(j, element);
+		return SameGroupMatrix.fromRows(modifiedElements);
 	}
 }

@@ -61,6 +61,16 @@ class TestHashService extends MixnetHashService {
 	}
 
 	/**
+	 * Creates a TestHashService whose output value is between 0 (incl.) and {@code upperBound} (excl.).
+	 *
+	 * @param upperBound the upper bound, exclusive.
+	 * @return a TestHashService.
+	 */
+	public static TestHashService create(final BigInteger upperBound) {
+		return TestHashService.create(BigInteger.ZERO, upperBound);
+	}
+
+	/**
 	 * Perform the recursive hash, ensuring the output value is within the bounds.
 	 *
 	 * @param values the values to hash.

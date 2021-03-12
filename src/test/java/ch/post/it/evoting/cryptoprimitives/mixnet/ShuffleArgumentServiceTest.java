@@ -17,6 +17,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.ShuffleArgumentGenerator.ShuffleArgumentPair;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors.with;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -59,7 +60,6 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
-import ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 
@@ -79,7 +79,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 	static void setUpAll() {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
 		commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
-		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
+		hashService = TestHashService.create(gqGroup.getQ());
 	}
 
 	@Nested
@@ -386,7 +386,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					FOUR, NINE, ZERO, ONE, SEVEN,
 					ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
 					.when(shuffleRandomService).genRandomInteger(q);
-			MixnetHashService shuffleHashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
+			MixnetHashService shuffleHashService = TestHashService.create(gqGroup.getQ());
 			ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey,
 					shuffleRandomService, shuffleHashService);
 
@@ -579,8 +579,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final int randomIndex = secureRandom.nextInt(ciphertexts.size());
 			final ElGamalMultiRecipientCiphertext ciphertext = ciphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(ciphertext);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = GroupVectors
-					.set(ciphertexts, randomIndex, otherCiphertext);
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = with(ciphertexts, randomIndex, otherCiphertext);
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.getShuffledCiphertexts());
 
@@ -594,8 +593,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final int randomIndex = secureRandom.nextInt(shuffledCiphertexts.size());
 			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(shuffledCiphertext);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts = GroupVectors
-					.set(shuffledCiphertexts, randomIndex, otherCiphertext);
+			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts =
+					with(shuffledCiphertexts, randomIndex, otherCiphertext);
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.getShuffledCiphertexts(), badShuffledCiphertexts);
 
@@ -608,7 +607,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final SameGroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.getcA();
 
 			final GqElement badCA0 = commitmentA.get(0).multiply(gqGroup.getGenerator());
-			final SameGroupVector<GqElement, GqGroup> badCommitmentA = GroupVectors.set(commitmentA, 0, badCA0);
+			final SameGroupVector<GqElement, GqGroup> badCommitmentA = with(commitmentA, 0, badCA0);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.withCA(badCommitmentA)
 					.withCB(shuffleArgument.getcB())
@@ -625,7 +624,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final SameGroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.getcB();
 
 			final GqElement badCBm = commitmentB.get(0).multiply(gqGroup.getGenerator());
-			final SameGroupVector<GqElement, GqGroup> badCommitmentB = GroupVectors.set(commitmentB, 0, badCBm);
+			final SameGroupVector<GqElement, GqGroup> badCommitmentB = with(commitmentB, 0, badCBm);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.withCA(shuffleArgument.getcA())
 					.withCB(badCommitmentB)

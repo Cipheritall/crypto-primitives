@@ -69,10 +69,10 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 	private static final RandomService randomService = new RandomService();
 
 	private static MixnetHashService hashService;
+
 	private static int n;
 	private static int m;
 
-	private static ElGamalGenerator elGamalGenerator;
 	private static CommitmentKeyGenerator commitmentKeyGenerator;
 
 	private static ElGamalMultiRecipientPublicKey publicKey;
@@ -86,11 +86,11 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 	static void setupAll() {
 		n = secureRandom.nextInt(MATRIX_BOUNDS) + 1;
 		m = secureRandom.nextInt(MATRIX_BOUNDS - 1) + 2; // The Hadamard argument only works with 2 or more columns
-		elGamalGenerator = new ElGamalGenerator(gqGroup);
+		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
 		publicKey = elGamalGenerator.genRandomPublicKey(n);
 		commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(n);
-		hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+		hashService = TestHashService.create(gqGroup.getQ());
 		hadamardArgumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 	}
 
@@ -392,7 +392,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		@DisplayName("with bad values for cUpperB returns false")
-		void verifyHadamardArgumentWithBadcUpperB() {
+		void verifyHadamardArgumentWithBad_cUpperB() {
 			SameGroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
@@ -406,7 +406,10 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			badcUpperB = SameGroupVector.from(new ArrayList<>(cUpperB).subList(0, m - 1)).append(badcUpperBmMinusOne);
 			badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
 
-			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument));
 		}
 
 		@Test
@@ -425,7 +428,11 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 					.withTPrime(zeroArgument.getTPrime())
 					.build();
 			HadamardArgument badArgument = new HadamardArgument(argument.getCommitmentsB(), badZeroArgument);
-			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+
+			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
+			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
+			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument));
 		}
 	}
 

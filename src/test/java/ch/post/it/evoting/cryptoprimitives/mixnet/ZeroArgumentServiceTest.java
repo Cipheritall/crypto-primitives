@@ -103,7 +103,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		// Init services.
 		randomService = new RandomService();
-		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
+		hashService = TestHashService.create(gqGroup.getQ());
 
 		zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 	}
@@ -630,7 +630,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 					.genRandomInteger(simpleZqGroup.getQ());
 
 			// Mock the hashService.
-			final MixnetHashService hashServiceMock = TestHashService.create(BigInteger.ZERO, simpleGqGroup.getQ());
+			final MixnetHashService hashServiceMock = TestHashService.create(simpleGqGroup.getQ());
 
 			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
 					hashServiceMock);

@@ -30,7 +30,7 @@ import com.google.common.io.BaseEncoding;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
-public final class RandomService {
+public class RandomService {
 
 	private final SecureRandom secureRandom;
 

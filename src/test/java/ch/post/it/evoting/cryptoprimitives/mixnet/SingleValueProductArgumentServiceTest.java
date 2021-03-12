@@ -92,7 +92,7 @@ class SingleValueProductArgumentServiceTest {
 		publicKey = keyPair.getPublicKey();
 		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
 		commitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
-		hashService = TestHashService.create(BigInteger.ZERO, gqGroup.getQ());
+		hashService = TestHashService.create(gqGroup.getQ());
 		argumentService = new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 	}
 
