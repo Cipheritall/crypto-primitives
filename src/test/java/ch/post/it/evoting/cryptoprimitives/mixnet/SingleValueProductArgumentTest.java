@@ -54,7 +54,7 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 
 	@BeforeAll
 	static void setUpAll() {
-		n = secureRandom.nextInt(UPPER_BOUND) + 1;
+		n = secureRandom.nextInt(UPPER_BOUND) + 2;
 		final SingleValueProductArgument singleValueProductArgument = new ArgumentGenerator(gqGroup).genSingleValueProductArgument(n);
 
 		cd = singleValueProductArgument.getCd();
@@ -90,7 +90,7 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 				.build();
 
 		SingleValueProductArgument singleValueProdArgument3 = new SingleValueProductArgument.Builder()
-				.withCd(cd.multiply(cd))
+				.withCd(gqGroupGenerator.otherElement(cd))
 				.withCLowerDelta(cLowerDelta)
 				.withCUpperDelta(cUpperDelta)
 				.withATilde(aTilde)
