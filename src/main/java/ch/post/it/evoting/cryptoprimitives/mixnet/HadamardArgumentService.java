@@ -373,7 +373,7 @@ public class HadamardArgumentService {
 		checkNotNull(matrix);
 		checkArgument(j >= 0, "The column index must be greater than or equal to 0.");
 		checkArgument(j < matrix.numColumns(), "The column index must be smaller than the number of rows in the matrix.");
-		ZqElement one = ZqElement.create(BigInteger.ONE, matrix.getGroup());
+		ZqElement one = ZqElement.create(1, matrix.getGroup());
 		int n = matrix.numRows();
 		return IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream()

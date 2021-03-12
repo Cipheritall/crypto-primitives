@@ -158,7 +158,7 @@ final class MultiExponentiationArgumentService {
 		List<ZqElement> mutableBs = randomService.genRandomVector(q, 2 * m);
 		List<ZqElement> mutableSs = randomService.genRandomVector(q, 2 * m);
 		List<ZqElement> mutableTaus = randomService.genRandomVector(q, 2 * m);
-		ZqElement zero = ZqElement.create(BigInteger.ZERO, zqGroup);
+		ZqElement zero = ZqElement.create(0, zqGroup);
 		mutableBs.set(m, zero);
 		mutableSs.set(m, zero);
 		mutableTaus.set(m, rho);

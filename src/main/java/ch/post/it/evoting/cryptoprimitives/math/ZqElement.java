@@ -36,8 +36,8 @@ public class ZqElement extends GroupElement<ZqGroup> {
 	/**
 	 * Create a new ZqElement.
 	 *
-	 * @param value the value of the element.
-	 * @param group the group this element belongs to.
+	 * @param value the value of the element. Must not be null and must be an element of the group.
+	 * @param group the {@link ZqGroup} to which this element belongs.
 	 * @return a new ZqElement.
 	 */
 	public static ZqElement create(final BigInteger value, final ZqGroup group) {
@@ -46,6 +46,17 @@ public class ZqElement extends GroupElement<ZqGroup> {
 		checkArgument(group.isGroupMember(value), "Cannot create a GroupElement with value %s as it is not an element of group %s", value, group);
 
 		return new ZqElement(value, group);
+	}
+
+	/**
+	 * Create a new ZqElement.
+	 *
+	 * @param value the value of the element. Must be an element of the group.
+	 * @param group the {@link ZqGroup} to which this element belongs.
+	 * @return a new ZqElement.
+	 */
+	public static ZqElement create(final int value, final ZqGroup group) {
+		return create(BigInteger.valueOf(value), group);
 	}
 
 	@Override

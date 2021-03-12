@@ -420,12 +420,11 @@ class ShuffleArgumentService {
 		return IntStream.range(0, N)
 				.boxed()
 				.flatMap(i -> Stream.of(i)
-						.map(BigInteger::valueOf)
-						.map(bi -> ZqElement.create(bi, zqGroup))
+						.map(value -> ZqElement.create(value, zqGroup))
 						.map(y::multiply)
 						.map(elem -> elem.add(xPowers.get(i)))
 						.map(elem -> elem.subtract(z)))
-				.reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
+				.reduce(ZqElement.create(1, zqGroup), ZqElement::multiply);
 	}
 
 	/**

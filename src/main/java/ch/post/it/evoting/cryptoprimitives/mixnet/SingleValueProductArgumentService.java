@@ -101,7 +101,7 @@ class SingleValueProductArgumentService {
 		checkArgument(ca.equals(getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
 		ZqGroup group = b.getGroup();
-		ZqElement one = ZqElement.create(BigInteger.ONE, group); // Identity for multiplication
+		ZqElement one = ZqElement.create(1, group); // Identity for multiplication
 		checkArgument(b.equals(a.stream().reduce(one, ZqElement::multiply)),
 				"The product of the provided elements does not give the provided product.");
 

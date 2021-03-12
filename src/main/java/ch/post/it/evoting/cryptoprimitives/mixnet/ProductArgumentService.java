@@ -115,7 +115,7 @@ final class ProductArgumentService {
 				"The commitment to matrix A with exponents r using the given commitment key must yield the commitments cA.");
 		final ZqGroup zqGroup = A.getGroup();
 		// Create the neutral element for the multiplication
-		final ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
+		final ZqElement one = ZqElement.create(1, zqGroup);
 		checkArgument(b.equals(A.stream().reduce(one, ZqElement::multiply)), "The product of all elements in matrix A must be equal to b.");
 
 		// Start of the operations
