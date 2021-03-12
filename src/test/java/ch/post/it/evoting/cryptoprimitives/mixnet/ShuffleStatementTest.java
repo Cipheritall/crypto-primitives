@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -44,8 +44,8 @@ class ShuffleStatementTest extends TestGroupSetup {
 
 	private int n;
 	private int l;
-	private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
-	private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
+	private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
+	private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -59,8 +59,8 @@ class ShuffleStatementTest extends TestGroupSetup {
 		n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 		l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
 
-		ciphertexts = SameGroupVector.from(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
-		shuffledCiphertexts = SameGroupVector.from(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
+		ciphertexts = GroupVector.from(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
+		shuffledCiphertexts = GroupVector.from(elGamalGenerator.genRandomCiphertexts(publicKey, l, n));
 	}
 
 	@Test
@@ -82,8 +82,8 @@ class ShuffleStatementTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with empty ciphertexts throws IllegalArgumentException")
 	void constructEmptyParams() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> emptyCiphertexts = SameGroupVector.of();
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> emptyShuffledCiphertexts = SameGroupVector.of();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> emptyCiphertexts = GroupVector.of();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> emptyShuffledCiphertexts = GroupVector.of();
 
 		final IllegalArgumentException emptyCiphertextsException = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(emptyCiphertexts, shuffledCiphertexts));
@@ -97,7 +97,7 @@ class ShuffleStatementTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with ciphertexts and shuffled ciphertexts of different size throws IllegalArgumentException")
 	void constructDiffSizeVectors() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertexts = ciphertexts
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertexts = ciphertexts
 				.append(elGamalGenerator.genRandomCiphertext(l));
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -108,7 +108,7 @@ class ShuffleStatementTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with ciphertexts and shuffled ciphertexts having different size throws IllegalArgumentException")
 	void constructCiphertextsAndShuffledDiffSizePhis() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> morePhisCiphertexts = elGamalGenerator.genRandomCiphertextVector(n, l + 1);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> morePhisCiphertexts = elGamalGenerator.genRandomCiphertextVector(n, l + 1);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(morePhisCiphertexts, shuffledCiphertexts));
@@ -120,7 +120,7 @@ class ShuffleStatementTest extends TestGroupSetup {
 	void constructDiffGroupCiphertextsAndShuffled() {
 		// Ciphertexts from different group.
 		final ElGamalGenerator differentElGamalGenerator = new ElGamalGenerator(otherGqGroup);
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diffGroupCiphertexts = differentElGamalGenerator
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diffGroupCiphertexts = differentElGamalGenerator
 				.genRandomCiphertextVector(n, l);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -133,9 +133,9 @@ class ShuffleStatementTest extends TestGroupSetup {
 		final ShuffleStatement shuffleStatement1 = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
 		final ShuffleStatement shuffleStatement2 = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
 
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = ciphertexts
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = ciphertexts
 				.append(elGamalGenerator.genRandomCiphertext(l));
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> otherShuffledCiphertexts = shuffledCiphertexts
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> otherShuffledCiphertexts = shuffledCiphertexts
 				.append(elGamalGenerator.genRandomCiphertext(l));
 		final ShuffleStatement shuffleStatement3 = new ShuffleStatement(otherCiphertexts, otherShuffledCiphertexts);
 

@@ -31,7 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -47,9 +47,9 @@ class ZeroArgumentTest extends TestGroupSetup {
 
 	private static GqElement cA0;
 	private static GqElement cBm;
-	private static SameGroupVector<GqElement, GqGroup> cd;
-	private static SameGroupVector<ZqElement, ZqGroup> aPrime;
-	private static SameGroupVector<ZqElement, ZqGroup> bPrime;
+	private static GroupVector<GqElement, GqGroup> cd;
+	private static GroupVector<ZqElement, ZqGroup> aPrime;
+	private static GroupVector<ZqElement, ZqGroup> bPrime;
 	private static ZqElement rPrime;
 	private static ZqElement sPrime;
 	private static ZqElement tPrime;
@@ -107,8 +107,8 @@ class ZeroArgumentTest extends TestGroupSetup {
 		@ParameterizedTest
 		@MethodSource("nullArgumentsProvider")
 		@DisplayName("null fields throws NullPointerException")
-		void zeroArgumentBuilderBuildNullFields(final GqElement cA0, final GqElement cBm, final SameGroupVector<GqElement, GqGroup> cd,
-				final SameGroupVector<ZqElement, ZqGroup> aPrime, final SameGroupVector<ZqElement, ZqGroup> bPrime, final ZqElement rPrime,
+		void zeroArgumentBuilderBuildNullFields(final GqElement cA0, final GqElement cBm, final GroupVector<GqElement, GqGroup> cd,
+				final GroupVector<ZqElement, ZqGroup> aPrime, final GroupVector<ZqElement, ZqGroup> bPrime, final ZqElement rPrime,
 				final ZqElement sPrime, final ZqElement tPrime) {
 
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
@@ -165,8 +165,8 @@ class ZeroArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("not compatible GqGroup and ZqGroup throws IllegalArgumentException")
 		void zeroArgumentBuilderDiffGqGroupAndZqGroup() {
-			final SameGroupVector<ZqElement, ZqGroup> otherGroupAPrime = otherZqGroupGenerator.genRandomZqElementVector(n);
-			final SameGroupVector<ZqElement, ZqGroup> otherGroupBPrime = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final GroupVector<ZqElement, ZqGroup> otherGroupAPrime = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final GroupVector<ZqElement, ZqGroup> otherGroupBPrime = otherZqGroupGenerator.genRandomZqElementVector(n);
 			final ZqElement otherGroupRPrime = otherZqGroupGenerator.genRandomZqElementMember();
 			final ZqElement otherGroupSPrime = otherZqGroupGenerator.genRandomZqElementMember();
 			final ZqElement otherGroupTPrime = otherZqGroupGenerator.genRandomZqElementMember();
@@ -188,7 +188,7 @@ class ZeroArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("aPrime and bPrime of different size throws IllegalArgumentException")
 		void zeroArgumentBuilderDiffSizeAPrimeBPrime() {
-			final SameGroupVector<ZqElement, ZqGroup> longerAPrime = zqGroupGenerator.genRandomZqElementVector(n + 1);
+			final GroupVector<ZqElement, ZqGroup> longerAPrime = zqGroupGenerator.genRandomZqElementVector(n + 1);
 
 			final Builder builder = new Builder()
 					.withCA0(cA0)
@@ -207,7 +207,7 @@ class ZeroArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("built with cd of bad size throws IllegalArgumentException")
 		void zeroArgumentBuilderBuildCdBadSize() {
-			SameGroupVector<GqElement, GqGroup> badCd = gqGroupGenerator.genRandomGqElementVector(4);
+			GroupVector<GqElement, GqGroup> badCd = gqGroupGenerator.genRandomGqElementVector(4);
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
 					.withCA0(cA0)
 					.withCBm(cBm)

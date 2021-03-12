@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -62,13 +62,13 @@ public class MultiExponentiationStatementWitnessPairGenerator {
 	}
 
 	StatementWitnessPair genPair(int n, int m, int l) {
-		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = this.elGamalGenerator.genRandomCiphertextMatrix(m, n, l);
-		SameGroupMatrix<ZqElement, ZqGroup> AMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m);
-		SameGroupVector<ZqElement, ZqGroup> rExponents = zqGroupGenerator.genRandomZqElementVector(m);
+		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = this.elGamalGenerator.genRandomCiphertextMatrix(m, n, l);
+		GroupMatrix<ZqElement, ZqGroup> AMatrix = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+		GroupVector<ZqElement, ZqGroup> rExponents = zqGroupGenerator.genRandomZqElementVector(m);
 		ZqElement rhoExponents = zqGroupGenerator.genRandomZqElementMember();
 
 		ElGamalMultiRecipientCiphertext computedC = argumentService.multiExponentiation(CMatrix, AMatrix, rhoExponents, m, l);
-		SameGroupVector<GqElement, GqGroup> commitmentToA = CommitmentService.getCommitmentMatrix(
+		GroupVector<GqElement, GqGroup> commitmentToA = CommitmentService.getCommitmentMatrix(
 				AMatrix, rExponents, commitmentKey);
 		MultiExponentiationStatement statement = new MultiExponentiationStatement(CMatrix, computedC, commitmentToA);
 		MultiExponentiationWitness witness = new MultiExponentiationWitness(AMatrix, rExponents, rhoExponents);

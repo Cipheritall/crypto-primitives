@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.getMessage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,9 +33,9 @@ import java.util.stream.Stream;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.Hashable;
 import ch.post.it.evoting.cryptoprimitives.HashableList;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -48,11 +48,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
 	private final GqElement gamma;
-	private final SameGroupVector<GqElement, GqGroup> phis;
+	private final GroupVector<GqElement, GqGroup> phis;
 	private final GqGroup group;
 
 	// Private constructor without input validation. Used only to internally construct new ciphertext whose elements have already been validated.
-	private ElGamalMultiRecipientCiphertext(final GqElement gamma, final SameGroupVector<GqElement, GqGroup> phis) {
+	private ElGamalMultiRecipientCiphertext(final GqElement gamma, final GroupVector<GqElement, GqGroup> phis) {
 		this.gamma = gamma;
 		this.phis = phis;
 		this.group = gamma.getGroup();
@@ -74,7 +74,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final GqElement resultGamma = this.gamma.multiply(other.gamma);
 
 		final int n = this.phis.size();
-		final SameGroupVector<GqElement, GqGroup> resultPhis =
+		final GroupVector<GqElement, GqGroup> resultPhis =
 				IntStream.range(0, n)
 						.mapToObj(i -> this.phis.get(i).multiply(other.phis.get(i)))
 						.collect(toSameGroupVector());
@@ -94,7 +94,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		checkArgument(this.group.getQ().equals(exponent.getGroup().getQ()));
 
 		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
-		SameGroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
+		GroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
 				.map(p -> p.exponentiate(exponent))
 				.collect(toSameGroupVector());
 
@@ -152,7 +152,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 			phis.add(compressedKey.exponentiate(exponent).multiply(message.get(n - 1)));
 		}
 
-		return new ElGamalMultiRecipientCiphertext(gamma, SameGroupVector.from(phis));
+		return new ElGamalMultiRecipientCiphertext(gamma, GroupVector.from(phis));
 	}
 
 	/**
@@ -169,7 +169,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
-		SameGroupVector<GqElement, GqGroup> phisVector = SameGroupVector.from(phis);
+		GroupVector<GqElement, GqGroup> phisVector = GroupVector.from(phis);
 		checkArgument(!phisVector.isEmpty(), "An ElGamalMultiRecipientCiphertext phis must be non empty.");
 		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");
 
@@ -207,8 +207,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @return {@code ElGamalMultiRecipientCiphertext}
 	 */
 	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final SameGroupVector<ZqElement, ZqGroup> exponents) {
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+			final GroupVector<ZqElement, ZqGroup> exponents) {
 
 		checkNotNull(ciphertexts);
 		checkNotNull(exponents);

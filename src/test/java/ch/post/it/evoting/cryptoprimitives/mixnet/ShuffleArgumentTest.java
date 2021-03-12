@@ -30,7 +30,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -45,8 +45,8 @@ class ShuffleArgumentTest extends TestGroupSetup {
 	private static int l;
 	private static ArgumentGenerator argumentGenerator;
 
-	private static SameGroupVector<GqElement, GqGroup> cA;
-	private static SameGroupVector<GqElement, GqGroup> cB;
+	private static GroupVector<GqElement, GqGroup> cA;
+	private static GroupVector<GqElement, GqGroup> cB;
 	private static ProductArgument productArgument;
 	private static MultiExponentiationArgument multiExponentiationArgument;
 
@@ -103,7 +103,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@ParameterizedTest
 		@MethodSource("nullArgumentsProvider")
 		@DisplayName("null fields throws NullPointerException")
-		void shuffleArgumentBuilderBuildNullFields(final SameGroupVector<GqElement, GqGroup> cA, final SameGroupVector<GqElement, GqGroup> cB,
+		void shuffleArgumentBuilderBuildNullFields(final GroupVector<GqElement, GqGroup> cA, final GroupVector<GqElement, GqGroup> cB,
 				final ProductArgument productArgument, final MultiExponentiationArgument multiExponentiationArgument) {
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
@@ -118,7 +118,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("cA from different group throws IllegalArgumentException")
 		void shuffleArgumentBuilderDiffGroupCA() {
-			final SameGroupVector<GqElement, GqGroup> otherGroupCA = otherGqGroupGenerator.genRandomGqElementVector(m);
+			final GroupVector<GqElement, GqGroup> otherGroupCA = otherGqGroupGenerator.genRandomGqElementVector(m);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
 					.withCA(otherGroupCA)
@@ -167,7 +167,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("commitment cA having different dimension m than cB and the arguments throws IllegalArgumentException")
 		void shuffleArgumentBuilderDiffSizeCA() {
-			final SameGroupVector<GqElement, GqGroup> longerCA = gqGroupGenerator.genRandomGqElementVector(m + 1);
+			final GroupVector<GqElement, GqGroup> longerCA = gqGroupGenerator.genRandomGqElementVector(m + 1);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
 					.withCA(longerCA)
@@ -183,8 +183,8 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("commitments cA, cB having different dimension m than arguments throws IllegalArgumentException")
 		void shuffleArgumentBuilderDiffSizeCACBAndArguments() {
-			final SameGroupVector<GqElement, GqGroup> longerCA = gqGroupGenerator.genRandomGqElementVector(m + 1);
-			final SameGroupVector<GqElement, GqGroup> longerCB = gqGroupGenerator.genRandomGqElementVector(m + 1);
+			final GroupVector<GqElement, GqGroup> longerCA = gqGroupGenerator.genRandomGqElementVector(m + 1);
+			final GroupVector<GqElement, GqGroup> longerCB = gqGroupGenerator.genRandomGqElementVector(m + 1);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
 					.withCA(longerCA)

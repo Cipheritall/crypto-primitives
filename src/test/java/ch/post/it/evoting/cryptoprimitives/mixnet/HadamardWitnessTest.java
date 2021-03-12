@@ -26,8 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -39,9 +39,9 @@ class HadamardWitnessTest extends TestGroupSetup {
 
 	private int n;
 	private int m;
-	private SameGroupMatrix<ZqElement, ZqGroup> matrix;
-	private SameGroupVector<ZqElement, ZqGroup> vector;
-	private SameGroupVector<ZqElement, ZqGroup> exponents;
+	private GroupMatrix<ZqElement, ZqGroup> matrix;
+	private GroupVector<ZqElement, ZqGroup> vector;
+	private GroupVector<ZqElement, ZqGroup> exponents;
 	private ZqElement randomness;
 
 	@BeforeEach

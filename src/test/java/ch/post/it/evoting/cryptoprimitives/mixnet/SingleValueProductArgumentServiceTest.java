@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -48,8 +48,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -98,7 +98,7 @@ class SingleValueProductArgumentServiceTest {
 
 	@BeforeEach
 	void setup() {
-		SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
+		GroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
 		ZqElement randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 		commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);
@@ -159,7 +159,7 @@ class SingleValueProductArgumentServiceTest {
 			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(commitmentKey.getGroup());
 			ZqGroup differentZqGroup = ZqGroup.sameOrderAs(differentGqGroup);
 			ZqGroupGenerator differentZqGroupGenerator = new ZqGroupGenerator(differentZqGroup);
-			SameGroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
+			GroupVector<ZqElement, ZqGroup> differentElements = differentZqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
 			ZqElement differentRandomness = ZqElement.create(randomService.genRandomInteger(differentZqGroup.getQ()), differentZqGroup);
 			SingleValueProductWitness differentWitness = new SingleValueProductWitness(differentElements, differentRandomness);
 			Exception exception = assertThrows(IllegalArgumentException.class,
@@ -170,7 +170,7 @@ class SingleValueProductArgumentServiceTest {
 		@Test
 		@DisplayName("with witness of size n < 2 throws IllegalArgumentException")
 		void getSingleValueProductArgumentWithNSmallerTwo() {
-			SameGroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(1);
+			GroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(1);
 			ZqElement randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 			product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 			commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);
@@ -246,8 +246,8 @@ class SingleValueProductArgumentServiceTest {
 					.withCd(cd)
 					.withCLowerDelta(cdelta)
 					.withCUpperDelta(cDelta)
-					.withATilde(SameGroupVector.from(aTilde))
-					.withBTilde(SameGroupVector.from(bTilde))
+					.withATilde(GroupVector.from(aTilde))
+					.withBTilde(GroupVector.from(bTilde))
 					.withRTilde(rTilde)
 					.withSTilde(sTilde)
 					.build();
@@ -260,7 +260,7 @@ class SingleValueProductArgumentServiceTest {
 					.when(randomService).genRandomInteger(specificZqGroup.getQ());
 
 			SingleValueProductStatement statement = new SingleValueProductStatement(commitment, product);
-			SingleValueProductWitness witness = new SingleValueProductWitness(SameGroupVector.from(a), r);
+			SingleValueProductWitness witness = new SingleValueProductWitness(GroupVector.from(a), r);
 
 			MixnetHashService hashService = mock(MixnetHashService.class);
 			when(hashService.recursiveHash(any()))
@@ -403,10 +403,10 @@ class SingleValueProductArgumentServiceTest {
 			final GqElement cd = GqElement.create(cdValue, gqGroup);
 			final GqElement cLowerDelta = GqElement.create(cLowerDeltaValue, gqGroup);
 			final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
-			final SameGroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
+			final GroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
 					.map(bi -> ZqElement.create(bi, zqGroup))
 					.collect(toSameGroupVector());
-			final SameGroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
+			final GroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
 					.map(bi -> ZqElement.create(bi, zqGroup))
 					.collect(toSameGroupVector());
 			final ZqElement rTilde = ZqElement.create(rTildeValue, zqGroup);

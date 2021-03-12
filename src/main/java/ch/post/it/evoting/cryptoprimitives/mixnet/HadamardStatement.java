@@ -18,13 +18,13 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 class HadamardStatement {
 
-	private final SameGroupVector<GqElement, GqGroup> commitmentsA;
+	private final GroupVector<GqElement, GqGroup> commitmentsA;
 	private final GqElement commitmentB;
 	private final GqGroup group;
 	private final int m;
@@ -41,7 +41,7 @@ class HadamardStatement {
 	 * @param commitmentsA c<sub>A</sub>, the vectors of commitments to a matrix A
 	 * @param commitmentB  c<sub>b</sub>, the commitment to a vector b.
 	 */
-	HadamardStatement(final SameGroupVector<GqElement, GqGroup> commitmentsA, final GqElement commitmentB) {
+	HadamardStatement(final GroupVector<GqElement, GqGroup> commitmentsA, final GqElement commitmentB) {
 		checkNotNull(commitmentsA);
 		checkNotNull(commitmentB);
 
@@ -54,7 +54,7 @@ class HadamardStatement {
 				"The commitments A and commitment b must have the same group.");
 	}
 
-	SameGroupVector<GqElement, GqGroup> getCommitmentsA() {
+	GroupVector<GqElement, GqGroup> getCommitmentsA() {
 		return commitmentsA;
 	}
 

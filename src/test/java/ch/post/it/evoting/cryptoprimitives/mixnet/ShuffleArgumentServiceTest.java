@@ -48,7 +48,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -172,19 +172,19 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Create a witness.
 			final Permutation permutation = permutationService.genPermutation(N);
-			final SameGroupVector<ZqElement, ZqGroup> randomness = zqGroupGenerator.genRandomZqElementVector(N);
+			final GroupVector<ZqElement, ZqGroup> randomness = zqGroupGenerator.genRandomZqElementVector(N);
 
 			shuffleWitness = new ShuffleWitness(permutation, randomness);
 
 			// Create the corresponding statement.
 			l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
 
 			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 					.mapToObj(i -> getCiphertext(ones, randomness.get(i), publicKey)
 							.multiply(ciphertexts.get(permutation.get(i))))
-					.collect(collectingAndThen(toList(), SameGroupVector::from));
+					.collect(collectingAndThen(toList(), GroupVector::from));
 
 			shuffleStatement = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
 		}
@@ -219,7 +219,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("ciphertexts and permutation of different size throws IllegalArgumentException")
 		void getShuffleArgumentCiphertextsPermutationDiffSize() {
 			final Permutation longerPermutation = permutationService.genPermutation(N + 1);
-			final SameGroupVector<ZqElement, ZqGroup> longerRandomness = zqGroupGenerator.genRandomZqElementVector(N + 1);
+			final GroupVector<ZqElement, ZqGroup> longerRandomness = zqGroupGenerator.genRandomZqElementVector(N + 1);
 			final ShuffleWitness longerShuffleWitness = new ShuffleWitness(longerPermutation, longerRandomness);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -230,7 +230,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("ciphertexts and randomness having a different group order throws IllegalArgumentException")
 		void getShuffleArgumentCiphertextsRandomnessDiffOrder() {
-			final SameGroupVector<ZqElement, ZqGroup> differentRandomness = otherZqGroupGenerator.genRandomZqElementVector(N);
+			final GroupVector<ZqElement, ZqGroup> differentRandomness = otherZqGroupGenerator.genRandomZqElementVector(N);
 			final ShuffleWitness differentShuffleWitness = new ShuffleWitness(this.shuffleWitness.getPermutation(), differentRandomness);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -243,14 +243,14 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		void getShuffleArgumentCiphertextsLongerThanPublicKey() {
 			final int biggerL = KEY_ELEMENTS_NUMBER + 1;
 			final ElGamalMultiRecipientPublicKey longerPublicKey = elGamalGenerator.genRandomPublicKey(biggerL);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertexts = elGamalGenerator
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerCiphertexts = elGamalGenerator
 					.genRandomCiphertextVector(N, biggerL);
 
 			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, biggerL);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 					.mapToObj(i -> getCiphertext(ones, shuffleWitness.getRandomness().get(i), longerPublicKey)
 							.multiply(longerCiphertexts.get(shuffleWitness.getPermutation().get(i))))
-					.collect(collectingAndThen(toList(), SameGroupVector::from));
+					.collect(collectingAndThen(toList(), GroupVector::from));
 
 			final ShuffleStatement longerCiphertextsStatement = new ShuffleStatement(longerCiphertexts, shuffledCiphertexts);
 
@@ -269,7 +269,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			shuffledCiphertexts.set(0, otherFirst);
 
 			// Recreate shuffled ciphertexts and statement.
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffledCiphertexts = SameGroupVector.from(
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffledCiphertexts = GroupVector.from(
 					shuffledCiphertexts);
 			final ShuffleStatement differentShuffleStatement = new ShuffleStatement(this.shuffleStatement.getCiphertexts(),
 					differentShuffledCiphertexts);
@@ -354,7 +354,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.getCiphertext(m3, zTwo, publicKey);
 			// Create the vector of ciphertexts:
 			// C = ({9, (18, 9, 13)}, {13, (13, 8, 9)}, {12, (2, 9, 8)}, {4, (4, 9, 12)})
-			SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> c = SameGroupVector.of(c0, c1, c2, c3);
+			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> c = GroupVector.of(c0, c1, c2, c3);
 
 			RandomService permutationRandomService = mock(RandomService.class);
 			when(permutationRandomService.genRandomInteger(any()))
@@ -362,14 +362,14 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			// Create the permutation: pi = [1, 3, 2, 0]
 			Permutation permutation = new PermutationService(permutationRandomService).genPermutation(4);
 			// Create the randomness: rho = (4, 9, 3, 2)
-			SameGroupVector<ZqElement, ZqGroup> rho = SameGroupVector.of(zFour, zNine, zThree, zTwo);
+			GroupVector<ZqElement, ZqGroup> rho = GroupVector.of(zFour, zNine, zThree, zTwo);
 
 			ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, 3);
 			// Create the vector of shuffled ciphertexts:
 			// C' = ({1, (3, 6, 4)}, {1, (13, 4, 18)}, {4, (12, 16, 6)}, {13, (2, 3, 1)})
-			SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> cPrime = IntStream.range(0, 4)
+			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> cPrime = IntStream.range(0, 4)
 					.mapToObj(i -> ElGamalMultiRecipientCiphertext.getCiphertext(ones, rho.get(i), publicKey).multiply(c.get(permutation.get(i))))
-					.collect(SameGroupVector.toSameGroupVector());
+					.collect(GroupVector.toSameGroupVector());
 
 			// Create the ShuffleArgumentService
 			// Create the commitment key: ck = {3, (6, 13, 12)}
@@ -399,16 +399,16 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			ZeroArgument zeroArgument = new ZeroArgument.Builder()
 					.withCA0(gTwelve)
 					.withCBm(gEighteen)
-					.withCd(SameGroupVector.of(gEighteen, gFour, gThirteen, gOne, gFour))
-					.withAPrime(SameGroupVector.of(zEight, zEight))
-					.withBPrime(SameGroupVector.of(zSix, zThree))
+					.withCd(GroupVector.of(gEighteen, gFour, gThirteen, gOne, gFour))
+					.withAPrime(GroupVector.of(zEight, zEight))
+					.withBPrime(GroupVector.of(zSix, zThree))
 					.withRPrime(zSeven)
 					.withSPrime(zZero)
 					.withTPrime(zFive)
 					.build();
 
 			// Create the expected HadamardArgument
-			SameGroupVector<GqElement, GqGroup> cBhadamard = SameGroupVector.of(gSixteen, gNine);
+			GroupVector<GqElement, GqGroup> cBhadamard = GroupVector.of(gSixteen, gNine);
 			HadamardArgument hadamardArgument = new HadamardArgument(cBhadamard, zeroArgument);
 
 			// Create the expected SingleValueProductArgument
@@ -416,8 +416,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.withCd(gOne)
 					.withCLowerDelta(gEight)
 					.withCUpperDelta(gOne)
-					.withATilde(SameGroupVector.of(zEight, zFive))
-					.withBTilde(SameGroupVector.of(zEight, zSeven))
+					.withATilde(GroupVector.of(zEight, zFive))
+					.withBTilde(GroupVector.of(zEight, zSeven))
 					.withRTilde(zSeven)
 					.withSTilde(zSeven)
 					.build();
@@ -428,8 +428,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			// Single: cd = 1, cδ = 8, cΔ = 1, aTilde = (8, 5), bTilde = (8, 7), rTilde = 7, sTilde = 7
 			ProductArgument productArgument = new ProductArgument(gNine, hadamardArgument, singleValueProductArgument);
 
-			SameGroupVector<GqElement, GqGroup> cBmulti = SameGroupVector.of(gTwelve, gFour, gOne, gEight);
-			SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = SameGroupVector.of(
+			GroupVector<GqElement, GqGroup> cBmulti = GroupVector.of(gTwelve, gFour, gOne, gEight);
+			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = GroupVector.of(
 					ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gThirteen, gTwo, gTwo)),
 					ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gEighteen, gEighteen, gSix)),
 					ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gFour, gThirteen, gOne)),
@@ -443,7 +443,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.withcA0(gOne)
 					.withcBVector(cBmulti)
 					.withEVector(eVector)
-					.withaVector(SameGroupVector.of(zTwo, zFour))
+					.withaVector(GroupVector.of(zTwo, zFour))
 					.withr(zSeven)
 					.withb(zOne)
 					.withs(zFive)
@@ -452,8 +452,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Create the expected output:
 			// cA = (8, 2), cB = (8, 18)
-			SameGroupVector<GqElement, GqGroup> cAshuffle = SameGroupVector.of(gEight, gTwo);
-			SameGroupVector<GqElement, GqGroup> cBshuffle = SameGroupVector.of(gEight, gEighteen);
+			GroupVector<GqElement, GqGroup> cAshuffle = GroupVector.of(gEight, gTwo);
+			GroupVector<GqElement, GqGroup> cBshuffle = GroupVector.of(gEight, gEighteen);
 
 			ShuffleArgument expected = new ShuffleArgument.Builder()
 					.withCA(cAshuffle)
@@ -575,11 +575,11 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect ciphertexts C throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectC() {
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = shuffleStatement.getCiphertexts();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = shuffleStatement.getCiphertexts();
 			final int randomIndex = secureRandom.nextInt(ciphertexts.size());
 			final ElGamalMultiRecipientCiphertext ciphertext = ciphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(ciphertext);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = with(ciphertexts, randomIndex, otherCiphertext);
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = with(ciphertexts, randomIndex, otherCiphertext);
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.getShuffledCiphertexts());
 
@@ -589,11 +589,11 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect shuffled ciphertexts C' throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectShuffledCPrime() {
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts();
 			final int randomIndex = secureRandom.nextInt(shuffledCiphertexts.size());
 			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(shuffledCiphertext);
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts =
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts =
 					with(shuffledCiphertexts, randomIndex, otherCiphertext);
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.getShuffledCiphertexts(), badShuffledCiphertexts);
@@ -604,10 +604,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect commitment vector c_A throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectCA() {
-			final SameGroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.getcA();
+			final GroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.getcA();
 
 			final GqElement badCA0 = commitmentA.get(0).multiply(gqGroup.getGenerator());
-			final SameGroupVector<GqElement, GqGroup> badCommitmentA = with(commitmentA, 0, badCA0);
+			final GroupVector<GqElement, GqGroup> badCommitmentA = with(commitmentA, 0, badCA0);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.withCA(badCommitmentA)
 					.withCB(shuffleArgument.getcB())
@@ -621,10 +621,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect commitment vector c_B throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectCB() {
-			final SameGroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.getcB();
+			final GroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.getcB();
 
 			final GqElement badCBm = commitmentB.get(0).multiply(gqGroup.getGenerator());
-			final SameGroupVector<GqElement, GqGroup> badCommitmentB = with(commitmentB, 0, badCBm);
+			final GroupVector<GqElement, GqGroup> badCommitmentB = with(commitmentB, 0, badCBm);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.withCA(shuffleArgument.getcA())
 					.withCB(badCommitmentB)

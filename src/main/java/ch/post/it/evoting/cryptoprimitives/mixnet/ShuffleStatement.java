@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -30,8 +30,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  */
 class ShuffleStatement {
 
-	private final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
-	private final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
+	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
+	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
 
 	private final int N;
 	private final GqGroup group;
@@ -47,12 +47,12 @@ class ShuffleStatement {
 	 *     <li>both vectors must be part of the same group</li>
 	 * </ul>
 	 *
-	 * @param ciphertexts         <b>C</b>, the ciphertexts as a {@link SameGroupVector}. All ciphertexts must have the same size.
-	 * @param shuffledCiphertexts <b>C'</b>, the shuffled and re-encrypted ciphertexts as a {@link SameGroupVector}. All shuffled ciphertexts must
+	 * @param ciphertexts         <b>C</b>, the ciphertexts as a {@link GroupVector}. All ciphertexts must have the same size.
+	 * @param shuffledCiphertexts <b>C'</b>, the shuffled and re-encrypted ciphertexts as a {@link GroupVector}. All shuffled ciphertexts must
 	 *                            have the same size.
 	 */
-	ShuffleStatement(final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts) {
+	ShuffleStatement(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts) {
 
 		checkNotNull(ciphertexts);
 		checkNotNull(shuffledCiphertexts);
@@ -74,11 +74,11 @@ class ShuffleStatement {
 		this.group = ciphertexts.getGroup();
 	}
 
-	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getCiphertexts() {
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getCiphertexts() {
 		return ciphertexts;
 	}
 
-	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getShuffledCiphertexts() {
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getShuffledCiphertexts() {
 		return shuffledCiphertexts;
 	}
 

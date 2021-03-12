@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
@@ -31,7 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 class ShuffleWitness {
 
 	private final Permutation permutation;
-	private final SameGroupVector<ZqElement, ZqGroup> randomness;
+	private final GroupVector<ZqElement, ZqGroup> randomness;
 
 	/**
 	 * Instantiates a shuffle witness with the given permutation and randomness vector which must comply with the following:
@@ -42,9 +42,9 @@ class ShuffleWitness {
 	 * </ul>
 	 *
 	 * @param permutation π, the permutation.
-	 * @param randomness  ρ, the randomness as a {@link SameGroupVector}.
+	 * @param randomness  ρ, the randomness as a {@link GroupVector}.
 	 */
-	ShuffleWitness(final Permutation permutation, final SameGroupVector<ZqElement, ZqGroup> randomness) {
+	ShuffleWitness(final Permutation permutation, final GroupVector<ZqElement, ZqGroup> randomness) {
 		checkNotNull(permutation);
 		checkNotNull(randomness);
 
@@ -58,7 +58,7 @@ class ShuffleWitness {
 		return permutation;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getRandomness() {
+	GroupVector<ZqElement, ZqGroup> getRandomness() {
 		return randomness;
 	}
 

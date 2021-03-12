@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -64,7 +64,7 @@ class ArgumentGenerator {
 	}
 
 	HadamardArgument genHadamardArgument(final int m, final int n) {
-		final SameGroupVector<GqElement, GqGroup> commitmentsB = gqGroupGenerator.genRandomGqElementVector(m);
+		final GroupVector<GqElement, GqGroup> commitmentsB = gqGroupGenerator.genRandomGqElementVector(m);
 		final ZeroArgument zeroArgument = genZeroArgument(m, n);
 
 		return new HadamardArgument(commitmentsB, zeroArgument);

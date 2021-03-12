@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
@@ -40,7 +40,7 @@ class SingleValueProductWitnessTest {
 	private static final int NUM_ELEMENTS = 5;
 
 	private ZqGroup zqGroup;
-	private SameGroupVector<ZqElement, ZqGroup> elements;
+	private GroupVector<ZqElement, ZqGroup> elements;
 	private ZqElement randomness;
 
 	@BeforeEach

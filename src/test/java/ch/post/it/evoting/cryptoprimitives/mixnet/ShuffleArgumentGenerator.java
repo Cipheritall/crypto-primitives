@@ -15,12 +15,12 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 
 import java.util.stream.IntStream;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -54,8 +54,8 @@ class ShuffleArgumentGenerator {
 	 * Generates a standalone {@link ShuffleStatement}. This statement does not match any witness as it just composed of (consistent) random values.
 	 */
 	ShuffleStatement genShuffleStatement(final int N, final int l) {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
 
 		return new ShuffleStatement(ciphertexts, shuffledCiphertexts);
 	}
@@ -66,15 +66,15 @@ class ShuffleArgumentGenerator {
 	ShuffleArgumentPair genShuffleArgumentPair(final int N, final int l, final ElGamalMultiRecipientPublicKey publicKey) {
 		// Create a witness.
 		final Permutation permutation = permutationService.genPermutation(N);
-		final SameGroupVector<ZqElement, ZqGroup> randomness = zqGroupGenerator.genRandomZqElementVector(N);
+		final GroupVector<ZqElement, ZqGroup> randomness = zqGroupGenerator.genRandomZqElementVector(N);
 
 		final ShuffleWitness shuffleWitness = new ShuffleWitness(permutation, randomness);
 
 		// Create the corresponding statement.
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator.genRandomCiphertextVector(N, l);
 
 		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 				.mapToObj(i -> getCiphertext(ones, randomness.get(i), publicKey)
 						.multiply(ciphertexts.get(permutation.get(i))))
 				.collect(toSameGroupVector());

@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -121,20 +121,19 @@ public class GqGroupGenerator {
 	}
 
 	/**
-	 * Generate a random {@link SameGroupVector} of {@link GqElement} in this {@code group}.
+	 * Generate a random {@link GroupVector} of {@link GqElement} in this {@code group}.
 	 *
 	 * @param numElements the number of elements to generate.
 	 * @return a vector of {@code numElements} random {@link GqElement}.
 	 */
-	public SameGroupVector<GqElement, GqGroup> genRandomGqElementVector(final int numElements) {
-		return SameGroupVector.from(generateElementList(numElements, this::genMember));
+	public GroupVector<GqElement, GqGroup> genRandomGqElementVector(final int numElements) {
+		return GroupVector.from(generateElementList(numElements, this::genMember));
 	}
 
-	public SameGroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
+	public GroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
 		List<List<GqElement>> elements = generateElementMatrix(numRows, numColumns, this::genMember);
-		return SameGroupMatrix.fromRows(elements);
+		return GroupMatrix.fromRows(elements);
 	}
-
 
 	private BigInteger randomBigInteger(int bitLength) {
 		return new BigInteger(bitLength, random);

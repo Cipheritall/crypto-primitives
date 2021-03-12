@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -33,7 +33,7 @@ class HadamardArgumentTest extends TestGroupSetup {
 	private static final int UPPER_BOUND = 10;
 
 	private int m;
-	private SameGroupVector<GqElement, GqGroup> commitmentsB;
+	private GroupVector<GqElement, GqGroup> commitmentsB;
 	private ZeroArgument zeroArgument;
 
 	@BeforeEach
@@ -57,7 +57,7 @@ class HadamardArgumentTest extends TestGroupSetup {
 	@Test
 	@DisplayName("commitments B and ZeroArgument having a different m throws an IllegalArgumentException")
 	void constructHadamardArgumentWithCommitmentsBAndZeroArgumentDifferentSizeM() {
-		SameGroupVector<GqElement, GqGroup> differentSizeCommitmentsB = gqGroupGenerator.genRandomGqElementVector(m + 1);
+		GroupVector<GqElement, GqGroup> differentSizeCommitmentsB = gqGroupGenerator.genRandomGqElementVector(m + 1);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardArgument(differentSizeCommitmentsB, zeroArgument));
 		assertEquals("The commitments B must be of the same size as the m of the zero argument.", exception.getMessage());
 	}
@@ -65,7 +65,7 @@ class HadamardArgumentTest extends TestGroupSetup {
 	@Test
 	@DisplayName("commitments B and ZeroArgument having different group orders throws an IllegalArgumentException")
 	void constructHadamardArgumentWithCommitmentsBAndZeroArgumentDifferentGroupOrder() {
-		SameGroupVector<GqElement, GqGroup> otherCommitmentsB = otherGqGroupGenerator.genRandomGqElementVector(m);
+		GroupVector<GqElement, GqGroup> otherCommitmentsB = otherGqGroupGenerator.genRandomGqElementVector(m);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardArgument(otherCommitmentsB, zeroArgument));
 		assertEquals("The commitments B must have the same group order as the zero argument.", exception.getMessage());
 	}

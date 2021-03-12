@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -86,7 +86,7 @@ class SingleValueProductArgumentService {
 
 		GqElement ca = statement.getCommitment();
 		ZqElement b = statement.getProduct();
-		SameGroupVector<ZqElement, ZqGroup> a = witness.getElements();
+		GroupVector<ZqElement, ZqGroup> a = witness.getElements();
 		ZqElement r = witness.getRandomness();
 
 		// Check groups
@@ -114,7 +114,7 @@ class SingleValueProductArgumentService {
 				.collect(Collectors.toList());
 
 		// Calculate d and r_d
-		SameGroupVector<ZqElement, ZqGroup> d = SameGroupVector.from(randomService.genRandomVector(q, n));
+		GroupVector<ZqElement, ZqGroup> d = GroupVector.from(randomService.genRandomVector(q, n));
 		ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ
@@ -131,10 +131,10 @@ class SingleValueProductArgumentService {
 		ZqElement sx = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ' and Δ
-		SameGroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
+		GroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k).negate().multiply(d.get(k + 1)))
 				.collect(toSameGroupVector());
-		SameGroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
+		GroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k + 1)
 						.add(a.get(k + 1).negate().multiply(lowerDelta.get(k)))
 						.add(bList.get(k).negate().multiply(d.get(k + 1))))
@@ -149,10 +149,10 @@ class SingleValueProductArgumentService {
 		ZqElement x = hashAndConvertX(cUpperDelta, cLowerDelta, cd, b, ca);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
-		SameGroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
+		GroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(a.get(k)).add(d.get(k)))
 				.collect(toSameGroupVector());
-		SameGroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
+		GroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(bList.get(k)).add(lowerDelta.get(k)))
 				.collect(toSameGroupVector());
 		ZqElement rTilde = x.multiply(r).add(rd);
@@ -191,8 +191,8 @@ class SingleValueProductArgumentService {
 		final GqElement cd = argument.getCd();
 		final GqElement cLowerDelta = argument.getCLowerDelta();
 		final GqElement cUpperDelta = argument.getCUpperDelta();
-		final SameGroupVector<ZqElement, ZqGroup> aTilde = argument.getATilde();
-		final SameGroupVector<ZqElement, ZqGroup> bTilde = argument.getBTilde();
+		final GroupVector<ZqElement, ZqGroup> aTilde = argument.getATilde();
+		final GroupVector<ZqElement, ZqGroup> bTilde = argument.getBTilde();
 		final ZqElement rTilde = argument.getRTilde();
 		final ZqElement sTilde = argument.getSTilde();
 
@@ -213,10 +213,10 @@ class SingleValueProductArgumentService {
 
 		// Verify Delta
 		final GqElement prodDelta = cUpperDelta.exponentiate(x).multiply(cLowerDelta);
-		final SameGroupVector<ZqElement, ZqGroup> eiVector = IntStream.range(0, n - 1)
+		final GroupVector<ZqElement, ZqGroup> eiVector = IntStream.range(0, n - 1)
 				.mapToObj(i -> x.multiply(bTilde.get(i + 1))
 						.subtract(bTilde.get(i).multiply(aTilde.get(i + 1))))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupVector::from));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), GroupVector::from));
 		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
 		final BooleanSupplier verifDelta = () -> prodDelta.equals(commDelta);
 

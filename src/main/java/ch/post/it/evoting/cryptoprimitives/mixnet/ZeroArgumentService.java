@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentVector;
@@ -33,9 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -95,12 +95,12 @@ final class ZeroArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
-		final SameGroupMatrix<ZqElement, ZqGroup> matrixA = witness.getMatrixA();
-		final SameGroupMatrix<ZqElement, ZqGroup> matrixB = witness.getMatrixB();
-		final SameGroupVector<ZqElement, ZqGroup> exponentsR = witness.getExponentsR();
-		final SameGroupVector<ZqElement, ZqGroup> exponentsS = witness.getExponentsS();
-		final SameGroupVector<GqElement, GqGroup> commitmentsA = statement.getCommitmentsA();
-		final SameGroupVector<GqElement, GqGroup> commitmentsB = statement.getCommitmentsB();
+		final GroupMatrix<ZqElement, ZqGroup> matrixA = witness.getMatrixA();
+		final GroupMatrix<ZqElement, ZqGroup> matrixB = witness.getMatrixB();
+		final GroupVector<ZqElement, ZqGroup> exponentsR = witness.getExponentsR();
+		final GroupVector<ZqElement, ZqGroup> exponentsS = witness.getExponentsS();
+		final GroupVector<GqElement, GqGroup> commitmentsA = statement.getCommitmentsA();
+		final GroupVector<GqElement, GqGroup> commitmentsB = statement.getCommitmentsB();
 		final ZqElement y = statement.getY();
 
 		// Cross dimensions checking between statement and witness.
@@ -110,9 +110,9 @@ final class ZeroArgumentService {
 		checkArgument(y.getGroup().equals(exponentsR.getGroup()), "The statement y and witness exponents must be part of the same group.");
 
 		// Ensure the statement and witness are corresponding.
-		final SameGroupVector<GqElement, GqGroup> computedCommitmentsA = getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
+		final GroupVector<GqElement, GqGroup> computedCommitmentsA = getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 		checkArgument(commitmentsA.equals(computedCommitmentsA), "The statement's Ca commitments must be equal to the witness' commitment matrix A.");
-		final SameGroupVector<GqElement, GqGroup> computedCommitmentsB = getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
+		final GroupVector<GqElement, GqGroup> computedCommitmentsB = getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
 		checkArgument(commitmentsB.equals(computedCommitmentsB), "The statement's Cb commitments must be equal to the witness' commitment matrix B.");
 
 		final ZqGroup zqGroup = y.getGroup();
@@ -129,23 +129,23 @@ final class ZeroArgumentService {
 
 		final int n = matrixA.numRows();
 		final BigInteger q = zqGroup.getQ();
-		final SameGroupVector<ZqElement, ZqGroup> a0 = SameGroupVector.from(randomService.genRandomVector(q, n));
-		final SameGroupVector<ZqElement, ZqGroup> bm = SameGroupVector.from(randomService.genRandomVector(q, n));
+		final GroupVector<ZqElement, ZqGroup> a0 = GroupVector.from(randomService.genRandomVector(q, n));
+		final GroupVector<ZqElement, ZqGroup> bm = GroupVector.from(randomService.genRandomVector(q, n));
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		final GqElement cA0 = getCommitment(a0, r0, commitmentKey);
 		final GqElement cBm = getCommitment(bm, sm, commitmentKey);
 
 		// Compute the D vector.
-		final SameGroupMatrix<ZqElement, ZqGroup> augmentedMatrixA = matrixA.prependColumn(a0);
-		final SameGroupMatrix<ZqElement, ZqGroup> augmentedMatrixB = matrixB.appendColumn(bm);
+		final GroupMatrix<ZqElement, ZqGroup> augmentedMatrixA = matrixA.prependColumn(a0);
+		final GroupMatrix<ZqElement, ZqGroup> augmentedMatrixB = matrixB.appendColumn(bm);
 
-		final SameGroupVector<ZqElement, ZqGroup> d = computeDVector(augmentedMatrixA, augmentedMatrixB, y);
+		final GroupVector<ZqElement, ZqGroup> d = computeDVector(augmentedMatrixA, augmentedMatrixB, y);
 
 		// Compute t and c_d.
 		final List<ZqElement> t = new ArrayList<>(randomService.genRandomVector(q, (2 * m) + 1));
 		t.set(m + 1, ZqElement.create(BigInteger.ZERO, zqGroup));
-		final SameGroupVector<GqElement, GqGroup> cd = getCommitmentVector(d, SameGroupVector.from(t), commitmentKey);
+		final GroupVector<GqElement, GqGroup> cd = getCommitmentVector(d, GroupVector.from(t), commitmentKey);
 
 		// Compute x, later used to compute a', b', r', s' and t'.
 		final byte[] hash = getHash(commitmentsA, commitmentsB, cA0, cBm, cd);
@@ -157,14 +157,14 @@ final class ZeroArgumentService {
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		// Compute vectors a' and b'.
-		final SameGroupVector<ZqElement, ZqGroup> aPrime = IntStream.range(0, n)
+		final GroupVector<ZqElement, ZqGroup> aPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(i).multiply(augmentedMatrixA.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
 				.collect(toSameGroupVector());
 
-		final SameGroupVector<ZqElement, ZqGroup> bPrime = IntStream.range(0, n)
+		final GroupVector<ZqElement, ZqGroup> bPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(m - i).multiply(augmentedMatrixB.get(j, i)))
@@ -172,8 +172,8 @@ final class ZeroArgumentService {
 				.collect(toSameGroupVector());
 
 		// Compute r', s' and t'.
-		final SameGroupVector<ZqElement, ZqGroup> augmentedExponentsR = exponentsR.prepend(r0);
-		final SameGroupVector<ZqElement, ZqGroup> augmentedExponentsS = exponentsS.append(sm);
+		final GroupVector<ZqElement, ZqGroup> augmentedExponentsR = exponentsR.prepend(r0);
+		final GroupVector<ZqElement, ZqGroup> augmentedExponentsS = exponentsS.append(sm);
 
 		final ZqElement rPrime = IntStream.range(0, m + 1)
 				.mapToObj(i -> xExpI.get(i).multiply(augmentedExponentsR.get(i)))
@@ -215,8 +215,8 @@ final class ZeroArgumentService {
 	 * @param secondMatrix B, the second matrix.
 	 * @return the computed <b>d</b> vector.
 	 */
-	SameGroupVector<ZqElement, ZqGroup> computeDVector(final SameGroupMatrix<ZqElement, ZqGroup> firstMatrix,
-			final SameGroupMatrix<ZqElement, ZqGroup> secondMatrix, final ZqElement y) {
+	GroupVector<ZqElement, ZqGroup> computeDVector(final GroupMatrix<ZqElement, ZqGroup> firstMatrix,
+			final GroupMatrix<ZqElement, ZqGroup> secondMatrix, final ZqElement y) {
 
 		// Null checking.
 		checkNotNull(firstMatrix);
@@ -228,7 +228,7 @@ final class ZeroArgumentService {
 		checkArgument(firstMatrix.numColumns() == secondMatrix.numColumns(), "The two matrices must have the same number of columns.");
 
 		if (firstMatrix.isEmpty()) {
-			return SameGroupVector.of();
+			return GroupVector.of();
 		}
 
 		// Cross matrix group checking.
@@ -251,7 +251,7 @@ final class ZeroArgumentService {
 			d.add(dk);
 		}
 
-		return SameGroupVector.from(d);
+		return GroupVector.from(d);
 	}
 
 	/**
@@ -265,7 +265,7 @@ final class ZeroArgumentService {
 	 * @param secondVector b, the second vector.
 	 * @return The sum &sum;<sub>j=0</sub><sup>n-1</sup> a<sub>j</sub> &middot; b<sub>j</sub> &middot; y<sup>j</sup>
 	 */
-	ZqElement starMap(final SameGroupVector<ZqElement, ZqGroup> firstVector, final SameGroupVector<ZqElement, ZqGroup> secondVector,
+	ZqElement starMap(final GroupVector<ZqElement, ZqGroup> firstVector, final GroupVector<ZqElement, ZqGroup> secondVector,
 			final ZqElement y) {
 
 		// Null checking.
@@ -311,9 +311,9 @@ final class ZeroArgumentService {
 		checkArgument(statement.getCommitmentsA().getGroup().equals(argument.getCd().getGroup()),
 				"Statement and argument do not share the same group");
 
-		SameGroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
-		SameGroupVector<GqElement, GqGroup> cd = argument.getCd();
-		SameGroupVector<GqElement, GqGroup> cB = statement.getCommitmentsB();
+		GroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
+		GroupVector<GqElement, GqGroup> cd = argument.getCd();
+		GroupVector<GqElement, GqGroup> cB = statement.getCommitmentsB();
 
 		int m = cA.size();
 		checkArgument((cd.size() - 2 * m) == 1, "The m of the statement should be equal to the m of the argument (2m+1)");
@@ -333,13 +333,13 @@ final class ZeroArgumentService {
 
 		GqElement identity = cA.getGroup().getIdentity();
 
-		SameGroupVector<GqElement, GqGroup> augmentedCA = cA.prepend(argument.getCA0());
+		GroupVector<GqElement, GqGroup> augmentedCA = cA.prepend(argument.getCA0());
 
 		GqElement prodCa = IntStream.range(0, m + 1)
 				.mapToObj(i -> augmentedCA.get(i).exponentiate(exponentiatedXs.get(i)))
 				.reduce(identity, GqElement::multiply);
 
-		SameGroupVector<ZqElement, ZqGroup> aPrime = argument.getAPrime();
+		GroupVector<ZqElement, ZqGroup> aPrime = argument.getAPrime();
 		ZqElement rPrime = argument.getRPrime();
 
 		GqElement commA = getCommitment(aPrime, rPrime, commitmentKey);
@@ -350,13 +350,13 @@ final class ZeroArgumentService {
 			return false;
 		}
 
-		SameGroupVector<GqElement, GqGroup> augmentedCB = cB.append(argument.getCBm());
+		GroupVector<GqElement, GqGroup> augmentedCB = cB.append(argument.getCBm());
 
 		GqElement prodCb = IntStream.range(0, m + 1)
 				.mapToObj(i -> augmentedCB.get(m - i).exponentiate(exponentiatedXs.get(i)))
 				.reduce(identity, GqElement::multiply);
 
-		SameGroupVector<ZqElement, ZqGroup> bPrime = argument.getBPrime();
+		GroupVector<ZqElement, ZqGroup> bPrime = argument.getBPrime();
 		ZqElement sPrime = argument.getSPrime();
 
 		GqElement commB = getCommitment(bPrime, sPrime, commitmentKey);
@@ -371,7 +371,7 @@ final class ZeroArgumentService {
 				.mapToObj(i -> cd.get(i).exponentiate(exponentiatedXs.get(i)))
 				.reduce(identity, GqElement::multiply);
 
-		SameGroupVector<ZqElement, ZqGroup> prod = SameGroupVector.of(starMap(aPrime, bPrime, statement.getY()));
+		GroupVector<ZqElement, ZqGroup> prod = GroupVector.of(starMap(aPrime, bPrime, statement.getY()));
 
 		ZqElement tPrime = argument.getTPrime();
 		GqElement commD = getCommitment(prod, tPrime, commitmentKey);
@@ -388,22 +388,22 @@ final class ZeroArgumentService {
 	}
 
 	private ZqElement hashAndConvertX(ZeroStatement zeroStatement, ZeroArgument zeroArgument) {
-		SameGroupVector<GqElement, GqGroup> cA = zeroStatement.getCommitmentsA();
-		SameGroupVector<GqElement, GqGroup> cB = zeroStatement.getCommitmentsB();
+		GroupVector<GqElement, GqGroup> cA = zeroStatement.getCommitmentsA();
+		GroupVector<GqElement, GqGroup> cB = zeroStatement.getCommitmentsB();
 		GqGroup group = cA.getGroup();
 
 		GqElement cA0 = zeroArgument.getCA0();
 		GqElement cBm = zeroArgument.getCBm();
 
-		SameGroupVector<GqElement, GqGroup> cd = zeroArgument.getCd();
+		GroupVector<GqElement, GqGroup> cd = zeroArgument.getCd();
 
 		final byte[] hash = getHash(cA, cB, cA0, cBm, cd);
 		return ZqElement.create(ConversionService.byteArrayToInteger(hash), ZqGroup.sameOrderAs(group));
 	}
 
-	private byte[] getHash(SameGroupVector<GqElement, GqGroup> commitmentsA,
-			SameGroupVector<GqElement, GqGroup> commitmentsB, GqElement cA0,
-			GqElement cBm, SameGroupVector<GqElement, GqGroup> cd) {
+	private byte[] getHash(GroupVector<GqElement, GqGroup> commitmentsA,
+			GroupVector<GqElement, GqGroup> commitmentsB, GqElement cA0,
+			GqElement cBm, GroupVector<GqElement, GqGroup> cd) {
 
 		final GqGroup gqGroup = commitmentsA.get(0).getGroup();
 		BigInteger p = gqGroup.getP();

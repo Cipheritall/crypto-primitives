@@ -20,13 +20,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 class HadamardArgument {
 
-	private final SameGroupVector<GqElement, GqGroup> commitmentsB;
+	private final GroupVector<GqElement, GqGroup> commitmentsB;
 	private final ZeroArgument zeroArgument;
 
 	private final int m;
@@ -42,10 +42,10 @@ class HadamardArgument {
 	 *     <li>the commitments and zero argument must belong to the same group</li>
 	 * </ul>
 	 *
-	 * @param commitmentsB a {@link SameGroupVector} of {@link GqElement}s. Non-null.
+	 * @param commitmentsB a {@link GroupVector} of {@link GqElement}s. Non-null.
 	 * @param zeroArgument a {@link ZeroArgument}. Non-null.
 	 */
-	HadamardArgument(final SameGroupVector<GqElement, GqGroup> commitmentsB, final ZeroArgument zeroArgument) {
+	HadamardArgument(final GroupVector<GqElement, GqGroup> commitmentsB, final ZeroArgument zeroArgument) {
 		checkNotNull(commitmentsB);
 		checkNotNull(zeroArgument);
 
@@ -61,7 +61,7 @@ class HadamardArgument {
 		this.group = commitmentsB.getGroup();
 	}
 
-	SameGroupVector<GqElement, GqGroup> getCommitmentsB() {
+	GroupVector<GqElement, GqGroup> getCommitmentsB() {
 		return commitmentsB;
 	}
 

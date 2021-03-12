@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -37,9 +37,9 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class MultiExponentiationArgument {
 
 	private GqElement cA0;
-	private SameGroupVector<GqElement, GqGroup> cBVector;
-	private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
-	private SameGroupVector<ZqElement, ZqGroup> aVector;
+	private GroupVector<GqElement, GqGroup> cBVector;
+	private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
+	private GroupVector<ZqElement, ZqGroup> aVector;
 	private ZqElement r;
 	private ZqElement b;
 	private ZqElement s;
@@ -58,15 +58,15 @@ public class MultiExponentiationArgument {
 		return cA0;
 	}
 
-	public SameGroupVector<GqElement, GqGroup> getcBVector() {
+	public GroupVector<GqElement, GqGroup> getcBVector() {
 		return cBVector;
 	}
 
-	public SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getEVector() {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getEVector() {
 		return EVector;
 	}
 
-	public SameGroupVector<ZqElement, ZqGroup> getaVector() {
+	public GroupVector<ZqElement, ZqGroup> getaVector() {
 		return aVector;
 	}
 
@@ -124,9 +124,9 @@ public class MultiExponentiationArgument {
 	static class Builder {
 
 		private GqElement cA0;
-		private SameGroupVector<GqElement, GqGroup> cBVector;
-		private SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
-		private SameGroupVector<ZqElement, ZqGroup> aVector;
+		private GroupVector<GqElement, GqGroup> cBVector;
+		private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
+		private GroupVector<ZqElement, ZqGroup> aVector;
 		private ZqElement r;
 		private ZqElement b;
 		private ZqElement s;
@@ -141,17 +141,17 @@ public class MultiExponentiationArgument {
 			return this;
 		}
 
-		Builder withcBVector(final SameGroupVector<GqElement, GqGroup> cBVector) {
+		Builder withcBVector(final GroupVector<GqElement, GqGroup> cBVector) {
 			this.cBVector = cBVector;
 			return this;
 		}
 
-		Builder withEVector(final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector) {
+		Builder withEVector(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector) {
 			this.EVector = EVector;
 			return this;
 		}
 
-		Builder withaVector(final SameGroupVector<ZqElement, ZqGroup> aVector) {
+		Builder withaVector(final GroupVector<ZqElement, ZqGroup> aVector) {
 			this.aVector = aVector;
 			return this;
 		}

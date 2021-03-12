@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -37,9 +37,9 @@ class ZeroArgument {
 
 	private GqElement cA0;
 	private GqElement cBm;
-	private SameGroupVector<GqElement, GqGroup> cd;
-	private SameGroupVector<ZqElement, ZqGroup> aPrime;
-	private SameGroupVector<ZqElement, ZqGroup> bPrime;
+	private GroupVector<GqElement, GqGroup> cd;
+	private GroupVector<ZqElement, ZqGroup> aPrime;
+	private GroupVector<ZqElement, ZqGroup> bPrime;
 	private ZqElement rPrime;
 	private ZqElement sPrime;
 	private ZqElement tPrime;
@@ -60,15 +60,15 @@ class ZeroArgument {
 		return cBm;
 	}
 
-	SameGroupVector<GqElement, GqGroup> getCd() {
+	GroupVector<GqElement, GqGroup> getCd() {
 		return cd;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getAPrime() {
+	GroupVector<ZqElement, ZqGroup> getAPrime() {
 		return aPrime;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getBPrime() {
+	GroupVector<ZqElement, ZqGroup> getBPrime() {
 		return bPrime;
 	}
 
@@ -121,9 +121,9 @@ class ZeroArgument {
 
 		private GqElement cA0;
 		private GqElement cBm;
-		private SameGroupVector<GqElement, GqGroup> cd;
-		private SameGroupVector<ZqElement, ZqGroup> aPrime;
-		private SameGroupVector<ZqElement, ZqGroup> bPrime;
+		private GroupVector<GqElement, GqGroup> cd;
+		private GroupVector<ZqElement, ZqGroup> aPrime;
+		private GroupVector<ZqElement, ZqGroup> bPrime;
 		private ZqElement rPrime;
 		private ZqElement sPrime;
 		private ZqElement tPrime;
@@ -138,17 +138,17 @@ class ZeroArgument {
 			return this;
 		}
 
-		Builder withCd(final SameGroupVector<GqElement, GqGroup> cd) {
+		Builder withCd(final GroupVector<GqElement, GqGroup> cd) {
 			this.cd = cd;
 			return this;
 		}
 
-		Builder withAPrime(final SameGroupVector<ZqElement, ZqGroup> aPrime) {
+		Builder withAPrime(final GroupVector<ZqElement, ZqGroup> aPrime) {
 			this.aPrime = aPrime;
 			return this;
 		}
 
-		Builder withBPrime(final SameGroupVector<ZqElement, ZqGroup> bPrime) {
+		Builder withBPrime(final GroupVector<ZqElement, ZqGroup> bPrime) {
 			this.bPrime = bPrime;
 			return this;
 		}

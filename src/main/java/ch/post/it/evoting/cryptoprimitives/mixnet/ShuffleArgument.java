@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -32,8 +32,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  */
 class ShuffleArgument {
 
-	private SameGroupVector<GqElement, GqGroup> cA;
-	private SameGroupVector<GqElement, GqGroup> cB;
+	private GroupVector<GqElement, GqGroup> cA;
+	private GroupVector<GqElement, GqGroup> cB;
 	private ProductArgument productArgument;
 	private MultiExponentiationArgument multiExponentiationArgument;
 
@@ -45,11 +45,11 @@ class ShuffleArgument {
 		// Intentionally left blank.
 	}
 
-	SameGroupVector<GqElement, GqGroup> getcA() {
+	GroupVector<GqElement, GqGroup> getcA() {
 		return cA;
 	}
 
-	SameGroupVector<GqElement, GqGroup> getcB() {
+	GroupVector<GqElement, GqGroup> getcB() {
 		return cB;
 	}
 
@@ -93,17 +93,17 @@ class ShuffleArgument {
 
 	static class Builder {
 
-		private SameGroupVector<GqElement, GqGroup> cA;
-		private SameGroupVector<GqElement, GqGroup> cB;
+		private GroupVector<GqElement, GqGroup> cA;
+		private GroupVector<GqElement, GqGroup> cB;
 		private ProductArgument productArgument;
 		private MultiExponentiationArgument multiExponentiationArgument;
 
-		Builder withCA(final SameGroupVector<GqElement, GqGroup> cA) {
+		Builder withCA(final GroupVector<GqElement, GqGroup> cA) {
 			this.cA = cA;
 			return this;
 		}
 
-		Builder withCB(final SameGroupVector<GqElement, GqGroup> cB) {
+		Builder withCB(final GroupVector<GqElement, GqGroup> cB) {
 			this.cB = cB;
 			return this;
 		}

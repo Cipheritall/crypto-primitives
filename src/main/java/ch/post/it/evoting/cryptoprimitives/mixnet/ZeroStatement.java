@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -30,8 +30,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  */
 class ZeroStatement {
 
-	private final SameGroupVector<GqElement, GqGroup> commitmentsA;
-	private final SameGroupVector<GqElement, GqGroup> commitmentsB;
+	private final GroupVector<GqElement, GqGroup> commitmentsA;
+	private final GroupVector<GqElement, GqGroup> commitmentsB;
 	private final ZqElement y;
 
 	/**
@@ -48,7 +48,7 @@ class ZeroStatement {
 	 * @param commitmentsB c<sub>B</sub>, a list of {@link GqElement}s.
 	 * @param y            The value defining the bilinear mapping.
 	 */
-	ZeroStatement(final SameGroupVector<GqElement, GqGroup> commitmentsA, final SameGroupVector<GqElement, GqGroup> commitmentsB, final ZqElement y) {
+	ZeroStatement(final GroupVector<GqElement, GqGroup> commitmentsA, final GroupVector<GqElement, GqGroup> commitmentsB, final ZqElement y) {
 		// Null checking.
 		this.commitmentsA = checkNotNull(commitmentsA);
 		this.commitmentsB = checkNotNull(commitmentsB);
@@ -67,11 +67,11 @@ class ZeroStatement {
 
 	}
 
-	SameGroupVector<GqElement, GqGroup> getCommitmentsA() {
+	GroupVector<GqElement, GqGroup> getCommitmentsA() {
 		return commitmentsA;
 	}
 
-	SameGroupVector<GqElement, GqGroup> getCommitmentsB() {
+	GroupVector<GqElement, GqGroup> getCommitmentsB() {
 		return commitmentsB;
 	}
 

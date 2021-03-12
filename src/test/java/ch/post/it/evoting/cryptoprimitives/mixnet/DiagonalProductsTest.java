@@ -30,9 +30,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.HashService;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -53,8 +52,8 @@ class DiagonalProductsTest extends TestGroupSetup {
 	private int n;
 	private int m;
 	private int l;
-	private SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
-	private SameGroupMatrix<ZqElement, ZqGroup> exponents;
+	private GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
+	private GroupMatrix<ZqElement, ZqGroup> exponents;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -84,7 +83,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with valid inputs does not throw")
 	void getDiagonalProductsValid() {
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProductsOutput = multiExponentiationArgumentService
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProductsOutput = multiExponentiationArgumentService
 				.getDiagonalProducts(ciphertexts, exponents);
 		assertEquals(2 * m, diagonalProductsOutput.size());
 	}
@@ -99,8 +98,8 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with any empty matrix throws IllegalArgumentException")
 	void getDiagonalProductsEmptyParams() {
-		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> emptyCiphertexts = SameGroupMatrix.fromRows(Collections.emptyList());
-		final SameGroupMatrix<ZqElement, ZqGroup> emptyExponents = SameGroupMatrix.fromRows(Collections.emptyList());
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> emptyCiphertexts = GroupMatrix.fromRows(Collections.emptyList());
+		final GroupMatrix<ZqElement, ZqGroup> emptyExponents = GroupMatrix.fromRows(Collections.emptyList());
 
 		final IllegalArgumentException emptyCiphertextsException = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(emptyCiphertexts, exponents));
@@ -114,7 +113,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with exponents having different number of rows throws IllegalArgumentException")
 	void getDiagonalProductsExponentsTooManyRows() {
-		final SameGroupMatrix<ZqElement, ZqGroup> biggerExponents = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m + 1);
+		final GroupMatrix<ZqElement, ZqGroup> biggerExponents = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m + 1);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(ciphertexts, biggerExponents));
@@ -124,7 +123,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with exponents having wrong number of columns throws IllegalArgumentException")
 	void getDiagonalProductsExponentsTooFewRows() {
-		final SameGroupMatrix<ZqElement, ZqGroup> lessColsExponents = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+		final GroupMatrix<ZqElement, ZqGroup> lessColsExponents = zqGroupGenerator.genRandomZqElementMatrix(n, m);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(ciphertexts, lessColsExponents));
@@ -141,8 +140,8 @@ class DiagonalProductsTest extends TestGroupSetup {
 				() -> elGamalGenerator.genRandomCiphertexts(otherPublicKey, KEY_SIZE + 1, n))
 				.limit(m)
 				.collect(Collectors.toList());
-		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = SameGroupMatrix.fromRows(randomCiphertexts);
-		final SameGroupMatrix<ZqElement, ZqGroup> otherExponents = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = GroupMatrix.fromRows(randomCiphertexts);
+		final GroupMatrix<ZqElement, ZqGroup> otherExponents = zqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(otherCiphertexts, otherExponents));
@@ -161,7 +160,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 				() -> elGamalGenerator.genRandomCiphertexts(differentGroupPublicKey, l, n))
 				.limit(m)
 				.collect(Collectors.toList());
-		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> differentGroupCiphertexts = SameGroupMatrix
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> differentGroupCiphertexts = GroupMatrix
 				.fromRows(otherGroupRandomCiphertexts);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -172,7 +171,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with ciphertexts of different group order than exponents throws IllegalArgumentException")
 	void getDiagonalProductsDifferentOrderCiphertextsAndExponents() {
-		final SameGroupMatrix<ZqElement, ZqGroup> differentGroupExponents = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
+		final GroupMatrix<ZqElement, ZqGroup> differentGroupExponents = otherZqGroupGenerator.genRandomZqElementMatrix(n, m + 1);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(ciphertexts, differentGroupExponents));
@@ -226,16 +225,16 @@ class DiagonalProductsTest extends TestGroupSetup {
 		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
 		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
 		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
-		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = SameGroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
+		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = GroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
 
 		// Create the exponent matrix
 		// A = [0 3 5]
 		// 	   [1 9 1]
-		SameGroupMatrix<ZqElement, ZqGroup> matrixA = SameGroupVector.of(zZero, zOne, zThree, zNine, zFive, zOne).toMatrix(2, 3);
+		GroupMatrix<ZqElement, ZqGroup> matrixA = GroupVector.of(zZero, zOne, zThree, zNine, zFive, zOne).toMatrix(2, 3);
 
 		// Create the expected output
 		// D = ( {13, (2, 3, 1)}, {12, (13, 9, 9)}, {8, (13, 16, 13)}, {4, (18, 9, 3)} )
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> expected = SameGroupVector.of(
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> expected = GroupVector.of(
 				ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne)),
 				ElGamalMultiRecipientCiphertext.create(gTwelve, Arrays.asList(gThirteen, gNine, gNine)),
 				ElGamalMultiRecipientCiphertext.create(gEight, Arrays.asList(gThirteen, gSixteen, gThirteen)),

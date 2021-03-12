@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -30,8 +30,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 class ProductWitness {
 
-	private final SameGroupMatrix<ZqElement, ZqGroup> matrix;
-	private final SameGroupVector<ZqElement, ZqGroup> exponents;
+	private final GroupMatrix<ZqElement, ZqGroup> matrix;
+	private final GroupVector<ZqElement, ZqGroup> exponents;
 
 	/**
 	 * Instantiates a {@link ProductWitness} with the given matrix and exponents.
@@ -43,10 +43,10 @@ class ProductWitness {
 	 *     <li>the number of columns in the matrix must be equal to the number of exponents</li>
 	 * </ul>
 	 *
-	 * @param matrix    A, a {@link SameGroupMatrix} of {@code ZqElements}
-	 * @param exponents <b><i>r</i></b>, a {@link SameGroupVector} of {@code ZqElements}
+	 * @param matrix    A, a {@link GroupMatrix} of {@code ZqElements}
+	 * @param exponents <b><i>r</i></b>, a {@link GroupVector} of {@code ZqElements}
 	 */
-	ProductWitness(final SameGroupMatrix<ZqElement, ZqGroup> matrix, final SameGroupVector<ZqElement, ZqGroup> exponents) {
+	ProductWitness(final GroupMatrix<ZqElement, ZqGroup> matrix, final GroupVector<ZqElement, ZqGroup> exponents) {
 		checkNotNull(matrix);
 		checkNotNull(exponents);
 		checkArgument(matrix.numColumns() == exponents.size(),
@@ -58,11 +58,11 @@ class ProductWitness {
 		this.exponents = exponents;
 	}
 
-	SameGroupMatrix<ZqElement, ZqGroup> getMatrix() {
+	GroupMatrix<ZqElement, ZqGroup> getMatrix() {
 		return matrix;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getExponents() {
+	GroupVector<ZqElement, ZqGroup> getExponents() {
 		return exponents;
 	}
 

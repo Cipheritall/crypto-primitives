@@ -20,22 +20,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Value class representing the statement for the multi exponent argument.
- *
+ * <p>
  * Instances of this class are immutable.
  */
 final class MultiExponentiationStatement {
 
-	private final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix;
+	private final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix;
 	private final ElGamalMultiRecipientCiphertext C;
-	private final SameGroupVector<GqElement, GqGroup> cA;
+	private final GroupVector<GqElement, GqGroup> cA;
 
 	private final GqGroup group;
 	private final int m;
@@ -44,7 +44,7 @@ final class MultiExponentiationStatement {
 
 	/**
 	 * <p>Create a multi exponentiation statement.</p>
-	 *
+	 * <p>
 	 * The arguments must abide by the following conditions:
 	 * <ul>
 	 *     <li>All arguments must be non null</li>
@@ -52,13 +52,12 @@ final class MultiExponentiationStatement {
 	 *     <li>The commitment to A must be the same size as the number of rows of the ciphertext matrix.</li>
 	 * </ul>
 	 *
-	 *
 	 * @param ciphertextMatrix (C<sub>0</sub>, ..., C<sub>m-1</sub>), the matrix of ciphertexts of size m x n
-	 * @param ciphertextC C, the re-encrypted multi exponentiation product
-	 * @param commitmentA c<sub>A</sub>, the commitment to the matrix A of size m
+	 * @param ciphertextC      C, the re-encrypted multi exponentiation product
+	 * @param commitmentA      c<sub>A</sub>, the commitment to the matrix A of size m
 	 */
-	MultiExponentiationStatement(final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix,
-			final ElGamalMultiRecipientCiphertext ciphertextC, final SameGroupVector<GqElement, GqGroup> commitmentA) {
+	MultiExponentiationStatement(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix,
+			final ElGamalMultiRecipientCiphertext ciphertextC, final GroupVector<GqElement, GqGroup> commitmentA) {
 
 		//Null checking
 		checkNotNull(ciphertextMatrix);
@@ -77,7 +76,6 @@ final class MultiExponentiationStatement {
 					"The ciphertext matrix and the commitment must be from the same group.");
 		}
 
-
 		this.CMatrix = ciphertextMatrix;
 		this.C = ciphertextC;
 		this.cA = commitmentA;
@@ -88,7 +86,7 @@ final class MultiExponentiationStatement {
 		this.l = ciphertextMatrix.getElementSize();
 	}
 
-	SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> getCMatrix() {
+	GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> getCMatrix() {
 		return CMatrix;
 	}
 
@@ -96,7 +94,7 @@ final class MultiExponentiationStatement {
 		return C;
 	}
 
-	SameGroupVector<GqElement, GqGroup> getcA() {
+	GroupVector<GqElement, GqGroup> getcA() {
 		return cA;
 	}
 

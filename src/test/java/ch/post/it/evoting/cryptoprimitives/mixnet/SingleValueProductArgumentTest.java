@@ -31,7 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -47,8 +47,8 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 	private static GqElement cd;
 	private static GqElement cLowerDelta;
 	private static GqElement cUpperDelta;
-	private static SameGroupVector<ZqElement, ZqGroup> aTilde;
-	private static SameGroupVector<ZqElement, ZqGroup> bTilde;
+	private static GroupVector<ZqElement, ZqGroup> aTilde;
+	private static GroupVector<ZqElement, ZqGroup> bTilde;
 	private static ZqElement rTilde;
 	private static ZqElement sTilde;
 
@@ -141,7 +141,7 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 		@MethodSource("nullArgumentsProvider")
 		@DisplayName("null fields throws NullPointerException")
 		void singleValueProductBuilderBuildNullFields(final GqElement cd, final GqElement cLowerDelta, final GqElement cUpperDelta,
-				final SameGroupVector<ZqElement, ZqGroup> aTilde, final SameGroupVector<ZqElement, ZqGroup> bTilde, final ZqElement rTilde,
+				final GroupVector<ZqElement, ZqGroup> aTilde, final GroupVector<ZqElement, ZqGroup> bTilde, final ZqElement rTilde,
 				final ZqElement sTilde) {
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
@@ -195,8 +195,8 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("not compatible GqGroup and ZqGroup throws IllegalArgumentException")
 		void singleValueProductBuilderDiffGqGroupAndZqGroup() {
-			final SameGroupVector<ZqElement, ZqGroup> otherGroupATilde = otherZqGroupGenerator.genRandomZqElementVector(n);
-			final SameGroupVector<ZqElement, ZqGroup> otherGroupBTilde = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final GroupVector<ZqElement, ZqGroup> otherGroupATilde = otherZqGroupGenerator.genRandomZqElementVector(n);
+			final GroupVector<ZqElement, ZqGroup> otherGroupBTilde = otherZqGroupGenerator.genRandomZqElementVector(n);
 			final ZqElement otherGroupRTilde = otherZqGroupGenerator.genRandomZqElementMember();
 			final ZqElement otherGroupSTilde = otherZqGroupGenerator.genRandomZqElementMember();
 
@@ -216,7 +216,7 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("aTilde and bTilde of different size throws IllegalArgumentException")
 		void singleValueProductBuilderDiffSizeATildeBTilde() {
-			final SameGroupVector<ZqElement, ZqGroup> longerATilde = zqGroupGenerator.genRandomZqElementVector(n + 1);
+			final GroupVector<ZqElement, ZqGroup> longerATilde = zqGroupGenerator.genRandomZqElementVector(n + 1);
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
 					.withCd(cd)
@@ -234,8 +234,8 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("aTilde and bTilde of size not greater than or equal to 2 throws IllegalArgumentException")
 		void singleValueProductBuilderWrongSizeATildeBTilde() {
-			final SameGroupVector<ZqElement, ZqGroup> shorterATilde = zqGroupGenerator.genRandomZqElementVector(1);
-			final SameGroupVector<ZqElement, ZqGroup> shorterBTilde = zqGroupGenerator.genRandomZqElementVector(1);
+			final GroupVector<ZqElement, ZqGroup> shorterATilde = zqGroupGenerator.genRandomZqElementVector(1);
+			final GroupVector<ZqElement, ZqGroup> shorterBTilde = zqGroupGenerator.genRandomZqElementVector(1);
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
 					.withCd(cd)

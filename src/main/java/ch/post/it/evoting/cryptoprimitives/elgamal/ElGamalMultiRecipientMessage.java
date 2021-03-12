@@ -30,9 +30,9 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.Hashable;
 import ch.post.it.evoting.cryptoprimitives.HashableList;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -44,10 +44,10 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  */
 public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
-	private final SameGroupVector<GqElement, GqGroup> messageElements;
+	private final GroupVector<GqElement, GqGroup> messageElements;
 
 	public ElGamalMultiRecipientMessage(final List<GqElement> messageElements) {
-		this.messageElements = SameGroupVector.from(messageElements);
+		this.messageElements = GroupVector.from(messageElements);
 		checkArgument(!this.messageElements.isEmpty(), "An ElGamal message must not be empty.");
 	}
 
@@ -66,7 +66,7 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	 * Generates an {@link ElGamalMultiRecipientMessage} of constant value.
 	 *
 	 * @param constant the constant element of the message
-	 * @param size  the size of the message
+	 * @param size     the size of the message
 	 * @return the message of constants with {@code size} elements
 	 */
 	public static ElGamalMultiRecipientMessage constantMessage(final GqElement constant, final int size) {

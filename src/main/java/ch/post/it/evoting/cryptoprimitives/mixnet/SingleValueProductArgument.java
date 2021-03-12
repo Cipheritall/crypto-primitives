@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -38,8 +38,8 @@ class SingleValueProductArgument {
 	private GqElement cd;
 	private GqElement cLowerDelta;
 	private GqElement cUpperDelta;
-	private SameGroupVector<ZqElement, ZqGroup> aTilde;
-	private SameGroupVector<ZqElement, ZqGroup> bTilde;
+	private GroupVector<ZqElement, ZqGroup> aTilde;
+	private GroupVector<ZqElement, ZqGroup> bTilde;
 	private ZqElement rTilde;
 	private ZqElement sTilde;
 
@@ -62,11 +62,11 @@ class SingleValueProductArgument {
 		return cUpperDelta;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getATilde() {
+	GroupVector<ZqElement, ZqGroup> getATilde() {
 		return aTilde;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getBTilde() {
+	GroupVector<ZqElement, ZqGroup> getBTilde() {
 		return bTilde;
 	}
 
@@ -114,8 +114,8 @@ class SingleValueProductArgument {
 		private GqElement cd;
 		private GqElement cLowerDelta;
 		private GqElement cUpperDelta;
-		private SameGroupVector<ZqElement, ZqGroup> aTilde;
-		private SameGroupVector<ZqElement, ZqGroup> bTilde;
+		private GroupVector<ZqElement, ZqGroup> aTilde;
+		private GroupVector<ZqElement, ZqGroup> bTilde;
 		private ZqElement rTilde;
 		private ZqElement sTilde;
 
@@ -134,12 +134,12 @@ class SingleValueProductArgument {
 			return this;
 		}
 
-		Builder withATilde(final SameGroupVector<ZqElement, ZqGroup> aTilde) {
+		Builder withATilde(final GroupVector<ZqElement, ZqGroup> aTilde) {
 			this.aTilde = aTilde;
 			return this;
 		}
 
-		Builder withBTilde(final SameGroupVector<ZqElement, ZqGroup> bTilde) {
+		Builder withBTilde(final GroupVector<ZqElement, ZqGroup> bTilde) {
 			this.bTilde = bTilde;
 			return this;
 		}

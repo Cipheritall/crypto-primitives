@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationStatementWitnessPairGenerator.StatementWitnessPair;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors.with;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -46,9 +46,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -212,11 +212,11 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			MultiExponentiationStatement statement = statementWitnessPair.getStatement();
 			MultiExponentiationWitness witness = statementWitnessPair.getWitness();
 
-			SameGroupVector<GqElement, GqGroup> computeCommitmentToA = statement.getcA();
+			GroupVector<GqElement, GqGroup> computeCommitmentToA = statement.getcA();
 			GqElement firstElement = computeCommitmentToA.get(0);
 			GqElement differentFirstElement = Generators.genWhile(gqGroupGenerator::genMember, element -> element.equals(firstElement));
 
-			SameGroupVector<GqElement, GqGroup> differentCommitmentToA =
+			GroupVector<GqElement, GqGroup> differentCommitmentToA =
 					Stream.concat(
 							Stream.of(differentFirstElement),
 							computeCommitmentToA
@@ -452,13 +452,13 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		private MultiExponentiationStatement parseMultiExpStatement(final GqGroup realGqGroup, final JsonData statement,
 				final ArgumentParser argumentParser) {
 
-			final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = argumentParser
+			final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = argumentParser
 					.parseCiphertextMatrix(statement.getJsonData("ciphertexts"));
 
 			final ElGamalMultiRecipientCiphertext ciphertextC = argumentParser.parseCiphertext(statement.getJsonData("ciphertext_product"));
 
 			final BigInteger[] commitmentAValues = statement.get("c_a", BigInteger[].class);
-			final SameGroupVector<GqElement, GqGroup> commitmentA = Arrays.stream(commitmentAValues)
+			final GroupVector<GqElement, GqGroup> commitmentA = Arrays.stream(commitmentAValues)
 					.map(bi -> GqElement.create(bi, realGqGroup))
 					.collect(toSameGroupVector());
 
@@ -531,19 +531,19 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
 		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
 		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
-		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = SameGroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
+		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = GroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
 		// Create the ciphertext: C = {9, (4, 13, 1)}
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gFour, gThirteen, gOne));
 		// Create the commitment: ca = (8, 18)
-		SameGroupVector<GqElement, GqGroup> ca = SameGroupVector.of(gEight, gEighteen);
+		GroupVector<GqElement, GqGroup> ca = GroupVector.of(gEight, gEighteen);
 
 		// Witness values
 		// Create the matrix: a1 a2
 		//                   [3  5]
 		//		 	         [9  1]
-		SameGroupMatrix<ZqElement, ZqGroup> matrixA = SameGroupVector.of(zThree, zNine, zFive, zOne).toMatrix(2, 2);
+		GroupMatrix<ZqElement, ZqGroup> matrixA = GroupVector.of(zThree, zNine, zFive, zOne).toMatrix(2, 2);
 		// Create the exponents: r = (7, 8)
-		SameGroupVector<ZqElement, ZqGroup> rVector = SameGroupVector.of(zSeven, zEight);
+		GroupVector<ZqElement, ZqGroup> rVector = GroupVector.of(zSeven, zEight);
 		// Create the exponent: rho = 2
 		ZqElement rho = zTwo;
 		List<BigInteger> randomValues = Arrays.asList(ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN);
@@ -552,15 +552,15 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		// Argument: cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {9, (18, 18, 6)}, {9, (4, 13, 1)}, {6, (8, 3, 6)})
 		// a = (2, 4), r = 7, b = 1, s = 5, tau = 5
 		GqElement cA0 = gOne;
-		SameGroupVector<GqElement, GqGroup> cB = SameGroupVector.of(gTwelve, gFour, gOne, gEight);
+		GroupVector<GqElement, GqGroup> cB = GroupVector.of(gTwelve, gFour, gOne, gEight);
 
 		ElGamalMultiRecipientCiphertext e0 = ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gThirteen, gTwo, gTwo));
 		ElGamalMultiRecipientCiphertext e1 = ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gEighteen, gEighteen, gSix));
 		ElGamalMultiRecipientCiphertext e2 = ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gFour, gThirteen, gOne));
 		ElGamalMultiRecipientCiphertext e3 = ElGamalMultiRecipientCiphertext.create(gSix, Arrays.asList(gEight, gThree, gSix));
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = SameGroupVector.of(e0, e1, e2, e3);
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = GroupVector.of(e0, e1, e2, e3);
 
-		SameGroupVector<ZqElement, ZqGroup> aVector = SameGroupVector.of(zTwo, zFour);
+		GroupVector<ZqElement, ZqGroup> aVector = GroupVector.of(zTwo, zFour);
 		ZqElement b = zOne;
 		ZqElement tau = zFive;
 		ZqElement s = zFive;

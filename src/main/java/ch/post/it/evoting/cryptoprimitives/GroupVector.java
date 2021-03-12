@@ -37,27 +37,28 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
  * Represents a vector of {@link GroupElement} belonging to the same {@link MathematicalGroup} and having the same size.
- *
+ * <p>
  * This is effectively a decorator for the ImmutableList class.
  *
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */
-public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> extends ForwardingList<E> implements HashableList,
+public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> extends ForwardingList<E>
+		implements HashableList,
 		RandomAccess, GroupVectorElement<G> {
 
 	private final ImmutableList<E> elements;
 	private final G group;
 	private final int elementSize;
 
-	private SameGroupVector(ImmutableList<E> elements) {
+	private GroupVector(ImmutableList<E> elements) {
 		this.elements = elements;
 		this.group = elements.isEmpty() ? null : elements.get(0).getGroup();
 		this.elementSize = elements.isEmpty() ? 0 : elements.get(0).size();
 	}
 
 	/**
-	 * Returns a SameGroupVector of {@code elements}.
+	 * Returns a GroupVector of {@code elements}.
 	 *
 	 * @param elements the list of elements contained by this vector, which must respect the following:
 	 *                 <li>the list must be non-null</li>
@@ -65,7 +66,7 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 	 *                 <li>all elements must be from the same {@link MathematicalGroup} </li>
 	 *                 <li>all elements must be of the same size</li>
 	 */
-	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> SameGroupVector<E, G> from(List<E> elements){
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupVector<E, G> from(List<E> elements) {
 		//Check null values
 		checkNotNull(elements);
 		checkArgument(elements.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
@@ -79,23 +80,23 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 		//Check same size
 		checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::size), "All vector elements must be the same size.");
 
-		return new SameGroupVector<>(elementsCopy);
+		return new GroupVector<>(elementsCopy);
 	}
 
 	/**
-	 * Returns a SameGroupVector of {@code elements}. The elements must comply with the SameGroupVector constraints.
+	 * Returns a GroupVector of {@code elements}. The elements must comply with the GroupVector constraints.
 	 *
 	 * @param elements The elements to be contained in this vector. May be empty.
 	 * @param <E>      The type of the elements.
 	 * @param <G>      The group of the elements.
-	 * @return A SameGroupVector containing {@code elements}.
+	 * @return A GroupVector containing {@code elements}.
 	 */
 	@SafeVarargs
-	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> SameGroupVector<E, G> of(final E... elements) {
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupVector<E, G> of(final E... elements) {
 		checkNotNull(elements);
 		checkArgument(Arrays.stream(elements).allMatch(Objects::nonNull), "Elements must not contain nulls");
 
-		return SameGroupVector.from(ImmutableList.copyOf(elements));
+		return GroupVector.from(ImmutableList.copyOf(elements));
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 	 */
 	public G getGroup() {
 		if (this.isEmpty()) {
-			throw new IllegalStateException("An empty SameGroupVector does not have a group.");
+			throw new IllegalStateException("An empty GroupVector does not have a group.");
 		} else {
 			return this.group;
 		}
@@ -123,17 +124,17 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 	}
 
 	/**
-	 * Append a new element to this vector. Returns a new SameGroupVector.
+	 * Append a new element to this vector. Returns a new GroupVector.
 	 *
 	 * @param element The element to append. Must be non null and from the same group.
-	 * @return A new SameGroupVector with the appended {@code element}.
+	 * @return A new GroupVector with the appended {@code element}.
 	 */
-	public SameGroupVector<E, G> append(final E element) {
+	public GroupVector<E, G> append(final E element) {
 		checkNotNull(element);
 		checkArgument(element.getGroup().equals(this.group), "The element to append must be in the same group.");
 		checkArgument(element.size() == this.elementSize, "The element to append must be the same size.");
 
-		return new SameGroupVector<>(
+		return new GroupVector<>(
 				new ImmutableList.Builder<E>()
 						.addAll(this.elements)
 						.add(element)
@@ -141,17 +142,17 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 	}
 
 	/**
-	 * Prepend a new element to this vector. Returns a new SameGroupVector.
+	 * Prepend a new element to this vector. Returns a new GroupVector.
 	 *
 	 * @param element The element to prepend. Must be non null and from the same group.
-	 * @return A new SameGroupVector with the prepended {@code element}.
+	 * @return A new GroupVector with the prepended {@code element}.
 	 */
-	public SameGroupVector<E, G> prepend(final E element) {
+	public GroupVector<E, G> prepend(final E element) {
 		checkNotNull(element);
 		checkArgument(element.getGroup().equals(this.group), "The element to prepend must be in the same group.");
 		checkArgument(element.size() == this.elementSize, "The element to prepend must be the same size.");
 
-		return new SameGroupVector<>(
+		return new GroupVector<>(
 				new ImmutableList.Builder<E>()
 						.add(element)
 						.addAll(this.elements)
@@ -176,9 +177,9 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 	 *
 	 * @param numRows    m, the number of rows of the matrix to be created
 	 * @param numColumns n, the number of columns of the matrix to be created
-	 * @return a {@link SameGroupMatrix} of size m &times; n
+	 * @return a {@link GroupMatrix} of size m &times; n
 	 */
-	public SameGroupMatrix<E, G> toMatrix(final int numRows, final int numColumns) {
+	public GroupMatrix<E, G> toMatrix(final int numRows, final int numColumns) {
 		checkArgument(numRows > 0, "The number of rows must be positive.");
 		checkArgument(numColumns > 0, "The number of columns must be positive.");
 
@@ -190,22 +191,22 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 				.mapToObj(i -> IntStream.range(0, numColumns)
 						.mapToObj(j -> this.get(i + numRows * j))
 						.collect(Collectors.toList()))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), SameGroupMatrix::fromRows));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), GroupMatrix::fromRows));
 	}
 
 	/**
-	 * Returns a Collector that accumulates the input elements into a SameGroupVector.
+	 * Returns a Collector that accumulates the input elements into a GroupVector.
 	 *
 	 * @param <E> the type of elements this list contains.
-	 * @return a {@code Collector} for accumulating the input elements into a SameGroupVector.
+	 * @return a {@code Collector} for accumulating the input elements into a GroupVector.
 	 */
-	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, SameGroupVector<E, G>> toSameGroupVector() {
-		return Collectors.collectingAndThen(toImmutableList(), SameGroupVector::from);
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, GroupVector<E, G>> toSameGroupVector() {
+		return Collectors.collectingAndThen(toImmutableList(), GroupVector::from);
 	}
 
 	@Override
 	public String toString() {
-		return "SameGroupVector{" + "elements=" + elements + '}';
+		return "GroupVector{" + "elements=" + elements + '}';
 	}
 
 	@Override
@@ -216,7 +217,7 @@ public class SameGroupVector<E extends GroupVectorElement<G> & Hashable, G exten
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		SameGroupVector<?, ?> that = (SameGroupVector<?, ?>) o;
+		GroupVector<?, ?> that = (GroupVector<?, ?>) o;
 		return elements.equals(that.elements);
 	}
 

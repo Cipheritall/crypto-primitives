@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -29,7 +29,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 class SingleValueProductWitness {
 
-	private final SameGroupVector<ZqElement, ZqGroup> elements;
+	private final GroupVector<ZqElement, ZqGroup> elements;
 	private final ZqElement randomness;
 
 	/**
@@ -41,7 +41,7 @@ class SingleValueProductWitness {
 	 * @param elements   (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
 	 * @param randomness r, the randomness
 	 */
-	SingleValueProductWitness(final SameGroupVector<ZqElement, ZqGroup> elements, final ZqElement randomness) {
+	SingleValueProductWitness(final GroupVector<ZqElement, ZqGroup> elements, final ZqElement randomness) {
 		this.elements = checkNotNull(elements);
 		this.randomness = checkNotNull(randomness);
 
@@ -49,7 +49,7 @@ class SingleValueProductWitness {
 				"All elements must belong to the same group as the randomness");
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getElements() {
+	GroupVector<ZqElement, ZqGroup> getElements() {
 		return elements;
 	}
 

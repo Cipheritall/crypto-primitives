@@ -18,16 +18,16 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 class HadamardWitness {
 
-	private final SameGroupMatrix<ZqElement, ZqGroup> matrixA;
-	private final SameGroupVector<ZqElement, ZqGroup> vectorB;
-	private final SameGroupVector<ZqElement, ZqGroup> exponentsR;
+	private final GroupMatrix<ZqElement, ZqGroup> matrixA;
+	private final GroupVector<ZqElement, ZqGroup> vectorB;
+	private final GroupVector<ZqElement, ZqGroup> exponentsR;
 	private final ZqElement exponentS;
 
 	/**
@@ -41,14 +41,13 @@ class HadamardWitness {
 	 *     <li>the number of columns of the matrix and the size of the exponents vector must be equal</li>
 	 * </ul>
 	 *
-	 *
-	 * @param matrix	 A, a matrix of {@code ZqElements} of size <i>n</i> &times; <i>m</i>
-	 * @param vector	 b, a vector of {@code ZqElements} of size <i>n</i>
-	 * @param exponents	 r, a vector of {@code ZqElements} of size <i>m</i>
+	 * @param matrix     A, a matrix of {@code ZqElements} of size <i>n</i> &times; <i>m</i>
+	 * @param vector     b, a vector of {@code ZqElements} of size <i>n</i>
+	 * @param exponents  r, a vector of {@code ZqElements} of size <i>m</i>
 	 * @param randomness s, a {@code ZqElement}
 	 */
-	HadamardWitness(final SameGroupMatrix<ZqElement, ZqGroup> matrix, final SameGroupVector<ZqElement, ZqGroup> vector,
-			final SameGroupVector<ZqElement, ZqGroup> exponents, final ZqElement randomness) {
+	HadamardWitness(final GroupMatrix<ZqElement, ZqGroup> matrix, final GroupVector<ZqElement, ZqGroup> vector,
+			final GroupVector<ZqElement, ZqGroup> exponents, final ZqElement randomness) {
 		checkNotNull(matrix);
 		checkNotNull(vector);
 		checkNotNull(exponents);
@@ -74,15 +73,15 @@ class HadamardWitness {
 				"The exponents r and the exponent s must have the same group.");
 	}
 
-	SameGroupMatrix<ZqElement, ZqGroup> getMatrixA() {
+	GroupMatrix<ZqElement, ZqGroup> getMatrixA() {
 		return matrixA;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getVectorB() {
+	GroupVector<ZqElement, ZqGroup> getVectorB() {
 		return vectorB;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getExponentsR() {
+	GroupVector<ZqElement, ZqGroup> getExponentsR() {
 		return exponentsR;
 	}
 

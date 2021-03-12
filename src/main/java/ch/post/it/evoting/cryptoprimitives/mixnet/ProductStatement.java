@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  */
 class ProductStatement {
 
-	private final SameGroupVector<GqElement, GqGroup> commitments;
+	private final GroupVector<GqElement, GqGroup> commitments;
 	private final ZqElement product;
 	private final int m;
 	private final GqGroup group;
@@ -43,7 +43,7 @@ class ProductStatement {
 	 * @param commitments <b><i>c</i></b><sub>A</sub>, a vector of {@link GqElement}s
 	 * @param product     <i>b</i>, a {@link ZqElement}
 	 */
-	ProductStatement(final SameGroupVector<GqElement, GqGroup> commitments, final ZqElement product) {
+	ProductStatement(final GroupVector<GqElement, GqGroup> commitments, final ZqElement product) {
 		checkNotNull(commitments);
 		checkNotNull(product);
 		checkArgument(commitments.getGroup().hasSameOrderAs(product.getGroup()),
@@ -55,7 +55,7 @@ class ProductStatement {
 		this.group = commitments.getGroup();
 	}
 
-	SameGroupVector<GqElement, GqGroup> getCommitments() {
+	GroupVector<GqElement, GqGroup> getCommitments() {
 		return commitments;
 	}
 

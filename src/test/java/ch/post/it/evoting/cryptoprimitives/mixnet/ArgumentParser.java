@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -56,13 +56,13 @@ class ArgumentParser {
 
 		final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
 		final GqElement cBm = GqElement.create(cBmValue, gqGroup);
-		final SameGroupVector<GqElement, GqGroup> cd = Arrays.stream(cdValues)
+		final GroupVector<GqElement, GqGroup> cd = Arrays.stream(cdValues)
 				.map(bi -> GqElement.create(bi, gqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupVector<ZqElement, ZqGroup> aPrime = Arrays.stream(aValues)
+		final GroupVector<ZqElement, ZqGroup> aPrime = Arrays.stream(aValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupVector<ZqElement, ZqGroup> bPrime = Arrays.stream(bValues)
+		final GroupVector<ZqElement, ZqGroup> bPrime = Arrays.stream(bValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
 				.collect(toSameGroupVector());
 		final ZqElement r = ZqElement.create(rValue, zqGroup);
@@ -83,7 +83,7 @@ class ArgumentParser {
 
 	HadamardArgument parseHadamardArgument(final JsonData hadamardArgumentData) {
 		final BigInteger[] cUpperBValues = hadamardArgumentData.get("cUpperB", BigInteger[].class);
-		SameGroupVector<GqElement, GqGroup> cUpperB = Arrays.stream(cUpperBValues)
+		GroupVector<GqElement, GqGroup> cUpperB = Arrays.stream(cUpperBValues)
 				.map(bi -> GqElement.create(bi, gqGroup))
 				.collect(toSameGroupVector());
 
@@ -105,10 +105,10 @@ class ArgumentParser {
 		final GqElement cd = GqElement.create(cdValue, gqGroup);
 		final GqElement cLowerDelta = GqElement.create(cLowerDeltaValue, gqGroup);
 		final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
-		final SameGroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
+		final GroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
+		final GroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
 				.collect(toSameGroupVector());
 		final ZqElement rTilde = ZqElement.create(rTildeValue, zqGroup);
@@ -136,13 +136,13 @@ class ArgumentParser {
 		final BigInteger tauValue = multiExpArgumentData.get("tau", BigInteger.class);
 
 		final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
-		final SameGroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
+		final GroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
 				.map(bi -> GqElement.create(bi, gqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupVector<ZqElement, ZqGroup> a = Arrays.stream(aValues)
+		final GroupVector<ZqElement, ZqGroup> a = Arrays.stream(aValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
 				.collect(toSameGroupVector());
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = parseCiphertextVector(eDataArray);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = parseCiphertextVector(eDataArray);
 		final ZqElement r = ZqElement.create(rValue, zqGroup);
 		final ZqElement b = ZqElement.create(bValue, zqGroup);
 		final ZqElement s = ZqElement.create(sValue, zqGroup);
@@ -173,7 +173,7 @@ class ArgumentParser {
 		return ElGamalMultiRecipientCiphertext.create(gamma, phis);
 	}
 
-	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertextVector(final JsonData ciphertextsDataVector) {
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertextVector(final JsonData ciphertextsDataVector) {
 		if (!ciphertextsDataVector.getJsonNode().isArray()) {
 			throw new IllegalArgumentException("Provided jsonData does not wrap an array.");
 		}
@@ -183,14 +183,14 @@ class ArgumentParser {
 				.collect(toSameGroupVector());
 	}
 
-	SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertextMatrix(final JsonData ciphertextDataMatrix) {
+	GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertextMatrix(final JsonData ciphertextDataMatrix) {
 		if (!ciphertextDataMatrix.getJsonNode().isArray()) {
 			throw new IllegalArgumentException("Provided jsonData does not wrap an array.");
 		}
 
 		return StreamSupport.stream(ciphertextDataMatrix.getJsonNode().spliterator(), false)
 				.map(node -> parseCiphertextVector(new JsonData(node)))
-				.collect(collectingAndThen(toList(), SameGroupMatrix::fromRows));
+				.collect(collectingAndThen(toList(), GroupMatrix::fromRows));
 	}
 
 }

@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -33,9 +33,9 @@ public class MultiExponentiationStatementGenerator {
 	}
 
 	MultiExponentiationStatement genRandomStatement(int n, int m, int l) {
-		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = elGamalGenerator.genRandomCiphertextMatrix(m, n, l);
+		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = elGamalGenerator.genRandomCiphertextMatrix(m, n, l);
 		ElGamalMultiRecipientCiphertext C = elGamalGenerator.genRandomCiphertext(l);
-		SameGroupVector<GqElement, GqGroup> cA = gqGroupGenerator.genRandomGqElementVector(m);
+		GroupVector<GqElement, GqGroup> cA = gqGroupGenerator.genRandomGqElementVector(m);
 		return new MultiExponentiationStatement(CMatrix, C, cA);
 	}
 }

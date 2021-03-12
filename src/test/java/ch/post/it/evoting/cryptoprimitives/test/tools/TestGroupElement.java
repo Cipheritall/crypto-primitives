@@ -16,19 +16,16 @@
 package ch.post.it.evoting.cryptoprimitives.test.tools;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
-public class TestSameGroupElement implements GroupVectorElement<TestGroup>, HashableBigInteger {
-	private static final SecureRandom random = new SecureRandom();
+public class TestGroupElement implements GroupVectorElement<TestGroup>, HashableBigInteger {
 
 	private final TestGroup group;
 
-	//Create a TestSameGroupElement with a random value with the given group
-	public TestSameGroupElement(TestGroup group) {
+	public TestGroupElement(TestGroup group) {
 		this.group = group;
 	}
 

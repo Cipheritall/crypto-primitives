@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -35,19 +35,19 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup> {
 
-	private final SameGroupVector<ZqElement, ZqGroup> privateKeyElements;
+	private final GroupVector<ZqElement, ZqGroup> privateKeyElements;
 
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPrivateKey} object.
 	 *
-	 * @param keyElements <p>the list of private key Zq keyElements, which must satisfy the conditions of a {@link SameGroupVector} and
+	 * @param keyElements <p>the list of private key Zq keyElements, which must satisfy the conditions of a {@link GroupVector} and
 	 *                    the following:
 	 *                    <li>not be empty</li>
 	 *                    <li>no element must be equal to 0</li>
 	 *                    <li>no element must be equal to 1</li></p>
 	 */
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
-		this.privateKeyElements = SameGroupVector.from(keyElements);
+		this.privateKeyElements = GroupVector.from(keyElements);
 		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ZERO) != 0),
 				"An ElGamal private key cannot contain a 0 valued element.");

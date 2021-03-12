@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -27,8 +27,8 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -93,11 +93,11 @@ final class ProductArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
-		final SameGroupVector<GqElement, GqGroup> cA = statement.getCommitments();
+		final GroupVector<GqElement, GqGroup> cA = statement.getCommitments();
 		final ZqElement b = statement.getProduct();
 		@SuppressWarnings("squid:S00117")
-		final SameGroupMatrix<ZqElement, ZqGroup> A = witness.getMatrix();
-		final SameGroupVector<ZqElement, ZqGroup> r = witness.getExponents();
+		final GroupMatrix<ZqElement, ZqGroup> A = witness.getMatrix();
+		final GroupVector<ZqElement, ZqGroup> r = witness.getExponents();
 
 		// Dimension check
 		checkArgument(cA.size() == r.size(), "The commitments A and the exponents r must have the same size.");
@@ -126,7 +126,7 @@ final class ProductArgumentService {
 			// In that case, the Product Argument consists of a Hadamard Argument and a Single Value Product Argument.
 
 			final ZqElement s = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
-			final SameGroupVector<ZqElement, ZqGroup> biList = IntStream.range(0, n)
+			final GroupVector<ZqElement, ZqGroup> biList = IntStream.range(0, n)
 					.mapToObj(i -> IntStream.range(0, m)
 							.mapToObj(j -> A.get(i, j))
 							.reduce(one, ZqElement::multiply))
@@ -170,7 +170,7 @@ final class ProductArgumentService {
 		checkNotNull(statement, "The statement must be non-null.");
 		checkNotNull(argument, "The argument must be non-null.");
 
-		final SameGroupVector<GqElement, GqGroup> cA = statement.getCommitments();
+		final GroupVector<GqElement, GqGroup> cA = statement.getCommitments();
 		final ZqElement b = statement.getProduct();
 		final int m = statement.getM();
 

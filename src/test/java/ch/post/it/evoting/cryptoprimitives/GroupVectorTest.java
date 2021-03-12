@@ -38,85 +38,85 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
-import ch.post.it.evoting.cryptoprimitives.test.tools.TestSameGroupElement;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestSizedElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
-class SameGroupVectorTest {
+class GroupVectorTest {
 
 	static SecureRandom random = new SecureRandom();
 
 	@Test
 	void testOf() {
 		TestGroup group = new TestGroup();
-		TestSameGroupElement e1 = new TestSameGroupElement(group);
-		TestSameGroupElement e2 = new TestSameGroupElement(group);
+		TestGroupElement e1 = new TestGroupElement(group);
+		TestGroupElement e2 = new TestGroupElement(group);
 
-		final SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector = SameGroupVector.of(e1, e2);
-		assertEquals(2, sameGroupVector.size());
+		final GroupVector<TestGroupElement, TestGroup> groupVector = GroupVector.of(e1, e2);
+		assertEquals(2, groupVector.size());
 
-		final SameGroupVector<TestSameGroupElement, TestGroup> emptySameGroupVector = SameGroupVector.of();
-		assertEquals(0, emptySameGroupVector.size());
+		final GroupVector<TestGroupElement, TestGroup> emptyGroupVector = GroupVector.of();
+		assertEquals(0, emptyGroupVector.size());
 	}
 
 	@Test
 	void testOfWithInvalidParametersThrows() {
-		assertThrows(NullPointerException.class, () -> SameGroupVector.of(null));
+		assertThrows(NullPointerException.class, () -> GroupVector.of(null));
 
 		// With null elem.
 		TestGroup group = new TestGroup();
-		TestSameGroupElement e1 = new TestSameGroupElement(group);
+		TestGroupElement e1 = new TestGroupElement(group);
 		final IllegalArgumentException nullIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> SameGroupVector.of(e1, null));
+				() -> GroupVector.of(e1, null));
 		assertEquals("Elements must not contain nulls", nullIllegalArgumentException.getMessage());
 
 		// Different group elems.
-		TestSameGroupElement e2 = new TestSameGroupElement(new TestGroup());
+		TestGroupElement e2 = new TestGroupElement(new TestGroup());
 		final IllegalArgumentException diffGroupIllegalArgumentException2 = assertThrows(IllegalArgumentException.class,
-				() -> SameGroupVector.of(e1, e2));
+				() -> GroupVector.of(e1, e2));
 		assertEquals("All elements must belong to the same group.", diffGroupIllegalArgumentException2.getMessage());
 	}
 
 	@Test
 	void testNullElementsThrows() {
-		assertThrows(NullPointerException.class, () -> SameGroupVector.from(null));
+		assertThrows(NullPointerException.class, () -> GroupVector.from(null));
 	}
 
 	@Test
 	void testEmptyElementsDoesNotThrow() {
-		SameGroupVector<TestSameGroupElement, TestGroup> vector = SameGroupVector.of();
+		GroupVector<TestGroupElement, TestGroup> vector = GroupVector.of();
 		assertEquals(0, vector.size());
 	}
 
 	@Test
 	void testGroupOfEmptyVectorThrows() {
-		SameGroupVector<TestSameGroupElement, TestGroup> vector = SameGroupVector.of();
+		GroupVector<TestGroupElement, TestGroup> vector = GroupVector.of();
 		assertThrows(IllegalStateException.class, vector::getGroup);
 	}
 
 	@Test
 	void testElementsWithNullThrows() {
-		List<TestSameGroupElement> elements = new ArrayList<>(Collections.emptyList());
+		List<TestGroupElement> elements = new ArrayList<>(Collections.emptyList());
 		elements.add(null);
-		assertThrows(IllegalArgumentException.class, () -> SameGroupVector.from(elements));
+		assertThrows(IllegalArgumentException.class, () -> GroupVector.from(elements));
 	}
 
 	@Test
 	void testElementsWithValueAndNullThrows() {
 		TestGroup group = new TestGroup();
-		TestSameGroupElement validElement = new TestSameGroupElement(group);
-		List<TestSameGroupElement> elements = Arrays.asList(validElement, null);
-		assertThrows(IllegalArgumentException.class, () -> SameGroupVector.from(elements));
+		TestGroupElement validElement = new TestGroupElement(group);
+		List<TestGroupElement> elements = Arrays.asList(validElement, null);
+		assertThrows(IllegalArgumentException.class, () -> GroupVector.from(elements));
 	}
 
 	@Test
 	void testElementsOfDifferentGroupsThrows() {
 		TestGroup group1 = new TestGroup();
-		TestSameGroupElement first = new TestSameGroupElement(group1);
+		TestGroupElement first = new TestGroupElement(group1);
 		TestGroup group2 = new TestGroup();
-		TestSameGroupElement second = new TestSameGroupElement(group2);
-		List<TestSameGroupElement> elements = Arrays.asList(first, second);
-		assertThrows(IllegalArgumentException.class, () -> SameGroupVector.from(elements));
+		TestGroupElement second = new TestGroupElement(group2);
+		List<TestGroupElement> elements = Arrays.asList(first, second);
+		assertThrows(IllegalArgumentException.class, () -> GroupVector.from(elements));
 	}
 
 	@Test
@@ -125,36 +125,36 @@ class SameGroupVectorTest {
 		TestSizedElement first = new TestSizedElement(group, 1);
 		TestSizedElement second = new TestSizedElement(group, 2);
 		List<TestSizedElement> elements = Arrays.asList(first, second);
-		assertThrows(IllegalArgumentException.class, () -> SameGroupVector.from(elements));
+		assertThrows(IllegalArgumentException.class, () -> GroupVector.from(elements));
 	}
 
 	@Test
 	void testLengthReturnsElementsLength() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(100) + 1;
-		List<TestSameGroupElement> elements =
+		List<TestGroupElement> elements =
 				Stream
-						.generate(() -> new TestSameGroupElement(group))
+						.generate(() -> new TestGroupElement(group))
 						.limit(n)
 						.collect(Collectors.toList());
-		assertEquals(n, SameGroupVector.from(elements).size());
+		assertEquals(n, GroupVector.from(elements).size());
 	}
 
 	@Test
 	void testGetElementReturnsElement() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(100) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
 		int i = random.nextInt(n);
-		assertEquals(elements.get(i), SameGroupVector.from(elements).get(i));
+		assertEquals(elements.get(i), GroupVector.from(elements).get(i));
 	}
 
 	@Test
 	void testGetElementAboveRangeThrows() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(100) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> actor = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> actor = GroupVector.from(elements);
 		assertThrows(IndexOutOfBoundsException.class, () -> actor.get(n));
 	}
 
@@ -162,8 +162,8 @@ class SameGroupVectorTest {
 	void testGetElementBelowRangeThrows() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(100) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> actor = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> actor = GroupVector.from(elements);
 		assertThrows(IndexOutOfBoundsException.class, () -> actor.get(-1));
 	}
 
@@ -171,8 +171,8 @@ class SameGroupVectorTest {
 	void testGetGroupReturnsElementsGroup() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(100) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> actor = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> actor = GroupVector.from(elements);
 		assertEquals(group, actor.getGroup());
 	}
 
@@ -180,16 +180,16 @@ class SameGroupVectorTest {
 	void givenElementsWhenGetElementsThenExpectedElements() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(100) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> actor = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> actor = GroupVector.from(elements);
 		assertEquals(elements, new ArrayList<>(actor));
 	}
 
 	@Test
 	void givenAPropertyHoldsForAnEmptyVector() {
-		SameGroupVector<TestSameGroupElement, ?> empty = SameGroupVector.of();
+		GroupVector<TestGroupElement, ?> empty = GroupVector.of();
 		SecureRandom random = new SecureRandom();
-		Function<TestSameGroupElement, ?> randomFunction = ignored -> random.nextInt();
+		Function<TestGroupElement, ?> randomFunction = ignored -> random.nextInt();
 		assertTrue(empty.allEqual(randomFunction));
 	}
 
@@ -200,7 +200,7 @@ class SameGroupVectorTest {
 		TestValuedElement second = new TestValuedElement(BigInteger.valueOf(2), group);
 		TestValuedElement third = new TestValuedElement(BigInteger.valueOf(3), group);
 		List<TestValuedElement> elements = Arrays.asList(first, second, third);
-		SameGroupVector<TestValuedElement, TestGroup> vector = SameGroupVector.from(elements);
+		GroupVector<TestValuedElement, TestGroup> vector = GroupVector.from(elements);
 		assertAll(() -> {
 			assertFalse(vector.allEqual(TestValuedElement::getValue));
 			assertTrue(vector.allEqual(TestValuedElement::getGroup));
@@ -209,16 +209,16 @@ class SameGroupVectorTest {
 
 	@Test
 	void isEmptyReturnsTrueForEmptyVector() {
-		List<TestSameGroupElement> elements = Collections.emptyList();
-		SameGroupVector<TestSameGroupElement, TestGroup> vector = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Collections.emptyList();
+		GroupVector<TestGroupElement, TestGroup> vector = GroupVector.from(elements);
 		assertTrue(vector.isEmpty());
 	}
 
 	@Test
 	void isEmptyReturnsFalseForNonEmptyVector() {
 		TestGroup group = new TestGroup();
-		List<TestSameGroupElement> elements = Collections.singletonList(new TestSameGroupElement(group));
-		SameGroupVector<TestSameGroupElement, TestGroup> vector = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Collections.singletonList(new TestGroupElement(group));
+		GroupVector<TestGroupElement, TestGroup> vector = GroupVector.from(elements);
 		assertFalse(vector.isEmpty());
 	}
 
@@ -226,14 +226,14 @@ class SameGroupVectorTest {
 	void appendWithInvalidParamsThrows() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> groupVector = GroupVector.from(elements);
 
-		assertThrows(NullPointerException.class, () -> sameGroupVector.append(null));
+		assertThrows(NullPointerException.class, () -> groupVector.append(null));
 
-		final TestSameGroupElement element = new TestSameGroupElement(new TestGroup());
+		final TestGroupElement element = new TestGroupElement(new TestGroup());
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> sameGroupVector.append(element));
+				() -> groupVector.append(element));
 		assertEquals("The element to append must be in the same group.", illegalArgumentException.getMessage());
 	}
 
@@ -242,10 +242,10 @@ class SameGroupVectorTest {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
 		List<TestSizedElement> elements = Stream.generate(() -> new TestSizedElement(group, 1)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSizedElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		GroupVector<TestSizedElement, TestGroup> groupVector = GroupVector.from(elements);
 
 		final TestSizedElement element = new TestSizedElement(group, 2);
-		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.append(element));
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> groupVector.append(element));
 		assertEquals("The element to append must be the same size.", illegalArgumentException.getMessage());
 	}
 
@@ -253,13 +253,13 @@ class SameGroupVectorTest {
 	void appendCorrectlyAppends() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> groupVector = GroupVector.from(elements);
 
-		final TestSameGroupElement element = new TestSameGroupElement(group);
-		final SameGroupVector<TestSameGroupElement, TestGroup> augmentedVector = sameGroupVector.append(element);
+		final TestGroupElement element = new TestGroupElement(group);
+		final GroupVector<TestGroupElement, TestGroup> augmentedVector = groupVector.append(element);
 
-		assertEquals(sameGroupVector.size() + 1, augmentedVector.size());
+		assertEquals(groupVector.size() + 1, augmentedVector.size());
 		assertEquals(element, augmentedVector.get(n));
 	}
 
@@ -267,13 +267,13 @@ class SameGroupVectorTest {
 	void prependWithInvalidParamsThrows() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> groupVector = GroupVector.from(elements);
 
-		assertThrows(NullPointerException.class, () -> sameGroupVector.prepend(null));
+		assertThrows(NullPointerException.class, () -> groupVector.prepend(null));
 
-		final TestSameGroupElement element = new TestSameGroupElement(new TestGroup());
-		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.prepend(element));
+		final TestGroupElement element = new TestGroupElement(new TestGroup());
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> groupVector.prepend(element));
 		assertEquals("The element to prepend must be in the same group.", illegalArgumentException.getMessage());
 	}
 
@@ -282,10 +282,10 @@ class SameGroupVectorTest {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
 		List<TestSizedElement> elements = Stream.generate(() -> new TestSizedElement(group, 1)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSizedElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		GroupVector<TestSizedElement, TestGroup> groupVector = GroupVector.from(elements);
 
 		final TestSizedElement element = new TestSizedElement(group, 2);
-		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.prepend(element));
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> groupVector.prepend(element));
 		assertEquals("The element to prepend must be the same size.", illegalArgumentException.getMessage());
 	}
 
@@ -293,13 +293,13 @@ class SameGroupVectorTest {
 	void prependCorrectlyPrepends() {
 		TestGroup group = new TestGroup();
 		int n = random.nextInt(10) + 1;
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> groupVector = GroupVector.from(elements);
 
-		final TestSameGroupElement element = new TestSameGroupElement(group);
-		final SameGroupVector<TestSameGroupElement, TestGroup> augmentedVector = sameGroupVector.prepend(element);
+		final TestGroupElement element = new TestGroupElement(group);
+		final GroupVector<TestGroupElement, TestGroup> augmentedVector = groupVector.prepend(element);
 
-		assertEquals(sameGroupVector.size() + 1, augmentedVector.size());
+		assertEquals(groupVector.size() + 1, augmentedVector.size());
 		assertEquals(element, augmentedVector.get(0));
 	}
 
@@ -307,9 +307,9 @@ class SameGroupVectorTest {
 	void toSameGroupVectorCorrectlyCollects() {
 		int n = random.nextInt(10) + 1;
 		TestGroup group = new TestGroup();
-		List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit(n).collect(Collectors.toList());
-		SameGroupVector<TestSameGroupElement, TestGroup> actual = elements.stream().collect(SameGroupVector.toSameGroupVector());
-		SameGroupVector<TestSameGroupElement, TestGroup> expected = SameGroupVector.from(elements);
+		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
+		GroupVector<TestGroupElement, TestGroup> actual = elements.stream().collect(GroupVector.toSameGroupVector());
+		GroupVector<TestGroupElement, TestGroup> expected = GroupVector.from(elements);
 
 		assertEquals(expected, actual);
 	}
@@ -330,7 +330,7 @@ class SameGroupVectorTest {
 		private int n;
 
 		private TestGroup group;
-		private SameGroupVector<TestSameGroupElement, TestGroup> sameGroupVector;
+		private GroupVector<TestGroupElement, TestGroup> groupVector;
 
 		@BeforeEach
 		void setup() {
@@ -338,35 +338,35 @@ class SameGroupVectorTest {
 			n = random.nextInt(BOUND_MATRIX_SIZE) + 1;
 
 			group = new TestGroup();
-			List<TestSameGroupElement> elements = Stream.generate(() -> new TestSameGroupElement(group)).limit((long) n * m)
+			List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit((long) n * m)
 					.collect(Collectors.toList());
-			sameGroupVector = SameGroupVector.from(elements);
+			groupVector = GroupVector.from(elements);
 		}
 
 		@Test
 		@DisplayName("with negative number of rows or columns throws IllegalArgumentException")
 		void toMatrixWithInvalidNumRowsOrColumns() {
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toMatrix(-m, n));
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> groupVector.toMatrix(-m, n));
 			assertEquals("The number of rows must be positive.", exception.getMessage());
-			exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toMatrix(m, -n));
+			exception = assertThrows(IllegalArgumentException.class, () -> groupVector.toMatrix(m, -n));
 			assertEquals("The number of columns must be positive.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with incompatible decomposition into rows and columns throws an IllegalArgumentException")
 		void toMatrixWithWrongN() {
-			Exception exception = assertThrows(IllegalArgumentException.class, () -> sameGroupVector.toMatrix(m + 1, n));
+			Exception exception = assertThrows(IllegalArgumentException.class, () -> groupVector.toMatrix(m + 1, n));
 			assertEquals("The vector of ciphertexts must be decomposable into m rows and n columns.", exception.getMessage());
 		}
 
 		@Test
 		@DisplayName("with valid input yields expected result")
 		void toMatrixTest() {
-			SameGroupMatrix<TestSameGroupElement, TestGroup> matrix = sameGroupVector.toMatrix(m, n);
+			GroupMatrix<TestGroupElement, TestGroup> matrix = groupVector.toMatrix(m, n);
 
 			for (int i = 0; i < m; i++) {
 				for (int j = 0; j < n; j++) {
-					assertEquals(sameGroupVector.get(i + m * j), matrix.get(i, j));
+					assertEquals(groupVector.get(i + m * j), matrix.get(i, j));
 				}
 			}
 		}

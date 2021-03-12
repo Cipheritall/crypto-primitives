@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -30,10 +30,10 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 class ZeroWitness {
 
-	private final SameGroupMatrix<ZqElement, ZqGroup> matrixA;
-	private final SameGroupMatrix<ZqElement, ZqGroup> matrixB;
-	private final SameGroupVector<ZqElement, ZqGroup> exponentsR;
-	private final SameGroupVector<ZqElement, ZqGroup> exponentsS;
+	private final GroupMatrix<ZqElement, ZqGroup> matrixA;
+	private final GroupMatrix<ZqElement, ZqGroup> matrixB;
+	private final GroupVector<ZqElement, ZqGroup> exponentsR;
+	private final GroupVector<ZqElement, ZqGroup> exponentsS;
 
 	/**
 	 * Instantiate a zero witness. The matrices and exponents must comply with the following:
@@ -50,8 +50,8 @@ class ZeroWitness {
 	 * @param exponentsR r, a vector of {@link ZqElement}s.
 	 * @param exponentsS s, a vector of {@link ZqElement}s.
 	 */
-	ZeroWitness(final SameGroupMatrix<ZqElement, ZqGroup> matrixA, final SameGroupMatrix<ZqElement, ZqGroup> matrixB,
-			final SameGroupVector<ZqElement, ZqGroup> exponentsR, SameGroupVector<ZqElement, ZqGroup> exponentsS) {
+	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> matrixA, final GroupMatrix<ZqElement, ZqGroup> matrixB,
+			final GroupVector<ZqElement, ZqGroup> exponentsR, GroupVector<ZqElement, ZqGroup> exponentsS) {
 
 		// Null checking.
 		this.matrixA = checkNotNull(matrixA);
@@ -75,19 +75,19 @@ class ZeroWitness {
 		}
 	}
 
-	SameGroupMatrix<ZqElement, ZqGroup> getMatrixA() {
+	GroupMatrix<ZqElement, ZqGroup> getMatrixA() {
 		return matrixA;
 	}
 
-	SameGroupMatrix<ZqElement, ZqGroup> getMatrixB() {
+	GroupMatrix<ZqElement, ZqGroup> getMatrixB() {
 		return matrixB;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getExponentsR() {
+	GroupVector<ZqElement, ZqGroup> getExponentsR() {
 		return exponentsR;
 	}
 
-	SameGroupVector<ZqElement, ZqGroup> getExponentsS() {
+	GroupVector<ZqElement, ZqGroup> getExponentsS() {
 		return exponentsS;
 	}
 

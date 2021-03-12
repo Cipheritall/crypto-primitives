@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -38,9 +38,9 @@ public class MultiExponentiationArgumentGenerator {
 
 	MultiExponentiationArgument genRandomArgument(int n, int m, int l) {
 		GqElement cA0 = gqGroupGenerator.genMember();
-		SameGroupVector<GqElement, GqGroup> cB = gqGroupGenerator.genRandomGqElementVector(2 * m);
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = elGamalGenerator.genRandomCiphertextVector(2 * m, l);
-		SameGroupVector<ZqElement, ZqGroup> a = zqGroupGenerator.genRandomZqElementVector(n);
+		GroupVector<GqElement, GqGroup> cB = gqGroupGenerator.genRandomGqElementVector(2 * m);
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = elGamalGenerator.genRandomCiphertextVector(2 * m, l);
+		GroupVector<ZqElement, ZqGroup> a = zqGroupGenerator.genRandomZqElementVector(n);
 		ZqElement r = zqGroupGenerator.genRandomZqElementMember();
 		ZqElement b = zqGroupGenerator.genRandomZqElementMember();
 		ZqElement s = zqGroupGenerator.genRandomZqElementMember();

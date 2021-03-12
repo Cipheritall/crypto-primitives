@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -69,12 +69,12 @@ public class ElGamalGenerator {
 		return ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, genRandomPublicKey(ciphertextSize));
 	}
 
-	public SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextVector(int size, int ciphertextSize) {
-		return SameGroupVector.from(generateElementList(size, () -> genRandomCiphertext(ciphertextSize)));
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextVector(int size, int ciphertextSize) {
+		return GroupVector.from(generateElementList(size, () -> genRandomCiphertext(ciphertextSize)));
 	}
 
-	public SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextMatrix(int numRows, int numColumns, int ciphertextSize) {
-		return SameGroupMatrix.fromRows(generateElementMatrix(numRows, numColumns, () -> genRandomCiphertext(ciphertextSize)));
+	public GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextMatrix(int numRows, int numColumns, int ciphertextSize) {
+		return GroupMatrix.fromRows(generateElementMatrix(numRows, numColumns, () -> genRandomCiphertext(ciphertextSize)));
 	}
 
 	/**

@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -61,7 +61,7 @@ public class ShuffleService {
 		//Verify ciphertext input
 		checkNotNull(ciphertexts);
 		checkArgument(ciphertexts.stream().allMatch(Objects::nonNull));
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = SameGroupVector.from(ciphertexts);
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = GroupVector.from(ciphertexts);
 
 		if (ciphertextsCopy.isEmpty()) {
 			return Shuffle.EMPTY;

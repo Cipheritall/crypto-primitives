@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -41,7 +41,7 @@ class ShuffleWitnessTest extends TestGroupSetup {
 	private static PermutationService permutationService;
 
 	private Permutation permutation;
-	private SameGroupVector<ZqElement, ZqGroup> randomness;
+	private GroupVector<ZqElement, ZqGroup> randomness;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -72,7 +72,7 @@ class ShuffleWitnessTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with empty randomness throws IllegalArgumentException")
 	void constructEmptyRandomness() {
-		final SameGroupVector<ZqElement, ZqGroup> emptyRandomness = SameGroupVector.of();
+		final GroupVector<ZqElement, ZqGroup> emptyRandomness = GroupVector.of();
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleWitness(permutation, emptyRandomness));
@@ -95,7 +95,7 @@ class ShuffleWitnessTest extends TestGroupSetup {
 		final ShuffleWitness shuffleWitness2 = new ShuffleWitness(permutation, randomness);
 
 		final Permutation otherPermutation = permutationService.genPermutation(PERMUTATION_SIZE + 1);
-		final SameGroupVector<ZqElement, ZqGroup> otherRandomness = zqGroupGenerator.genRandomZqElementVector(PERMUTATION_SIZE + 1);
+		final GroupVector<ZqElement, ZqGroup> otherRandomness = zqGroupGenerator.genRandomZqElementVector(PERMUTATION_SIZE + 1);
 		final ShuffleWitness shuffleWitness3 = new ShuffleWitness(otherPermutation, otherRandomness);
 
 		assertEquals(shuffleWitness1, shuffleWitness1);

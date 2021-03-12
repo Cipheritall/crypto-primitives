@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -43,7 +43,7 @@ class ProductStatementTest {
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private int numElements;
-	private SameGroupVector<GqElement, GqGroup> commitments;
+	private GroupVector<GqElement, GqGroup> commitments;
 	private ZqElement product;
 
 	@BeforeEach
@@ -81,7 +81,7 @@ class ProductStatementTest {
 
 		List<GqElement> commitmentValues = commitments.stream().collect(Collectors.toList());
 		commitmentValues.add(commitments.getGroup().getIdentity());
-		SameGroupVector<GqElement, GqGroup> differentCommitments = SameGroupVector.from(commitmentValues);
+		GroupVector<GqElement, GqGroup> differentCommitments = GroupVector.from(commitmentValues);
 		ProductStatement statement3 = new ProductStatement(differentCommitments, product);
 
 		ZqElement differentProduct = product.add(ZqElement.create(BigInteger.ONE, product.getGroup()));

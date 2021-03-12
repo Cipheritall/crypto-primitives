@@ -15,13 +15,16 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -32,8 +35,8 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 
 	private int n;
 	private int m;
-	private SameGroupMatrix<ZqElement, ZqGroup> matrixA;
-	private SameGroupVector<ZqElement, ZqGroup> exponentsR;
+	private GroupMatrix<ZqElement, ZqGroup> matrixA;
+	private GroupVector<ZqElement, ZqGroup> exponentsR;
 	private ZqElement exponentsRho;
 
 	@BeforeEach
@@ -58,24 +61,25 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 	}
 
 	@Test
-	void testThatEmptyMatrixDoesNotThrow(){
-		SameGroupMatrix<ZqElement, ZqGroup> emptyMatrix = zqGroupGenerator.genRandomZqElementMatrix(0, 0);
-		SameGroupVector<ZqElement, ZqGroup> emptyExponents = zqGroupGenerator.genRandomZqElementVector(0);
+	void testThatEmptyMatrixDoesNotThrow() {
+		GroupMatrix<ZqElement, ZqGroup> emptyMatrix = zqGroupGenerator.genRandomZqElementMatrix(0, 0);
+		GroupVector<ZqElement, ZqGroup> emptyExponents = zqGroupGenerator.genRandomZqElementVector(0);
 		assertDoesNotThrow(() -> new MultiExponentiationWitness(emptyMatrix, emptyExponents, exponentsRho));
 	}
 
 	@Test
-	void testThatExponentsOfDifferentSizeThanMatrixColumnsThrows(){
-		SameGroupVector<ZqElement, ZqGroup> differentSizeExponents = zqGroupGenerator.genRandomZqElementVector(m + 1);
+	void testThatExponentsOfDifferentSizeThanMatrixColumnsThrows() {
+		GroupVector<ZqElement, ZqGroup> differentSizeExponents = zqGroupGenerator.genRandomZqElementVector(m + 1);
 		Exception exception =
 				assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationWitness(matrixA, differentSizeExponents, exponentsRho));
 		assertEquals("The matrix A number of columns must equals the number of exponents.", exception.getMessage());
 	}
 
 	@Test
-	void testThatMatrixAndExponentsOfDifferentGroupsThrows(){
-		SameGroupMatrix<ZqElement, ZqGroup> otherMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationWitness(otherMatrix, exponentsR, exponentsRho));
+	void testThatMatrixAndExponentsOfDifferentGroupsThrows() {
+		GroupMatrix<ZqElement, ZqGroup> otherMatrix = otherZqGroupGenerator.genRandomZqElementMatrix(n, m);
+		Exception exception = assertThrows(IllegalArgumentException.class,
+				() -> new MultiExponentiationWitness(otherMatrix, exponentsR, exponentsRho));
 		assertEquals("The matrix A and the exponents r must belong to the same group.", exception.getMessage());
 	}
 
@@ -89,7 +93,7 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 
 	@Test
 	void testThatExponentsAndRhoOfDifferentGroupsThrows() {
-		SameGroupVector<ZqElement, ZqGroup> otherR = otherZqGroupGenerator.genRandomZqElementVector(m);
+		GroupVector<ZqElement, ZqGroup> otherR = otherZqGroupGenerator.genRandomZqElementVector(m);
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> new MultiExponentiationWitness(matrixA, otherR, exponentsRho));
 		assertEquals("The matrix A and the exponents r must belong to the same group.", exception.getMessage());
 	}

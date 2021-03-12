@@ -25,9 +25,9 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.Hashable;
 import ch.post.it.evoting.cryptoprimitives.HashableList;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -43,19 +43,19 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  */
 public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
-	private final SameGroupVector<GqElement, GqGroup> publicKeyElements;
+	private final GroupVector<GqElement, GqGroup> publicKeyElements;
 
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPublicKey} object.
 	 *
-	 * @param keyElements <p>the list of public key Gq group publicKeyElements, which must satisfy the conditions of a {@link SameGroupVector} and
+	 * @param keyElements <p>the list of public key Gq group publicKeyElements, which must satisfy the conditions of a {@link GroupVector} and
 	 *                    the following:
 	 *                    <li>not be empty</li>
 	 *                    <li>no element must be equal to 1</li>
 	 *                    <li>no element must be equal to the generator of the group they belong to</li></p>
 	 */
 	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
-		this.publicKeyElements = SameGroupVector.from(keyElements);
+		this.publicKeyElements = GroupVector.from(keyElements);
 		checkArgument(!publicKeyElements.isEmpty(), "An ElGamal public key must not be empty.");
 		checkArgument(keyElements.stream().map(GqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
 				"An ElGamal public key cannot contain a 1 valued element.");

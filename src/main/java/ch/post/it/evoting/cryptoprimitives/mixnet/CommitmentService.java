@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -59,7 +59,7 @@ public class CommitmentService {
 	 * @param commitmentKey <b>ck</b>, a {@link CommitmentKey} (h, g<sub>1</sub>, ..., g<sub>k</sub>)
 	 * @return the commitment to the provided elements as a {@link GqElement}
 	 */
-	static GqElement getCommitment(final SameGroupVector<ZqElement, ZqGroup> values, final ZqElement randomElement,
+	static GqElement getCommitment(final GroupVector<ZqElement, ZqGroup> values, final ZqElement randomElement,
 			final CommitmentKey commitmentKey) {
 		// Null checks.
 		checkNotNull(values);
@@ -114,8 +114,8 @@ public class CommitmentService {
 	 * @param commitmentKey  <b>ck</b>, the commitment key of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>), k >= n.
 	 * @return the commitments (c<sub>0</sub>, ..., c<sub>m-1</sub>)
 	 */
-	static SameGroupVector<GqElement, GqGroup> getCommitmentMatrix(final SameGroupMatrix<ZqElement, ZqGroup> elementsMatrix,
-			final SameGroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
+	static GroupVector<GqElement, GqGroup> getCommitmentMatrix(final GroupMatrix<ZqElement, ZqGroup> elementsMatrix,
+			final GroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
 
 		// Check nullity.
 		checkNotNull(elementsMatrix);
@@ -124,7 +124,7 @@ public class CommitmentService {
 
 		// Handle empty matrix.
 		if (elementsMatrix.isEmpty()) {
-			return SameGroupVector.of();
+			return GroupVector.of();
 		}
 
 		// Cross arguments dimension checking.
@@ -164,15 +164,15 @@ public class CommitmentService {
 	 * @param commitmentKey  <b>ck</b>, the {@link CommitmentKey} of size k &ge; 1.
 	 * @return the commitment c = (c<sub>0</sub>, ..., c<sub>2m</sub>)
 	 */
-	static SameGroupVector<GqElement, GqGroup> getCommitmentVector(final SameGroupVector<ZqElement, ZqGroup> elementsVector,
-			final SameGroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
+	static GroupVector<GqElement, GqGroup> getCommitmentVector(final GroupVector<ZqElement, ZqGroup> elementsVector,
+			final GroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
 
 		checkNotNull(elementsVector);
 		checkNotNull(randomElements);
 		checkNotNull(commitmentKey);
 
 		final List<List<ZqElement>> rows = Collections.singletonList(elementsVector.stream().collect(Collectors.toList()));
-		SameGroupMatrix<ZqElement, ZqGroup> elementsMatrix = SameGroupMatrix.fromRows(rows);
+		GroupMatrix<ZqElement, ZqGroup> elementsMatrix = GroupMatrix.fromRows(rows);
 
 		// Cross dimension checking.
 		checkArgument(elementsMatrix.numColumns() == randomElements.size(),

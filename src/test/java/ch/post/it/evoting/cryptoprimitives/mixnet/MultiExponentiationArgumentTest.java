@@ -27,7 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -45,9 +45,9 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 	private static int l;
 
 	private static GqElement cA0;
-	private static SameGroupVector<GqElement, GqGroup> cBVector;
-	private static SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
-	private static SameGroupVector<ZqElement, ZqGroup> aVector;
+	private static GroupVector<GqElement, GqGroup> cBVector;
+	private static GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
+	private static GroupVector<ZqElement, ZqGroup> aVector;
 	private static ZqElement r;
 	private static ZqElement b;
 	private static ZqElement s;
@@ -103,8 +103,8 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	@ParameterizedTest
 	@MethodSource("nullArgumentsProvider")
-	void builtWithNullFields(GqElement cA0, SameGroupVector<GqElement, GqGroup> cBVector,
-			SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector, SameGroupVector<ZqElement, ZqGroup> aVector, ZqElement r, ZqElement b,
+	void builtWithNullFields(GqElement cA0, GroupVector<GqElement, GqGroup> cBVector,
+			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector, GroupVector<ZqElement, ZqGroup> aVector, ZqElement r, ZqElement b,
 			ZqElement s, ZqElement tau) {
 
 		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
@@ -157,7 +157,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	@Test
 	void builtWithDiffGqGroupAndZqGroup() {
-		final SameGroupVector<ZqElement, ZqGroup> otherGroupAVector = otherZqGroupGenerator.genRandomZqElementVector(n);
+		final GroupVector<ZqElement, ZqGroup> otherGroupAVector = otherZqGroupGenerator.genRandomZqElementVector(n);
 		final ZqElement otherGroupR = otherZqGroupGenerator.genRandomZqElementMember();
 		final ZqElement otherGroupS = otherZqGroupGenerator.genRandomZqElementMember();
 		final ZqElement otherGroupB = otherZqGroupGenerator.genRandomZqElementMember();
@@ -179,7 +179,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	@Test
 	void builtWithDiffSizeVectors() {
-		final SameGroupVector<GqElement, GqGroup> longerCBVector = gqGroupGenerator.genRandomGqElementVector(2 * m + 1);
+		final GroupVector<GqElement, GqGroup> longerCBVector = gqGroupGenerator.genRandomGqElementVector(2 * m + 1);
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		builder.withcA0(cA0)
@@ -197,8 +197,8 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	@Test
 	void builtWithWrongSizeCBAndE() {
-		final SameGroupVector<GqElement, GqGroup> longerCBVector = gqGroupGenerator.genRandomGqElementVector(2 * m + 1);
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerEVector = new ElGamalGenerator(gqGroup)
+		final GroupVector<GqElement, GqGroup> longerCBVector = gqGroupGenerator.genRandomGqElementVector(2 * m + 1);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> longerEVector = new ElGamalGenerator(gqGroup)
 				.genRandomCiphertextVector(2 * m + 1, l);
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();

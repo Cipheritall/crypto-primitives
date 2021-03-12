@@ -33,12 +33,12 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.Hashable;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.HashableList;
 import ch.post.it.evoting.cryptoprimitives.HashableString;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -52,7 +52,7 @@ class CommitmentKey implements HashableList {
 	static final String HASH_CONSTANT = "commitmentKey";
 	private final GqGroup group;
 	private final GqElement h;
-	private final SameGroupVector<GqElement, GqGroup> gElements;
+	private final GroupVector<GqElement, GqGroup> gElements;
 
 	/**
 	 * Creates a {@link CommitmentKey} object.
@@ -77,7 +77,7 @@ class CommitmentKey implements HashableList {
 		//Validate gElements
 		checkNotNull(gElements);
 		checkArgument(gElements.stream().noneMatch(Objects::isNull), "A commitment key cannot contain null elements");
-		SameGroupVector<GqElement, GqGroup> gs = SameGroupVector.from(gElements);
+		GroupVector<GqElement, GqGroup> gs = GroupVector.from(gElements);
 
 		checkArgument(!gs.isEmpty(), "No g element provided");
 		checkArgument(gs.getGroup().equals(h.getGroup()), "All g elements must have the same group as h");

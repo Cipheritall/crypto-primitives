@@ -16,7 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.constantMessage;
@@ -41,9 +41,9 @@ import java.util.stream.Stream;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
-import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -126,11 +126,11 @@ final class MultiExponentiationArgumentService {
 		BigInteger q = this.gqGroup.getQ();
 
 		//Dimension checking
-		SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
+		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
 		ElGamalMultiRecipientCiphertext CCiphertext = statement.getC();
-		SameGroupVector<GqElement, GqGroup> cA = statement.getcA();
-		SameGroupMatrix<ZqElement, ZqGroup> AMatrix = witness.getA();
-		SameGroupVector<ZqElement, ZqGroup> rVector = witness.getR();
+		GroupVector<GqElement, GqGroup> cA = statement.getcA();
+		GroupMatrix<ZqElement, ZqGroup> AMatrix = witness.getA();
+		GroupVector<ZqElement, ZqGroup> rVector = witness.getR();
 		ZqElement rho = witness.getRho();
 
 		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
@@ -153,7 +153,7 @@ final class MultiExponentiationArgumentService {
 
 		//Algorithm
 		//Generate a0, r0, bs, ss, taus,
-		SameGroupVector<ZqElement, ZqGroup> a0 = SameGroupVector.from(randomService.genRandomVector(q, n));
+		GroupVector<ZqElement, ZqGroup> a0 = GroupVector.from(randomService.genRandomVector(q, n));
 		ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		List<ZqElement> mutableBs = randomService.genRandomVector(q, 2 * m);
 		List<ZqElement> mutableSs = randomService.genRandomVector(q, 2 * m);
@@ -162,24 +162,24 @@ final class MultiExponentiationArgumentService {
 		mutableBs.set(m, zero);
 		mutableSs.set(m, zero);
 		mutableTaus.set(m, rho);
-		SameGroupVector<ZqElement, ZqGroup> bVector = SameGroupVector.from(mutableBs);
-		SameGroupVector<ZqElement, ZqGroup> sVector = SameGroupVector.from(mutableSs);
-		SameGroupVector<ZqElement, ZqGroup> tauVector = SameGroupVector.from(mutableTaus);
+		GroupVector<ZqElement, ZqGroup> bVector = GroupVector.from(mutableBs);
+		GroupVector<ZqElement, ZqGroup> sVector = GroupVector.from(mutableSs);
+		GroupVector<ZqElement, ZqGroup> tauVector = GroupVector.from(mutableTaus);
 
 		//Compute cA0
 		GqElement cA0 = getCommitment(a0, r0, ck);
 
 		//Compute diagonal products
-		SameGroupMatrix<ZqElement, ZqGroup> prependedAMatrix = AMatrix.prependColumn(a0);
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProducts = getDiagonalProducts(CMatrix, prependedAMatrix);
+		GroupMatrix<ZqElement, ZqGroup> prependedAMatrix = AMatrix.prependColumn(a0);
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProducts = getDiagonalProducts(CMatrix, prependedAMatrix);
 
 		//Compute commitments to individual values of b
-		SameGroupVector<GqElement, GqGroup> cBVector = IntStream.range(0, 2 * m)
-				.mapToObj(k -> getCommitment(SameGroupVector.of(bVector.get(k)), sVector.get(k), ck))
+		GroupVector<GqElement, GqGroup> cBVector = IntStream.range(0, 2 * m)
+				.mapToObj(k -> getCommitment(GroupVector.of(bVector.get(k)), sVector.get(k), ck))
 				.collect(toSameGroupVector());
 
 		//Compute re-encrypted diagonal products
-		SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
 				IntStream.range(0, 2 * m)
 						.boxed()
 						.flatMap(k -> Stream.of(k)
@@ -213,14 +213,14 @@ final class MultiExponentiationArgumentService {
 
 		//For all the next computations we include the first element in the sum by starting at the index 0 instead of 1. This is possible since x^0
 		// is 1.
-		SameGroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
+		GroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
 				.limit(n)
 				.collect(toSameGroupVector());
-		SameGroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)
+		GroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)
 				.mapToObj(i -> vectorScalarMultiplication(xPowI.get(i), prependedAMatrix.getColumn(i)))
 				.reduce(neutralVector, MultiExponentiationArgumentService::vectorSum);
 
-		SameGroupVector<ZqElement, ZqGroup> prependedrVector = rVector.prepend(r0);
+		GroupVector<ZqElement, ZqGroup> prependedrVector = rVector.prepend(r0);
 		ZqElement r = IntStream.range(0, m + 1)
 				.mapToObj(i -> xPowI.get(i).multiply(prependedrVector.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
@@ -251,8 +251,8 @@ final class MultiExponentiationArgumentService {
 	}
 
 	@VisibleForTesting
-	ElGamalMultiRecipientCiphertext multiExponentiation(final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix,
-			final SameGroupMatrix<ZqElement, ZqGroup> AMatrix, final ZqElement rho, final int m, final int ciphertextSize) {
+	ElGamalMultiRecipientCiphertext multiExponentiation(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix,
+			final GroupMatrix<ZqElement, ZqGroup> AMatrix, final ZqElement rho, final int m, final int ciphertextSize) {
 
 		final ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertext.neutralElement(ciphertextSize, gqGroup);
 		//Due to 0 indexing the index i+1 in the spec on the matrix A becomes index i here
@@ -279,11 +279,11 @@ final class MultiExponentiationArgumentService {
 	 *
 	 * @param ciphertexts C, the ciphertexts matrix.
 	 * @param exponents   A, the exponents matrix.
-	 * @return A {@link SameGroupVector} of size 2m.
+	 * @return A {@link GroupVector} of size 2m.
 	 */
 	@VisibleForTesting
-	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getDiagonalProducts(
-			final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final SameGroupMatrix<ZqElement, ZqGroup> exponents) {
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getDiagonalProducts(
+			final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final GroupMatrix<ZqElement, ZqGroup> exponents) {
 
 		// Null checking.
 		checkNotNull(ciphertexts);
@@ -329,8 +329,8 @@ final class MultiExponentiationArgumentService {
 					return IntStream.range(lowerBound, upperBound)
 							.mapToObj(i -> {
 								final int j = (k - m) + i + 1;
-								final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextRowI = ciphertexts.getRow(i);
-								final SameGroupVector<ZqElement, ZqGroup> exponentsColumnJ = exponents.getColumn(j);
+								final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextRowI = ciphertexts.getRow(i);
+								final GroupVector<ZqElement, ZqGroup> exponentsColumnJ = exponents.getColumn(j);
 								return ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(ciphertextRowI, exponentsColumnJ);
 							})
 							.reduce(ciphertextMultiplicationIdentity, ElGamalMultiRecipientCiphertext::multiply);
@@ -353,14 +353,14 @@ final class MultiExponentiationArgumentService {
 		//Extract variables from statement and argument
 		int m = statement.getM();
 		int l = statement.getL();
-		final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
 		final ElGamalMultiRecipientCiphertext C = statement.getC();
-		final SameGroupVector<GqElement, GqGroup> cA = statement.getcA();
+		final GroupVector<GqElement, GqGroup> cA = statement.getcA();
 
 		final GqElement cA0 = argument.getcA0();
-		final SameGroupVector<GqElement, GqGroup> cBVector = argument.getcBVector();
-		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector = argument.getEVector();
-		final SameGroupVector<ZqElement, ZqGroup> aVector = argument.getaVector();
+		final GroupVector<GqElement, GqGroup> cBVector = argument.getcBVector();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector = argument.getEVector();
+		final GroupVector<ZqElement, ZqGroup> aVector = argument.getaVector();
 		final ZqElement r = argument.getR();
 		final ZqElement b = argument.getB();
 		final ZqElement s = argument.getS();
@@ -395,7 +395,7 @@ final class MultiExponentiationArgumentService {
 
 		BooleanSupplier verifB = () -> {
 			GqElement prodCb = prodExp(cBVector, xPowI);
-			GqElement commB = getCommitment(SameGroupVector.of(b), s, ck);
+			GqElement commB = getCommitment(GroupVector.of(b), s, ck);
 			return prodCb.equals(commB);
 		};
 
@@ -424,8 +424,8 @@ final class MultiExponentiationArgumentService {
 		return verifCbm.getAsBoolean() && verifEm.getAsBoolean() && verifA.getAsBoolean() && verifB.getAsBoolean() && verifEC.getAsBoolean();
 	}
 
-	private static SameGroupVector<ZqElement, ZqGroup> vectorSum(SameGroupVector<ZqElement, ZqGroup> first,
-			SameGroupVector<ZqElement, ZqGroup> second) {
+	private static GroupVector<ZqElement, ZqGroup> vectorSum(GroupVector<ZqElement, ZqGroup> first,
+			GroupVector<ZqElement, ZqGroup> second) {
 		checkNotNull(first);
 		checkNotNull(second);
 		checkArgument(first.size() == second.size(), "Cannot sum vectors of different dimensions.");
@@ -435,17 +435,18 @@ final class MultiExponentiationArgumentService {
 				.collect(toSameGroupVector());
 	}
 
-	private static SameGroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(ZqElement value, SameGroupVector<ZqElement, ZqGroup> vector) {
+	private static GroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(ZqElement value, GroupVector<ZqElement, ZqGroup> vector) {
 		return vector.stream().map(element -> element.multiply(value)).collect(toSameGroupVector());
 	}
 
 	/**
 	 * Calculate Π<sub>i</sub> base<sub>i</sub> <sup>pow_i</sup>
-	 * @param bases the bases
+	 *
+	 * @param bases  the bases
 	 * @param powers a function that maps from index to power
 	 * @return the product of the bases exponentiated to the matching power.
 	 */
-	private GqElement prodExp(SameGroupVector<GqElement, GqGroup> bases, IntFunction<ZqElement> powers) {
+	private GqElement prodExp(GroupVector<GqElement, GqGroup> bases, IntFunction<ZqElement> powers) {
 		return IntStream.range(0, bases.size())
 				.boxed()
 				.flatMap(i -> Stream.of(i)
