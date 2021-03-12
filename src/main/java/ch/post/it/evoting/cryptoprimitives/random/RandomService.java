@@ -137,7 +137,7 @@ public class RandomService {
 	}
 
 	/**
-	 * Generates a uniformly distributed random exponent within a ZqGroup.
+	 * Generates a uniformly distributed random exponent within a ZqGroup (but excluding 0 and 1).
 	 *
 	 * @param group a ZqGroup (not null)
 	 * @return a random element of the group, with value in [2, q).
