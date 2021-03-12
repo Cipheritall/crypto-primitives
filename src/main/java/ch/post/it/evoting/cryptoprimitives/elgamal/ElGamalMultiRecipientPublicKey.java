@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.math.BigInteger;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -60,6 +61,36 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 				"An ElGamal public key cannot contain a 1 valued element.");
 		checkArgument(keyElements.stream().allMatch(element -> element.getValue().compareTo(element.getGroup().getGenerator().getValue()) != 0),
 				"An ElGamal public key cannot contain an element value equal to the group generator.");
+	}
+
+	/**
+	 * This method implements the specification algorithm CompressPublicKey algorithm. It compresses the public key to the requested length.
+	 * <p>
+	 * The {@code length} must comply with the following:
+	 * <ul>
+	 * 	<li>the length must be strictly positive.</li>
+	 * 	<li>the length must be at most the public key size.</li>
+	 * </ul>
+	 *
+	 * @param length l, the requested length for key compression.
+	 * @return An output vector with the first {@code length}-1 elements of the public key followed by the compressed computed element.
+	 */
+	public List<GqElement> compress(final int length) {
+
+		final int k = this.size();
+
+		checkArgument(0 < length, "The requested length for key compression must be strictly positive.");
+		checkArgument(length <= k, "The requested length for key compression must be at most the public key size.");
+
+		final GqElement compressedKeyElement = this.stream()
+				.skip(length - 1L)
+				.reduce(this.getGroup().getIdentity(), GqElement::multiply);
+
+		final List<GqElement> keyElements = new LinkedList<>(this.publicKeyElements.subList(0, length - 1));
+
+		keyElements.add(compressedKeyElement);
+
+		return keyElements;
 	}
 
 	@Override
