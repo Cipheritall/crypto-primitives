@@ -41,12 +41,9 @@ import java.util.stream.Stream;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -86,17 +83,14 @@ final class MultiExponentiationArgumentService {
 	MultiExponentiationArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 			final RandomService randomService, final MixnetHashService hashService) {
 
-		//Null checking
+		// Null checking.
 		checkNotNull(publicKey);
 		checkNotNull(commitmentKey);
 		checkNotNull(randomService);
 		checkNotNull(hashService);
 
-		//Group checking
+		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public key and commitment key must belong to the same group");
-
-		//Dimension checking
-		checkArgument(publicKey.size() == commitmentKey.size(), "The commitment key and public key must be of the same size.");
 
 		this.pk = publicKey;
 		this.ck = commitmentKey;

@@ -16,11 +16,17 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
+import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -117,6 +123,74 @@ class ArgumentParser {
 				.withRTilde(rTilde)
 				.withSTilde(sTilde)
 				.build();
+	}
+
+	MultiExponentiationArgument parseMultiExponentiationArgument(final JsonData multiExpArgumentData) {
+		final BigInteger cA0Value = multiExpArgumentData.get("c_a_0", BigInteger.class);
+		final BigInteger[] cBValues = multiExpArgumentData.get("c_b", BigInteger[].class);
+		final JsonData eDataArray = multiExpArgumentData.getJsonData("e");
+		final BigInteger[] aValues = multiExpArgumentData.get("a", BigInteger[].class);
+		final BigInteger rValue = multiExpArgumentData.get("r", BigInteger.class);
+		final BigInteger bValue = multiExpArgumentData.get("b", BigInteger.class);
+		final BigInteger sValue = multiExpArgumentData.get("s", BigInteger.class);
+		final BigInteger tauValue = multiExpArgumentData.get("tau", BigInteger.class);
+
+		final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
+		final SameGroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
+				.map(bi -> GqElement.create(bi, gqGroup))
+				.collect(toSameGroupVector());
+		final SameGroupVector<ZqElement, ZqGroup> a = Arrays.stream(aValues)
+				.map(bi -> ZqElement.create(bi, zqGroup))
+				.collect(toSameGroupVector());
+		final SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = parseCiphertextVector(eDataArray);
+		final ZqElement r = ZqElement.create(rValue, zqGroup);
+		final ZqElement b = ZqElement.create(bValue, zqGroup);
+		final ZqElement s = ZqElement.create(sValue, zqGroup);
+		final ZqElement tau = ZqElement.create(tauValue, zqGroup);
+
+		return new MultiExponentiationArgument.Builder()
+				.withcA0(cA0)
+				.withcBVector(cB)
+				.withEVector(E)
+				.withaVector(a)
+				.withr(r)
+				.withb(b)
+				.withs(s)
+				.withtau(tau)
+				.build();
+
+	}
+
+	ElGamalMultiRecipientCiphertext parseCiphertext(final JsonData ciphertextData) {
+		final BigInteger gammaValue = ciphertextData.get("gamma", BigInteger.class);
+		final BigInteger[] phisValues = ciphertextData.get("phis", BigInteger[].class);
+
+		final GqElement gamma = GqElement.create(gammaValue, gqGroup);
+		final List<GqElement> phis = Arrays.stream(phisValues)
+				.map(bi -> GqElement.create(bi, gqGroup))
+				.collect(toList());
+
+		return ElGamalMultiRecipientCiphertext.create(gamma, phis);
+	}
+
+	SameGroupVector<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertextVector(final JsonData ciphertextsDataVector) {
+		if (!ciphertextsDataVector.getJsonNode().isArray()) {
+			throw new IllegalArgumentException("Provided jsonData does not wrap an array.");
+		}
+
+		return StreamSupport.stream(ciphertextsDataVector.getJsonNode().spliterator(), false)
+				.map(node -> parseCiphertext(new JsonData(node)))
+				.collect(toSameGroupVector());
+	}
+
+	SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertextMatrix(final JsonData ciphertextDataMatrix) {
+		if (!ciphertextDataMatrix.getJsonNode().isArray()) {
+			throw new IllegalArgumentException("Provided jsonData does not wrap an array.");
+		}
+
+		return StreamSupport.stream(ciphertextDataMatrix.getJsonNode().spliterator(), false)
+				.map(node -> parseCiphertextVector(new JsonData(node)))
+				.collect(collectingAndThen(toList(), SameGroupMatrix::fromRows));
 	}
 
 }

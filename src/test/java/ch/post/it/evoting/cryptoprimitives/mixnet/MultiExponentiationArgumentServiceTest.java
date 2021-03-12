@@ -26,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -36,10 +38,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
@@ -52,6 +59,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
@@ -79,7 +88,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 		randomService = new RandomService();
-		
+
 		hashService = TestHashService.create(gqGroup.getQ());
 		argumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, hashService);
 
@@ -129,13 +138,6 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			CommitmentKey otherKey = otherGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 			assertThrowsIllegalArgumentExceptionWithMessage("The public key and commitment key must belong to the same group",
 					() -> new MultiExponentiationArgumentService(publicKey, otherKey, randomService, hashService));
-		}
-
-		@Test
-		void publicKeyAndCommitmentKeyOfDifferentSizeThrows() {
-			CommitmentKey longerKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER + 1);
-			assertThrowsIllegalArgumentExceptionWithMessage("The commitment key and public key must be of the same size.",
-					() -> new MultiExponentiationArgumentService(publicKey, longerKey, randomService, hashService));
 		}
 
 		@Test
@@ -258,9 +260,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		}
 	}
 
-
 	@Nested
 	@DisplayName("verifyMultiExponentiationArgument...")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifyMultiExponentiationArgument {
 		private MultiExponentiationArgument randomArgument;
 
@@ -401,6 +403,68 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
 		}
+
+		@ParameterizedTest(name = "{5}")
+		@MethodSource("verifyMultiExponentiationArgumentRealValueProvider")
+		@DisplayName("with real values gives expected result")
+		void verifyRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
+				final MultiExponentiationStatement statement, final MultiExponentiationArgument argument, final boolean expectedOutput,
+				final String description) throws NoSuchAlgorithmException {
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService,
+					mixnetHashService);
+
+			assertEquals(expectedOutput, service.verifyMultiExponentiationArgument(statement, argument),
+					String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> verifyMultiExponentiationArgumentRealValueProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-multiexp-argument.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData contextData = testParameters.getContext();
+				final Context context = new Context(contextData);
+				final GqGroup realGqGroup = context.getGqGroup();
+
+				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
+				final CommitmentKey commitmentKey = context.parseCommitmentKey();
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				final JsonData statement = input.getJsonData("statement");
+				final ArgumentParser argumentParser = new ArgumentParser(realGqGroup);
+
+				final MultiExponentiationArgument multiExpArgument = argumentParser.parseMultiExponentiationArgument(input.getJsonData("argument"));
+				final MultiExponentiationStatement multiExpStatement = parseMultiExpStatement(realGqGroup, statement, argumentParser);
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final boolean outputValue = output.get("verif_result", Boolean.class);
+
+				return Arguments.of(publicKey, commitmentKey, multiExpStatement, multiExpArgument, outputValue, testParameters.getDescription());
+			});
+		}
+
+		private MultiExponentiationStatement parseMultiExpStatement(final GqGroup realGqGroup, final JsonData statement,
+				final ArgumentParser argumentParser) {
+
+			final SameGroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = argumentParser
+					.parseCiphertextMatrix(statement.getJsonData("ciphertexts"));
+
+			final ElGamalMultiRecipientCiphertext ciphertextC = argumentParser.parseCiphertext(statement.getJsonData("ciphertext_product"));
+
+			final BigInteger[] commitmentAValues = statement.get("c_a", BigInteger[].class);
+			final SameGroupVector<GqElement, GqGroup> commitmentA = Arrays.stream(commitmentAValues)
+					.map(bi -> GqElement.create(bi, realGqGroup))
+					.collect(toSameGroupVector());
+
+			return new MultiExponentiationStatement(ciphertextMatrix, ciphertextC, commitmentA);
+		}
+
 	}
 
 	/**
