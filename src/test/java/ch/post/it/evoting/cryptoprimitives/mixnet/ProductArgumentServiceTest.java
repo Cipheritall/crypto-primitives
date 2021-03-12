@@ -32,16 +32,24 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import ch.post.it.evoting.cryptoprimitives.HashService;
 import ch.post.it.evoting.cryptoprimitives.SameGroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
@@ -53,6 +61,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 class ProductArgumentServiceTest extends TestGroupSetup {
 
@@ -335,6 +345,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 	@Nested
 	@DisplayName("verifyProductArgument...")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifyProductArgumentTest {
 
 		private ProductArgumentService productArgumentService;
@@ -486,5 +497,79 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			assertFalse(productArgumentService.verifyProductArgument(shortStatement, badArgument));
 		}
 
+		@ParameterizedTest(name = "{5}")
+		@MethodSource("verifyProductArgumentRealValuesProvider")
+		@DisplayName("with real values gives expected result")
+		void verifyProductArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
+				final ProductStatement productStatement, final ProductArgument productArgument, final boolean expectedOutput,
+				final String description) throws NoSuchAlgorithmException {
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, mixnetHashService, publicKey,
+					commitmentKey);
+
+			assertEquals(expectedOutput, productArgumentService.verifyProductArgument(productStatement, productArgument),
+					String.format("assertion failed for: %s", description));
+		}
+
+		Stream<Arguments> verifyProductArgumentRealValuesProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-product-argument.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData contextData = testParameters.getContext();
+				final Context context = new Context(contextData);
+
+				final GqGroup realGqGroup = context.getGqGroup();
+				final ElGamalMultiRecipientPublicKey realPublicKey = context.parsePublicKey();
+				final CommitmentKey realCommitmentKey = context.parseCommitmentKey();
+
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				final JsonData statement = input.getJsonData("statement");
+				final JsonData argument = input.getJsonData("argument");
+
+				final ProductStatement productStatement = parseProductStatement(realGqGroup, statement);
+
+				// Product Argument.
+				final ArgumentParser argumentParser = new ArgumentParser(realGqGroup);
+				final SingleValueProductArgument singleValueProductArgument = argumentParser
+						.parseSingleValueProductArgument(argument.getJsonData("single_vpa"));
+
+				ProductArgument productArgument;
+				final JsonData cbJsonData = argument.getJsonData("c_b");
+				if (!cbJsonData.getJsonNode().isMissingNode()) {
+					final BigInteger cbValue = argument.get("c_b", BigInteger.class);
+					final GqElement cb = GqElement.create(cbValue, realGqGroup);
+					final HadamardArgument hadamardArgument = argumentParser.parseHadamardArgument(argument.getJsonData("hadamard_argument"));
+
+					productArgument = new ProductArgument(cb, hadamardArgument, singleValueProductArgument);
+				} else {
+					productArgument = new ProductArgument(singleValueProductArgument);
+				}
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final boolean outputValue = output.get("verif_result", Boolean.class);
+
+				return Arguments
+						.of(realPublicKey, realCommitmentKey, productStatement, productArgument, outputValue, testParameters.getDescription());
+			});
+		}
+
+		private ProductStatement parseProductStatement(final GqGroup realGqGroup, final JsonData statement) {
+			final BigInteger[] cAValues = statement.get("c_a", BigInteger[].class);
+			final BigInteger bValue = statement.get("b", BigInteger.class);
+			final SameGroupVector<GqElement, GqGroup> commitments = Arrays.stream(cAValues)
+					.map(bi -> GqElement.create(bi, realGqGroup))
+					.collect(toSameGroupVector());
+			final ZqElement product = ZqElement.create(bValue, ZqGroup.sameOrderAs(realGqGroup));
+
+			return new ProductStatement(commitments, product);
+		}
+
 	}
+
 }

@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.serialization;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.stream.StreamSupport;
 
@@ -83,7 +82,7 @@ public final class JsonData {
 	 * @return The "raw" JsonData.
 	 */
 	public JsonData getJsonData(final String field) {
-		return new JsonData(jsonNode.get(field));
+		return new JsonData(jsonNode.path(field));
 	}
 
 	/**

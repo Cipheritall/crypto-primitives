@@ -16,14 +16,11 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.SameGroupVector.toSameGroupVector;
-import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 
 import ch.post.it.evoting.cryptoprimitives.SameGroupVector;
-import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -89,4 +86,37 @@ class ArgumentParser {
 
 		return new HadamardArgument(cUpperB, zeroArgument);
 	}
+
+	SingleValueProductArgument parseSingleValueProductArgument(final JsonData svpArgumentData) {
+		final BigInteger cdValue = svpArgumentData.get("c_d", BigInteger.class);
+		final BigInteger cLowerDeltaValue = svpArgumentData.get("c_lower_delta", BigInteger.class);
+		final BigInteger cUpperDeltaValue = svpArgumentData.get("c_upper_delta", BigInteger.class);
+		final BigInteger[] aTildeValues = svpArgumentData.get("a_tilde", BigInteger[].class);
+		final BigInteger[] bTildeValues = svpArgumentData.get("b_tilde", BigInteger[].class);
+		final BigInteger rTildeValue = svpArgumentData.get("r_tilde", BigInteger.class);
+		final BigInteger sTildeValue = svpArgumentData.get("s_tilde", BigInteger.class);
+
+		final GqElement cd = GqElement.create(cdValue, gqGroup);
+		final GqElement cLowerDelta = GqElement.create(cLowerDeltaValue, gqGroup);
+		final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
+		final SameGroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
+				.map(bi -> ZqElement.create(bi, zqGroup))
+				.collect(toSameGroupVector());
+		final SameGroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
+				.map(bi -> ZqElement.create(bi, zqGroup))
+				.collect(toSameGroupVector());
+		final ZqElement rTilde = ZqElement.create(rTildeValue, zqGroup);
+		final ZqElement sTilde = ZqElement.create(sTildeValue, zqGroup);
+
+		return new SingleValueProductArgument.Builder()
+				.withCd(cd)
+				.withCLowerDelta(cLowerDelta)
+				.withCUpperDelta(cUpperDelta)
+				.withATilde(aTilde)
+				.withBTilde(bTilde)
+				.withRTilde(rTilde)
+				.withSTilde(sTilde)
+				.build();
+	}
+
 }
