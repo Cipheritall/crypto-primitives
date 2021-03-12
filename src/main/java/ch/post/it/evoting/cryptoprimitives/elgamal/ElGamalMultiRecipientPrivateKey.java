@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.math.BigInteger;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -52,6 +53,36 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 				"An ElGamal private key cannot contain a 0 valued element.");
 		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
 				"An ElGamal private key cannot contain a 1 valued element.");
+	}
+
+	/**
+	 * This method implements the specification algorithm CompressSecretKey algorithm. It compresses the secret key to the requested length.
+	 * <p>
+	 * The {@code length} must comply with the following:
+	 * <ul>
+	 * 	<li>the length must be strictly positive.</li>
+	 * 	<li>the length must be at most the secret key size.</li>
+	 * </ul>
+	 *
+	 * @param length l, the requested length for key compression.
+	 * @return An output vector with the first {@code length}-1 elements of the secret key followed by the compressed computed element.
+	 */
+	public List<ZqElement> compress(final int length) {
+
+		final int k = this.size();
+
+		checkArgument(0 < length, "The requested length for key compression must be strictly positive.");
+		checkArgument(length <= k, "The requested length for key compression must be at most the secret key size.");
+
+		final ZqElement compressedKeyElement = this.stream()
+				.skip(length - 1L)
+				.reduce(this.getGroup().getIdentity(), ZqElement::add);
+
+		final List<ZqElement> keyElements = new LinkedList<>(this.privateKeyElements.subList(0, length - 1));
+
+		keyElements.add(compressedKeyElement);
+
+		return keyElements;
 	}
 
 	@Override
