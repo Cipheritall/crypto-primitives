@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,9 +38,9 @@ import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 /**
  * Provides methods for calculating a single value product argument.
@@ -114,7 +114,7 @@ class SingleValueProductArgumentService {
 				.collect(Collectors.toList());
 
 		// Calculate d and r_d
-		GroupVector<ZqElement, ZqGroup> d = GroupVector.from(randomService.genRandomVector(q, n));
+		GroupVector<ZqElement, ZqGroup> d = randomService.genRandomVector(q, n);
 		ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ
@@ -133,12 +133,12 @@ class SingleValueProductArgumentService {
 		// Calculate δ' and Δ
 		GroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k).negate().multiply(d.get(k + 1)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		GroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k + 1)
 						.add(a.get(k + 1).negate().multiply(lowerDelta.get(k)))
 						.add(bList.get(k).negate().multiply(d.get(k + 1))))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_d, c_δ and c_Δ
 		GqElement cd = getCommitment(d, rd, commitmentKey);
@@ -151,10 +151,10 @@ class SingleValueProductArgumentService {
 		// Calculate aTilde, bTilde, rTilde and sTilde
 		GroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(a.get(k)).add(d.get(k)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		GroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(bList.get(k)).add(lowerDelta.get(k)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		ZqElement rTilde = x.multiply(r).add(rd);
 		ZqElement sTilde = x.multiply(sx).add(s0);
 

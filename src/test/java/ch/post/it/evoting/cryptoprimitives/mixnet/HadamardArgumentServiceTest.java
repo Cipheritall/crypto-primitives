@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.HadamardGenerators.generateHadamardStatement;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.HadamardGenerators.generateHadamardWitness;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -55,9 +55,9 @@ import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -396,7 +396,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			GroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
-			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toSameGroupVector()).prepend(badcUpperB0);
+			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
 			HadamardArgument badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
 
 			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
@@ -556,7 +556,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 			final GroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
 					.map(bi -> GqElement.create(bi, gqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final GqElement cB = GqElement.create(cBValue, gqGroup);
 
 			return new HadamardStatement(cA, cB);

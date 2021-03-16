@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.getMessage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -77,7 +77,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final GroupVector<GqElement, GqGroup> resultPhis =
 				IntStream.range(0, n)
 						.mapToObj(i -> this.phis.get(i).multiply(other.phis.get(i)))
-						.collect(toSameGroupVector());
+						.collect(toGroupVector());
 
 		return new ElGamalMultiRecipientCiphertext(resultGamma, resultPhis);
 	}
@@ -96,7 +96,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
 		GroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
 				.map(p -> p.exponentiate(exponent))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		return new ElGamalMultiRecipientCiphertext(exponentiatedGamma, exponentiatedPhis);
 	}
@@ -253,7 +253,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 		final ElGamalMultiRecipientMessage message = getMessage(this, secretKey);
 
-		return new ElGamalMultiRecipientCiphertext(this.getGamma(), message.stream().collect(toSameGroupVector()));
+		return new ElGamalMultiRecipientCiphertext(this.getGamma(), message.stream().collect(toGroupVector()));
 	}
 
 	public final GqElement getGamma() {

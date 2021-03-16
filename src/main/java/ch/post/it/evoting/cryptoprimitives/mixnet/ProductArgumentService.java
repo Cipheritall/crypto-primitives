@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -32,9 +32,9 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 final class ProductArgumentService {
 
@@ -130,7 +130,7 @@ final class ProductArgumentService {
 					.mapToObj(i -> IntStream.range(0, m)
 							.mapToObj(j -> A.get(i, j))
 							.reduce(one, ZqElement::multiply))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final GqElement cb = getCommitment(biList, s, commitmentKey);
 
 			// Get the Hadamard argument

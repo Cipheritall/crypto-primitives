@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.genProductWitness;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.getProductStatement;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -57,9 +57,9 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
@@ -450,7 +450,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			GroupVector<GqElement, GqGroup> cUpperB = hadamardArgument.getCommitmentsB();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
-			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toSameGroupVector()).prepend(badcUpperB0);
+			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
 			HadamardArgument badHadamardArgument = new HadamardArgument(badcUpperB, hadamardArgument.getZeroArgument());
 			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), badHadamardArgument,
 					longArgument.getSingleValueProductArgument());
@@ -576,7 +576,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			final BigInteger bValue = statement.get("b", BigInteger.class);
 			final GroupVector<GqElement, GqGroup> commitments = Arrays.stream(cAValues)
 					.map(bi -> GqElement.create(bi, realGqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final ZqElement product = ZqElement.create(bValue, ZqGroup.sameOrderAs(realGqGroup));
 
 			return new ProductStatement(commitments, product);

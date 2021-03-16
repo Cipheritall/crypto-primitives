@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,9 +40,9 @@ import ch.post.it.evoting.cryptoprimitives.HashableString;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 public class HadamardArgumentService {
 
@@ -206,19 +206,19 @@ public class HadamardArgumentService {
 		// Calculate c_(D_0), ..., c_(D_(m-2))
 		final GroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
 				.mapToObj(i -> cBVector.get(i).exponentiate(xExpI.get(i + 1)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate t_0, ..., t_(m-2)
 		final GroupVector<ZqElement, ZqGroup> tiList = IntStream.range(0, m - 1)
 				.mapToObj(i -> xExpI.get(i + 1).multiply(sList.get(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate d
 		final GroupVector<ZqElement, ZqGroup> dElements = IntStream.range(0, n)
 				.mapToObj(i -> IntStream.range(1, m)
 						.mapToObj(j -> xExpI.get(j).multiply(bList.get(j).get(i)))
 						.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_D
 		final GqElement cD = IntStream.range(1, m)
@@ -240,7 +240,7 @@ public class HadamardArgumentService {
 		// Therefore, D becomes B and T becomes S.
 		// Create statement
 		final GroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
 		ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		// Create witness
@@ -249,7 +249,7 @@ public class HadamardArgumentService {
 						.collect(Collectors.toList()));
 		final GroupMatrix<ZqElement, ZqGroup> zMatrixB = GroupMatrix.fromColumns(diList).appendColumn(dElements);
 		final GroupVector<ZqElement, ZqGroup> zExponentsR = r.append(zero).stream().skip(1)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		final GroupVector<ZqElement, ZqGroup> zExponentsS = tiList.append(t);
 		ZeroWitness zWitness = new ZeroWitness(zMatrixA, zMatrixB, zExponentsR, zExponentsS);
 
@@ -326,12 +326,12 @@ public class HadamardArgumentService {
 		// Pre-calculate the powers of x
 		final GroupVector<ZqElement, ZqGroup> xPowers = IntStream.range(0, m)
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_(D_0), ..., c_(D_(m-2))
 		final GroupVector<GqElement, GqGroup> cDiList = IntStream.range(0, m - 1)
 				.mapToObj(i -> cUpperB.get(i).exponentiate(xPowers.get(i + 1)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Calculate c_D
 		final GqElement cD = IntStream.range(1, m)
@@ -345,7 +345,7 @@ public class HadamardArgumentService {
 		final GqElement cMinusOne = CommitmentService.getCommitment(minusOnes, zero, commitmentKey);
 
 		// Create zero statement
-		final GroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1).collect(toSameGroupVector());
+		final GroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
 		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		final ZeroArgument zArgument = argument.getZeroArgument();
@@ -379,7 +379,7 @@ public class HadamardArgumentService {
 				.mapToObj(i -> matrix.getRow(i).stream()
 						.limit(j + 1L)
 						.reduce(one, ZqElement::multiply))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 
 	/**
@@ -393,6 +393,6 @@ public class HadamardArgumentService {
 		BigInteger q = zqGroup.getQ();
 
 		return Stream.generate(() -> ZqElement.create(q.subtract(BigInteger.ONE), zqGroup)).limit(size)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 }

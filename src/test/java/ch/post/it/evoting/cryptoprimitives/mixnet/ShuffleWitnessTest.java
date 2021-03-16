@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 @DisplayName("A ShuffleWitness")
 class ShuffleWitnessTest extends TestGroupSetup {

@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationStatementWitnessPairGenerator.StatementWitnessPair;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors.with;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -54,9 +54,9 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCipherte
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -222,7 +222,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 							computeCommitmentToA
 									.stream()
 									.skip(1)
-					).collect(toSameGroupVector());
+					).collect(toGroupVector());
 			MultiExponentiationStatement invalidStatement = new MultiExponentiationStatement(
 					statement.getCMatrix(), statement.getC(), differentCommitmentToA);
 
@@ -460,7 +460,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			final BigInteger[] commitmentAValues = statement.get("c_a", BigInteger[].class);
 			final GroupVector<GqElement, GqGroup> commitmentA = Arrays.stream(commitmentAValues)
 					.map(bi -> GqElement.create(bi, realGqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 
 			return new MultiExponentiationStatement(ciphertextMatrix, ciphertextC, commitmentA);
 		}

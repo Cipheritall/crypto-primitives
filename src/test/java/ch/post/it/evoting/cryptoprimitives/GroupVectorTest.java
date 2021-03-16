@@ -308,7 +308,7 @@ class GroupVectorTest {
 		int n = random.nextInt(10) + 1;
 		TestGroup group = new TestGroup();
 		List<TestGroupElement> elements = Stream.generate(() -> new TestGroupElement(group)).limit(n).collect(Collectors.toList());
-		GroupVector<TestGroupElement, TestGroup> actual = elements.stream().collect(GroupVector.toSameGroupVector());
+		GroupVector<TestGroupElement, TestGroup> actual = elements.stream().collect(GroupVector.toGroupVector());
 		GroupVector<TestGroupElement, TestGroup> expected = GroupVector.from(elements);
 
 		assertEquals(expected, actual);

@@ -31,11 +31,11 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCipherte
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 /**
  * Re-encrypting shuffle service.

@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 
 final class CryptoPrimitiveFacade implements CryptoPrimitiveService {
 

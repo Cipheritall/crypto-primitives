@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -57,9 +57,9 @@ import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
@@ -405,12 +405,12 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 				final BigInteger[] aVector = input.get("a", BigInteger[].class);
 				final GroupVector<ZqElement, ZqGroup> firstVector = Arrays.stream(aVector)
 						.map(bi -> ZqElement.create(bi, zqGroup))
-						.collect(toSameGroupVector());
+						.collect(toGroupVector());
 
 				final BigInteger[] bVector = input.get("b", BigInteger[].class);
 				final GroupVector<ZqElement, ZqGroup> secondVector = Arrays.stream(bVector)
 						.map(bi -> ZqElement.create(bi, zqGroup))
-						.collect(toSameGroupVector());
+						.collect(toGroupVector());
 
 				final BigInteger yValue = input.get("y", BigInteger.class);
 				final ZqElement y = ZqElement.create(yValue, zqGroup);
@@ -747,10 +747,10 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			final GroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
 					.map(bi -> GqElement.create(bi, realGqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final GroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
 					.map(bi -> GqElement.create(bi, realGqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final ZqElement y = ZqElement.create(yValue, ZqGroup.sameOrderAs(realGqGroup));
 
 			return new ZeroStatement(cA, cB, y);

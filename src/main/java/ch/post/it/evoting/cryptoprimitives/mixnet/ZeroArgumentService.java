@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentVector;
@@ -39,9 +39,9 @@ import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 /**
  * Class in charge of providing a Zero Argument used in the Zero Argument proof.
@@ -129,8 +129,8 @@ final class ZeroArgumentService {
 
 		final int n = matrixA.numRows();
 		final BigInteger q = zqGroup.getQ();
-		final GroupVector<ZqElement, ZqGroup> a0 = GroupVector.from(randomService.genRandomVector(q, n));
-		final GroupVector<ZqElement, ZqGroup> bm = GroupVector.from(randomService.genRandomVector(q, n));
+		final GroupVector<ZqElement, ZqGroup> a0 = randomService.genRandomVector(q, n);
+		final GroupVector<ZqElement, ZqGroup> bm = randomService.genRandomVector(q, n);
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		final ZqElement sm = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 		final GqElement cA0 = getCommitment(a0, r0, commitmentKey);
@@ -162,14 +162,14 @@ final class ZeroArgumentService {
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(i).multiply(augmentedMatrixA.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		final GroupVector<ZqElement, ZqGroup> bPrime = IntStream.range(0, n)
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xExpI.get(m - i).multiply(augmentedMatrixB.get(j, i)))
 								.reduce(zqGroup.getIdentity(), ZqElement::add))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Compute r', s' and t'.
 		final GroupVector<ZqElement, ZqGroup> augmentedExponentsR = exponentsR.prepend(r0);

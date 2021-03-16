@@ -22,9 +22,9 @@ import java.math.BigInteger;
 
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 public class ZqGroupGenerator {
 

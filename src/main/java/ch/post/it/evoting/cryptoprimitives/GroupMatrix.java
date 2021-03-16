@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -178,7 +178,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	public GroupVector<E, G> getColumn(int j) {
 		checkArgument(j >= 0, OUT_OF_BOUNDS_MESSAGE);
 		checkArgument(j < this.numColumns, OUT_OF_BOUNDS_MESSAGE);
-		return this.rows.stream().map(row -> row.get(j)).collect(toSameGroupVector());
+		return this.rows.stream().map(row -> row.get(j)).collect(toGroupVector());
 	}
 
 	/**

@@ -200,7 +200,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * @param <E> the type of elements this list contains.
 	 * @return a {@code Collector} for accumulating the input elements into a GroupVector.
 	 */
-	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, GroupVector<E, G>> toSameGroupVector() {
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, GroupVector<E, G>> toGroupVector() {
 		return Collectors.collectingAndThen(toImmutableList(), GroupVector::from);
 	}
 
