@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.stream.IntStream;
 
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+
 public class PermutationService {
 
 	private final RandomService randomService;

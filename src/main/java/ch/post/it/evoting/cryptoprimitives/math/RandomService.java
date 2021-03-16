@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.random;
+package ch.post.it.evoting.cryptoprimitives.math;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.io.BaseEncoding;
 
-import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
-import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 
 public class RandomService {
 
@@ -156,7 +154,7 @@ public class RandomService {
 	 * @param length     n
 	 * @return {@code List<ZqElement>}
 	 */
-	public List<ZqElement> genRandomVector(final BigInteger upperBound, final int length) {
+	public GroupVector<ZqElement, ZqGroup> genRandomVector(final BigInteger upperBound, final int length) {
 		checkNotNull(upperBound);
 		checkArgument(upperBound.compareTo(BigInteger.ZERO) > 0, "The upper bound should be greater than zero");
 		checkArgument(length > 0, "The length should be greater than zero");
@@ -165,7 +163,7 @@ public class RandomService {
 
 		return Stream.generate(() -> ZqElement.create(genRandomInteger(upperBound), zqGroup))
 				.limit(length)
-				.collect(Collectors.toList());
+				.collect(toGroupVector());
 	}
 
 	/**

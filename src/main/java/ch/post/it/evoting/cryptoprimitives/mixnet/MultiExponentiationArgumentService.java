@@ -16,7 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.constantMessage;
@@ -28,6 +28,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.MoreCollectors.onlyElement;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,9 +50,9 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 /**
  * Service to generate multi exponentiation arguments.
@@ -153,11 +154,11 @@ final class MultiExponentiationArgumentService {
 
 		//Algorithm
 		//Generate a0, r0, bs, ss, taus,
-		GroupVector<ZqElement, ZqGroup> a0 = GroupVector.from(randomService.genRandomVector(q, n));
+		GroupVector<ZqElement, ZqGroup> a0 = randomService.genRandomVector(q, n);
 		ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
-		List<ZqElement> mutableBs = randomService.genRandomVector(q, 2 * m);
-		List<ZqElement> mutableSs = randomService.genRandomVector(q, 2 * m);
-		List<ZqElement> mutableTaus = randomService.genRandomVector(q, 2 * m);
+		List<ZqElement> mutableBs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		List<ZqElement> mutableSs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		List<ZqElement> mutableTaus = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
 		ZqElement zero = ZqElement.create(0, zqGroup);
 		mutableBs.set(m, zero);
 		mutableSs.set(m, zero);
@@ -176,7 +177,7 @@ final class MultiExponentiationArgumentService {
 		//Compute commitments to individual values of b
 		GroupVector<GqElement, GqGroup> cBVector = IntStream.range(0, 2 * m)
 				.mapToObj(k -> getCommitment(GroupVector.of(bVector.get(k)), sVector.get(k), ck))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		//Compute re-encrypted diagonal products
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
@@ -188,7 +189,7 @@ final class MultiExponentiationArgumentService {
 								.map(gPowBk -> constantMessage(gPowBk, l))
 								.map(gPowBkMessage -> getCiphertext(gPowBkMessage, tauVector.get(k), pk)
 										.multiply(diagonalProducts.get(k))))
-						.collect(toSameGroupVector());
+						.collect(toGroupVector());
 
 		//Compute challenge hash
 		byte[] hash = hashService.recursiveHash(
@@ -215,7 +216,7 @@ final class MultiExponentiationArgumentService {
 		// is 1.
 		GroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
 				.limit(n)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		GroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)
 				.mapToObj(i -> vectorScalarMultiplication(xPowI.get(i), prependedAMatrix.getColumn(i)))
 				.reduce(neutralVector, MultiExponentiationArgumentService::vectorSum);
@@ -335,7 +336,7 @@ final class MultiExponentiationArgumentService {
 							})
 							.reduce(ciphertextMultiplicationIdentity, ElGamalMultiRecipientCiphertext::multiply);
 				})
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 
 	boolean verifyMultiExponentiationArgument(final MultiExponentiationStatement statement, final MultiExponentiationArgument argument) {
@@ -432,11 +433,11 @@ final class MultiExponentiationArgumentService {
 		checkArgument(first.getGroup().equals(second.getGroup()), "Cannot sum vectors of different groups.");
 		return IntStream.range(0, first.size())
 				.mapToObj(i -> first.get(i).add(second.get(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 
 	private static GroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(ZqElement value, GroupVector<ZqElement, ZqGroup> vector) {
-		return vector.stream().map(element -> element.multiply(value)).collect(toSameGroupVector());
+		return vector.stream().map(element -> element.multiply(value)).collect(toGroupVector());
 	}
 
 	/**

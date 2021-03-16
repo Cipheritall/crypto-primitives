@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
@@ -40,10 +40,10 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.random.Permutation;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 /**
  * Service to compute a cryptographic argument for the validity of a shuffle.
@@ -142,7 +142,7 @@ class ShuffleArgumentService {
 				.collect(toList());
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computedShuffledCiphertextsCPrime = IntStream.range(0, N)
 				.mapToObj(i -> encryptedOnes.get(i).multiply(shuffledCiphertexts.get(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		checkArgument(shuffledCiphertextsCPrime.equals(computedShuffledCiphertextsCPrime),
 				"The shuffled ciphertexts provided in the statement do not correspond to the re-encryption and shuffle of C under pi and rho.");
 
@@ -154,11 +154,11 @@ class ShuffleArgumentService {
 		final BigInteger q = gqGroup.getQ();
 
 		// Compute vector r, matrix A and vector c_A
-		final GroupVector<ZqElement, ZqGroup> r = GroupVector.from(randomService.genRandomVector(q, m));
+		final GroupVector<ZqElement, ZqGroup> r = randomService.genRandomVector(q, m);
 		final GroupVector<ZqElement, ZqGroup> permutationVector = permutation.stream()
 				.mapToObj(BigInteger::valueOf)
 				.map(value -> ZqElement.create(value, zqGroup))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		final GroupMatrix<ZqElement, ZqGroup> matrixA = permutationVector.toMatrix(m, n).transpose();
 		final GroupVector<GqElement, GqGroup> cA = getCommitmentMatrix(matrixA, r, commitmentKey);
 
@@ -175,11 +175,11 @@ class ShuffleArgumentService {
 		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(xHash), zqGroup);
 
 		// Compute vector s, vector b, matrix B and vector c_B.
-		final GroupVector<ZqElement, ZqGroup> s = GroupVector.from(randomService.genRandomVector(q, m));
+		final GroupVector<ZqElement, ZqGroup> s = randomService.genRandomVector(q, m);
 		final GroupVector<ZqElement, ZqGroup> bVector = permutation.stream()
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		final GroupMatrix<ZqElement, ZqGroup> matrixB = bVector.toMatrix(m, n).transpose();
 		final GroupVector<GqElement, GqGroup> cB = getCommitmentMatrix(matrixB, s, commitmentKey);
 
@@ -212,14 +212,14 @@ class ShuffleArgumentService {
 		// Compute Zneg, c_{-z}.
 		final GroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate)
 				.limit(N)
-				.collect(toSameGroupVector())
+				.collect(toGroupVector())
 				.toMatrix(m, n)
 				.transpose();
-		final GroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toSameGroupVector());
+		final GroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> cNegativeZ = getCommitmentMatrix(negativeZ, zeros, commitmentKey);
 
 		// Compute c_D.
-		final GroupVector<GqElement, GqGroup> cAPowY = cA.stream().map(element -> element.exponentiate(y)).collect(toSameGroupVector());
+		final GroupVector<GqElement, GqGroup> cAPowY = cA.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> cD = vectorEntryWiseProduct(cAPowY, cB);
 
 		// Compute matrix D.
@@ -231,7 +231,7 @@ class ShuffleArgumentService {
 		// Compute vector t.
 		final GroupVector<ZqElement, ZqGroup> t = IntStream.range(0, r.size())
 				.mapToObj(i -> y.multiply(r.get(i)).add(s.get(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 
 		// Pre-compute x^i for i=0..N used multiple times.
 		final GroupVector<ZqElement, ZqGroup> xPowers = precomputeXPowers(x, N);
@@ -362,14 +362,14 @@ class ShuffleArgumentService {
 		// Compute Zneg, c_{-z}.
 		final GroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate)
 				.limit(N)
-				.collect(toSameGroupVector())
+				.collect(toGroupVector())
 				.toMatrix(m, n)
 				.transpose();
-		final GroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toSameGroupVector());
+		final GroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> cNegativeZ = getCommitmentMatrix(negativeZ, zeros, commitmentKey);
 
 		// Compute c_D.
-		final GroupVector<GqElement, GqGroup> cAPowY = cA.stream().map(element -> element.exponentiate(y)).collect(toSameGroupVector());
+		final GroupVector<GqElement, GqGroup> cAPowY = cA.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> cD = vectorEntryWiseProduct(cAPowY, cB);
 
 		// Pre-compute x^i for i=0..N used multiple times.
@@ -408,7 +408,7 @@ class ShuffleArgumentService {
 		return IntStream.range(0, N)
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 
 	/**
@@ -441,7 +441,7 @@ class ShuffleArgumentService {
 
 		return IntStream.range(0, first.size())
 				.mapToObj(i -> first.get(i).multiply(second.get(i)))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 	}
 
 	/**

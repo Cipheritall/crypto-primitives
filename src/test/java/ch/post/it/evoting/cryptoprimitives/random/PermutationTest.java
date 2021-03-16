@@ -27,6 +27,8 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+
 class PermutationTest {
 
 	private static final int MAX_PERMUTATION_TEST_SIZE = 1000;

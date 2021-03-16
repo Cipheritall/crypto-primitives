@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -54,9 +54,9 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
@@ -405,10 +405,10 @@ class SingleValueProductArgumentServiceTest {
 			final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
 			final GroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
 					.map(bi -> ZqElement.create(bi, zqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final GroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
 					.map(bi -> ZqElement.create(bi, zqGroup))
-					.collect(toSameGroupVector());
+					.collect(toGroupVector());
 			final ZqElement rTilde = ZqElement.create(rTildeValue, zqGroup);
 			final ZqElement sTilde = ZqElement.create(sTildeValue, zqGroup);
 

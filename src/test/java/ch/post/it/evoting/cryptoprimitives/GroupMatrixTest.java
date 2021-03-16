@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -207,7 +207,7 @@ class GroupMatrixTest {
 		GroupVector<TestValuedElement, TestGroup> expected = IntStream.range(0, numRows)
 				.map(row -> row * numColumns + column)
 				.mapToObj(value -> new TestValuedElement(BigInteger.valueOf(value), group))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		assertEquals(expected, matrix.getColumn(column));
 	}
 

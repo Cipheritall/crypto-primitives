@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toSameGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 
 import java.math.BigInteger;
 import java.util.stream.IntStream;
@@ -38,7 +38,7 @@ class HadamardGenerators {
 		GroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, m);
 		GroupVector<ZqElement, ZqGroup> vector = IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
-				.collect(toSameGroupVector());
+				.collect(toGroupVector());
 		GroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(m);
 		ZqElement randomness = zqGenerator.genRandomZqElementMember();
 

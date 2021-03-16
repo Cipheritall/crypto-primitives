@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.RandomService;
 
 class ElGamalMultiRecipientKeyPairTest {
 
