@@ -15,37 +15,34 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
-/**
- * Interface exposing all methods that need to be accessed outside of crypto-primitives.
- */
-public interface CryptoPrimitiveService {
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+
+final class CryptoPrimitiveService implements CryptoPrimitive {
+
+	private final RandomService randomService = new RandomService();
 
 	/**
-	 * Generate a random Base16 string following RFC 4648.
-	 *
-	 * @param length l, the length of the string to be generated, in number of chars.
-	 * @return A random Base16-encoded string of {@code length} characters. Must be in range (0, 1000).
+	 * @inheritDoc
 	 */
-	String genRandomBase16String(final int length);
+	@Override
+	public String genRandomBase16String(final int length) {
+		return randomService.genRandomBase16String(length);
+	}
 
 	/**
-	 * Generate a random Base32 string following RFC 4648.
-	 *
-	 * @param length l, the length of the string to be generated, in number of chars.
-	 * @return A random Base32-encoded string of {@code length} characters. Must be in range (0, 1000).
+	 * @inheritDoc
 	 */
-	String genRandomBase32String(final int length);
+	@Override
+	public String genRandomBase32String(final int length) {
+		return randomService.genRandomBase32String(length);
+	}
 
 	/**
-	 * Generate a random Base64 string following RFC 4648.
-	 *
-	 * @param length l, the length of the string to be generated, in number of chars.
-	 * @return A random Base64-encoded string of {@code length} characters. Must be in range (0, 1000).
+	 * @inheritDoc
 	 */
-	String genRandomBase64String(final int length);
-
-	static CryptoPrimitiveService get() {
-		return new CryptoPrimitiveFacade();
+	@Override
+	public String genRandomBase64String(final int length) {
+		return randomService.genRandomBase64String(length);
 	}
 
 }

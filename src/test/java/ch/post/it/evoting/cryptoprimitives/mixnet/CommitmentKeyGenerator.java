@@ -37,7 +37,8 @@ public class CommitmentKeyGenerator {
 
 	/**
 	 * Generate a random commitment key in the given group and of given size.
-	 * @param k     the number of g elements of the key.
+	 *
+	 * @param k the number of g elements of the key.
 	 * @return a new commitment key of length k + 1.
 	 */
 	CommitmentKey genCommitmentKey(int k) {
