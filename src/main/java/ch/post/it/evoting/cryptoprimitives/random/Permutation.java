@@ -16,24 +16,27 @@
 package ch.post.it.evoting.cryptoprimitives.random;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
 /**
  * Represents a permutation of integers in the range [0, N).
- *
+ * <p>
  * Instances of this class are immutable.
  */
 public class Permutation {
 
-	public static final Permutation EMPTY = new Permutation(new int[]{});
+	public static final Permutation EMPTY = new Permutation(new int[] {});
 
 	//valueMapping[i] represents the permutation of value i
 	private final int[] valueMapping;
 	private final int size;
 
 	Permutation(final int[] valueMapping) {
+		checkNotNull(valueMapping);
+
 		this.size = valueMapping.length;
 		this.valueMapping = Arrays.copyOf(valueMapping, this.size);
 	}
@@ -46,7 +49,7 @@ public class Permutation {
 	}
 
 	/**
-	 * Get the new value of value i under this permutation.
+	 * Gets the new value of value i under this permutation.
 	 *
 	 * @param i the value to get the permutation of, must be smaller than the size of this permutation.
 	 * @return a value in the range [0, N)
@@ -62,5 +65,22 @@ public class Permutation {
 	 */
 	public int getSize() {
 		return this.size;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Permutation that = (Permutation) o;
+		return Arrays.equals(valueMapping, that.valueMapping);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(valueMapping);
 	}
 }

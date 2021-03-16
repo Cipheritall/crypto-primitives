@@ -38,6 +38,11 @@ class PermutationTest {
 	private static final PermutationService permutationService = new PermutationService(randomService);
 
 	@Test
+	void permutationWithNullParameter() {
+		assertThrows(NullPointerException.class, () -> new Permutation(null));
+	}
+
+	@Test
 	void genPermutationThrowsForNonPositiveSize() {
 		int size = -Math.abs(random.nextInt());
 		assertThrows(IllegalArgumentException.class, () -> permutationService.genPermutation(size));
