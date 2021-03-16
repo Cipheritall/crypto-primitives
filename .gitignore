@@ -4,3 +4,6 @@ target
 .settings/
 .idea
 *.iml
+
+# Maven local repository
+.m2/
