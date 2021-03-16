@@ -94,9 +94,12 @@ public final class ConversionService {
 	}
 
 	/**
-	 * Convert a byte array to it's BigInteger equivalent.
+	 * Converts a byte array to its BigInteger equivalent.
+	 * <p>
+	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation,
+	 * which is equivalent to the specification of ByteArrayToInteger.
 	 *
-	 * @param bytes the byte array to convert to it's BigInteger equivalent.
+	 * @param bytes the byte array to convert to its BigInteger equivalent.
 	 * @return a BigInteger corresponding to the provided byte array representation.
 	 */
 	public static BigInteger byteArrayToInteger(final byte[] bytes) {
