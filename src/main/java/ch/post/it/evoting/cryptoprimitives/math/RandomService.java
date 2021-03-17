@@ -83,7 +83,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitive#genRandomBase16String(int)
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase16String(int)
 	 */
 	public String genRandomBase16String(final int length) {
 		checkArgument(length > 0);
@@ -102,7 +102,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitive#genRandomBase32String(int)
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase32String(int)
 	 */
 	public String genRandomBase32String(final int length) {
 		checkArgument(length > 0);
@@ -121,7 +121,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitive#genRandomBase64String(int)
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase64String(int)
 	 */
 	public String genRandomBase64String(final int length) {
 		checkArgument(length > 0);

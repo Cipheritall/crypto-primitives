@@ -17,7 +17,7 @@ package ch.post.it.evoting.cryptoprimitives;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 
-final class CryptoPrimitiveService implements CryptoPrimitive {
+public final class CryptoPrimitivesService implements CryptoPrimitives {
 
 	private final RandomService randomService = new RandomService();
 
@@ -36,4 +36,7 @@ final class CryptoPrimitiveService implements CryptoPrimitive {
 		return randomService.genRandomBase64String(length);
 	}
 
+	public static CryptoPrimitives get() {
+		return new CryptoPrimitivesService();
+	}
 }

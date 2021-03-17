@@ -18,7 +18,7 @@ package ch.post.it.evoting.cryptoprimitives;
 /**
  * Interface exposing all methods that need to be accessed outside of crypto-primitives.
  */
-public interface CryptoPrimitive {
+public interface CryptoPrimitives {
 
 	/**
 	 * Generates a random Base16 string following RFC 4648.
@@ -43,9 +43,5 @@ public interface CryptoPrimitive {
 	 * @return a random Base64-encoded string of {@code length} characters. Must be in range (0, 1000).
 	 */
 	String genRandomBase64String(final int length);
-
-	static CryptoPrimitive get() {
-		return new CryptoPrimitiveService();
-	}
 
 }
