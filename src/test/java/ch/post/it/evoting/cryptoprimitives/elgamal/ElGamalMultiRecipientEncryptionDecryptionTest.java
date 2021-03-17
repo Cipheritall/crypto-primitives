@@ -63,7 +63,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	@RepeatedTest(10)
 	void testEncryptAndDecryptGivesOriginalMessage() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientMessage decryptedMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, keyPair.getPrivateKey());
 
@@ -73,7 +73,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	@RepeatedTest(10)
 	void testEncryptAndDecryptWithLongerKeysGivesOriginalMessage() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS + 1, randomService);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientMessage decryptedMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, keyPair.getPrivateKey());
 
@@ -83,7 +83,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	@Test
 	void testEncryptAndDecryptWithDifferentKeysGivesDifferentMessage() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientKeyPair differentKeyPair;
 		do {
@@ -97,7 +97,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	@Test
 	void testEncryptAndDecryptWithDifferentLongerKeysGivesDifferentMessage() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS + 1, randomService);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientKeyPair differentKeyPair;
 		do {
@@ -111,7 +111,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	@Test
 	void testEncryptAndDecryptWithDifferentKeySizesGivesDifferentMessage() {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS + 1, randomService);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
 		ElGamalMultiRecipientPublicKey publicKey =
 				new ElGamalMultiRecipientPublicKey(keyPair.getPublicKey().stream().limit(NUM_ELEMENTS).collect(Collectors.toList()));
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);

@@ -135,16 +135,21 @@ public class RandomService {
 	}
 
 	/**
-	 * Generates a uniformly distributed random exponent within a ZqGroup (but excluding 0 and 1).
+	 * Generates a uniformly distributed random exponent within the group of integers modulo q (but excluding 0 and 1).
 	 *
-	 * @param group a ZqGroup (not null)
+	 * @param upperBound q, the upper bound. Must be non null and greater than 2.
 	 * @return a random element of the group, with value in [2, q).
 	 */
-	public ZqElement genRandomExponent(final ZqGroup group) {
-		checkNotNull(group);
+	public ZqElement genRandomExponent(final BigInteger upperBound) {
+		checkNotNull(upperBound);
 
-		BigInteger value = genRandomIntegerWithinBounds(BigInteger.valueOf(2), group.getQ());
-		return ZqElement.create(value, group);
+		final BigInteger two = BigInteger.valueOf(2);
+
+		checkArgument(upperBound.compareTo(two) > 0, "The provided upperBound element must be greater than 2.");
+
+		final BigInteger value = genRandomIntegerWithinBounds(two, upperBound);
+
+		return ZqElement.create(value, new ZqGroup(upperBound));
 	}
 
 	/**

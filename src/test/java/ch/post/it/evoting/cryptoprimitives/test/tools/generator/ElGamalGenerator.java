@@ -65,7 +65,7 @@ public class ElGamalGenerator {
 
 	public ElGamalMultiRecipientCiphertext genRandomCiphertext(int ciphertextSize) {
 		ElGamalMultiRecipientMessage randomMessage = genRandomMessage(ciphertextSize);
-		ZqElement randomExponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(group));
+		ZqElement randomExponent = randomService.genRandomExponent(group.getQ());
 		return ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, genRandomPublicKey(ciphertextSize));
 	}
 
@@ -82,7 +82,7 @@ public class ElGamalGenerator {
 	 */
 	public List<ElGamalMultiRecipientCiphertext> genRandomCiphertexts(ElGamalMultiRecipientPublicKey publicKey, int numElements, int numCiphertexts) {
 		ElGamalMultiRecipientMessage randomMessage = genRandomMessage(numElements);
-		ZqElement randomExponent = randomService.genRandomExponent(ZqGroup.sameOrderAs(group));
+		ZqElement randomExponent = randomService.genRandomExponent(group.getQ());
 
 		return Stream.generate(() -> ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, publicKey))
 				.limit(numCiphertexts).collect(Collectors.toList());
@@ -91,7 +91,7 @@ public class ElGamalGenerator {
 	public static ElGamalMultiRecipientCiphertext encryptMessage(ElGamalMultiRecipientMessage originalMessage, ElGamalMultiRecipientKeyPair keyPair,
 			ZqGroup zqGroup) {
 		RandomService randomService = new RandomService();
-		ZqElement exponent = randomService.genRandomExponent(zqGroup);
+		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
 		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
 	}
 

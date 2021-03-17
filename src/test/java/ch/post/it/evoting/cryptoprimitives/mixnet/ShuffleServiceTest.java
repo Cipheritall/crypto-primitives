@@ -126,7 +126,7 @@ class ShuffleServiceTest {
 		List<ZqElement> randomExponents = Stream.of(7, 5, 3)
 				.map(r -> ZqElement.create(BigInteger.valueOf(r), exponentGroup))
 				.collect(Collectors.toList());
-		when(randomService.genRandomExponent(exponentGroup))
+		when(randomService.genRandomExponent(exponentGroup.getQ()))
 				.thenReturn(randomExponents.get(0), randomExponents.subList(1, randomExponents.size()).toArray(new ZqElement[] {}));
 
 		//Create public key

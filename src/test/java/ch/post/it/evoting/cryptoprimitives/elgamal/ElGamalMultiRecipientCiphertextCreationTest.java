@@ -99,7 +99,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@Test
 	void testExponentFromDifferentQThrows() {
 		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup);
+		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup.getQ());
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}
@@ -116,7 +116,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@Test
 	void testPublicKeyAndExponentFromDifferentGroupsThrows() {
 		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup);
+		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup.getQ());
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}

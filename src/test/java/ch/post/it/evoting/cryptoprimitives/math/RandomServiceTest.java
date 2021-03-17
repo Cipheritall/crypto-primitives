@@ -110,7 +110,7 @@ class RandomServiceTest {
 
 	@RepeatedTest(10)
 	void testWhenRandomZqElementCreatedThenValueIsInRange() {
-		ZqElement randomExponent = randomService.genRandomExponent(smallGroup);
+		ZqElement randomExponent = randomService.genRandomExponent(smallGroup.getQ());
 
 		assertTrue(randomExponent.getValue().compareTo(BigInteger.valueOf(2)) >= 0, "The random exponent should be equal or greater than 2");
 		assertTrue(randomExponent.getValue().compareTo(smallGroup.getQ()) < 0, "The random exponent should be less than q");
@@ -125,9 +125,9 @@ class RandomServiceTest {
 		doReturn(BigInteger.ZERO, BigInteger.ONE, BigInteger.valueOf(2))
 				.when(spyRandomService).genRandomIntegerWithinBounds(ArgumentMatchers.any(), ArgumentMatchers.any());
 
-		ZqElement exponent1 = randomService.genRandomExponent(largeGroup);
-		ZqElement exponent2 = randomService.genRandomExponent(largeGroup);
-		ZqElement exponent3 = randomService.genRandomExponent(largeGroup);
+		ZqElement exponent1 = randomService.genRandomExponent(largeGroup.getQ());
+		ZqElement exponent2 = randomService.genRandomExponent(largeGroup.getQ());
+		ZqElement exponent3 = randomService.genRandomExponent(largeGroup.getQ());
 
 		assertNotEquals(exponent1.getValue(), exponent2.getValue(), errorMessage);
 		assertNotEquals(exponent1.getValue(), exponent3.getValue(), errorMessage);
