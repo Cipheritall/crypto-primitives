@@ -74,14 +74,14 @@ class ShuffleArgument {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ShuffleArgument that = (ShuffleArgument) o;
+		final ShuffleArgument that = (ShuffleArgument) o;
 		return cA.equals(that.cA) && cB.equals(that.cB) && productArgument.equals(that.productArgument) && multiExponentiationArgument
 				.equals(that.multiExponentiationArgument);
 	}

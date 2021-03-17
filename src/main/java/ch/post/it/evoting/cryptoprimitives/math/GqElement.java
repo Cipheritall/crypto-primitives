@@ -57,7 +57,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		checkNotNull(other);
 		checkArgument(this.group.equals(other.group));
 
-		BigInteger resultValue = BigIntegerOperations.modMultiply(value, other.getValue(), group.getP());
+		final BigInteger resultValue = BigIntegerOperations.modMultiply(value, other.getValue(), group.getP());
 		return new GqElement(resultValue, this.group);
 	}
 
@@ -72,16 +72,16 @@ public final class GqElement extends GroupElement<GqGroup> {
 		checkNotNull(exponent);
 		checkArgument(isOfSameOrderGroup(exponent));
 
-		BigInteger valueExponentiated = BigIntegerOperations.modExponentiate(value, exponent.getValue(), this.group.getP());
+		final BigInteger valueExponentiated = BigIntegerOperations.modExponentiate(value, exponent.getValue(), this.group.getP());
 		return new GqElement(valueExponentiated, this.group);
 	}
 
 	private boolean isOfSameOrderGroup(final ZqElement exponent) {
-		return this.group.getQ().equals(exponent.getGroup().getQ());
+		return this.group.hasSameOrderAs(exponent.getGroup());
 	}
 
 	GqElement invert() {
-		BigInteger invertedValue = value.modInverse(this.group.getP());
+		final BigInteger invertedValue = value.modInverse(this.group.getP());
 		return new GqElement(invertedValue, this.group);
 	}
 

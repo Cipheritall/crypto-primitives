@@ -24,5 +24,5 @@ public interface ElGamal {
 	 * @param secretKey  sk, the {@link ElGamalMultiRecipientPrivateKey} to be used for decrypting
 	 * @return the decrypted plaintext message as {@link ElGamalMultiRecipientMessage}
 	 */
-	ElGamalMultiRecipientMessage getMessage(ElGamalMultiRecipientCiphertext ciphertext, ElGamalMultiRecipientPrivateKey secretKey);
+	ElGamalMultiRecipientMessage getMessage(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPrivateKey secretKey);
 }

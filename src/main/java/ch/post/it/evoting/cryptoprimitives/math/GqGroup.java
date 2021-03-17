@@ -116,14 +116,14 @@ public final class GqGroup implements MathematicalGroup<GqGroup> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		GqGroup gqGroup = (GqGroup) o;
+		final GqGroup gqGroup = (GqGroup) o;
 		return p.equals(gqGroup.p) && q.equals(gqGroup.q) && generator.getValue().equals(gqGroup.generator.getValue());
 	}
 

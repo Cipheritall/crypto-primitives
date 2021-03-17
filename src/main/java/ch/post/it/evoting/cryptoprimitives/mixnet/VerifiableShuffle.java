@@ -17,15 +17,17 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 
 public class VerifiableShuffle {
 
-	private final List<ElGamalMultiRecipientCiphertext> shuffledCiphertextList;
+	private final ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertextList;
 	private final ShuffleArgument shuffleArgument;
 
-	public VerifiableShuffle(List<ElGamalMultiRecipientCiphertext> shuffledCiphertextList, ShuffleArgument shuffleArgument) {
-		this.shuffledCiphertextList = shuffledCiphertextList;
+	public VerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> shuffledCiphertextList, final ShuffleArgument shuffleArgument) {
+		this.shuffledCiphertextList = ImmutableList.copyOf(shuffledCiphertextList);
 		this.shuffleArgument = shuffleArgument;
 	}
 

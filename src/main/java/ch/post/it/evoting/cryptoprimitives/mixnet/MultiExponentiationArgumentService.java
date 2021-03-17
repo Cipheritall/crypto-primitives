@@ -124,28 +124,28 @@ final class MultiExponentiationArgumentService {
 		//Group checking
 		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement must belong to the same group as the public key and commitment key.");
 		checkArgument(this.gqGroup.hasSameOrderAs(witness.getGroup()), "The witness must belong to a ZqGroup of order q.");
-		BigInteger q = this.gqGroup.getQ();
+		final BigInteger q = this.gqGroup.getQ();
 
 		//Dimension checking
-		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
-		ElGamalMultiRecipientCiphertext CCiphertext = statement.getC();
-		GroupVector<GqElement, GqGroup> cA = statement.getcA();
-		GroupMatrix<ZqElement, ZqGroup> AMatrix = witness.getA();
-		GroupVector<ZqElement, ZqGroup> rVector = witness.getR();
-		ZqElement rho = witness.getRho();
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
+		final ElGamalMultiRecipientCiphertext CCiphertext = statement.getC();
+		final GroupVector<GqElement, GqGroup> cA = statement.getcA();
+		final GroupMatrix<ZqElement, ZqGroup> AMatrix = witness.getA();
+		final GroupVector<ZqElement, ZqGroup> rVector = witness.getR();
+		final ZqElement rho = witness.getRho();
 
 		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
 		checkArgument(statement.getM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
 		checkArgument(witness.getDimensionN() <= pk.size(), "The number of rows of matrix A must be less than the size of the public key.");
 
-		int m = statement.getM();
-		int n = statement.getN();
-		int l = CMatrix.isEmpty() ? 0 : CMatrix.get(0, 0).size();
+		final int m = statement.getM();
+		final int n = statement.getN();
+		final int l = CMatrix.isEmpty() ? 0 : CMatrix.get(0, 0).size();
 
 		checkArgument(l <= pk.size(), "The ciphertexts must be smaller than the public key.");
 
 		//Ensure that C is the result of the re-encryption and multi exponentiation of matrix C with exponents matrix A
-		ElGamalMultiRecipientCiphertext computedCCiphertext = multiExponentiation(CMatrix, AMatrix, rho, m, l);
+		final ElGamalMultiRecipientCiphertext computedCCiphertext = multiExponentiation(CMatrix, AMatrix, rho, m, l);
 		checkArgument(CCiphertext.equals(computedCCiphertext),
 				"The computed multi exponentiation ciphertext does not correspond to the one provided in the statement.");
 
@@ -154,33 +154,33 @@ final class MultiExponentiationArgumentService {
 
 		//Algorithm
 		//Generate a0, r0, bs, ss, taus,
-		GroupVector<ZqElement, ZqGroup> a0 = randomService.genRandomVector(q, n);
-		ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
-		List<ZqElement> mutableBs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
-		List<ZqElement> mutableSs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
-		List<ZqElement> mutableTaus = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
-		ZqElement zero = ZqElement.create(0, zqGroup);
+		final GroupVector<ZqElement, ZqGroup> a0 = randomService.genRandomVector(q, n);
+		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
+		final List<ZqElement> mutableBs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		final List<ZqElement> mutableSs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		final List<ZqElement> mutableTaus = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		final ZqElement zero = ZqElement.create(0, zqGroup);
 		mutableBs.set(m, zero);
 		mutableSs.set(m, zero);
 		mutableTaus.set(m, rho);
-		GroupVector<ZqElement, ZqGroup> bVector = GroupVector.from(mutableBs);
-		GroupVector<ZqElement, ZqGroup> sVector = GroupVector.from(mutableSs);
-		GroupVector<ZqElement, ZqGroup> tauVector = GroupVector.from(mutableTaus);
+		final GroupVector<ZqElement, ZqGroup> bVector = GroupVector.from(mutableBs);
+		final GroupVector<ZqElement, ZqGroup> sVector = GroupVector.from(mutableSs);
+		final GroupVector<ZqElement, ZqGroup> tauVector = GroupVector.from(mutableTaus);
 
 		//Compute cA0
-		GqElement cA0 = getCommitment(a0, r0, ck);
+		final GqElement cA0 = getCommitment(a0, r0, ck);
 
 		//Compute diagonal products
-		GroupMatrix<ZqElement, ZqGroup> prependedAMatrix = AMatrix.prependColumn(a0);
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProducts = getDiagonalProducts(CMatrix, prependedAMatrix);
+		final GroupMatrix<ZqElement, ZqGroup> prependedAMatrix = AMatrix.prependColumn(a0);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProducts = getDiagonalProducts(CMatrix, prependedAMatrix);
 
 		//Compute commitments to individual values of b
-		GroupVector<GqElement, GqGroup> cBVector = IntStream.range(0, 2 * m)
+		final GroupVector<GqElement, GqGroup> cBVector = IntStream.range(0, 2 * m)
 				.mapToObj(k -> getCommitment(GroupVector.of(bVector.get(k)), sVector.get(k), ck))
 				.collect(toGroupVector());
 
 		//Compute re-encrypted diagonal products
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
 				IntStream.range(0, 2 * m)
 						.boxed()
 						.flatMap(k -> Stream.of(k)
@@ -192,7 +192,7 @@ final class MultiExponentiationArgumentService {
 						.collect(toGroupVector());
 
 		//Compute challenge hash
-		byte[] hash = hashService.recursiveHash(
+		final byte[] hash = hashService.recursiveHash(
 				HashableBigInteger.from(gqGroup.getP()),
 				HashableBigInteger.from(gqGroup.getQ()),
 				pk,
@@ -204,41 +204,41 @@ final class MultiExponentiationArgumentService {
 				cBVector,
 				EVector
 		);
-		ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
+		final ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
 
 		//Compute as, r, b, s, tau
-		ImmutableList<ZqElement> xPowI = LongStream.range(0, 2L * m)
+		final ImmutableList<ZqElement> xPowI = LongStream.range(0, 2L * m)
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toImmutableList());
 
 		//For all the next computations we include the first element in the sum by starting at the index 0 instead of 1. This is possible since x^0
 		// is 1.
-		GroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
+		final GroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
 				.limit(n)
 				.collect(toGroupVector());
-		GroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)
+		final GroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)
 				.mapToObj(i -> vectorScalarMultiplication(xPowI.get(i), prependedAMatrix.getColumn(i)))
 				.reduce(neutralVector, MultiExponentiationArgumentService::vectorSum);
 
-		GroupVector<ZqElement, ZqGroup> prependedrVector = rVector.prepend(r0);
-		ZqElement r = IntStream.range(0, m + 1)
+		final GroupVector<ZqElement, ZqGroup> prependedrVector = rVector.prepend(r0);
+		final ZqElement r = IntStream.range(0, m + 1)
 				.mapToObj(i -> xPowI.get(i).multiply(prependedrVector.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
-		ZqElement b = IntStream.range(0, 2 * m)
+		final ZqElement b = IntStream.range(0, 2 * m)
 				.mapToObj(k -> xPowI.get(k).multiply(bVector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
-		ZqElement s = IntStream.range(0, 2 * m)
+		final ZqElement s = IntStream.range(0, 2 * m)
 				.mapToObj(k -> xPowI.get(k).multiply(sVector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
-		ZqElement tau = IntStream.range(0, 2 * m)
+		final ZqElement tau = IntStream.range(0, 2 * m)
 				.mapToObj(k -> xPowI.get(k).multiply(tauVector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
-		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
+		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		return builder
 				.withcA0(cA0)
 				.withcBVector(cBVector)
@@ -283,8 +283,8 @@ final class MultiExponentiationArgumentService {
 	 * @return A {@link GroupVector} of size 2m.
 	 */
 	@VisibleForTesting
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getDiagonalProducts(
-			final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final GroupMatrix<ZqElement, ZqGroup> exponents) {
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getDiagonalProducts(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+			final GroupMatrix<ZqElement, ZqGroup> exponents) {
 
 		// Null checking.
 		checkNotNull(ciphertexts);
@@ -303,7 +303,7 @@ final class MultiExponentiationArgumentService {
 
 		// Group checking.
 		checkArgument(pk.getGroup().equals(ciphertexts.getGroup()), "The public key and ciphertexts matrices must be part of the same group.");
-		checkArgument(ciphertexts.getGroup().getQ().equals(exponents.getGroup().getQ()),
+		checkArgument(ciphertexts.getGroup().hasSameOrderAs(exponents.getGroup()),
 				"The exponents group must have the order of the ciphertexts group.");
 
 		// Algorithm.
@@ -368,7 +368,7 @@ final class MultiExponentiationArgumentService {
 		final ZqElement tau = argument.getTau();
 
 		//Algorithm
-		byte[] hash = hashService.recursiveHash(
+		final byte[] hash = hashService.recursiveHash(
 				HashableBigInteger.from(this.gqGroup.getP()),
 				HashableBigInteger.from(this.gqGroup.getQ()),
 				this.pk,
@@ -381,38 +381,38 @@ final class MultiExponentiationArgumentService {
 				EVector);
 
 		//Hash value is guaranteed to be smaller than q
-		ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
+		final ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
 
-		BooleanSupplier verifCbm = () -> cBVector.get(m).equals(gqGroup.getIdentity());
-		BooleanSupplier verifEm = () -> EVector.get(m).equals(C);
+		final BooleanSupplier verifCbm = () -> cBVector.get(m).equals(gqGroup.getIdentity());
+		final BooleanSupplier verifEm = () -> EVector.get(m).equals(C);
 
-		Memoizer<ZqElement> xPowI = new Memoizer<>(i -> x.exponentiate(BigInteger.valueOf(i)));
+		final Memoizer<ZqElement> xPowI = new Memoizer<>(i -> x.exponentiate(BigInteger.valueOf(i)));
 
-		BooleanSupplier verifA = () -> {
+		final BooleanSupplier verifA = () -> {
 			GqElement prodCa = prodExp(cA.prepend(cA0), xPowI);
 			GqElement commA = getCommitment(aVector, r, ck);
 			return prodCa.equals(commA);
 		};
 
-		BooleanSupplier verifB = () -> {
+		final BooleanSupplier verifB = () -> {
 			GqElement prodCb = prodExp(cBVector, xPowI);
 			GqElement commB = getCommitment(GroupVector.of(b), s, ck);
 			return prodCb.equals(commB);
 		};
 
-		BooleanSupplier verifEC = () -> {
-			ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, EVector.size())
+		final BooleanSupplier verifEC = () -> {
+			final ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, EVector.size())
 					.boxed()
 					.flatMap(i -> Stream.of(i)
 							.map(EVector::get)
 							.map(Ek -> Ek.exponentiate(xPowI.apply(i))))
 					.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
-			ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
+			final ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
 					.map(gqGroup.getGenerator()::exponentiate)
 					.map(gPowB -> constantMessage(gPowB, l))
 					.map(gPowBMessage -> getCiphertext(gPowBMessage, tau, pk))
 					.collect(onlyElement());
-			ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
+			final ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
 					.boxed()
 					.flatMap(j -> Stream.of(j)
 							.map(i -> xPowI.apply(m - i - 1))
@@ -425,8 +425,8 @@ final class MultiExponentiationArgumentService {
 		return verifCbm.getAsBoolean() && verifEm.getAsBoolean() && verifA.getAsBoolean() && verifB.getAsBoolean() && verifEC.getAsBoolean();
 	}
 
-	private static GroupVector<ZqElement, ZqGroup> vectorSum(GroupVector<ZqElement, ZqGroup> first,
-			GroupVector<ZqElement, ZqGroup> second) {
+	private static GroupVector<ZqElement, ZqGroup> vectorSum(final GroupVector<ZqElement, ZqGroup> first,
+			final GroupVector<ZqElement, ZqGroup> second) {
 		checkNotNull(first);
 		checkNotNull(second);
 		checkArgument(first.size() == second.size(), "Cannot sum vectors of different dimensions.");
@@ -436,7 +436,7 @@ final class MultiExponentiationArgumentService {
 				.collect(toGroupVector());
 	}
 
-	private static GroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(ZqElement value, GroupVector<ZqElement, ZqGroup> vector) {
+	private static GroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(final ZqElement value, final GroupVector<ZqElement, ZqGroup> vector) {
 		return vector.stream().map(element -> element.multiply(value)).collect(toGroupVector());
 	}
 
@@ -447,7 +447,7 @@ final class MultiExponentiationArgumentService {
 	 * @param powers a function that maps from index to power
 	 * @return the product of the bases exponentiated to the matching power.
 	 */
-	private GqElement prodExp(GroupVector<GqElement, GqGroup> bases, IntFunction<ZqElement> powers) {
+	private GqElement prodExp(final GroupVector<GqElement, GqGroup> bases, final IntFunction<ZqElement> powers) {
 		return IntStream.range(0, bases.size())
 				.boxed()
 				.flatMap(i -> Stream.of(i)
@@ -479,7 +479,7 @@ final class MultiExponentiationArgumentService {
 		 * @return the result of applying this function to the input.
 		 */
 		@Override
-		public R apply(int input) {
+		public R apply(final int input) {
 			return cache.computeIfAbsent(input, function);
 		}
 	}

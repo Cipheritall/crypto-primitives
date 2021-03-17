@@ -156,7 +156,7 @@ public class HadamardArgumentService {
 			sElements.addAll(1, randomService.genRandomVector(q, m - 2));
 		}
 		sElements.add(m - 1, s);
-		ImmutableList<ZqElement> sList = ImmutableList.copyOf(sElements);
+		final ImmutableList<ZqElement> sList = ImmutableList.copyOf(sElements);
 
 		// Calculate c_(B_0), ..., c_(B_(m-1))
 		final List<GqElement> cBList = new ArrayList<>(m);
@@ -243,7 +243,7 @@ public class HadamardArgumentService {
 		final GroupVector<GqElement, GqGroup> zCommitmentsA = cA.append(cMinusOne).stream().skip(1)
 				.collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
-		ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
+		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		// Create witness
 		final GroupMatrix<ZqElement, ZqGroup> zMatrixA = GroupMatrix
 				.fromColumns(A.appendColumn(minusOnes).columnStream().skip(1).map(ArrayList::new)
@@ -252,11 +252,11 @@ public class HadamardArgumentService {
 		final GroupVector<ZqElement, ZqGroup> zExponentsR = r.append(zero).stream().skip(1)
 				.collect(toGroupVector());
 		final GroupVector<ZqElement, ZqGroup> zExponentsS = tiList.append(t);
-		ZeroWitness zWitness = new ZeroWitness(zMatrixA, zMatrixB, zExponentsR, zExponentsS);
+		final ZeroWitness zWitness = new ZeroWitness(zMatrixA, zMatrixB, zExponentsR, zExponentsS);
 
 		// Prepare Hadamard argument
-		GroupVector<GqElement, GqGroup> cB = GroupVector.from(cBList);
-		ZeroArgument zeroArgument = zeroArgumentService.getZeroArgument(zStatement, zWitness);
+		final GroupVector<GqElement, GqGroup> cB = GroupVector.from(cBList);
+		final ZeroArgument zeroArgument = zeroArgumentService.getZeroArgument(zStatement, zWitness);
 
 		return new HadamardArgument(cB, zeroArgument);
 	}
@@ -376,7 +376,7 @@ public class HadamardArgumentService {
 		checkArgument(j >= 0, "The column index must be greater than or equal to 0.");
 		checkArgument(j < matrix.numColumns(), "The column index must be smaller than the number of rows in the matrix.");
 		ZqElement one = ZqElement.create(1, matrix.getGroup());
-		int n = matrix.numRows();
+		final int n = matrix.numRows();
 		return IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream()
 						.limit(j + 1L)
@@ -392,7 +392,7 @@ public class HadamardArgumentService {
 	 * @return a vector of {@code size} elements with value {@code zqGroup.getQ() - 1}
 	 */
 	private GroupVector<ZqElement, ZqGroup> getMinusOnes(final int size, final ZqGroup zqGroup) {
-		BigInteger q = zqGroup.getQ();
+		final BigInteger q = zqGroup.getQ();
 
 		return Stream.generate(() -> ZqElement.create(q.subtract(BigInteger.ONE), zqGroup)).limit(size)
 				.collect(toGroupVector());

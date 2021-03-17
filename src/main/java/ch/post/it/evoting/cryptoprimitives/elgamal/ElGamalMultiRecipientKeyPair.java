@@ -58,19 +58,19 @@ public class ElGamalMultiRecipientKeyPair {
 		checkNotNull(group);
 		checkArgument(numElements > 0, "Cannot generate a ElGamalMultiRecipient key pair with %s elements.", numElements);
 
-		GqElement generator = group.getGenerator();
-		ZqGroup privateKeyGroup = ZqGroup.sameOrderAs(group);
+		final GqElement generator = group.getGenerator();
+		final ZqGroup privateKeyGroup = ZqGroup.sameOrderAs(group);
 
 		// Generate the private key as a list of random exponents
-		List<ZqElement> privateKeyElements =
+		final List<ZqElement> privateKeyElements =
 				Stream.generate(() -> randomService.genRandomExponent(privateKeyGroup.getQ()))
 						.limit(numElements)
 						.collect(Collectors.toList());
-		ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
+		final ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
 
 		// Calculate the public key from the private key previously generated
-		List<GqElement> publicKeyElements = privateKeyElements.stream().map(generator::exponentiate).collect(Collectors.toList());
-		ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(publicKeyElements);
+		final List<GqElement> publicKeyElements = privateKeyElements.stream().map(generator::exponentiate).collect(Collectors.toList());
+		final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(publicKeyElements);
 
 		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
@@ -84,14 +84,14 @@ public class ElGamalMultiRecipientKeyPair {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ElGamalMultiRecipientKeyPair that = (ElGamalMultiRecipientKeyPair) o;
+		final ElGamalMultiRecipientKeyPair that = (ElGamalMultiRecipientKeyPair) o;
 		return publicKey.equals(that.publicKey) && privateKey.equals(that.privateKey);
 	}
 

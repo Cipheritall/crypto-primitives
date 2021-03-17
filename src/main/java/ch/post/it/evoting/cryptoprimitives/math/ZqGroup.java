@@ -62,14 +62,14 @@ public class ZqGroup implements MathematicalGroup<ZqGroup> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ZqGroup zqGroup = (ZqGroup) o;
+		final ZqGroup zqGroup = (ZqGroup) o;
 		return q.equals(zqGroup.q);
 	}
 

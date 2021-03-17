@@ -82,18 +82,18 @@ public class BigIntegerOperations {
 	public static BigInteger multiModExp(final List<BigInteger> bases, final List<BigInteger> exponents, final BigInteger modulus) {
 		checkNotNull(bases);
 		checkArgument(bases.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
-		ImmutableList<BigInteger> basesCopy = ImmutableList.copyOf(bases);
+		final ImmutableList<BigInteger> basesCopy = ImmutableList.copyOf(bases);
 		checkArgument(!basesCopy.isEmpty(), "Bases must be non empty.");
 
 		checkNotNull(exponents);
 		checkArgument(exponents.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
-		ImmutableList<BigInteger> exponentsCopy = ImmutableList.copyOf(exponents);
+		final ImmutableList<BigInteger> exponentsCopy = ImmutableList.copyOf(exponents);
 
 		// The next check assures also that exponentsCopy is not empty
 		checkArgument(basesCopy.size() == exponentsCopy.size(), "Bases and exponents must have the same size");
 		checkArgument(modulus.compareTo(BigInteger.ONE) > 0, MODULUS_CHECK_MESSAGE);
 
-		int numElements = basesCopy.size();
+		final int numElements = basesCopy.size();
 
 		return IntStream.range(0, numElements)
 				.mapToObj(i -> modExponentiate(basesCopy.get(i), exponentsCopy.get(i), modulus))

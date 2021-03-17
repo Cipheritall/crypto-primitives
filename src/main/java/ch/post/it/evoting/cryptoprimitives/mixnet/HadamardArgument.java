@@ -82,14 +82,14 @@ class HadamardArgument {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		HadamardArgument that = (HadamardArgument) o;
+		final HadamardArgument that = (HadamardArgument) o;
 		return commitmentsB.equals(that.commitmentsB) && zeroArgument.equals(that.zeroArgument);
 	}
 

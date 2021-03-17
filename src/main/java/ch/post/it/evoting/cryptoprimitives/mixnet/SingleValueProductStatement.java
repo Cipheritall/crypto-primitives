@@ -42,7 +42,7 @@ class SingleValueProductStatement {
 	SingleValueProductStatement(final GqElement commitment, final ZqElement product) {
 		checkNotNull(commitment);
 		checkNotNull(product);
-		checkArgument(commitment.getGroup().getQ().equals(product.getGroup().getQ()),
+		checkArgument(commitment.getGroup().hasSameOrderAs(product.getGroup()),
 				"The group of the commitment and the group of the product must have the same order");
 		this.commitment = commitment;
 		this.product = product;
@@ -57,14 +57,14 @@ class SingleValueProductStatement {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		SingleValueProductStatement that = (SingleValueProductStatement) o;
+		final SingleValueProductStatement that = (SingleValueProductStatement) o;
 		return commitment.equals(that.commitment) &&
 				product.equals(that.product);
 	}

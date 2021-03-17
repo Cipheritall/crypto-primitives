@@ -91,18 +91,19 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	 * @param secretKey  sk, the secret key to be used for decrypting. Must be non null and not empty.
 	 * @return the decrypted plaintext message
 	 */
-	static ElGamalMultiRecipientMessage getMessage(ElGamalMultiRecipientCiphertext ciphertext, ElGamalMultiRecipientPrivateKey secretKey) {
+	static ElGamalMultiRecipientMessage getMessage(final ElGamalMultiRecipientCiphertext ciphertext,
+			final ElGamalMultiRecipientPrivateKey secretKey) {
 
 		checkNotNull(ciphertext);
 		checkNotNull(secretKey);
 		checkArgument(ciphertext.getGroup().hasSameOrderAs(secretKey.getGroup()), "Ciphertext and secret key must be of the same order");
 
-		int n = ciphertext.size();
-		int k = secretKey.size();
+		final int n = ciphertext.size();
+		final int k = secretKey.size();
 		// 0 < k is guaranteed by the checks performed during the construction of the ElGamalMultiRecipientCiphertext
 		checkArgument(n <= k, "There cannot be more message elements than private key elements.");
 
-		GqElement gamma = ciphertext.getGamma();
+		final GqElement gamma = ciphertext.getGamma();
 
 		LinkedList<GqElement> messageElements = new LinkedList<>();
 		// no key compression
@@ -151,14 +152,14 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ElGamalMultiRecipientMessage that = (ElGamalMultiRecipientMessage) o;
+		final ElGamalMultiRecipientMessage that = (ElGamalMultiRecipientMessage) o;
 		return messageElements.equals(that.messageElements);
 	}
 

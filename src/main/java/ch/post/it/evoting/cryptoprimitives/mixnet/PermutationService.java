@@ -38,10 +38,10 @@ class PermutationService {
 	 * @param size N, the strictly positive number of values being permuted.
 	 * @return a Permutation object representing an individual permutation.
 	 */
-	Permutation genPermutation(int size) {
+	Permutation genPermutation(final int size) {
 		checkArgument(size > 0);
 
-		int[] psi = IntStream.range(0, size).toArray();
+		final int[] psi = IntStream.range(0, size).toArray();
 		for (int i = 0; i < size; i++) {
 			int offset = this.randomService.genRandomInteger(BigInteger.valueOf((long) size - i)).intValueExact();
 			int tmp = psi[i];

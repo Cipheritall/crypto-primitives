@@ -97,14 +97,14 @@ class ZeroArgument {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ZeroArgument that = (ZeroArgument) o;
+		final ZeroArgument that = (ZeroArgument) o;
 		return cA0.equals(that.cA0) && cBm.equals(that.cBm) && cd.equals(that.cd) && aPrime.equals(that.aPrime) && bPrime.equals(that.bPrime)
 				&& rPrime.equals(that.rPrime) && sPrime.equals(that.sPrime) && tPrime.equals(that.tPrime);
 	}

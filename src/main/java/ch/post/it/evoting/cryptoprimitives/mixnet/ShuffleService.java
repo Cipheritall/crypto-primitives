@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +60,7 @@ public class ShuffleService {
 		//Verify ciphertext input
 		checkNotNull(ciphertexts);
 		checkArgument(ciphertexts.stream().allMatch(Objects::nonNull));
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = GroupVector.from(ciphertexts);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = GroupVector.from(ciphertexts);
 
 		if (ciphertextsCopy.isEmpty()) {
 			return Shuffle.EMPTY;
@@ -77,19 +78,19 @@ public class ShuffleService {
 		checkArgument(0 < n);
 		checkArgument(n <= k);
 		checkArgument(ciphertextsCopy.getGroup().equals(publicKey.getGroup()));
-		GqGroup group = ciphertextsCopy.getGroup();
+		final GqGroup group = ciphertextsCopy.getGroup();
 
 		//Generate shuffle
-		Permutation psi = this.permutationService.genPermutation(N);
-		ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
-		ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(group, n);
+		final Permutation psi = this.permutationService.genPermutation(N);
+		final ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
+		final ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(group, n);
 
-		ImmutableList<ZqElement> exponents =
-				Stream.generate(() -> randomService.genRandomExponent(exponentGroup.getQ())).limit(N).collect(ImmutableList.toImmutableList());
-		ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertexts =
+		final ImmutableList<ZqElement> exponents =
+				Stream.generate(() -> randomService.genRandomExponent(exponentGroup.getQ())).limit(N).collect(toImmutableList());
+		final ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertexts =
 				IntStream.range(0, N)
 						.mapToObj(i -> getCiphertext(onesMessage, exponents.get(i), publicKey).multiply(ciphertextsCopy.get(psi.get(i))))
-						.collect(ImmutableList.toImmutableList());
+						.collect(toImmutableList());
 
 		return new Shuffle(shuffledCiphertexts, psi, exponents);
 	}

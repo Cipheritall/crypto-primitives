@@ -25,7 +25,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 /**
  * Represents the result of a re-encrypting shuffle operation. It contains the re-encrypted ciphertexts, the list of exponents used for re-encryption
  * and the permutation used for shuffling.
- *
+ * <p>
  * Instances of this class are immutable.
  */
 public class Shuffle {
@@ -35,8 +35,7 @@ public class Shuffle {
 	private final Permutation permutation;
 	private final ImmutableList<ZqElement> reEncryptionExponents;
 
-	Shuffle(final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts,
-			final Permutation permutation,
+	Shuffle(final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts, final Permutation permutation,
 			final ImmutableList<ZqElement> reEncryptionExponents) {
 		this.ciphertexts = ciphertexts;
 		this.permutation = permutation;

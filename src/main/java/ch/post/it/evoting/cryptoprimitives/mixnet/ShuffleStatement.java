@@ -91,14 +91,14 @@ class ShuffleStatement {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ShuffleStatement that = (ShuffleStatement) o;
+		final ShuffleStatement that = (ShuffleStatement) o;
 		return ciphertexts.equals(that.ciphertexts) && shuffledCiphertexts.equals(that.shuffledCiphertexts);
 	}
 

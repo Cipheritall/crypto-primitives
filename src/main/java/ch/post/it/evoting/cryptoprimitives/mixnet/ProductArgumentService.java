@@ -134,14 +134,14 @@ final class ProductArgumentService {
 			final GqElement cb = getCommitment(biList, s, commitmentKey);
 
 			// Get the Hadamard argument
-			HadamardStatement hStatement = new HadamardStatement(cA, cb);
-			HadamardWitness hWitness = new HadamardWitness(A, biList, r, s);
-			HadamardArgument hadamardArgument = hadamardArgumentService.getHadamardArgument(hStatement, hWitness);
+			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
+			final HadamardWitness hWitness = new HadamardWitness(A, biList, r, s);
+			final HadamardArgument hadamardArgument = hadamardArgumentService.getHadamardArgument(hStatement, hWitness);
 
 			// Get the single value product argument
-			SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
-			SingleValueProductWitness sWitness = new SingleValueProductWitness(biList, s);
-			SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
+			final SingleValueProductWitness sWitness = new SingleValueProductWitness(biList, s);
+			final SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
 					.getSingleValueProductArgument(sStatement, sWitness);
 
 			return new ProductArgument(cb, hadamardArgument, singleValueProdArgument);
@@ -150,9 +150,9 @@ final class ProductArgumentService {
 			// In that case, we omit the Hadamard Argument and return a Single Value Product Argument only.
 
 			// Get the single value product argument
-			SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
-			SingleValueProductWitness sWitness = new SingleValueProductWitness(A.getColumn(0), r.get(0));
-			SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
+			final SingleValueProductWitness sWitness = new SingleValueProductWitness(A.getColumn(0), r.get(0));
+			final SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
 					.getSingleValueProductArgument(sStatement, sWitness);
 
 			return new ProductArgument(singleValueProdArgument);

@@ -97,12 +97,12 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @param exponent a, a {@code ZqElement}. Must be non null.
 	 * @return a ciphertext whose gamma and phis values are exponentiated with {@code exponent}.
 	 */
-	public ElGamalMultiRecipientCiphertext exponentiate(ZqElement exponent) {
+	public ElGamalMultiRecipientCiphertext exponentiate(final ZqElement exponent) {
 		checkNotNull(exponent);
 		checkArgument(this.group.hasSameOrderAs(exponent.getGroup()));
 
-		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
-		GroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
+		final GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
+		final GroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
 				.map(p -> p.exponentiate(exponent))
 				.collect(toGroupVector());
 
@@ -124,9 +124,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @param publicKey pk, the public key to use to encrypt the message. Must be non null.
 	 * @return A ciphertext containing the encrypted message.
 	 */
-	public static ElGamalMultiRecipientCiphertext getCiphertext(
-			final ElGamalMultiRecipientMessage message,
-			final ZqElement exponent,
+	public static ElGamalMultiRecipientCiphertext getCiphertext(final ElGamalMultiRecipientMessage message, final ZqElement exponent,
 			final ElGamalMultiRecipientPublicKey publicKey) {
 
 		checkNotNull(message);
@@ -138,11 +136,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		//The message is guaranteed to be non empty by the checks performed during the construction of the ElGamalMultiRecipientMessage
 		checkArgument(message.size() <= publicKey.size(), "There cannot be more message elements than public key elements.");
 
-		int n = message.size();
-		int k = publicKey.size();
+		final int n = message.size();
+		final int k = publicKey.size();
 
-		GqElement generator = publicKey.getGroup().getGenerator();
-		GqElement gamma = generator.exponentiate(exponent);
+		final GqElement generator = publicKey.getGroup().getGenerator();
+		final GqElement gamma = generator.exponentiate(exponent);
 
 		LinkedList<GqElement> phis = new LinkedList<>();
 		//No key compression
@@ -158,7 +156,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 						.mapToObj(i -> publicKey.get(i).exponentiate(exponent).multiply(message.get(i)))
 						.collect(Collectors.toCollection(LinkedList::new));
 			}
-			GqElement compressedKey =
+			final GqElement compressedKey =
 					IntStream.range(n - 1, k).mapToObj(publicKey::get)
 							.reduce(GqElement::multiply)
 							// Because of the precondition n <= k and the else condition n != k we are guaranteed to have at least two elements in the
@@ -184,7 +182,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
-		GroupVector<GqElement, GqGroup> phisVector = GroupVector.from(phis);
+		final GroupVector<GqElement, GqGroup> phisVector = GroupVector.from(phis);
+
 		checkArgument(!phisVector.isEmpty(), "An ElGamalMultiRecipientCiphertext phis must be non empty.");
 		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");
 
@@ -222,8 +221,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @return the product of the exponentiated ciphertexts.
 	 */
 	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final GroupVector<ZqElement, ZqGroup> exponents) {
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final GroupVector<ZqElement, ZqGroup> exponents) {
 
 		checkNotNull(ciphertexts);
 		checkNotNull(exponents);
@@ -233,9 +231,9 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 		checkArgument(ciphertexts.getGroup().hasSameOrderAs(exponents.getGroup()), "Ciphertexts and exponents must be of the same group.");
 
-		int numberOfPhiElements = ciphertexts.get(0).size();
+		final int numberOfPhiElements = ciphertexts.get(0).size();
 
-		ElGamalMultiRecipientCiphertext neutralElement = neutralElement(numberOfPhiElements, ciphertexts.getGroup());
+		final ElGamalMultiRecipientCiphertext neutralElement = neutralElement(numberOfPhiElements, ciphertexts.getGroup());
 
 		return IntStream
 				.range(0, exponents.size())
@@ -279,7 +277,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @return the ith phi element.
 	 */
 	@Override
-	public GqElement get(int i) {
+	public GqElement get(final int i) {
 		return phis.get(i);
 	}
 
@@ -305,7 +303,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -325,7 +323,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 	@Override
 	public String toString() {
-		List<String> simplePhis = phis.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
+		final List<String> simplePhis = phis.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
 		return "ElGamalMultiRecipientCiphertext{" + "gamma=" + gamma + ", phis=" + simplePhis + '}';
 	}
 

@@ -51,7 +51,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	private final G group;
 	private final int elementSize;
 
-	private GroupVector(ImmutableList<E> elements) {
+	private GroupVector(final ImmutableList<E> elements) {
 		this.elements = elements;
 		this.group = elements.isEmpty() ? null : elements.get(0).getGroup();
 		this.elementSize = elements.isEmpty() ? 0 : elements.get(0).size();
@@ -66,13 +66,13 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	 *                 <li>all elements must be from the same {@link MathematicalGroup} </li>
 	 *                 <li>all elements must be of the same size</li>
 	 */
-	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupVector<E, G> from(List<E> elements) {
+	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupVector<E, G> from(final List<E> elements) {
 		//Check null values
 		checkNotNull(elements);
 		checkArgument(elements.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
 
 		//Immutable copy
-		ImmutableList<E> elementsCopy = ImmutableList.copyOf(elements);
+		final ImmutableList<E> elementsCopy = ImmutableList.copyOf(elements);
 
 		//Check same group
 		checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::getGroup), "All elements must belong to the same group.");
@@ -165,7 +165,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * @param property to check all elements against.
 	 * @return true if the vector is empty or all elements are equal under this property. False otherwise.
 	 */
-	public boolean allEqual(Function<? super E, ?> property) {
+	public boolean allEqual(final Function<? super E, ?> property) {
 		return Validations.allEqual(this.elements.stream(), property);
 	}
 
@@ -210,14 +210,14 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		GroupVector<?, ?> that = (GroupVector<?, ?>) o;
+		final GroupVector<?, ?> that = (GroupVector<?, ?>) o;
 		return elements.equals(that.elements);
 	}
 

@@ -111,14 +111,14 @@ final class MultiExponentiationStatement {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		MultiExponentiationStatement that = (MultiExponentiationStatement) o;
+		final MultiExponentiationStatement that = (MultiExponentiationStatement) o;
 		return CMatrix.equals(that.CMatrix) && C.equals(that.C) && cA.equals(that.cA);
 	}
 

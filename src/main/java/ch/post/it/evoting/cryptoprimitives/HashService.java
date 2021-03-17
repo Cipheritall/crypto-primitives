@@ -62,24 +62,24 @@ public class HashService {
 		checkArgument(values.length != 0, "Cannot hash no values.");
 
 		if (values.length > 1) {
-			HashableList valuesList = HashableList.from(ImmutableList.copyOf(values));
+			final HashableList valuesList = HashableList.from(ImmutableList.copyOf(values));
 			return recursiveHash(valuesList);
 		} else {
-			Hashable value = values[0];
+			final Hashable value = values[0];
 
 			if (value instanceof HashableByteArray) {
-				byte[] byteArrayValue = ((HashableByteArray) value).toHashableForm();
+				final byte[] byteArrayValue = ((HashableByteArray) value).toHashableForm();
 				return this.hashFunction.apply(byteArrayValue);
 			} else if (value instanceof HashableString) {
-				String stringValue = ((HashableString) value).toHashableForm();
+				final String stringValue = ((HashableString) value).toHashableForm();
 				return this.hashFunction.apply(ConversionService.stringToByteArray(stringValue));
 			} else if (value instanceof HashableBigInteger) {
-				BigInteger bigIntegerValue = ((HashableBigInteger) value).toHashableForm();
+				final BigInteger bigIntegerValue = ((HashableBigInteger) value).toHashableForm();
 				checkArgument(bigIntegerValue.compareTo(BigInteger.ZERO) >= 0);
 				return this.hashFunction.apply(integerToByteArray(bigIntegerValue));
 			} else if (value instanceof HashableList) {
-				HashableList list = (HashableList) value;
-				List<? extends Hashable> listOfHashables = list.toHashableForm();
+				final HashableList list = (HashableList) value;
+				final List<? extends Hashable> listOfHashables = list.toHashableForm();
 
 				checkArgument(!listOfHashables.isEmpty(), "Cannot hash an empty list.");
 
@@ -88,11 +88,11 @@ public class HashService {
 				}
 
 				//Compute hashes of list elements
-				List<byte[]> subHashes = listOfHashables.stream().map(this::recursiveHash).collect(Collectors.toList());
-				int totalSize = subHashes.size() * subHashes.get(0).length;
+				final List<byte[]> subHashes = listOfHashables.stream().map(this::recursiveHash).collect(Collectors.toList());
+				final int totalSize = subHashes.size() * subHashes.get(0).length;
 
 				//Concatenate hashes of list elements
-				byte[] concatenatedSubHashes = new byte[totalSize];
+				final byte[] concatenatedSubHashes = new byte[totalSize];
 				int offset = 0;
 				for (byte[] subHash : subHashes) {
 					System.arraycopy(subHash, 0, concatenatedSubHashes, offset, subHash.length);

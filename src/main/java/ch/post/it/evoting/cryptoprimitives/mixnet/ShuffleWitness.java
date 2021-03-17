@@ -62,14 +62,14 @@ class ShuffleWitness {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ShuffleWitness that = (ShuffleWitness) o;
+		final ShuffleWitness that = (ShuffleWitness) o;
 		return permutation.equals(that.permutation) && randomness.equals(that.randomness);
 	}
 

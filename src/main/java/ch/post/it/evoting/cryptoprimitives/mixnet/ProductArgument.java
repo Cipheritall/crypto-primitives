@@ -112,14 +112,14 @@ class ProductArgument {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ProductArgument that = (ProductArgument) o;
+		final ProductArgument that = (ProductArgument) o;
 		return Objects.equals(commitmentB, that.commitmentB) && Objects.equals(hadamardArgument, that.hadamardArgument)
 				&& singleValueProductArgument.equals(that.singleValueProductArgument);
 	}

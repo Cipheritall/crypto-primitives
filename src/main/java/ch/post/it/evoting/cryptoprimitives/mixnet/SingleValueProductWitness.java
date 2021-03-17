@@ -58,14 +58,14 @@ class SingleValueProductWitness {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		SingleValueProductWitness that = (SingleValueProductWitness) o;
+		final SingleValueProductWitness that = (SingleValueProductWitness) o;
 		return elements.equals(that.elements) &&
 				randomness.equals(that.randomness);
 	}

@@ -79,7 +79,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 		checkNotNull(other);
 		checkArgument(this.group.equals(other.group));
 
-		BigInteger result = this.value.add(other.value).mod(this.group.getQ());
+		final BigInteger result = this.value.add(other.value).mod(this.group.getQ());
 		return new ZqElement(result, this.group);
 	}
 
@@ -93,7 +93,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 		checkNotNull(other);
 		checkArgument(this.group.equals(other.group));
 
-		BigInteger result = this.value.subtract(other.value).mod(this.group.getQ());
+		final BigInteger result = this.value.subtract(other.value).mod(this.group.getQ());
 		return new ZqElement(result, this.group);
 	}
 
@@ -107,7 +107,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 		checkNotNull(other);
 		checkArgument(this.group.equals(other.group));
 
-		BigInteger result = BigIntegerOperations.modMultiply(value, other.getValue(), this.group.getQ());
+		final BigInteger result = BigIntegerOperations.modMultiply(value, other.getValue(), this.group.getQ());
 		return new ZqElement(result, this.group);
 	}
 

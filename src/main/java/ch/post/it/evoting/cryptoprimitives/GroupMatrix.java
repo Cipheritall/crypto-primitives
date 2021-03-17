@@ -83,7 +83,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 *             <li>all elements must be the same size</li>
 	 */
 	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupMatrix<E, G> fromRows(List<L> rows) {
+	GroupMatrix<E, G> fromRows(final List<L> rows) {
 		//Null checks
 		checkNotNull(rows);
 		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
@@ -108,7 +108,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 *                <li>all elements must be the same size</li>
 	 */
 	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupMatrix<E, G> fromColumns(List<L> columns) {
+	GroupMatrix<E, G> fromColumns(final List<L> columns) {
 		return fromRows(columns).transpose();
 	}
 
@@ -144,7 +144,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 		return isEmpty(this.rows);
 	}
 
-	private boolean isEmpty(ImmutableList<GroupVector<E, G>> matrix) {
+	private boolean isEmpty(final ImmutableList<GroupVector<E, G>> matrix) {
 		return matrix.isEmpty() || matrix.get(0).isEmpty();
 	}
 
@@ -155,7 +155,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * @param column the index of the column, 0 indexed.
 	 * @return the specified element of the matrix.
 	 */
-	public E get(int row, int column) {
+	public E get(final int row, final int column) {
 		checkArgument(row >= 0, "The index of a row cannot be negative.");
 		checkArgument(row < numRows, "The index of a row cannot be larger than the number of rows of the matrix.");
 		checkArgument(column >= 0, "The index of a column cannot be negative.");
@@ -166,7 +166,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	/**
 	 * @return the ith row. i must be within bounds.
 	 */
-	public GroupVector<E, G> getRow(int i) {
+	public GroupVector<E, G> getRow(final int i) {
 		checkArgument(i >= 0, OUT_OF_BOUNDS_MESSAGE);
 		checkArgument(i < this.numRows, OUT_OF_BOUNDS_MESSAGE);
 		return this.rows.get(i);
@@ -175,7 +175,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	/**
 	 * @return the jth row. j must be within bounds.
 	 */
-	public GroupVector<E, G> getColumn(int j) {
+	public GroupVector<E, G> getColumn(final int j) {
 		checkArgument(j >= 0, OUT_OF_BOUNDS_MESSAGE);
 		checkArgument(j < this.numColumns, OUT_OF_BOUNDS_MESSAGE);
 		return this.rows.stream().map(row -> row.get(j)).collect(toGroupVector());
@@ -263,14 +263,14 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		GroupMatrix<?, ?> that = (GroupMatrix<?, ?>) o;
+		final GroupMatrix<?, ?> that = (GroupMatrix<?, ?>) o;
 		return rows.equals(that.rows);
 	}
 

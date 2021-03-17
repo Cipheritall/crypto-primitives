@@ -447,8 +447,7 @@ class ShuffleArgumentService {
 	 * Computes the entry-wise sum of matrices {@code first} and {@code second}. The matrices must have the same dimensions and belong to the same
 	 * ZqGroup.
 	 */
-	private GroupMatrix<ZqElement, ZqGroup> matrixSum(final GroupMatrix<ZqElement, ZqGroup> first,
-			final GroupMatrix<ZqElement, ZqGroup> second) {
+	private GroupMatrix<ZqElement, ZqGroup> matrixSum(final GroupMatrix<ZqElement, ZqGroup> first, final GroupMatrix<ZqElement, ZqGroup> second) {
 
 		checkNotNull(first);
 		checkNotNull(second);

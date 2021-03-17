@@ -78,7 +78,7 @@ public class RandomService {
 		checkArgument(upperbound.compareTo(lowerBound) > 0,
 				"Upper bound %s must be greater than the lower bound %s.", upperbound, lowerBound);
 
-		BigInteger r = genRandomInteger(upperbound.subtract(lowerBound));
+		final BigInteger r = genRandomInteger(upperbound.subtract(lowerBound));
 		return lowerBound.add(r);
 	}
 

@@ -105,7 +105,7 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	}
 
 	@Override
-	public GqElement get(int i) {
+	public GqElement get(final int i) {
 		return this.publicKeyElements.get(i);
 	}
 
@@ -115,14 +115,14 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ElGamalMultiRecipientPublicKey publicKey = (ElGamalMultiRecipientPublicKey) o;
+		final ElGamalMultiRecipientPublicKey publicKey = (ElGamalMultiRecipientPublicKey) o;
 		return publicKeyElements.equals(publicKey.publicKeyElements);
 	}
 

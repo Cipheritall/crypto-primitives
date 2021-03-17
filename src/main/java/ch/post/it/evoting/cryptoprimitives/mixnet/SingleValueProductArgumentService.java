@@ -84,79 +84,79 @@ class SingleValueProductArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
-		GqElement ca = statement.getCommitment();
-		ZqElement b = statement.getProduct();
-		GroupVector<ZqElement, ZqGroup> a = witness.getElements();
-		ZqElement r = witness.getRandomness();
+		final GqElement ca = statement.getCommitment();
+		final ZqElement b = statement.getProduct();
+		final GroupVector<ZqElement, ZqGroup> a = witness.getElements();
+		final ZqElement r = witness.getRandomness();
 
 		// Check groups
 		checkArgument(ca.getGroup().equals(commitmentKey.getGroup()),
 				"The statement's groups must have the same order as the commitment key's group.");
-		checkArgument(a.getGroup().getQ().equals(commitmentKey.getGroup().getQ()),
+		checkArgument(a.getGroup().hasSameOrderAs(commitmentKey.getGroup()),
 				"The witness' group must have the same order as the commitment key's group.");
 
 		// Ensure that the statement corresponds to the witness
-		int n = a.size();
+		final int n = a.size();
 		checkArgument(n >= 2, "The size n of the witness must be at least 2.");
 		checkArgument(ca.equals(getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
-		ZqGroup group = b.getGroup();
-		ZqElement one = ZqElement.create(1, group); // Identity for multiplication
+		final ZqGroup group = b.getGroup();
+		final ZqElement one = ZqElement.create(1, group); // Identity for multiplication
 		checkArgument(b.equals(a.stream().reduce(one, ZqElement::multiply)),
 				"The product of the provided elements does not give the provided product.");
 
 		// Start of the algorithm
-		BigInteger q = group.getQ();
+		final BigInteger q = group.getQ();
 
 		// Calculate b_0, ..., b_(n-1)
-		List<ZqElement> bList = IntStream.range(0, n)
+		final List<ZqElement> bList = IntStream.range(0, n)
 				.mapToObj(k -> a.stream().limit(k + 1L).reduce(one, ZqElement::multiply))
 				.collect(Collectors.toList());
 
 		// Calculate d and r_d
-		GroupVector<ZqElement, ZqGroup> d = randomService.genRandomVector(q, n);
-		ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
+		final GroupVector<ZqElement, ZqGroup> d = randomService.genRandomVector(q, n);
+		final ZqElement rd = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ
-		List<ZqElement> lowerDeltaElements = new ArrayList<>(n);
+		final List<ZqElement> lowerDeltaElements = new ArrayList<>(n);
 		lowerDeltaElements.add(0, d.get(0));
 		if (n > 2) {
 			lowerDeltaElements.addAll(1, randomService.genRandomVector(q, n - 2));
 		}
 		lowerDeltaElements.add(n - 1, group.getIdentity());
-		ImmutableList<ZqElement> lowerDelta = ImmutableList.copyOf(lowerDeltaElements);
+		final ImmutableList<ZqElement> lowerDelta = ImmutableList.copyOf(lowerDeltaElements);
 
 		// Calculate s_0 and s_x
-		ZqElement s0 = ZqElement.create(randomService.genRandomInteger(q), group);
-		ZqElement sx = ZqElement.create(randomService.genRandomInteger(q), group);
+		final ZqElement s0 = ZqElement.create(randomService.genRandomInteger(q), group);
+		final ZqElement sx = ZqElement.create(randomService.genRandomInteger(q), group);
 
 		// Calculate δ' and Δ
-		GroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
+		final GroupVector<ZqElement, ZqGroup> lowerDeltaPrime = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k).negate().multiply(d.get(k + 1)))
 				.collect(toGroupVector());
-		GroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
+		final GroupVector<ZqElement, ZqGroup> upperDelta = IntStream.range(0, n - 1)
 				.mapToObj(k -> lowerDelta.get(k + 1)
 						.add(a.get(k + 1).negate().multiply(lowerDelta.get(k)))
 						.add(bList.get(k).negate().multiply(d.get(k + 1))))
 				.collect(toGroupVector());
 
 		// Calculate c_d, c_δ and c_Δ
-		GqElement cd = getCommitment(d, rd, commitmentKey);
-		GqElement cLowerDelta = getCommitment(lowerDeltaPrime, s0, commitmentKey);
-		GqElement cUpperDelta = getCommitment(upperDelta, sx, commitmentKey);
+		final GqElement cd = getCommitment(d, rd, commitmentKey);
+		final GqElement cLowerDelta = getCommitment(lowerDeltaPrime, s0, commitmentKey);
+		final GqElement cUpperDelta = getCommitment(upperDelta, sx, commitmentKey);
 
 		// Calculate x
-		ZqElement x = hashAndConvertX(cUpperDelta, cLowerDelta, cd, b, ca);
+		final ZqElement x = hashAndConvertX(cUpperDelta, cLowerDelta, cd, b, ca);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
-		GroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
+		final GroupVector<ZqElement, ZqGroup> aTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(a.get(k)).add(d.get(k)))
 				.collect(toGroupVector());
-		GroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
+		final GroupVector<ZqElement, ZqGroup> bTilde = IntStream.range(0, n)
 				.mapToObj(k -> x.multiply(bList.get(k)).add(lowerDelta.get(k)))
 				.collect(toGroupVector());
-		ZqElement rTilde = x.multiply(r).add(rd);
-		ZqElement sTilde = x.multiply(sx).add(s0);
+		final ZqElement rTilde = x.multiply(r).add(rd);
+		final ZqElement sTilde = x.multiply(sx).add(s0);
 
 		return new SingleValueProductArgument.Builder()
 				.withCd(cd)
@@ -237,13 +237,14 @@ class SingleValueProductArgumentService {
 		return verifA.getAsBoolean() && verifDelta.getAsBoolean() && verifB.getAsBoolean();
 	}
 
-	private ZqElement hashAndConvertX(GqElement cUpperDelta, GqElement cLowerDelta, GqElement cd, ZqElement b, GqElement ca) {
-		GqGroup gqGroup = ca.getGroup();
-		ZqGroup zqGroup = b.getGroup();
-		BigInteger p = gqGroup.getP();
-		BigInteger q = gqGroup.getQ();
+	private ZqElement hashAndConvertX(final GqElement cUpperDelta, final GqElement cLowerDelta, final GqElement cd, final ZqElement b,
+			final GqElement ca) {
+		final GqGroup gqGroup = ca.getGroup();
+		final ZqGroup zqGroup = b.getGroup();
+		final BigInteger p = gqGroup.getP();
+		final BigInteger q = gqGroup.getQ();
 
-		byte[] hash = hashService.recursiveHash(
+		final byte[] hash = hashService.recursiveHash(
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
 				publicKey,

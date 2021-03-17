@@ -32,7 +32,7 @@ public interface MathematicalGroup<G extends MathematicalGroup<G>> {
 	 * @param value group element to check.
 	 * @return true if the value is a member of the group and false otherwise.
 	 */
-	boolean isGroupMember(BigInteger value);
+	boolean isGroupMember(final BigInteger value);
 
 	/**
 	 * Returns the identity element of the group.
@@ -54,7 +54,7 @@ public interface MathematicalGroup<G extends MathematicalGroup<G>> {
 	 * @param other mathematical group
 	 * @return true if both mathematical groups are of the same order, false otherwise.
 	 */
-	default boolean hasSameOrderAs(MathematicalGroup<?> other) {
+	default boolean hasSameOrderAs(final MathematicalGroup<?> other) {
 		return this.getQ().equals(other.getQ());
 	}
 }

@@ -51,7 +51,7 @@ class ZeroWitness {
 	 * @param exponentsS s, a vector of {@link ZqElement}s.
 	 */
 	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> matrixA, final GroupMatrix<ZqElement, ZqGroup> matrixB,
-			final GroupVector<ZqElement, ZqGroup> exponentsR, GroupVector<ZqElement, ZqGroup> exponentsS) {
+			final GroupVector<ZqElement, ZqGroup> exponentsR, final GroupVector<ZqElement, ZqGroup> exponentsS) {
 
 		// Null checking.
 		this.matrixA = checkNotNull(matrixA);
@@ -92,14 +92,14 @@ class ZeroWitness {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ZeroWitness that = (ZeroWitness) o;
+		final ZeroWitness that = (ZeroWitness) o;
 		return matrixA.equals(that.matrixA) && matrixB.equals(that.matrixB) && exponentsR.equals(that.exponentsR) && exponentsS
 				.equals(that.exponentsS);
 	}

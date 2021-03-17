@@ -103,7 +103,7 @@ public class MultiExponentiationArgument {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -111,7 +111,7 @@ public class MultiExponentiationArgument {
 			return false;
 		}
 
-		MultiExponentiationArgument that = (MultiExponentiationArgument) o;
+		final MultiExponentiationArgument that = (MultiExponentiationArgument) o;
 		return cA0.equals(that.cA0) && cBVector.equals(that.cBVector) && EVector.equals(that.EVector) && aVector.equals(that.aVector)
 				&& r.equals(that.r) && b.equals(that.b) && s.equals(that.s) && tau.equals(that.tau);
 	}

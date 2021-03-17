@@ -315,72 +315,72 @@ final class ZeroArgumentService {
 		checkArgument(statement.getCommitmentsA().getGroup().equals(argument.getCd().getGroup()),
 				"Statement and argument do not share the same group");
 
-		GroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
-		GroupVector<GqElement, GqGroup> cd = argument.getCd();
-		GroupVector<GqElement, GqGroup> cB = statement.getCommitmentsB();
+		final GroupVector<GqElement, GqGroup> cA = statement.getCommitmentsA();
+		final GroupVector<GqElement, GqGroup> cd = argument.getCd();
+		final GroupVector<GqElement, GqGroup> cB = statement.getCommitmentsB();
 
-		int m = cA.size();
+		final int m = cA.size();
 		checkArgument((cd.size() - 2 * m) == 1, "The m of the statement should be equal to the m of the argument (2m+1)");
 
-		ZqElement x = hashAndConvertX(statement, argument);
+		final ZqElement x = hashAndConvertX(statement, argument);
 
-		boolean verifCd = BigInteger.ONE.equals(cd.get(m + 1).getValue());
+		final boolean verifCd = BigInteger.ONE.equals(cd.get(m + 1).getValue());
 
 		if (!verifCd) {
 			log.error("cd.get(m + 1).getValue() {} should equal BigInteger.ONE", cd.get(m + 1).getValue());
 			return false;
 		}
 
-		List<ZqElement> exponentiatedXs = IntStream.range(0, (2 * m) + 1)
+		final List<ZqElement> exponentiatedXs = IntStream.range(0, (2 * m) + 1)
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
 				.collect(Collectors.toList());
 
-		GqElement identity = cA.getGroup().getIdentity();
+		final GqElement identity = cA.getGroup().getIdentity();
 
-		GroupVector<GqElement, GqGroup> augmentedCA = cA.prepend(argument.getCA0());
+		final GroupVector<GqElement, GqGroup> augmentedCA = cA.prepend(argument.getCA0());
 
-		GqElement prodCa = IntStream.range(0, m + 1)
+		final GqElement prodCa = IntStream.range(0, m + 1)
 				.mapToObj(i -> augmentedCA.get(i).exponentiate(exponentiatedXs.get(i)))
 				.reduce(identity, GqElement::multiply);
 
-		GroupVector<ZqElement, ZqGroup> aPrime = argument.getAPrime();
-		ZqElement rPrime = argument.getRPrime();
+		final GroupVector<ZqElement, ZqGroup> aPrime = argument.getAPrime();
+		final ZqElement rPrime = argument.getRPrime();
 
-		GqElement commA = getCommitment(aPrime, rPrime, commitmentKey);
-		boolean verifA = prodCa.equals(commA);
+		final GqElement commA = getCommitment(aPrime, rPrime, commitmentKey);
+		final boolean verifA = prodCa.equals(commA);
 
 		if (!verifA) {
 			log.error("commA {} and prodCa {} are not equal ", commA, prodCa);
 			return false;
 		}
 
-		GroupVector<GqElement, GqGroup> augmentedCB = cB.append(argument.getCBm());
+		final GroupVector<GqElement, GqGroup> augmentedCB = cB.append(argument.getCBm());
 
-		GqElement prodCb = IntStream.range(0, m + 1)
+		final GqElement prodCb = IntStream.range(0, m + 1)
 				.mapToObj(i -> augmentedCB.get(m - i).exponentiate(exponentiatedXs.get(i)))
 				.reduce(identity, GqElement::multiply);
 
-		GroupVector<ZqElement, ZqGroup> bPrime = argument.getBPrime();
-		ZqElement sPrime = argument.getSPrime();
+		final GroupVector<ZqElement, ZqGroup> bPrime = argument.getBPrime();
+		final ZqElement sPrime = argument.getSPrime();
 
-		GqElement commB = getCommitment(bPrime, sPrime, commitmentKey);
-		boolean verifB = prodCb.equals(commB);
+		final GqElement commB = getCommitment(bPrime, sPrime, commitmentKey);
+		final boolean verifB = prodCb.equals(commB);
 
 		if (!verifB) {
 			log.error("prodCb {} and commB {} are not equal ", prodCb, commB);
 			return false;
 		}
 
-		GqElement prodCd = IntStream.range(0, (2 * m) + 1)
+		final GqElement prodCd = IntStream.range(0, (2 * m) + 1)
 				.mapToObj(i -> cd.get(i).exponentiate(exponentiatedXs.get(i)))
 				.reduce(identity, GqElement::multiply);
 
-		GroupVector<ZqElement, ZqGroup> prod = GroupVector.of(starMap(aPrime, bPrime, statement.getY()));
+		final GroupVector<ZqElement, ZqGroup> prod = GroupVector.of(starMap(aPrime, bPrime, statement.getY()));
 
-		ZqElement tPrime = argument.getTPrime();
-		GqElement commD = getCommitment(prod, tPrime, commitmentKey);
+		final ZqElement tPrime = argument.getTPrime();
+		final GqElement commD = getCommitment(prod, tPrime, commitmentKey);
 
-		boolean verifD = prodCd.equals(commD);
+		final boolean verifD = prodCd.equals(commD);
 
 		if (!verifD) {
 			log.error("prodCd {} and commD {} are not equal ", prodCd, commD);
@@ -391,27 +391,26 @@ final class ZeroArgumentService {
 
 	}
 
-	private ZqElement hashAndConvertX(ZeroStatement zeroStatement, ZeroArgument zeroArgument) {
-		GroupVector<GqElement, GqGroup> cA = zeroStatement.getCommitmentsA();
-		GroupVector<GqElement, GqGroup> cB = zeroStatement.getCommitmentsB();
-		GqGroup group = cA.getGroup();
+	private ZqElement hashAndConvertX(final ZeroStatement zeroStatement, final ZeroArgument zeroArgument) {
+		final GroupVector<GqElement, GqGroup> cA = zeroStatement.getCommitmentsA();
+		final GroupVector<GqElement, GqGroup> cB = zeroStatement.getCommitmentsB();
+		final GqGroup group = cA.getGroup();
 
-		GqElement cA0 = zeroArgument.getCA0();
-		GqElement cBm = zeroArgument.getCBm();
+		final GqElement cA0 = zeroArgument.getCA0();
+		final GqElement cBm = zeroArgument.getCBm();
 
-		GroupVector<GqElement, GqGroup> cd = zeroArgument.getCd();
+		final GroupVector<GqElement, GqGroup> cd = zeroArgument.getCd();
 
 		final byte[] hash = getHash(cA, cB, cA0, cBm, cd);
 		return ZqElement.create(ConversionService.byteArrayToInteger(hash), ZqGroup.sameOrderAs(group));
 	}
 
-	private byte[] getHash(GroupVector<GqElement, GqGroup> commitmentsA,
-			GroupVector<GqElement, GqGroup> commitmentsB, GqElement cA0,
-			GqElement cBm, GroupVector<GqElement, GqGroup> cd) {
+	private byte[] getHash(final GroupVector<GqElement, GqGroup> commitmentsA, final GroupVector<GqElement, GqGroup> commitmentsB,
+			final GqElement cA0, final GqElement cBm, final GroupVector<GqElement, GqGroup> cd) {
 
 		final GqGroup gqGroup = commitmentsA.get(0).getGroup();
-		BigInteger p = gqGroup.getP();
-		BigInteger q = gqGroup.getQ();
+		final BigInteger p = gqGroup.getP();
+		final BigInteger q = gqGroup.getQ();
 
 		return hashService.recursiveHash(
 				HashableBigInteger.from(p),

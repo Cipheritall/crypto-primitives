@@ -61,8 +61,7 @@ class ZeroStatement {
 		if (!commitmentsA.isEmpty()) {
 			final GqGroup group = this.commitmentsA.getGroup();
 			checkArgument(group.equals(this.commitmentsB.getGroup()), "The two commitments must be part of the same group.");
-			checkArgument(group.getQ().equals(this.y.getGroup().getQ()),
-					"The y value group must be of the same order as the group of the commitments.");
+			checkArgument(group.hasSameOrderAs(this.y.getGroup()), "The y value group must be of the same order as the group of the commitments.");
 		}
 
 	}
@@ -80,14 +79,14 @@ class ZeroStatement {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ZeroStatement that = (ZeroStatement) o;
+		final ZeroStatement that = (ZeroStatement) o;
 		return commitmentsA.equals(that.commitmentsA) && commitmentsB.equals(that.commitmentsB) && y.equals(that.y);
 	}
 

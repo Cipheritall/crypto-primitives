@@ -31,6 +31,6 @@ public interface Mixnet {
 	 * @return the Bayer-Groth shuffle proof and the shuffled ciphertexts as {@link VerifiableShuffle}
 	 */
 
-	VerifiableShuffle genVerifiableShuffle(List<ElGamalMultiRecipientCiphertext> inputCiphertexts, ElGamalMultiRecipientPublicKey mixingPublicKey)
-			throws NoSuchAlgorithmException;
+	VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
+			final ElGamalMultiRecipientPublicKey mixingPublicKey) throws NoSuchAlgorithmException;
 }

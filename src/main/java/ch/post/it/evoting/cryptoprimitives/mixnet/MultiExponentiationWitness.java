@@ -104,14 +104,14 @@ final class MultiExponentiationWitness {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		MultiExponentiationWitness that = (MultiExponentiationWitness) o;
+		final MultiExponentiationWitness that = (MultiExponentiationWitness) o;
 		return A.equals(that.A) && r.equals(that.r) && rho.equals(that.rho);
 	}
 

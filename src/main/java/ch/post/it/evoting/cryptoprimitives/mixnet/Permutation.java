@@ -69,14 +69,14 @@ class Permutation {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		Permutation that = (Permutation) o;
+		final Permutation that = (Permutation) o;
 		return Arrays.equals(valueMapping, that.valueMapping);
 	}
 

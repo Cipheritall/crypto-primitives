@@ -37,7 +37,7 @@ interface ElGamalMultiRecipientObject<E extends GroupElement<G>, G extends Mathe
 	/**
 	 * @return the ith element of this actor.
 	 */
-	E get(int i);
+	E get(final int i);
 
 	/**
 	 * @return an ordered stream of this object's elements.

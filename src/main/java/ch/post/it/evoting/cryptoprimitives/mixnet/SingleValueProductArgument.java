@@ -87,14 +87,14 @@ class SingleValueProductArgument {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		SingleValueProductArgument that = (SingleValueProductArgument) o;
+		final SingleValueProductArgument that = (SingleValueProductArgument) o;
 		return cd.equals(that.cd) &&
 				cLowerDelta.equals(that.cLowerDelta) &&
 				cUpperDelta.equals(that.cUpperDelta) &&

@@ -42,14 +42,14 @@ public final class MixnetService implements Mixnet {
 	public MixnetService() throws NoSuchAlgorithmException {
 		hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		randomService = new RandomService();
-		PermutationService permutationService = new PermutationService(randomService);
+		final PermutationService permutationService = new PermutationService(randomService);
 		shuffleService = new ShuffleService(randomService, permutationService);
 	}
 
 	MixnetService(final HashService hashService) {
 		this.hashService = hashService;
 		randomService = new RandomService();
-		PermutationService permutationService = new PermutationService(randomService);
+		final PermutationService permutationService = new PermutationService(randomService);
 		shuffleService = new ShuffleService(randomService, permutationService);
 	}
 
@@ -57,40 +57,41 @@ public final class MixnetService implements Mixnet {
 	public VerifiableShuffle genVerifiableShuffle(List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
 			ElGamalMultiRecipientPublicKey publicKey) throws NoSuchAlgorithmException {
 		checkNotNull(inputCiphertexts);
+		final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts = ImmutableList.copyOf(inputCiphertexts);
 		checkNotNull(publicKey);
 
-		int N = inputCiphertexts.size();
+		final int N = ciphertexts.size();
 
 		checkArgument(N >= 2, "N must be >= 2");
 
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(inputCiphertexts);
-		GqGroup gqGroup = publicKey.getGroup();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
+		final GqGroup gqGroup = publicKey.getGroup();
 		checkArgument(gqGroup.equals(C.getGroup()), "InputCiphertextList must have the same group as publicKey");
 
-		checkArgument(inputCiphertexts.get(0).size() <= publicKey.size(), "The ciphertext must not contain more elements than the publicKey");
+		checkArgument(ciphertexts.get(0).size() <= publicKey.size(), "The ciphertext must not contain more elements than the publicKey");
 
-		Shuffle shuffle = shuffleService.genShuffle(inputCiphertexts, publicKey);
+		final Shuffle shuffle = shuffleService.genShuffle(ciphertexts, publicKey);
 
 		@SuppressWarnings("squid:S00117")
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> CPrime = GroupVector.from(shuffle.getCiphertexts());
-		Permutation phi = shuffle.getPermutation();
-		ImmutableList<ZqElement> reEncryptionExponents = shuffle.getReEncryptionExponents();
-		GroupVector<ZqElement, ZqGroup> r = GroupVector.from(reEncryptionExponents);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> CPrime = GroupVector.from(shuffle.getCiphertexts());
+		final Permutation phi = shuffle.getPermutation();
+		final ImmutableList<ZqElement> reEncryptionExponents = shuffle.getReEncryptionExponents();
+		final GroupVector<ZqElement, ZqGroup> r = GroupVector.from(reEncryptionExponents);
 
-		int[] matrixDimensions = MatrixUtils.getMatrixDimensions(N);
-		int m = matrixDimensions[0];
-		int n = matrixDimensions[1];
+		final int[] matrixDimensions = MatrixUtils.getMatrixDimensions(N);
+		final int m = matrixDimensions[0];
+		final int n = matrixDimensions[1];
 
-		CommitmentKey ck = CommitmentKey.getVerifiableCommitmentKey(n, gqGroup);
+		final CommitmentKey ck = CommitmentKey.getVerifiableCommitmentKey(n, gqGroup);
 
-		ShuffleStatement shuffleStatement = new ShuffleStatement(C, CPrime);
+		final ShuffleStatement shuffleStatement = new ShuffleStatement(C, CPrime);
 
-		ShuffleWitness shuffleWitness = new ShuffleWitness(phi, r);
+		final ShuffleWitness shuffleWitness = new ShuffleWitness(phi, r);
 
 		//shuffleArgument
-		MixnetHashService mixnetHashService = new MixnetHashService(this.hashService, gqGroup.getQ().bitLength());
-		ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, mixnetHashService);
-		ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
+		final MixnetHashService mixnetHashService = new MixnetHashService(this.hashService, gqGroup.getQ().bitLength());
+		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, mixnetHashService);
+		final ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
 
 		return new VerifiableShuffle(shuffle.getCiphertexts(), shuffleArgument);
 	}

@@ -54,8 +54,8 @@ public final class ConversionService {
 		// BigInteger#toByteArray gives back a 2s complement representation of the value. Given that we work only with positive BigIntegers, this
 		// representation is equivalent to the binary representation, except for a potential extra leading zero byte. (The presence or not of the
 		// leading zero depends on the number of bits needed to represent this value).
-		byte[] twosComplement = x.toByteArray();
-		byte[] result;
+		final byte[] twosComplement = x.toByteArray();
+		final byte[] result;
 		if (twosComplement[0] == 0 && twosComplement.length > 1) {
 			result = new byte[twosComplement.length - 1];
 			System.arraycopy(twosComplement, 1, result, 0, twosComplement.length - 1);
@@ -83,10 +83,10 @@ public final class ConversionService {
 			return new byte[1];
 		}
 
-		int bitLength = x.bitLength();
-		int n = (bitLength + Byte.SIZE - 1) / Byte.SIZE;
+		final int bitLength = x.bitLength();
+		final int n = (bitLength + Byte.SIZE - 1) / Byte.SIZE;
 
-		byte[] output = new byte[n];
+		final byte[] output = new byte[n];
 		BigInteger current = x;
 		for (int i = 1; i <= n; i++) {
 			output[n - i] = current.byteValue();
@@ -99,8 +99,8 @@ public final class ConversionService {
 	/**
 	 * Converts a byte array to its BigInteger equivalent.
 	 * <p>
-	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation,
-	 * which is equivalent to the specification of ByteArrayToInteger.
+	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation, which is equivalent to the specification of
+	 * ByteArrayToInteger.
 	 *
 	 * @param bytes B, the byte array to convert.
 	 * @return a BigInteger corresponding to the provided byte array representation.

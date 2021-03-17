@@ -77,7 +77,7 @@ class CommitmentKey implements HashableList {
 		//Validate gElements
 		checkNotNull(gElements);
 		checkArgument(gElements.stream().noneMatch(Objects::isNull), "A commitment key cannot contain null elements");
-		GroupVector<GqElement, GqGroup> gs = GroupVector.from(gElements);
+		final GroupVector<GqElement, GqGroup> gs = GroupVector.from(gElements);
 
 		checkArgument(!gs.isEmpty(), "No g element provided");
 		checkArgument(gs.getGroup().equals(h.getGroup()), "All g elements must have the same group as h");
@@ -115,7 +115,7 @@ class CommitmentKey implements HashableList {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -135,7 +135,7 @@ class CommitmentKey implements HashableList {
 
 	@Override
 	public String toString() {
-		List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
+		final List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
 		return "CommitmentKey{" + "h=" + h + ", g elements=" + simpleGElements + '}';
 	}
 
@@ -156,13 +156,13 @@ class CommitmentKey implements HashableList {
 		checkArgument(numberOfElements > 0, "The desired number of commitment elements must be greater than zero");
 		checkNotNull(gqGroup);
 
-		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 
 		int count = 0;
 		int i = 0;
-		Set<BigInteger> v = new LinkedHashSet<>();
+		final Set<BigInteger> v = new LinkedHashSet<>();
 
-		Predicate<BigInteger> validElement = w -> !w.equals(BigInteger.ZERO)
+		final Predicate<BigInteger> validElement = w -> !w.equals(BigInteger.ZERO)
 				&& !w.equals(BigInteger.ONE)
 				&& !w.equals(gqGroup.getGenerator().getValue())
 				&& v.add(w);
@@ -184,7 +184,7 @@ class CommitmentKey implements HashableList {
 
 		}
 
-		List<GqElement> commitmentKeyElements = v.stream().map(e -> GqElement.create(e, gqGroup)).collect(Collectors.toList());
+		final List<GqElement> commitmentKeyElements = v.stream().map(e -> GqElement.create(e, gqGroup)).collect(Collectors.toList());
 
 		return new CommitmentKey(commitmentKeyElements.get(0), commitmentKeyElements.subList(1, commitmentKeyElements.size()));
 

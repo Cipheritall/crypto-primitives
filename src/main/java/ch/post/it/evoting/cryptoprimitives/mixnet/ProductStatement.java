@@ -72,14 +72,14 @@ class ProductStatement {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ProductStatement that = (ProductStatement) o;
+		final ProductStatement that = (ProductStatement) o;
 		return commitments.equals(that.commitments) && product.equals(that.product);
 	}
 

@@ -58,7 +58,7 @@ public abstract class GroupElement<G extends MathematicalGroup<G>> implements Gr
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
