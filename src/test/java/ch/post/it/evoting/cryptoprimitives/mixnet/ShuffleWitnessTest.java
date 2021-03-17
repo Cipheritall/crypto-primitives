@@ -29,8 +29,6 @@ import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.Permutation;
-import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 
 @DisplayName("A ShuffleWitness")
 class ShuffleWitnessTest extends TestGroupSetup {

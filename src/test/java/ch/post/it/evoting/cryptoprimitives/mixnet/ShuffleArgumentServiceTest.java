@@ -58,8 +58,6 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.Permutation;
-import ch.post.it.evoting.cryptoprimitives.random.PermutationService;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 

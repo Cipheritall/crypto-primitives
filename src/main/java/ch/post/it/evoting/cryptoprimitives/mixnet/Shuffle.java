@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
-import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 
 /**
  * Represents the result of a re-encrypting shuffle operation. It contains the re-encrypted ciphertexts, the list of exponents used for re-encryption

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.random;
+package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -26,9 +26,9 @@ import java.util.stream.IntStream;
  * <p>
  * Instances of this class are immutable.
  */
-public class Permutation {
+class Permutation {
 
-	public static final Permutation EMPTY = new Permutation(new int[] {});
+	static final Permutation EMPTY = new Permutation(new int[] {});
 
 	//valueMapping[i] represents the permutation of value i
 	private final int[] valueMapping;
@@ -44,26 +44,27 @@ public class Permutation {
 	/**
 	 * @return An {@code IntStream} over elements of this permutation.
 	 */
-	public IntStream stream() {
+	IntStream stream() {
 		return Arrays.stream(this.valueMapping);
 	}
 
 	/**
 	 * Gets the new value of value i under this permutation.
 	 *
-	 * @param i the value to get the permutation of, must be smaller than the size of this permutation.
+	 * @param i the value to get the permutation of. Must be positive and smaller than the size of this permutation.
 	 * @return a value in the range [0, N)
 	 */
-	public int get(int i) {
+	int get(int i) {
 		checkArgument(i >= 0);
 		checkArgument(i < size);
+
 		return this.valueMapping[i];
 	}
 
 	/**
 	 * @return the size of this permutation, i.e. the upperbound of values represented in this permutation.
 	 */
-	public int getSize() {
+	int getSize() {
 		return this.size;
 	}
 

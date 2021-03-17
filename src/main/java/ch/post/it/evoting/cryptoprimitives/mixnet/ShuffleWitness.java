@@ -23,7 +23,6 @@ import java.util.Objects;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.random.Permutation;
 
 /**
  * Represents a shuffle argument witness, consisting of a permutation &#120587; and a randomness vector &#961;.

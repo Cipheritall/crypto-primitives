@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.random;
+package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 
-public class PermutationService {
+class PermutationService {
 
 	private final RandomService randomService;
 
@@ -38,7 +38,7 @@ public class PermutationService {
 	 * @param size N, the strictly positive number of values being permuted.
 	 * @return a Permutation object representing an individual permutation.
 	 */
-	public Permutation genPermutation(int size) {
+	Permutation genPermutation(int size) {
 		checkArgument(size > 0);
 
 		int[] psi = IntStream.range(0, size).toArray();
