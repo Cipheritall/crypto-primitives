@@ -39,7 +39,7 @@ public class ZqGroup implements MathematicalGroup<ZqGroup> {
 	}
 
 	/**
-	 * Create a ZqGroup with the same order as the given {@link GqGroup};
+	 * Creates a ZqGroup with the same order as the given {@link GqGroup};
 	 */
 	public static ZqGroup sameOrderAs(final GqGroup gqGroup) {
 		checkNotNull(gqGroup);

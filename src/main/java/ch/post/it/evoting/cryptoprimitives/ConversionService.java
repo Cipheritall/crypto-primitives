@@ -28,10 +28,9 @@ public final class ConversionService {
 	}
 
 	/**
-	 * Convert a string to a byte array representation.
-	 * StringToByteArray algorithm implementation.
+	 * Converts a string to a byte array representation. StringToByteArray algorithm implementation.
 	 *
-	 * @param s the string to convert.
+	 * @param s S, the string to convert.
 	 * @return the byte array representation of the string.
 	 */
 	public static byte[] stringToByteArray(final String s) {
@@ -40,13 +39,13 @@ public final class ConversionService {
 	}
 
 	/**
-	 * Convert a BigInteger to a byte array representation.
+	 * Converts a BigInteger to a byte array representation.
+	 * <p>
+	 * NOTE: our implementation slightly deviates from the specifications for performance reasons. Benchmarks show that our implementation is orders
+	 * of magnitude faster than the pseudo-code implementation integerToByteArraySpec. Both implementations provide the same result.
 	 *
 	 * @param x the positive BigInteger to convert.
 	 * @return the byte array representation of this BigInteger.
-	 *
-	 * NOTE: our implementation slightly deviates from the specifications for performance reasons. Benchmarks show that our implementation is orders of magnitude faster than the
-	 * pseudo-code implementation integerToByteArraySpec. Both implementations provide the same result.
 	 */
 	public static byte[] integerToByteArray(final BigInteger x) {
 		checkNotNull(x);
@@ -69,8 +68,12 @@ public final class ConversionService {
 	/**
 	 * Do not use.
 	 *
-	 * <p>This method implements the specification algorithm IntegerToByteArray algorithm implementation and is used in tests to show that it is
-	 * equivalent to the more performant method used. </p>
+	 * <p>
+	 * Implements the specification IntegerToByteArray algorithm. It is used in tests to show that it is equivalent to the more performant method
+	 * used.
+	 *
+	 * @param x the positive BigInteger to convert.
+	 * @return the byte array representation of this BigInteger.
 	 **/
 	static byte[] integerToByteArraySpec(final BigInteger x) {
 		checkNotNull(x);
@@ -85,7 +88,7 @@ public final class ConversionService {
 
 		byte[] output = new byte[n];
 		BigInteger current = x;
-		for(int i = 1; i <= n; i++){
+		for (int i = 1; i <= n; i++) {
 			output[n - i] = current.byteValue();
 			current = current.shiftRight(Byte.SIZE);
 		}
@@ -99,7 +102,7 @@ public final class ConversionService {
 	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation,
 	 * which is equivalent to the specification of ByteArrayToInteger.
 	 *
-	 * @param bytes the byte array to convert to its BigInteger equivalent.
+	 * @param bytes B, the byte array to convert.
 	 * @return a BigInteger corresponding to the provided byte array representation.
 	 */
 	public static BigInteger byteArrayToInteger(final byte[] bytes) {

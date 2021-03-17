@@ -45,12 +45,13 @@ public class ElGamalMultiRecipientKeyPair {
 	}
 
 	/**
-	 * Generates an ElGamalMultiRecipientKeyPair in the specified group and with the specified number of elements.
+	 * Generates a key pair in the specified group and with the specified number of elements.
 	 *
 	 * @param group         The {@link GqGroup} in which to generate the public keys. Not null.
 	 * @param numElements,  N, the number of elements that each key (the public key and the private key) should be composed of. This value must be
 	 *                      greater than 0.
 	 * @param randomService a service providing randomness. Not null.
+	 * @return the generated key pair.
 	 */
 	public static ElGamalMultiRecipientKeyPair genKeyPair(final GqGroup group, final int numElements, final RandomService randomService) {
 		checkNotNull(randomService);

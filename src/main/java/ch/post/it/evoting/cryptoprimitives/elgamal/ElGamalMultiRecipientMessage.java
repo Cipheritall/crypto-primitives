@@ -79,22 +79,28 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	}
 
 	/**
-	 * Decrypt a ciphertext to obtain the plaintext message
+	 * Decrypts a ciphertext to obtain the plaintext message.
+	 * <p>
+	 * The {@code ciphertext} and {@code secretKey} parameters must comply with the following:
+	 * <ul>
+	 *     <li>the ciphertext and the secret key must belong to groups of same order.</li>
+	 *     <li>the ciphertext size must be at most the secret key size.</li>
+	 * </ul>
 	 *
-	 * @param ciphertext c,	the ciphertext to be decrypted
-	 * @param secretKey  sk, the secret key to be used for decrypting
+	 * @param ciphertext c,	the ciphertext to be decrypted. Must be non null.
+	 * @param secretKey  sk, the secret key to be used for decrypting. Must be non null and not empty.
 	 * @return the decrypted plaintext message
 	 */
 	static ElGamalMultiRecipientMessage getMessage(ElGamalMultiRecipientCiphertext ciphertext, ElGamalMultiRecipientPrivateKey secretKey) {
 
 		checkNotNull(ciphertext);
 		checkNotNull(secretKey);
-		checkArgument(ciphertext.getGroup().getQ().equals(secretKey.getGroup().getQ()), "Ciphertext and secret key must be of the same order");
+		checkArgument(ciphertext.getGroup().hasSameOrderAs(secretKey.getGroup()), "Ciphertext and secret key must be of the same order");
 
 		int n = ciphertext.size();
 		int k = secretKey.size();
 		// 0 < k is guaranteed by the checks performed during the construction of the ElGamalMultiRecipientCiphertext
-		checkArgument(n <= k, "There can not be more message elements than private key elements.");
+		checkArgument(n <= k, "There cannot be more message elements than private key elements.");
 
 		GqElement gamma = ciphertext.getGamma();
 

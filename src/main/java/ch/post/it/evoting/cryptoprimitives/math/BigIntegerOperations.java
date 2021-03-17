@@ -34,12 +34,12 @@ public class BigIntegerOperations {
 	}
 
 	/**
-	 * Multiply two {@link BigInteger}s and take the modulus.
+	 * Multiplies two {@link BigInteger}s and take the modulus.
 	 *
-	 * @param n1		the multiplier
-	 * @param n2		the multiplicand
-	 * @param modulus	the modulus > 1
-	 * @return	the product n1 &times; n2 mod modulus
+	 * @param n1      the multiplier
+	 * @param n2      the multiplicand
+	 * @param modulus the modulus > 1
+	 * @return the product n1 &times; n2 mod modulus
 	 */
 	public static BigInteger modMultiply(final BigInteger n1, final BigInteger n2, final BigInteger modulus) {
 		checkNotNull(n1);
@@ -51,12 +51,12 @@ public class BigIntegerOperations {
 	}
 
 	/**
-	 * Exponentiate a {@link BigInteger} by another and take the modulus. If the exponent is negative, base and modulus must be relatively prime.
+	 * Exponentiates a {@link BigInteger} by another and take the modulus. If the exponent is negative, base and modulus must be relatively prime.
 	 *
-	 * @param base		the base
-	 * @param exponent	the exponent
-	 * @param modulus	the modulus > 1
-	 * @return	the power base<sup>exponent</sup> mod modulus
+	 * @param base        the base
+	 * @param exponent    the exponent
+	 * @param modulus    the modulus > 1
+	 * @return the power base<sup>exponent</sup> mod modulus
 	 */
 	public static BigInteger modExponentiate(final BigInteger base, final BigInteger exponent, final BigInteger modulus) {
 		checkNotNull(base);
@@ -70,14 +70,14 @@ public class BigIntegerOperations {
 	}
 
 	/**
-	 * Exponentiate the elements of a list of {@link BigInteger}s by the elements of a second list and multiply the resulting terms.
+	 * Exponentiates the elements of a list of {@link BigInteger}s by the elements of a second list and multiply the resulting terms.
 	 * If an exponent is negative, then the corresponding base must be relatively prime to the modulus.
 	 * This operations needs both lists to be of equal size.
 	 *
-	 * @param bases		the list of base values
-	 * @param exponents	the list of exponent values
-	 * @param modulus	the modulus > 1
-	 * @return	the product of the powers b[0]^e[0] * b[1]^e[1] * ... * b[n-1]^e[n-1] mod modulus
+	 * @param bases        the list of base values
+	 * @param exponents    the list of exponent values
+	 * @param modulus    the modulus > 1
+	 * @return the product of the powers b[0]^e[0] * b[1]^e[1] * ... * b[n-1]^e[n-1] mod modulus
 	 */
 	public static BigInteger multiModExp(final List<BigInteger> bases, final List<BigInteger> exponents, final BigInteger modulus) {
 		checkNotNull(bases);

@@ -145,12 +145,11 @@ class CommitmentKey implements HashableList {
 	}
 
 	/**
-	 * Creates a {@link CommitmentKey} object, with the {@code numberOfCommitmentElements} specifying the commitment key's desired number of
-	 * elements.
-	 * <p>
+	 * Creates a commitment key, with the {@code numberOfCommitmentElements} specifying the commitment key's desired number of elements.
 	 *
-	 * @param numberOfElements k , The desired number of elements of the commitment key. k must be greater than zero.
-	 * @param gqGroup          The gqGroup to which the commitment key belongs. {@code gqGroup}
+	 * @param numberOfElements k, the desired number of elements of the commitment key. Must be strictly positive.
+	 * @param gqGroup          the gqGroup to which the commitment key belongs. Must be non null.
+	 * @return the created commitment key.
 	 */
 	static CommitmentKey getVerifiableCommitmentKey(int numberOfElements, GqGroup gqGroup) throws NoSuchAlgorithmException {
 

@@ -34,7 +34,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 	}
 
 	/**
-	 * Create a new ZqElement.
+	 * Creates a new ZqElement.
 	 *
 	 * @param value the value of the element. Must not be null and must be an element of the group.
 	 * @param group the {@link ZqGroup} to which this element belongs.
@@ -49,7 +49,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 	}
 
 	/**
-	 * Create a new ZqElement.
+	 * Creates a new ZqElement.
 	 *
 	 * @param value the value of the element. Must be an element of the group.
 	 * @param group the {@link ZqGroup} to which this element belongs.

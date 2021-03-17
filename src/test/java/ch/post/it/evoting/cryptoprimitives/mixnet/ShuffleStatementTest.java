@@ -87,11 +87,11 @@ class ShuffleStatementTest extends TestGroupSetup {
 
 		final IllegalArgumentException emptyCiphertextsException = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(emptyCiphertexts, shuffledCiphertexts));
-		assertEquals("The ciphertexts vector can not be empty.", emptyCiphertextsException.getMessage());
+		assertEquals("The ciphertexts vector cannot be empty.", emptyCiphertextsException.getMessage());
 
 		final IllegalArgumentException emptyShuffledCiphertextsException = assertThrows(IllegalArgumentException.class,
 				() -> new ShuffleStatement(ciphertexts, emptyShuffledCiphertexts));
-		assertEquals("The shuffled ciphertexts vector can not be empty.", emptyShuffledCiphertextsException.getMessage());
+		assertEquals("The shuffled ciphertexts vector cannot be empty.", emptyShuffledCiphertextsException.getMessage());
 	}
 
 	@Test

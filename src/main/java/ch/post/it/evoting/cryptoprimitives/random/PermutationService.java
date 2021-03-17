@@ -33,10 +33,10 @@ public class PermutationService {
 	}
 
 	/**
-	 * Generate a permutation of integers [0, size)
+	 * Generates a permutation of integers [0, size).
 	 *
-	 * @param size N, the positive number of values being permuted
-	 * @return a Permutation object representing an individual permutation
+	 * @param size N, the strictly positive number of values being permuted.
+	 * @return a Permutation object representing an individual permutation.
 	 */
 	public Permutation genPermutation(int size) {
 		checkArgument(size > 0);

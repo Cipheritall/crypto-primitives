@@ -59,21 +59,25 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Returns a {@code ElGamalMultiRecipientCiphertext} whose value is {@code (this * other)}. This method implements the GetCiphertextProduct
-	 * algorithm.
+	 * Implements the specification GetCiphertextProduct algorithm. It multiplies two ciphertexts.
+	 * <p>
+	 * The {@code other} ciphertext parameter must comply with the following:
+	 * <ul>
+	 * 	<li>the other ciphertext size and the current ciphertext must be of same size.</li>
+	 * 	<li>the phis and the gamma of the other ciphertext and the phis and the gamma of the current ciphertext must belong to the same group.</li>
+	 * </ul>
 	 *
-	 * @param other The ciphertext to be multiplied by {@code this}. It must be non null and its gamma and phis must belong to the same group as the
-	 *              gamma and phis of {@code this}.
-	 * @return {@code this * other}.
+	 * @param other c_b, the ciphertext to be multiplied by {@code this}. Must be non null.
+	 * @return a ciphertext whose value is {@code this * other}.
 	 */
 	public ElGamalMultiRecipientCiphertext multiply(final ElGamalMultiRecipientCiphertext other) {
 		checkNotNull(other);
-		checkArgument(this.phis.size() == other.phis.size(), "Cannot multiply ciphertexts of different size.");
+		checkArgument(this.size() == other.size(), "Cannot multiply ciphertexts of different size.");
 		checkArgument(this.group.equals(other.group), "Cannot multiply ciphertexts of different groups.");
 
 		final GqElement resultGamma = this.gamma.multiply(other.gamma);
 
-		final int n = this.phis.size();
+		final int n = this.size();
 		final GroupVector<GqElement, GqGroup> resultPhis =
 				IntStream.range(0, n)
 						.mapToObj(i -> this.phis.get(i).multiply(other.phis.get(i)))
@@ -83,15 +87,19 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Exponentiates a multi-recipient ciphertext. This method implements the GetCiphertextExponentiation algorithm.
+	 * Implements the specification GetCiphertextExponentiation algorithm. It exponentiates a multi-recipient ciphertext.
+	 * <p>
+	 * The {@code exponent} parameter must comply with the following:
+	 * <ul>
+	 *     <li>the ciphertext to exponentiate and the exponent must belong to groups of same order.</li>
+	 * </ul>
 	 *
-	 * @param exponent A {@code ZqElement}
-	 * @return A {@code ElGamalMultiRecipientCiphertext} whose phis value are {exponentiated with @code(exponent)}.
+	 * @param exponent a, a {@code ZqElement}. Must be non null.
+	 * @return a ciphertext whose gamma and phis values are exponentiated with {@code exponent}.
 	 */
-
 	public ElGamalMultiRecipientCiphertext exponentiate(ZqElement exponent) {
 		checkNotNull(exponent);
-		checkArgument(this.group.getQ().equals(exponent.getGroup().getQ()));
+		checkArgument(this.group.hasSameOrderAs(exponent.getGroup()));
 
 		GqElement exponentiatedGamma = this.gamma.exponentiate(exponent);
 		GroupVector<GqElement, GqGroup> exponentiatedPhis = this.phis.stream()
@@ -102,11 +110,18 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Encrypt a message with the given public key and provided randomness.
+	 * Encrypts a message with the given public key and provided randomness.
+	 * <p>
+	 * The {@code message}, {@code exponent} and {@code publicKey} parameters must comply with the following:
+	 * <ul>
+	 *     <li>the message size must be at most the public key size.</li>
+	 *     <li>the message and the public key groups must be the same.</li>
+	 *     <li>the message and the exponent must belong to groups of same order.</li>
+	 * </ul>
 	 *
-	 * @param message   m, the plaintext message.
-	 * @param exponent  r, a random exponent.
-	 * @param publicKey pk, the public key to use to encrypt the message.
+	 * @param message   m, the plaintext message. Must be non null and not empty.
+	 * @param exponent  r, a random exponent. Must be non null.
+	 * @param publicKey pk, the public key to use to encrypt the message. Must be non null.
 	 * @return A ciphertext containing the encrypted message.
 	 */
 	public static ElGamalMultiRecipientCiphertext getCiphertext(
@@ -117,11 +132,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		checkNotNull(message);
 		checkNotNull(exponent);
 		checkNotNull(publicKey);
-		checkArgument(message.getGroup().getQ().equals(exponent.getGroup().getQ()), "Exponent and message groups must be of the same order.");
+		checkArgument(message.getGroup().hasSameOrderAs(exponent.getGroup()), "Exponent and message groups must be of the same order.");
 		checkArgument(message.getGroup().equals(publicKey.getGroup()), "Message and public key must belong to the same group. ");
 
 		//The message is guaranteed to be non empty by the checks performed during the construction of the ElGamalMultiRecipientMessage
-		checkArgument(message.size() <= publicKey.size(), "There can not be more message elements than public key elements.");
+		checkArgument(message.size() <= publicKey.size(), "There cannot be more message elements than public key elements.");
 
 		int n = message.size();
 		int k = publicKey.size();
@@ -193,18 +208,18 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Takes a vector of cipherTexts, exponentiates them using the supplied exponents and returns ({@code ElGamalMultiRecipientCiphertext}) the
-	 * product of the exponentiated ciphertexts. Both ciphertexts and exponents should :
+	 * Takes a vector of ciphertexts, exponentiates them using the supplied exponents and returns the product of the exponentiated ciphertexts.
+	 * <p>
+	 * The {@code ciphertexts} and {@code exponents} parameters must comply with the following:
 	 * <ul>
-	 * 	<li>not be null</li>
-	 * 	<li>not be empty</li>
-	 * 	<li>be the same size</li>
-	 * <li>have the same order</li>
+	 *     <li>the ciphertexts size must be equal to the exponents size.</li>
+	 *     <li>the ciphertexts and the exponents must belong to groups of same order.</li>
 	 * </ul>
 	 *
-	 * @param ciphertexts A List of {@code ElGamalMultiRecipientCiphertext}s, each element containing the same number of phis.
-	 * @param exponents   A List of {@code ZqElement}s, of the same size as the ciphertexts list <br>
-	 * @return {@code ElGamalMultiRecipientCiphertext}
+	 * @param ciphertexts A List of {@code ElGamalMultiRecipientCiphertext}s, each element containing the same number of phis. Must be non null and
+	 *                    not empty.
+	 * @param exponents   A List of {@code ZqElement}s, of the same size as the ciphertexts list. Must be non null and not empty.
+	 * @return the product of the exponentiated ciphertexts.
 	 */
 	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
@@ -237,7 +252,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *     <li>the secret key size is at least the size of the ciphertext size.</li>
 	 * </ul>
 	 *
-	 * @param secretKey sk, the secret key to be used for decrypting. Non-null.
+	 * @param secretKey sk, the secret key to be used for decrypting. Must be not null.
 	 * @return a new ciphertext with the partially decrypted plaintext message.
 	 */
 	public ElGamalMultiRecipientCiphertext getPartialDecryption(final ElGamalMultiRecipientPrivateKey secretKey) {

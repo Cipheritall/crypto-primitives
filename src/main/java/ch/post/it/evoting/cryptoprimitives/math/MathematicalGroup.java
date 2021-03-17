@@ -49,7 +49,8 @@ public interface MathematicalGroup<G extends MathematicalGroup<G>> {
 	BigInteger getQ();
 
 	/**
-	 * Compare mathematical groups based on order.
+	 * Compares mathematical groups based on their order.
+	 *
 	 * @param other mathematical group
 	 * @return true if both mathematical groups are of the same order, false otherwise.
 	 */

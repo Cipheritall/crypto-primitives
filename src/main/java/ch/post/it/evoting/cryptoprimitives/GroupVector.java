@@ -124,7 +124,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Append a new element to this vector. Returns a new GroupVector.
+	 * Appends a new element to this vector. Returns a new GroupVector.
 	 *
 	 * @param element The element to append. Must be non null and from the same group.
 	 * @return A new GroupVector with the appended {@code element}.
@@ -142,7 +142,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Prepend a new element to this vector. Returns a new GroupVector.
+	 * Prepends a new element to this vector. Returns a new GroupVector.
 	 *
 	 * @param element The element to prepend. Must be non null and from the same group.
 	 * @return A new GroupVector with the prepended {@code element}.

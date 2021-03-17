@@ -21,7 +21,7 @@ final class CertaintyLevel {
 	}
 
 	/**
-	 * Derive the certainty level from a given bit length.
+	 * Derives the certainty level from a given bit length.
 	 *
 	 * @param bitLength The bit length from which to derive the certainty level. Must be a positive integer.
 	 * @return The certainty level corresponding to the given {@code bitLength}.
@@ -34,7 +34,7 @@ final class CertaintyLevel {
 		} else if (bitLength >= 0) {
 			return 80;
 		} else {
-			throw new IllegalArgumentException("The bit length can not be negative.");
+			throw new IllegalArgumentException("The bit length cannot be negative.");
 		}
 	}
 

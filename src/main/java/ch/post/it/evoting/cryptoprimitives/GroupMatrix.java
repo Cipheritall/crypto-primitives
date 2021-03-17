@@ -71,7 +71,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Create a GroupMatrix from rows of elements.
+	 * Creates a GroupMatrix from rows of elements.
 	 *
 	 * <p>If no rows are provided or if the rows are empty, the matrix is considered empty and has dimensions 0x0. </p>
 	 *
@@ -96,7 +96,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Create a GroupMatrix from columns of elements.
+	 * Creates a GroupMatrix from columns of elements.
 	 *
 	 * <p>If no columns are provided or if the columns are empty, the matrix is considered empty and has dimensions 0x0. </p>
 	 *
@@ -149,7 +149,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Get a unique element of the matrix.
+	 * Gets a unique element of the matrix.
 	 *
 	 * @param row    the index of the row, 0 indexed.
 	 * @param column the index of the column, 0 indexed.
@@ -204,7 +204,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Append a new column to the matrix. Returns a new GroupMatrix. The new column must:
+	 * Appends a new column to the matrix. Returns a new GroupMatrix. The new column must:
 	 * <ul>
 	 *     <li>be non null</li>
 	 *     <li>have {@code numRows} elements</li>
@@ -228,7 +228,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Prepend a new column to the matrix. Returns a new GroupMatrix. The new column must:
+	 * Prepends a new column to the matrix. Returns a new GroupMatrix. The new column must:
 	 * <ul>
 	 *     <li>be non null</li>
 	 *     <li>have {@code numRows} elements</li>

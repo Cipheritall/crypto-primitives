@@ -51,10 +51,10 @@ public class ShuffleService {
 	}
 
 	/**
-	 * Shuffle and re-encrypt a list of ciphertext with the given key.
+	 * Shuffles and re-encrypts a list of ciphertext with the given key.
 	 *
-	 * @param ciphertexts the ciphertexts to re-encrypt and shuffle.
-	 * @param publicKey   the public key with which to re-encrypt the ciphertexts.
+	 * @param ciphertexts the ciphertexts to re-encrypt and shuffle. Must be non null.
+	 * @param publicKey   the public key with which to re-encrypt the ciphertexts. Must be non null.
 	 * @return a {@link Shuffle} with the result of the re-encrypting shuffle.
 	 */
 	Shuffle genShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey) {
@@ -67,13 +67,13 @@ public class ShuffleService {
 			return Shuffle.EMPTY;
 		}
 		checkArgument(ciphertextsCopy.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same size.");
-		@SuppressWarnings("squid:S00117")
-		int N = ciphertextsCopy.size();
-		int n = ciphertextsCopy.get(0).size();
+
+		final int N = ciphertextsCopy.size();
+		final int n = ciphertextsCopy.get(0).size();
 
 		//Verify public key input
 		checkNotNull(publicKey);
-		int k = publicKey.size();
+		final int k = publicKey.size();
 
 		//Verify combination of ciphertext and public key inputs
 		checkArgument(0 < n);

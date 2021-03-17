@@ -36,7 +36,7 @@ class ZeroWitness {
 	private final GroupVector<ZqElement, ZqGroup> exponentsS;
 
 	/**
-	 * Instantiate a zero witness. The matrices and exponents must comply with the following:
+	 * Instantiates a zero witness. The matrices and exponents must comply with the following:
 	 *
 	 * <ul>
 	 *     <li>be non null</li>

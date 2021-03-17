@@ -41,7 +41,7 @@ final class MultiExponentiationWitness {
 	private final int dimensionN;
 
 	/**
-	 * <p>Create a multi-exponentiation witness.</p>
+	 * <p>Creates a multi-exponentiation witness.</p>
 	 * <p>
 	 * Parameters must abide by the following conditions:
 	 * <ul>

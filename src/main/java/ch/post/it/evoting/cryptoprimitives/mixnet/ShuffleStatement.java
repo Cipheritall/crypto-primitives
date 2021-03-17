@@ -58,8 +58,8 @@ class ShuffleStatement {
 		checkNotNull(shuffledCiphertexts);
 
 		// Dimensions checking.
-		checkArgument(!ciphertexts.isEmpty(), "The ciphertexts vector can not be empty.");
-		checkArgument(!shuffledCiphertexts.isEmpty(), "The shuffled ciphertexts vector can not be empty.");
+		checkArgument(!ciphertexts.isEmpty(), "The ciphertexts vector cannot be empty.");
+		checkArgument(!shuffledCiphertexts.isEmpty(), "The shuffled ciphertexts vector cannot be empty.");
 		checkArgument(ciphertexts.size() == shuffledCiphertexts.size(), "The ciphertexts and shuffled ciphertexts vectors must have the same size.");
 		checkArgument(ciphertexts.getElementSize() == shuffledCiphertexts.getElementSize(),
 				"The ciphertexts and shuffled ciphertexts must have the same size.");

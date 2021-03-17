@@ -33,16 +33,16 @@ public class RandomService {
 	private final SecureRandom secureRandom;
 
 	/**
-	 * Construct a RandomService with a {@link SecureRandom} as its randomness source.
+	 * Constructs a RandomService with a {@link SecureRandom} as its randomness source.
 	 */
 	public RandomService() {
 		this.secureRandom = new SecureRandom();
 	}
 
 	/**
-	 * Generate a random BigInteger between 0 (incl.) and {@code upperBound} (excl.).
+	 * Generates a random BigInteger between 0 (incl.) and {@code upperBound} (excl.).
 	 *
-	 * @param upperBound m, the upper bound.
+	 * @param upperBound m, the upper bound. Must be non null and strictly positive.
 	 * @return A random BigInteger <code>r s.t. 0 <= r < m</code>.
 	 */
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
@@ -61,10 +61,15 @@ public class RandomService {
 	}
 
 	/**
-	 * Generate a random integer within bounds.
+	 * Generates a random integer within bounds.
+	 * <p>
+	 * The {@code lowerBound} and {@code upperBound} parameters must comply with the following:
+	 * <ul>
+	 *     <li>The upper bound must be greater than the lower bound.</li>
+	 * </ul>
 	 *
-	 * @param lowerBound a, inclusive.
-	 * @param upperbound b, exclusive.
+	 * @param lowerBound a, inclusive. Must be non null.
+	 * @param upperbound b, exclusive. Must be non null.
 	 * @return a BigInteger within the bounds.
 	 */
 	public BigInteger genRandomIntegerWithinBounds(final BigInteger lowerBound, final BigInteger upperbound) {
@@ -155,8 +160,8 @@ public class RandomService {
 	/**
 	 * Generates a vector (collection) of random {@link ZqElement}s between 0 (incl.) and {@code upperBound} (excl.).
 	 *
-	 * @param upperBound q
-	 * @param length     n
+	 * @param upperBound q, the exclusive upper bound. Must be non null and strictly positive.
+	 * @param length     n, the desired length. Must be strictly positive.
 	 * @return {@code List<ZqElement>}
 	 */
 	public GroupVector<ZqElement, ZqGroup> genRandomVector(final BigInteger upperBound, final int length) {
@@ -183,7 +188,7 @@ public class RandomService {
 	}
 
 	/**
-	 * Generate an array of {@code byteLength} random bytes.
+	 * Generates an array of {@code byteLength} random bytes.
 	 *
 	 * @param byteLength The number of bytes to generate.
 	 * @return An array of {@code byteLength} random bytes.

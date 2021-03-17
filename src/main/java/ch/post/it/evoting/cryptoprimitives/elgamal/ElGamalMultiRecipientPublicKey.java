@@ -64,7 +64,7 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	}
 
 	/**
-	 * This method implements the specification algorithm CompressPublicKey algorithm. It compresses the public key to the requested length.
+	 * Implements the specification CompressPublicKey algorithm. It compresses the public key to the requested length.
 	 * <p>
 	 * The {@code length} must comply with the following:
 	 * <ul>

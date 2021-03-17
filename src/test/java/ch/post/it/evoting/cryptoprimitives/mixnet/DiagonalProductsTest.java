@@ -103,11 +103,11 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 		final IllegalArgumentException emptyCiphertextsException = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(emptyCiphertexts, exponents));
-		assertEquals("The ciphertexts and exponents matrices can not be empty.", emptyCiphertextsException.getMessage());
+		assertEquals("The ciphertexts and exponents matrices cannot be empty.", emptyCiphertextsException.getMessage());
 
 		final IllegalArgumentException emptyExponentsException = assertThrows(IllegalArgumentException.class,
 				() -> multiExponentiationArgumentService.getDiagonalProducts(ciphertexts, emptyExponents));
-		assertEquals("The ciphertexts and exponents matrices can not be empty.", emptyExponentsException.getMessage());
+		assertEquals("The ciphertexts and exponents matrices cannot be empty.", emptyExponentsException.getMessage());
 	}
 
 	@Test

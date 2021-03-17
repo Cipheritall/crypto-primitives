@@ -28,10 +28,10 @@ public class Validations {
 	}
 
 	/**
-	 * Validate that a property holds for all elements of a stream.
+	 * Validates that a property holds for all elements of a stream.
 	 *
-	 * @param <T> the type of elements of the stream.
-	 * @param stream the elements to check.
+	 * @param <T>      the type of elements of the stream.
+	 * @param stream   the elements to check.
 	 * @param property the property to check all elements against.
 	 * @return true if the vector is empty or all elements are equal under this property. False otherwise.
 	 */

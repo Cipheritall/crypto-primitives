@@ -29,13 +29,14 @@ class MatrixUtils {
 	 * Computes the size-optimal number of rows and columns for a given vector size {@code N}. The dimensions are size-optimal when they are as close
 	 * as possible to the dimensions of a square matrix, resulting in the smallest size of the shuffle argument.
 	 *
-	 * @param N the vector size to decompose into size-optimal matrix dimensions. Must be greater than or equal to 2.
+	 * @param vectorSize N, the vector size to decompose into size-optimal matrix dimensions. Must be greater than or equal to 2.
 	 * @return an array [m, n] with m the number of rows, n the number of columns and m x n = N.
 	 */
-	static int[] getMatrixDimensions(final int N) {
-		checkArgument(N >= 2, "The size to decompose must be greater than or equal to 2.");
+	static int[] getMatrixDimensions(final int vectorSize) {
+		checkArgument(vectorSize >= 2, "The size to decompose must be greater than or equal to 2.");
 
 		final LongFunction<Integer> floorSquareRoot = x -> (int) Math.floor(Math.sqrt(x));
+		final int N = vectorSize;
 
 		int m = 1;
 		int n = N;

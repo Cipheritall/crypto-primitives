@@ -75,7 +75,7 @@ final class ZeroArgumentService {
 	}
 
 	/**
-	 * Generate an argument of knowledge of the values <code>a<sub>1</sub>, b<sub>0</sub>, ..., a<sub>m</sub>, b<sub>m-1</sub></code> such that
+	 * Generates an argument of knowledge of the values <code>a<sub>1</sub>, b<sub>0</sub>, ..., a<sub>m</sub>, b<sub>m-1</sub></code> such that
 	 * &sum;<sub>i=1</sub><sup>m</sup> a<sub>i</sub> &#8902; b<sub>i-1</sub> = 0. The statement and witness must comply with the following:
 	 * <ul>
 	 *  <li>be non null</li>
@@ -203,7 +203,7 @@ final class ZeroArgumentService {
 	}
 
 	/**
-	 * Compute the vector <b>d</b> for the GetZeroArgument algorithm. The input matrices must comply with the following:
+	 * Computes the vector <b>d</b> for the GetZeroArgument algorithm. The input matrices must comply with the following:
 	 * <ul>
 	 *     <li>be non null</li>
 	 *     <li>each matrix row must have the same number of columns</li>
@@ -255,7 +255,7 @@ final class ZeroArgumentService {
 	}
 
 	/**
-	 * Define the bilinear map represented by the star operator &#8902; in the specification. All elements must be in the same group. The algorithm
+	 * Defines the bilinear map represented by the star operator &#8902; in the specification. All elements must be in the same group. The algorithm
 	 * defined by the value {@code y} is the following:
 	 * <p>
 	 * (a<sub>0</sub>,..., a<sub>n-1</sub>) &#8902; (b<sub>0</sub>,...,b<sub>n-1</sub>) = &sum;<sub>j=0</sub><sup>n-1</sup> a<sub>j</sub> &middot;

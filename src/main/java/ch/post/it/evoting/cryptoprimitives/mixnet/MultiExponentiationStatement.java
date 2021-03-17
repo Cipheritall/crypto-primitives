@@ -43,7 +43,7 @@ final class MultiExponentiationStatement {
 	private final int l;
 
 	/**
-	 * <p>Create a multi exponentiation statement.</p>
+	 * <p>Creates a multi exponentiation statement.</p>
 	 * <p>
 	 * The arguments must abide by the following conditions:
 	 * <ul>

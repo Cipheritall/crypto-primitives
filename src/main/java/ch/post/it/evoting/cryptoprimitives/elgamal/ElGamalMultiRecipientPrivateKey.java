@@ -56,7 +56,7 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * This method implements the specification algorithm CompressSecretKey algorithm. It compresses the secret key to the requested length.
+	 * Implements the specification CompressSecretKey algorithm. It compresses the secret key to the requested length.
 	 * <p>
 	 * The {@code length} must comply with the following:
 	 * <ul>

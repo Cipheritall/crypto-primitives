@@ -33,7 +33,7 @@ public class HashService {
 	private final int hashLength;
 
 	/**
-	 * Instantiate a recursive hash service.
+	 * Instantiates a recursive hash service.
 	 *
 	 * @param messageDigest with which to hash.
 	 */
@@ -44,7 +44,7 @@ public class HashService {
 	}
 
 	/**
-	 * Compute the hash of multiple (potentially) recursive inputs.
+	 * Computes the hash of multiple (potentially) recursive inputs.
 	 *
 	 * @param values the objects to be hashed.
 	 * @return the hash of the input.

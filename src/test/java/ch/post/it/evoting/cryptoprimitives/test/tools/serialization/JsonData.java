@@ -55,8 +55,8 @@ public final class JsonData {
 	 * @return The converted json field.
 	 */
 	public <T> T get(final String field, final Class<T> clazz) {
-		checkNotNull(field, "field can not be null.");
-		checkNotNull(clazz, "Target class can not be null");
+		checkNotNull(field, "field cannot be null.");
+		checkNotNull(clazz, "Target class cannot be null");
 
 		if (clazz.equals(BigInteger.class)) {
 			return clazz.cast(getBigInteger(field));

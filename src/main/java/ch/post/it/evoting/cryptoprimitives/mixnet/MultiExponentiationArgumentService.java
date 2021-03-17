@@ -67,7 +67,7 @@ final class MultiExponentiationArgumentService {
 	private final ZqGroup zqGroup;
 
 	/**
-	 * Instantiate a new multi exponentiation argument service.
+	 * Instantiates a new multi exponentiation argument service.
 	 * <p>
 	 * The parameters must abide by the following conditions:
 	 * <ul>
@@ -291,7 +291,7 @@ final class MultiExponentiationArgumentService {
 		checkNotNull(exponents);
 
 		// Empty matrices handling.
-		checkArgument(!ciphertexts.isEmpty() && !exponents.isEmpty(), "The ciphertexts and exponents matrices can not be empty.");
+		checkArgument(!ciphertexts.isEmpty() && !exponents.isEmpty(), "The ciphertexts and exponents matrices cannot be empty.");
 
 		// Dimensions checking.
 		checkArgument(ciphertexts.numColumns() == exponents.numRows(),
@@ -441,7 +441,7 @@ final class MultiExponentiationArgumentService {
 	}
 
 	/**
-	 * Calculate Π<sub>i</sub> base<sub>i</sub> <sup>pow_i</sup>
+	 * Calculates Π<sub>i</sub> base<sub>i</sub> <sup>pow_i</sup>
 	 *
 	 * @param bases  the bases
 	 * @param powers a function that maps from index to power
@@ -473,7 +473,7 @@ final class MultiExponentiationArgumentService {
 		}
 
 		/**
-		 * Get the result of the function applied on the input.
+		 * Gets the result of the function applied on the input.
 		 *
 		 * @param input the input to the function
 		 * @return the result of applying this function to the input.

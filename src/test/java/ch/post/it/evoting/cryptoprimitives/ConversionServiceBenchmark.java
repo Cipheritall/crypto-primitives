@@ -33,8 +33,8 @@ public class ConversionServiceBenchmark {
 
 	private static final SecureRandom secureRandom = new SecureRandom();
 
-	@Param({"2048", "3072"})
-	public static int bitLength;
+	@Param({ "2048", "3072" })
+	static int bitLength;
 
 	@State(Scope.Thread)
 	public static class MyState {

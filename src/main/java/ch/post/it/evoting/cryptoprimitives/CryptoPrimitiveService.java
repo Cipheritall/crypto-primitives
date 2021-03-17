@@ -21,25 +21,16 @@ final class CryptoPrimitiveService implements CryptoPrimitive {
 
 	private final RandomService randomService = new RandomService();
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public String genRandomBase16String(final int length) {
 		return randomService.genRandomBase16String(length);
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public String genRandomBase32String(final int length) {
 		return randomService.genRandomBase32String(length);
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public String genRandomBase64String(final int length) {
 		return randomService.genRandomBase64String(length);
