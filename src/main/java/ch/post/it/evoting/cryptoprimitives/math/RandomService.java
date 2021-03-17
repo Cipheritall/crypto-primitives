@@ -89,7 +89,7 @@ public class RandomService {
 		checkArgument(length > 0);
 
 		// One char can be represented by 4 bits in Base16 encoding.
-		final int lengthInBytes = bitToByteLength(length * 4);
+		final int lengthInBytes = (int) Math.ceil(4.0 * length / Byte.SIZE);
 
 		// Generate the random bytes, b.
 		final byte[] randomBytes = randomBytes(lengthInBytes);
@@ -108,7 +108,7 @@ public class RandomService {
 		checkArgument(length > 0);
 
 		// One char can be represented by 5 bits in Base32 encoding.
-		final int lengthInBytes = bitToByteLength(length * 5);
+		final int lengthInBytes = (int) Math.ceil(5.0 * length / Byte.SIZE);
 
 		// Generate the random bytes, b.
 		final byte[] randomBytes = randomBytes(lengthInBytes);
@@ -127,7 +127,7 @@ public class RandomService {
 		checkArgument(length > 0);
 
 		// One char can be represented by 6 bits in Base64 encoding.
-		final int lengthInBytes = bitToByteLength(length * 6);
+		final int lengthInBytes = (int) Math.ceil(6.0 * length / Byte.SIZE);
 
 		// Generate the random bytes, b.
 		final byte[] randomBytes = randomBytes(lengthInBytes);
@@ -174,17 +174,6 @@ public class RandomService {
 		return Stream.generate(() -> ZqElement.create(genRandomInteger(upperBound), zqGroup))
 				.limit(length)
 				.collect(toGroupVector());
-	}
-
-	/**
-	 * Converts a {@code bitLength} to its corresponding byte length, i.e. the number of bytes it takes to represent the bits. Takes advantage of
-	 * integer truncation instead of ceiling function.
-	 *
-	 * @param bitLength the bit length to convert.
-	 * @return the equivalent byte length for the given bit length.
-	 */
-	private int bitToByteLength(final int bitLength) {
-		return (bitLength + (Byte.SIZE - 1)) / Byte.SIZE;
 	}
 
 	/**
