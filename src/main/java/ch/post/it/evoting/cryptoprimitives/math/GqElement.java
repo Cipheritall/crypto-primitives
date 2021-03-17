@@ -80,7 +80,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		return this.group.getQ().equals(exponent.getGroup().getQ());
 	}
 
-	public GqElement invert() {
+	GqElement invert() {
 		BigInteger invertedValue = value.modInverse(this.group.getP());
 		return new GqElement(invertedValue, this.group);
 	}

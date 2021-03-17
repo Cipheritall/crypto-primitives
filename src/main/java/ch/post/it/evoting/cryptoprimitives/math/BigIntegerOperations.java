@@ -41,7 +41,7 @@ public class BigIntegerOperations {
 	 * @param modulus the modulus > 1
 	 * @return the product n1 &times; n2 mod modulus
 	 */
-	public static BigInteger modMultiply(final BigInteger n1, final BigInteger n2, final BigInteger modulus) {
+	static BigInteger modMultiply(final BigInteger n1, final BigInteger n2, final BigInteger modulus) {
 		checkNotNull(n1);
 		checkNotNull(n2);
 		checkNotNull(modulus);
@@ -53,12 +53,12 @@ public class BigIntegerOperations {
 	/**
 	 * Exponentiates a {@link BigInteger} by another and take the modulus. If the exponent is negative, base and modulus must be relatively prime.
 	 *
-	 * @param base        the base
-	 * @param exponent    the exponent
-	 * @param modulus    the modulus > 1
+	 * @param base     the base
+	 * @param exponent the exponent
+	 * @param modulus  the modulus > 1
 	 * @return the power base<sup>exponent</sup> mod modulus
 	 */
-	public static BigInteger modExponentiate(final BigInteger base, final BigInteger exponent, final BigInteger modulus) {
+	static BigInteger modExponentiate(final BigInteger base, final BigInteger exponent, final BigInteger modulus) {
 		checkNotNull(base);
 		checkNotNull(exponent);
 		checkNotNull(modulus);

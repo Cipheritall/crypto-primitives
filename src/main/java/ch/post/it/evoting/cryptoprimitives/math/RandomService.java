@@ -72,7 +72,7 @@ public class RandomService {
 	 * @param upperbound b, exclusive. Must be non null.
 	 * @return a BigInteger within the bounds.
 	 */
-	public BigInteger genRandomIntegerWithinBounds(final BigInteger lowerBound, final BigInteger upperbound) {
+	BigInteger genRandomIntegerWithinBounds(final BigInteger lowerBound, final BigInteger upperbound) {
 		checkNotNull(lowerBound);
 		checkNotNull(upperbound);
 		checkArgument(upperbound.compareTo(lowerBound) > 0,

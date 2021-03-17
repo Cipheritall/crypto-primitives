@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
@@ -369,6 +370,7 @@ public class HadamardArgumentService {
 	 * @param j      the index &le; m-1 of the last column to include in the product
 	 * @return &prod;<sub>i=0</sub><sup>j</sup> a<sub>i</sub>
 	 */
+	@VisibleForTesting
 	GroupVector<ZqElement, ZqGroup> getHadamardProduct(final GroupMatrix<ZqElement, ZqGroup> matrix, final int j) {
 		checkNotNull(matrix);
 		checkArgument(j >= 0, "The column index must be greater than or equal to 0.");

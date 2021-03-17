@@ -48,7 +48,7 @@ class MixnetHashService {
 	/**
 	 * @see HashService#recursiveHash(Hashable...)
 	 */
-	public byte[] recursiveHash(final Hashable... values) {
+	byte[] recursiveHash(final Hashable... values) {
 		return this.delegate.recursiveHash(values);
 	}
 

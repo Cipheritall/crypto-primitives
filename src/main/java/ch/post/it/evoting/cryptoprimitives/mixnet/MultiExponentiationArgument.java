@@ -54,35 +54,35 @@ public class MultiExponentiationArgument {
 		// Intentionally left blank.
 	}
 
-	public GqElement getcA0() {
+	GqElement getcA0() {
 		return cA0;
 	}
 
-	public GroupVector<GqElement, GqGroup> getcBVector() {
+	GroupVector<GqElement, GqGroup> getcBVector() {
 		return cBVector;
 	}
 
-	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getEVector() {
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getEVector() {
 		return EVector;
 	}
 
-	public GroupVector<ZqElement, ZqGroup> getaVector() {
+	GroupVector<ZqElement, ZqGroup> getaVector() {
 		return aVector;
 	}
 
-	public ZqElement getR() {
+	ZqElement getR() {
 		return r;
 	}
 
-	public ZqElement getB() {
+	ZqElement getB() {
 		return b;
 	}
 
-	public ZqElement getS() {
+	ZqElement getS() {
 		return s;
 	}
 
-	public ZqElement getTau() {
+	ZqElement getTau() {
 		return tau;
 	}
 

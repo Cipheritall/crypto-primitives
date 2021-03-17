@@ -110,7 +110,7 @@ class CommitmentKey implements HashableList {
 	 *
 	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>k</sub> in that order
 	 */
-	public Stream<GqElement> stream() {
+	Stream<GqElement> stream() {
 		return Stream.concat(Stream.of(this.h), this.gElements.stream());
 	}
 

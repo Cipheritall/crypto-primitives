@@ -32,6 +32,8 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
@@ -215,6 +217,7 @@ final class ZeroArgumentService {
 	 * @param secondMatrix B, the second matrix.
 	 * @return the computed <b>d</b> vector.
 	 */
+	@VisibleForTesting
 	GroupVector<ZqElement, ZqGroup> computeDVector(final GroupMatrix<ZqElement, ZqGroup> firstMatrix,
 			final GroupMatrix<ZqElement, ZqGroup> secondMatrix, final ZqElement y) {
 
@@ -265,6 +268,7 @@ final class ZeroArgumentService {
 	 * @param secondVector b, the second vector.
 	 * @return The sum &sum;<sub>j=0</sub><sup>n-1</sup> a<sub>j</sub> &middot; b<sub>j</sub> &middot; y<sup>j</sup>
 	 */
+	@VisibleForTesting
 	ZqElement starMap(final GroupVector<ZqElement, ZqGroup> firstVector, final GroupVector<ZqElement, ZqGroup> secondVector,
 			final ZqElement y) {
 
