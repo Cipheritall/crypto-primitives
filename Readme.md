@@ -17,6 +17,34 @@ We re-implemented the Bayer-Groth mix net with the following objectives in mind:
 * reducing the number of external dependencies and future maintenance costs
 * laying the groundwork for future performance optimizations of mathematical operations
 
+## Code Quality
+We strive for excellent code quality and to minimize the risk of bugs and vulnerabilities. We rely on the following tools for code analysis.
+
+| Tool        | Focus                 |
+|-------------|-----------------------|
+| [SonarQube](https://www.sonarqube.org/)  | Code quality and code security      |
+| [Fortify](https://www.microfocus.com/de-de/products/static-code-analysis-sast/overview)  | Static Application Security Testing    |
+| [JFrog X-Ray](https://jfrog.com/xray/) | Common vulnerabilities and exposures (CVE) analysis, Open-source software (OSS) license compliance | |
+
+We base our below analysis on the reports from March 2021.
+
+### SonarQube analysis
+We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 23 code smells. You can find the details in the [following report](./SonarQubeDetail.pdf).
+
+![](./SonarQube.jpg)
+
+Out of the 23 code smells:
+* 5 code smells concern duplicated blocks in the argument classes. We left the code blocks as is since removing them reduces the code's readability.
+* 18 code smells are due to violation of standard Sonar way naming conventions. However, we prefer to keep variable names closer to the specification even if it deviates from the standard Java naming convention.
+
+Moreover, a high test coverage illustrates the fact that we extensively test the crypto-primitives library.
+
+### Fortify analysis
+The Fortify analysis showed 0 critical, 0 high, 0 medium, and 49 low criticality issues. We manually reviewed all 49 low-criticality issues and assessed them as false positives.
+
+### JFrog X-Ray analysis
+The X-Ray analysis indicates that none of the crypto-primitives' 3rd party dependencies contains known vulnerabilities or non-compliant open source software licenses. As a general principle, we try to minimize external dependencies in cryptographic libraries and only rely on well-tested and widely used 3rd party components.
+
 ## Future work
 We plan for the following improvements to the crypto-primitives library:
 * Implementing non-interactive zero-knowledge proofs.
