@@ -16,9 +16,7 @@
 		<jackson.version>2.12.2</jackson.version>
 		<jmh.version>1.28</jmh.version>
 		<junit-jupiter.version>5.7.1</junit-jupiter.version>
-		<lombok.version>1.18.18</lombok.version>
 		<mockito.version>3.8.0</mockito.version>
-		<slf4j-api.version>1.7.30</slf4j-api.version>
 
 		<!-- Plugins versions -->
 		<jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
@@ -59,12 +57,6 @@
 				<version>${guava.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j-api.version}</version>
-			</dependency>
-
 			<!-- Test dependencies -->
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
@@ -102,11 +94,6 @@
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok</artifactId>
-				<version>${lombok.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.openjdk.jmh</groupId>
 				<artifactId>jmh-core</artifactId>
 				<version>${jmh.version}</version>
@@ -123,11 +110,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -164,11 +146,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

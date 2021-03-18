@@ -89,7 +89,6 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	private static ZeroArgumentService zeroArgumentService;
 	private static CommitmentKey commitmentKey;
 	private static ElGamalMultiRecipientPublicKey publicKey;
-	private static ElGamalGenerator elGamalGenerator;
 	private static RandomService randomService;
 	private static MixnetHashService hashService;
 
@@ -99,7 +98,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		final TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 
-		elGamalGenerator = new ElGamalGenerator(gqGroup);
+		final ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
 		publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
 
 		// Init services.
@@ -659,7 +658,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
 
-			assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument));
+			assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument).verify().isVerified());
 		}
 
 		@Test
@@ -708,10 +707,13 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		void verifyZeroArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 				final ZeroStatement zeroStatement, final ZeroArgument zeroArgument, final boolean expectedOutput, String description)
 				throws NoSuchAlgorithmException {
-			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
 			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, mixnetHashService);
-			assertEquals(expectedOutput, service.verifyZeroArgument(zeroStatement, zeroArgument),
+
+			assertEquals(expectedOutput, service.verifyZeroArgument(zeroStatement, zeroArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));
 		}
 

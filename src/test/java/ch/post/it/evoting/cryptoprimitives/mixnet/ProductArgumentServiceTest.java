@@ -208,7 +208,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			SingleValueProductStatement sStatement = new SingleValueProductStatement(smallStatement.getCommitments().get(0),
 					smallStatement.getProduct());
 			assertTrue(new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey)
-					.verifySingleValueProductArgument(sStatement, argument.getSingleValueProductArgument()));
+					.verifySingleValueProductArgument(sStatement, argument.getSingleValueProductArgument()).verify().isVerified());
 		}
 
 		@Test
@@ -360,7 +360,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			n = secureRandom.nextInt(k - 1) + 2;
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
 
-			productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
+			// Need to remove 0 as this can lead to a valid proof even though we expect invalid.
+			MixnetHashService mixnetHashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			productArgumentService = new ProductArgumentService(randomService, mixnetHashService, publicKey, commitmentKey);
 
 			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
 			longStatement = getProductStatement(longWitness, commitmentKey);
@@ -425,8 +427,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with correct input returns true")
 		void verifyProductArgumentWithCorrectInput() {
-			assertTrue(productArgumentService.verifyProductArgument(longStatement, longArgument));
-			assertTrue(productArgumentService.verifyProductArgument(shortStatement, shortArgument));
+			assertTrue(productArgumentService.verifyProductArgument(longStatement, longArgument).verify().isVerified());
+			assertTrue(productArgumentService.verifyProductArgument(shortStatement, shortArgument).verify().isVerified());
 		}
 
 		@Test
@@ -437,10 +439,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductArgument badArgument = new ProductArgument(badCommitment, longArgument.getHadamardArgument(),
 					longArgument.getSingleValueProductArgument());
 
-			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
-			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
-			assertFalse(argumentService.verifyProductArgument(longStatement, badArgument));
+			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Hadamard Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -455,10 +456,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), badHadamardArgument,
 					longArgument.getSingleValueProductArgument());
 
-			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
-			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
-			assertFalse(argumentService.verifyProductArgument(longStatement, badArgument));
+			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Hadamard Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -479,10 +479,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 					.build();
 			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), longArgument.getHadamardArgument(), badSArgument);
 
-			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
-			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
-			assertFalse(argumentService.verifyProductArgument(longStatement, badArgument));
+			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Single Value Product Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -503,10 +502,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 					.build();
 			ProductArgument badArgument = new ProductArgument(badSArgument);
 
-			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
-			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			ProductArgumentService argumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
-			assertFalse(argumentService.verifyProductArgument(shortStatement, badArgument));
+			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(shortStatement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Single Value Product Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@ParameterizedTest(name = "{5}")
@@ -522,7 +520,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, mixnetHashService, publicKey,
 					commitmentKey);
 
-			assertEquals(expectedOutput, productArgumentService.verifyProductArgument(productStatement, productArgument),
+			assertEquals(expectedOutput, productArgumentService.verifyProductArgument(productStatement, productArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));
 		}
 

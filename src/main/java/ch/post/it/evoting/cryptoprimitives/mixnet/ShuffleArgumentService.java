@@ -26,7 +26,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -288,9 +287,9 @@ class ShuffleArgumentService {
 	 * @param argument  the argument to be verified. Non null.
 	 * @param m         the number of rows to use for ciphertext matrices. Strictly positive integer.
 	 * @param n         the number of columns to use for ciphertext matrices. Strictly positive integer.
-	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise.
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	boolean verifyShuffleArgument(final ShuffleStatement statement, final ShuffleArgument argument, final int m, final int n) {
+	VerificationResult verifyShuffleArgument(final ShuffleStatement statement, final ShuffleArgument argument, final int m, final int n) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
@@ -378,7 +377,8 @@ class ShuffleArgumentService {
 		final ProductStatement pStatement = new ProductStatement(vectorEntryWiseProduct(cD, cNegativeZ), b);
 
 		// Verify product argument.
-		final BooleanSupplier productVerif = () -> productArgumentService.verifyProductArgument(pStatement, productArgument);
+		final Verifiable productVerif = productArgumentService.verifyProductArgument(pStatement, productArgument)
+				.addErrorMessage("Failed to verify Product Argument.");
 
 		// Compute ciphertext C. The vector x is computed previously as xPowers.
 		final ElGamalMultiRecipientCiphertext ciphertextC = getCiphertextVectorExponentiation(ciphertextsC, xPowers);
@@ -387,10 +387,10 @@ class ShuffleArgumentService {
 		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(shuffledCiphertextsCPrime.toMatrix(m, n),
 				ciphertextC, cB);
 
-		final BooleanSupplier multiVerif = () -> multiExponentiationArgumentService
-				.verifyMultiExponentiationArgument(mStatement, multiExponentiationArgument);
+		final Verifiable multiVerif = multiExponentiationArgumentService.verifyMultiExponentiationArgument(mStatement, multiExponentiationArgument)
+				.addErrorMessage("Failed to verify MultiExponentiation Argument.");
 
-		return productVerif.getAsBoolean() && multiVerif.getAsBoolean();
+		return productVerif.and(multiVerif).verify();
 	}
 
 	// ===============================================================================================================================================

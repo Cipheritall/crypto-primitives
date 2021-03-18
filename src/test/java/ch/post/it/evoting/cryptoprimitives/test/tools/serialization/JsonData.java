@@ -24,12 +24,9 @@ import java.util.stream.StreamSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import lombok.Getter;
-
 /**
  * Represents one of the general object present in the json test files and provides utility method to convert data to the supported types.
  */
-@Getter
 public final class JsonData {
 
 	/* The underlying jackson node. */
@@ -85,6 +82,10 @@ public final class JsonData {
 	 */
 	public JsonData getJsonData(final String field) {
 		return new JsonData(jsonNode.path(field));
+	}
+
+	public JsonNode getJsonNode() {
+		return jsonNode;
 	}
 
 	/**

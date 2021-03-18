@@ -17,18 +17,15 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -51,8 +48,6 @@ class SingleValueProductArgumentService {
 	private final MixnetHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
-
-	private final Logger log = LoggerFactory.getLogger(SingleValueProductArgumentService.class);
 
 	SingleValueProductArgumentService(final RandomService randomService, final MixnetHashService hashService,
 			final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey) {
@@ -176,9 +171,9 @@ class SingleValueProductArgumentService {
 	 *
 	 * @param statement the statement for which the argument is to be verified.
 	 * @param argument  the argument to be verified.
-	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	boolean verifySingleValueProductArgument(final SingleValueProductStatement statement, final SingleValueProductArgument argument) {
+	Verifiable verifySingleValueProductArgument(final SingleValueProductStatement statement, final SingleValueProductArgument argument) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
@@ -204,12 +199,7 @@ class SingleValueProductArgumentService {
 		// Verify A
 		final GqElement prodCa = ca.exponentiate(x).multiply(cd);
 		final GqElement commA = getCommitment(aTilde, rTilde, commitmentKey);
-		final BooleanSupplier verifA = () -> prodCa.equals(commA);
-
-		if (!verifA.getAsBoolean()) {
-			log.error("prodCa {} and commA {} are not equal", prodCa, commA);
-			return false;
-		}
+		final Verifiable verifA = create(() -> prodCa.equals(commA), String.format("prodCa %s and commA %s are not equal", prodCa, commA));
 
 		// Verify Delta
 		final GqElement prodDelta = cUpperDelta.exponentiate(x).multiply(cLowerDelta);
@@ -218,23 +208,15 @@ class SingleValueProductArgumentService {
 						.subtract(bTilde.get(i).multiply(aTilde.get(i + 1))))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), GroupVector::from));
 		final GqElement commDelta = getCommitment(eiVector, sTilde, commitmentKey);
-		final BooleanSupplier verifDelta = () -> prodDelta.equals(commDelta);
-
-		if (!verifDelta.getAsBoolean()) {
-			log.error("prodDelta {} and commDelta {} are not equal", prodDelta, commDelta);
-			return false;
-		}
+		final Verifiable verifDelta = create(() -> prodDelta.equals(commDelta),
+				String.format("prodDelta %s and commDelta %s are not equal", prodDelta, commDelta));
 
 		// Verify B
-		final BooleanSupplier verifB = () -> bTilde.get(0).equals(aTilde.get(0)) && bTilde.get(n - 1).equals(x.multiply(b));
+		final Verifiable verifB = create(() -> bTilde.get(0).equals(aTilde.get(0)) && bTilde.get(n - 1).equals(x.multiply(b)),
+				String.format("bTilde.get(0) %s must equal aTilde.get(0) %s and bTilde.get(n - 1) %s must equal x * b %s", bTilde.get(0),
+						aTilde.get(0), bTilde.get(n - 1), x.multiply(b)));
 
-		if (!verifB.getAsBoolean()) {
-			log.error("bTilde.get(0) {} must equal aTilde.get(0) {} and bTilde.get(n - 1) {} must equal x * b {}", bTilde.get(0), aTilde.get(0),
-					bTilde.get(n - 1), x.multiply(b));
-			return false;
-		}
-
-		return verifA.getAsBoolean() && verifDelta.getAsBoolean() && verifB.getAsBoolean();
+		return verifA.and(verifDelta).and(verifB);
 	}
 
 	private ZqElement hashAndConvertX(final GqElement cUpperDelta, final GqElement cLowerDelta, final GqElement cd, final ZqElement b,

@@ -24,9 +24,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.stream.IntStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -39,13 +36,9 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 final class ProductArgumentService {
 
 	private final RandomService randomService;
-	private final MixnetHashService hashService;
-	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final HadamardArgumentService hadamardArgumentService;
 	private final SingleValueProductArgumentService singleValueProductArgumentService;
-
-	private final Logger log = LoggerFactory.getLogger(ProductArgumentService.class);
 
 	/**
 	 * Constructs a ProductArgumentService.
@@ -58,11 +51,11 @@ final class ProductArgumentService {
 	ProductArgumentService(final RandomService randomService, final MixnetHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		this.randomService = checkNotNull(randomService);
-		this.hashService = checkNotNull(hashService);
-		this.publicKey = checkNotNull(publicKey);
+		checkNotNull(hashService);
+		checkNotNull(publicKey);
 		this.commitmentKey = checkNotNull(commitmentKey);
-		this.hadamardArgumentService = new HadamardArgumentService(this.randomService, this.hashService, this.publicKey, this.commitmentKey);
-		this.singleValueProductArgumentService = new SingleValueProductArgumentService(this.randomService, this.hashService, this.publicKey,
+		this.hadamardArgumentService = new HadamardArgumentService(this.randomService, hashService, publicKey, this.commitmentKey);
+		this.singleValueProductArgumentService = new SingleValueProductArgumentService(this.randomService, hashService, publicKey,
 				this.commitmentKey);
 
 		// Group checking
@@ -164,9 +157,9 @@ final class ProductArgumentService {
 	 *
 	 * @param statement the statement for which the argument is to be verified.
 	 * @param argument  the argument to be verified.
-	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	boolean verifyProductArgument(final ProductStatement statement, final ProductArgument argument) {
+	Verifiable verifyProductArgument(final ProductStatement statement, final ProductArgument argument) {
 		checkNotNull(statement, "The statement must be non-null.");
 		checkNotNull(argument, "The argument must be non-null.");
 
@@ -191,22 +184,20 @@ final class ProductArgumentService {
 
 			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
 			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
-			if (hadamardArgumentService.verifyHadamardArgument(hStatement, hArgument) &&
-					singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)) {
-				return true;
-			} else {
-				log.error("Failed to verify the HadamardArgument and the SingleValueProductArgument.");
-				return false;
-			}
+
+			final Verifiable verifHadamard = hadamardArgumentService.verifyHadamardArgument(hStatement, hArgument).addErrorMessage("Failed to verify Hadamard Argument.");
+
+			final Verifiable verifSVP = singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
+					.addErrorMessage("Failed to verify Single Value Product Argument.");
+
+			return verifHadamard.and(verifSVP);
 		} else { // corresponds to the case m=1 (number of ciphertexts is prime), where we omit the Hadamard Argument.
 			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
 
-			if (singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)) {
-				return true;
-			} else {
-				log.error("Failed to verify the SingleValueProductArgument.");
-				return false;
-			}
+			final Verifiable verifSVP = singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
+					.addErrorMessage("Failed to verify Single Value Product Argument.");
+
+			return verifSVP;
 		}
 	}
 }

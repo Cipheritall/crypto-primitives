@@ -84,7 +84,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
 		publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
 
-		TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
+		final TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 		randomService = new RandomService();
 
@@ -255,7 +255,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			MultiExponentiationArgument computed = service.getMultiExponentiationArgument(values.createStatement(), values.createWitness());
 
 			assertEquals(values.createArgument(), computed);
-			assertTrue(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			assertTrue(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify().isVerified());
 		}
 	}
 
@@ -312,7 +312,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			MultiExponentiationStatement statement = pair.getStatement();
 			MultiExponentiationWitness witness = pair.getWitness();
 			MultiExponentiationArgument argument = argumentService.getMultiExponentiationArgument(statement, witness);
-			assertTrue(argumentService.verifyMultiExponentiationArgument(statement, argument));
+			assertTrue(argumentService.verifyMultiExponentiationArgument(statement, argument).verify().isVerified());
 		}
 
 		@Test
@@ -320,7 +320,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.ciphertextMatrix = with(values.ciphertextMatrix, 0, 0, values.c2);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
 		}
 
 		@Test
@@ -328,7 +330,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.ciphertext = ElGamalMultiRecipientCiphertext.create(values.gNine, Arrays.asList(values.gThirteen, values.gThirteen, values.gOne));
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("E_m must equal C.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -336,7 +341,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.ca = with(values.ca, 1, values.gNine);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Ca must equal commitment A.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -344,7 +352,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.cA0 = values.gEight;
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Ca must equal commitment A.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -352,7 +363,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.cB = with(values.cB, 0, values.gOne);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Cb must equal commitment B.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -360,7 +374,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.eVector = with(values.eVector, 0, values.e1);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
 		}
 
 		@Test
@@ -368,7 +384,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.aVector = with(values.aVector, 0, values.zEight);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Ca must equal commitment A.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -376,7 +395,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.r = values.zFour;
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Ca must equal commitment A.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -384,7 +406,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.b = values.zFour;
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Cb must equal commitment B.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -392,7 +417,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.s = values.zFour;
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product Cb must equal commitment B.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -400,7 +428,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			SpecificValues values = new SpecificValues();
 			values.tau = values.zFour;
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
-			assertFalse(service.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()));
+			final VerificationResult verificationResult = service
+					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("product E must equal ciphertext product of Gb and product C.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@ParameterizedTest(name = "{5}")
@@ -416,7 +447,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			final MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService,
 					mixnetHashService);
 
-			assertEquals(expectedOutput, service.verifyMultiExponentiationArgument(statement, argument),
+			assertEquals(expectedOutput, service.verifyMultiExponentiationArgument(statement, argument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));
 		}
 

@@ -16,19 +16,16 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -52,8 +49,6 @@ public class HadamardArgumentService {
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
-
-	private final Logger log = LoggerFactory.getLogger(HadamardArgumentService.class);
 
 	/**
 	 * Constructs a {code HadamardArgumentService}.
@@ -268,9 +263,9 @@ public class HadamardArgumentService {
 	 *
 	 * @param statement the statement for which the argument is to be verified.
 	 * @param argument  the argument to be verified.
-	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	boolean verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
+	Verifiable verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
@@ -292,12 +287,9 @@ public class HadamardArgumentService {
 
 		// Start verification
 		final int m = cA.size();
-		final BooleanSupplier verifB = () -> cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB);
-		if (!verifB.getAsBoolean()) {
-			log.error("cUpperB.get(0) {} must equal cA.get(0) {} and cUpperB.get(m - 1) {} must equal cLowerB {}",
-					cUpperB.get(0), cA.get(0), cUpperB.get(m - 1), cLowerB);
-			return false;
-		}
+		final Verifiable verifB = create(() -> cUpperB.get(0).equals(cA.get(0)) && cUpperB.get(m - 1).equals(cLowerB),
+				String.format("cUpperB.get(0) %s must equal cA.get(0) %s and cUpperB.get(m - 1) %s must equal cLowerB %s", cUpperB.get(0),
+						cA.get(0), cUpperB.get(m - 1), cLowerB));
 
 		// Calculate x
 		final byte[] hashX = hashService.recursiveHash(
@@ -350,14 +342,9 @@ public class HadamardArgumentService {
 		final GroupVector<GqElement, GqGroup> zCommitmentsB = cDiList.append(cD);
 		final ZeroStatement zStatement = new ZeroStatement(zCommitmentsA, zCommitmentsB, y);
 		final ZeroArgument zArgument = argument.getZeroArgument();
-		final BooleanSupplier verifZ = () -> zeroArgumentService.verifyZeroArgument(zStatement, zArgument);
+		final Verifiable verifZ = zeroArgumentService.verifyZeroArgument(zStatement, zArgument).addErrorMessage("Failed to verify the ZeroArgument.");
 
-		if (!verifZ.getAsBoolean()) {
-			log.error("Failed to verify the ZeroArgument");
-			return false;
-		}
-
-		return verifB.getAsBoolean() && verifZ.getAsBoolean();
+		return verifB.and(verifZ);
 	}
 
 	/**

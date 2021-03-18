@@ -387,7 +387,8 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with correct input returns true")
 		void verifyHadamardArgumentWithCorrectInput() {
-			assertTrue(hadamardArgumentService.verifyHadamardArgument(statement, argument));
+			final VerificationResult verificationResult = hadamardArgumentService.verifyHadamardArgument(statement, argument).verify();
+			assertTrue(verificationResult.isVerified());
 		}
 
 		@Test
@@ -399,7 +400,12 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
 			HadamardArgument badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
 
-			assertFalse(hadamardArgumentService.verifyHadamardArgument(statement, badArgument));
+			final VerificationResult verificationResult = hadamardArgumentService.verifyHadamardArgument(statement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			String expectedError = String
+					.format("cUpperB.get(0) %s must equal cA.get(0) %s and cUpperB.get(m - 1) %s must equal cLowerB %s", badcUpperB0,
+							statement.getCommitmentsA().get(0), cUpperB.get(m - 1), statement.getCommitmentB());
+			assertEquals(expectedError, verificationResult.getErrorMessages().getFirst());
 
 			int m = cUpperB.size();
 			GqElement badcUpperBmMinusOne = cUpperB.get(m - 1).multiply(gqGroup.getGenerator());
@@ -409,7 +415,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
 			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
 			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
-			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument));
+			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument).verify().isVerified());
 		}
 
 		@Test
@@ -432,7 +438,10 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
 			MixnetHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
 			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
-			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument));
+
+			final VerificationResult verificationResult = argumentService.verifyHadamardArgument(statement, badArgument).verify();
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify the ZeroArgument.", verificationResult.getErrorMessages().element());
 		}
 	}
 
@@ -516,10 +525,13 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		void verifyHadamardArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 				final HadamardStatement hadamardStatement, final HadamardArgument hadamardArgument, final boolean expectedOutput, String description)
 				throws NoSuchAlgorithmException {
-			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
+			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+
 			final HadamardArgumentService service = new HadamardArgumentService(randomService, mixnetHashService, publicKey, commitmentKey);
-			assertEquals(expectedOutput, service.verifyHadamardArgument(hadamardStatement, hadamardArgument),
+
+			assertEquals(expectedOutput, service.verifyHadamardArgument(hadamardStatement, hadamardArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));
 		}
 

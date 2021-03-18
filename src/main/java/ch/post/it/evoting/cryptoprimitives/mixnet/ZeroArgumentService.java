@@ -19,6 +19,7 @@ import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentVector;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -28,9 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -55,8 +53,6 @@ final class ZeroArgumentService {
 
 	private final RandomService randomService;
 	private final MixnetHashService hashService;
-
-	private final Logger log = LoggerFactory.getLogger(ZeroArgumentService.class);
 
 	ZeroArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 			final RandomService randomService, final MixnetHashService hashService) {
@@ -306,9 +302,9 @@ final class ZeroArgumentService {
 	 *
 	 * @param argument  the statement for which the argument is to be verified.
 	 * @param statement the argument to be verified.
-	 * @return <b>true</b> if the argument is valid for the given statement, <b>false</b> otherwise
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	boolean verifyZeroArgument(final ZeroStatement statement, final ZeroArgument argument) {
+	Verifiable verifyZeroArgument(final ZeroStatement statement, final ZeroArgument argument) {
 
 		checkNotNull(statement);
 		checkNotNull(argument);
@@ -324,12 +320,8 @@ final class ZeroArgumentService {
 
 		final ZqElement x = hashAndConvertX(statement, argument);
 
-		final boolean verifCd = BigInteger.ONE.equals(cd.get(m + 1).getValue());
-
-		if (!verifCd) {
-			log.error("cd.get(m + 1).getValue() {} should equal BigInteger.ONE", cd.get(m + 1).getValue());
-			return false;
-		}
+		final Verifiable verifCd = create(() -> BigInteger.ONE.equals(cd.get(m + 1).getValue()),
+				String.format("cd.get(m + 1).getValue() %s should equal BigInteger.ONE", cd.get(m + 1).getValue()));
 
 		final List<ZqElement> exponentiatedXs = IntStream.range(0, (2 * m) + 1)
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
@@ -347,12 +339,7 @@ final class ZeroArgumentService {
 		final ZqElement rPrime = argument.getRPrime();
 
 		final GqElement commA = getCommitment(aPrime, rPrime, commitmentKey);
-		final boolean verifA = prodCa.equals(commA);
-
-		if (!verifA) {
-			log.error("commA {} and prodCa {} are not equal ", commA, prodCa);
-			return false;
-		}
+		final Verifiable verifA = create(() -> prodCa.equals(commA), String.format("commA %s and prodCa %s are not equal", commA, prodCa));
 
 		final GroupVector<GqElement, GqGroup> augmentedCB = cB.append(argument.getCBm());
 
@@ -364,12 +351,7 @@ final class ZeroArgumentService {
 		final ZqElement sPrime = argument.getSPrime();
 
 		final GqElement commB = getCommitment(bPrime, sPrime, commitmentKey);
-		final boolean verifB = prodCb.equals(commB);
-
-		if (!verifB) {
-			log.error("prodCb {} and commB {} are not equal ", prodCb, commB);
-			return false;
-		}
+		final Verifiable verifB = create(() -> prodCb.equals(commB), String.format("prodCb %s and commB %s are not equal", prodCb, commB));
 
 		final GqElement prodCd = IntStream.range(0, (2 * m) + 1)
 				.mapToObj(i -> cd.get(i).exponentiate(exponentiatedXs.get(i)))
@@ -379,16 +361,9 @@ final class ZeroArgumentService {
 
 		final ZqElement tPrime = argument.getTPrime();
 		final GqElement commD = getCommitment(prod, tPrime, commitmentKey);
+		final Verifiable verifD = create(() -> prodCd.equals(commD), String.format("prodCd %s and commD %s are not equal", prodCd, commD));
 
-		final boolean verifD = prodCd.equals(commD);
-
-		if (!verifD) {
-			log.error("prodCd {} and commD {} are not equal ", prodCd, commD);
-			return false;
-		}
-
-		return true;
-
+		return verifCd.and(verifA).and(verifB).and(verifD);
 	}
 
 	private ZqElement hashAndConvertX(final ZeroStatement zeroStatement, final ZeroArgument zeroArgument) {

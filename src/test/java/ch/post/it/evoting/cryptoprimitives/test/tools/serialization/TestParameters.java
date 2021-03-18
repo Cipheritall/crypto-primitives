@@ -27,12 +27,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import lombok.Getter;
-
 /**
  * General deserialization of json test files according to the schema defined in the specifications.
  */
-@Getter
 public final class TestParameters {
 
 	private String description;
@@ -65,6 +62,22 @@ public final class TestParameters {
 		} catch (final IOException e) {
 			throw new RuntimeException("Read values failed for file " + url.getPath() + ". " + e.getMessage());
 		}
+	}
+
+	public JsonData getContext() {
+		return context;
+	}
+
+	public JsonData getInput() {
+		return input;
+	}
+
+	public JsonData getOutput() {
+		return output;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	private static final class JsonDataDeserializer extends JsonDeserializer<JsonData> {

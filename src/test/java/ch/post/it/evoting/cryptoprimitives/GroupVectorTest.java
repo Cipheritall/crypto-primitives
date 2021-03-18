@@ -61,7 +61,7 @@ class GroupVectorTest {
 
 	@Test
 	void testOfWithInvalidParametersThrows() {
-		assertThrows(NullPointerException.class, () -> GroupVector.of(null));
+		assertThrows(NullPointerException.class, () -> GroupVector.of((TestGroupElement[]) null));
 
 		// With null elem.
 		TestGroup group = new TestGroup();

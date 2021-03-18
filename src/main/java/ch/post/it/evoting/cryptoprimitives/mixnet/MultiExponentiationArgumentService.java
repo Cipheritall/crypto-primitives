@@ -22,6 +22,7 @@ import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientC
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.constantMessage;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
@@ -339,7 +339,16 @@ final class MultiExponentiationArgumentService {
 				.collect(toGroupVector());
 	}
 
-	boolean verifyMultiExponentiationArgument(final MultiExponentiationStatement statement, final MultiExponentiationArgument argument) {
+	/**
+	 * Verifies the correctness of a {@link MultiExponentiationArgument} with respect to a given {@link MultiExponentiationStatement}.
+	 * <p>
+	 * The statement and the argument must be non null and have compatible groups.
+	 *
+	 * @param statement the statement for which the argument is to be verified.
+	 * @param argument  the argument to be verified.
+	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
+	 */
+	Verifiable verifyMultiExponentiationArgument(final MultiExponentiationStatement statement, final MultiExponentiationArgument argument) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
@@ -383,46 +392,41 @@ final class MultiExponentiationArgumentService {
 		//Hash value is guaranteed to be smaller than q
 		final ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
 
-		final BooleanSupplier verifCbm = () -> cBVector.get(m).equals(gqGroup.getIdentity());
-		final BooleanSupplier verifEm = () -> EVector.get(m).equals(C);
+		final Verifiable verifCbm = create(() -> cBVector.get(m).equals(gqGroup.getIdentity()), "cB_m must equal one.");
+		final Verifiable verifEm = create(() -> EVector.get(m).equals(C), "E_m must equal C.");
 
 		final Memoizer<ZqElement> xPowI = new Memoizer<>(i -> x.exponentiate(BigInteger.valueOf(i)));
 
-		final BooleanSupplier verifA = () -> {
-			GqElement prodCa = prodExp(cA.prepend(cA0), xPowI);
-			GqElement commA = getCommitment(aVector, r, ck);
-			return prodCa.equals(commA);
-		};
+		final GqElement prodCa = prodExp(cA.prepend(cA0), xPowI);
+		final GqElement commA = getCommitment(aVector, r, ck);
+		final Verifiable verifA = create(() -> prodCa.equals(commA), "product Ca must equal commitment A.");
 
-		final BooleanSupplier verifB = () -> {
-			GqElement prodCb = prodExp(cBVector, xPowI);
-			GqElement commB = getCommitment(GroupVector.of(b), s, ck);
-			return prodCb.equals(commB);
-		};
+		final GqElement prodCb = prodExp(cBVector, xPowI);
+		final GqElement commB = getCommitment(GroupVector.of(b), s, ck);
+		final Verifiable verifB = create(() -> prodCb.equals(commB), "product Cb must equal commitment B.");
 
-		final BooleanSupplier verifEC = () -> {
-			final ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, EVector.size())
-					.boxed()
-					.flatMap(i -> Stream.of(i)
-							.map(EVector::get)
-							.map(Ek -> Ek.exponentiate(xPowI.apply(i))))
-					.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
-			final ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
-					.map(gqGroup.getGenerator()::exponentiate)
-					.map(gPowB -> constantMessage(gPowB, l))
-					.map(gPowBMessage -> getCiphertext(gPowBMessage, tau, pk))
-					.collect(onlyElement());
-			final ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
-					.boxed()
-					.flatMap(j -> Stream.of(j)
-							.map(i -> xPowI.apply(m - i - 1))
-							.map(xExponentiated -> vectorScalarMultiplication(xExponentiated, aVector))
-							.map(powers -> getCiphertextVectorExponentiation(CMatrix.getRow(j), powers)))
-					.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
-			return prodE.equals(encryptedGb.multiply(prodC));
-		};
+		final ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, EVector.size())
+				.boxed()
+				.flatMap(i -> Stream.of(i)
+						.map(EVector::get)
+						.map(Ek -> Ek.exponentiate(xPowI.apply(i))))
+				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
+		final ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
+				.map(gqGroup.getGenerator()::exponentiate)
+				.map(gPowB -> constantMessage(gPowB, l))
+				.map(gPowBMessage -> getCiphertext(gPowBMessage, tau, pk))
+				.collect(onlyElement());
+		final ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
+				.boxed()
+				.flatMap(j -> Stream.of(j)
+						.map(i -> xPowI.apply(m - i - 1))
+						.map(xExponentiated -> vectorScalarMultiplication(xExponentiated, aVector))
+						.map(powers -> getCiphertextVectorExponentiation(CMatrix.getRow(j), powers)))
+				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
+		final Verifiable verifEC = create(() -> prodE.equals(encryptedGb.multiply(prodC)),
+				"product E must equal ciphertext product of Gb and product C.");
 
-		return verifCbm.getAsBoolean() && verifEm.getAsBoolean() && verifA.getAsBoolean() && verifB.getAsBoolean() && verifEC.getAsBoolean();
+		return verifCbm.and(verifEm).and(verifA).and(verifB).and(verifEC);
 	}
 
 	private static GroupVector<ZqElement, ZqGroup> vectorSum(final GroupVector<ZqElement, ZqGroup> first,

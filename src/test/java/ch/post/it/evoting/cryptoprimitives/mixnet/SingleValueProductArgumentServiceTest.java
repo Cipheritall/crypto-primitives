@@ -92,7 +92,8 @@ class SingleValueProductArgumentServiceTest {
 		publicKey = keyPair.getPublicKey();
 		TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		commitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
-		hashService = TestHashService.create(gqGroup.getQ());
+		// Need to remove 0 as this can lead to a valid proof even though we expect invalid.
+		hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
 		argumentService = new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 	}
 
@@ -307,17 +308,20 @@ class SingleValueProductArgumentServiceTest {
 		@Test
 		@DisplayName("with a correct argument returns true")
 		void verifySingleValueProductArgumentWithCorrectArgument() {
-			assertTrue(argumentService.verifySingleValueProductArgument(statement, argument));
+			final VerificationResult verificationResult = argumentService.verifySingleValueProductArgument(statement, argument).verify();
+			assertTrue(verificationResult.isVerified());
 		}
 
 		@Test
-		@DisplayName("with an incorrect argument returns false")
-		void verifySingleValueProductArgumentWithIncorrectArgument() {
+		@DisplayName("with an incorrect statement returns false")
+		void verifySingleValueProductArgumentWithIncorrectStatement() {
 			GqElement commitment = statement.getCommitment();
 			commitment = commitment.multiply(gqGroup.getGenerator());
 			ZqElement product = statement.getProduct();
 			statement = new SingleValueProductStatement(commitment, product);
-			assertFalse(argumentService.verifySingleValueProductArgument(statement, argument));
+
+			final VerificationResult verificationResult = argumentService.verifySingleValueProductArgument(statement, argument).verify();
+			assertFalse(verificationResult.isVerified());
 		}
 
 		@ParameterizedTest
@@ -333,7 +337,8 @@ class SingleValueProductArgumentServiceTest {
 			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, mixnetHashService, publicKey,
 					commitmentKey);
 
-			assertEquals(expectedOutput, service.verifySingleValueProductArgument(singleValueProductStatement, singleValueProductArgument),
+			assertEquals(expectedOutput,
+					service.verifySingleValueProductArgument(singleValueProductStatement, singleValueProductArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));
 		}
 

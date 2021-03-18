@@ -29,9 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -39,7 +37,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -53,8 +50,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
@@ -526,7 +521,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("valid parameters returns true")
 		void verifyShuffleArgumentValidParams() {
-			assertTrue(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n));
+			assertTrue(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n).isVerified());
 		}
 
 		@Test
@@ -582,7 +577,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.getShuffledCiphertexts());
 
-			assertFalse(shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n));
+			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n);
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify MultiExponentiation Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -597,7 +594,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.getShuffledCiphertexts(), badShuffledCiphertexts);
 
-			assertFalse(shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n));
+			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n);
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify MultiExponentiation Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -614,7 +613,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
 
-			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Product Argument.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -631,7 +632,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
 
-			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Product Argument.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -666,7 +669,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
 
-			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify Product Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -693,7 +698,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.withMultiExponentiationArgument(badMultiExponentiationArgument)
 					.build();
 
-			assertFalse(shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n));
+			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
+			assertFalse(verificationResult.isVerified());
+			assertEquals("Failed to verify MultiExponentiation Argument.", verificationResult.getErrorMessages().getFirst());
 		}
 
 		Stream<Arguments> jsonData() {
@@ -739,7 +746,6 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 				Integer m = testParameters.getInput().get("m", Integer.class);
 				Integer n = testParameters.getInput().get("n", Integer.class);
 
-
 				//Output
 				final JsonData outputData = testParameters.getOutput();
 				boolean output = outputData.get("result", Boolean.class);
@@ -757,7 +763,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 			MixnetHashService mixnetHashService = new MixnetHashService(hashService, pk.getGroup().getQ().bitLength());
 			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, mixnetHashService);
-			assertEquals(output, service.verifyShuffleArgument(statement, argument, m, n), String.format("assertion failed for: %s", description));
+			assertEquals(output, service.verifyShuffleArgument(statement, argument, m, n).isVerified(),
+					String.format("assertion failed for: %s", description));
 		}
 	}
 }
