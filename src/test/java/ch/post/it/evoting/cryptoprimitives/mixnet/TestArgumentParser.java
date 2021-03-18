@@ -161,16 +161,14 @@ class TestArgumentParser {
 
 	}
 	ProductArgument parseProductArgument(final JsonData argumentData) {
-		final TestArgumentParser argumentParser = new TestArgumentParser(gqGroup);
-		final SingleValueProductArgument singleValueProductArgument = argumentParser
-				.parseSingleValueProductArgument(argumentData.getJsonData("single_vpa"));
+		final SingleValueProductArgument singleValueProductArgument = this.parseSingleValueProductArgument(argumentData.getJsonData("single_vpa"));
 
 		ProductArgument productArgument;
 		final JsonData cbJsonData = argumentData.getJsonData("c_b");
 		if (!cbJsonData.getJsonNode().isMissingNode()) {
 			final BigInteger cbValue = argumentData.get("c_b", BigInteger.class);
 			final GqElement cb = GqElement.create(cbValue, gqGroup);
-			final HadamardArgument hadamardArgument = argumentParser.parseHadamardArgument(argumentData.getJsonData("hadamard_argument"));
+			final HadamardArgument hadamardArgument = this.parseHadamardArgument(argumentData.getJsonData("hadamard_argument"));
 
 			productArgument = new ProductArgument(cb, hadamardArgument, singleValueProductArgument);
 		} else {

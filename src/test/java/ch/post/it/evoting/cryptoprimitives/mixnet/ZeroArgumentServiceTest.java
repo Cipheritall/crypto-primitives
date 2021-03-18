@@ -742,7 +742,6 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		private ZeroStatement parseZeroStatement(final GqGroup realGqGroup, final JsonData input) {
 			final JsonData zeroStatementJsonData = input.getJsonData("statement");
-			zeroStatementJsonData.getJsonData("c_a");
 
 			final GroupVector<GqElement, GqGroup> cA = parseCommitment(zeroStatementJsonData, "c_a", realGqGroup);
 			final GroupVector<GqElement, GqGroup> cB = parseCommitment(zeroStatementJsonData, "c_b", realGqGroup);
