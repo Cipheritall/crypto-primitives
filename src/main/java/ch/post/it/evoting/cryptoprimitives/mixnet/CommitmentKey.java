@@ -151,7 +151,7 @@ class CommitmentKey implements HashableList {
 	 * @param gqGroup          the gqGroup to which the commitment key belongs. Must be non null.
 	 * @return the created commitment key.
 	 */
-	static CommitmentKey getVerifiableCommitmentKey(int numberOfElements, GqGroup gqGroup) throws NoSuchAlgorithmException {
+	static CommitmentKey getVerifiableCommitmentKey(final int numberOfElements, final GqGroup gqGroup) throws NoSuchAlgorithmException {
 
 		checkArgument(numberOfElements > 0, "The desired number of commitment elements must be greater than zero");
 		checkNotNull(gqGroup);
@@ -160,24 +160,27 @@ class CommitmentKey implements HashableList {
 
 		int count = 0;
 		int i = 0;
+
+		// Using a Set to prevent duplicates.
 		final Set<BigInteger> v = new LinkedHashSet<>();
 
 		final Predicate<BigInteger> validElement = w -> !w.equals(BigInteger.ZERO)
 				&& !w.equals(BigInteger.ONE)
 				&& !w.equals(gqGroup.getGenerator().getValue())
-				&& v.add(w);
+				&& !v.contains(w);
 
 		while (count <= numberOfElements) {
 
-			BigInteger u = ConversionService.byteArrayToInteger(hashService.recursiveHash(
+			final BigInteger u = ConversionService.byteArrayToInteger(hashService.recursiveHash(
 					HashableBigInteger.from(gqGroup.getQ()),
 					HashableString.from(HASH_CONSTANT),
 					HashableBigInteger.from(BigInteger.valueOf(i)),
 					HashableBigInteger.from(BigInteger.valueOf(count))));
 
-			BigInteger w = u.modPow(BigInteger.valueOf(2), gqGroup.getP());
+			final BigInteger w = u.modPow(BigInteger.valueOf(2), gqGroup.getP());
 
 			if (validElement.test(w)) {
+				v.add(w);
 				count++;
 			}
 			i++;

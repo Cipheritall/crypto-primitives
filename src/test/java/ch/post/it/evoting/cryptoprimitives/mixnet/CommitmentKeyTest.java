@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,33 +124,33 @@ class CommitmentKeyTest {
 	@Test
 	void getVerifiableCommitmentKey() throws NoSuchAlgorithmException {
 
-		int numberOfCommitmentElements = 8;
-		GqGroup gqGroup = GroupTestData.getGroupP59();
-		CommitmentKey verifiableCommitmentKey = CommitmentKey.getVerifiableCommitmentKey(numberOfCommitmentElements, gqGroup);
+		final int numberOfCommitmentElements = 15;
+		final GqGroup gqGroup = GroupTestData.getGroupP59();
+		final CommitmentKey verifiableCommitmentKey = CommitmentKey.getVerifiableCommitmentKey(numberOfCommitmentElements, gqGroup);
+
 		assertNotNull(verifiableCommitmentKey.getGroup());
 
-		GqElement h = GqElement.create(BigInteger.valueOf(16), gqGroup);
+		final GqElement h = GqElement.create(BigInteger.valueOf(16), gqGroup);
 
-		GqElement g1 = GqElement.create(BigInteger.valueOf(4), gqGroup);
-		GqElement g2 = GqElement.create(BigInteger.valueOf(57), gqGroup);
-		GqElement g3 = GqElement.create(BigInteger.valueOf(20), gqGroup);
-		GqElement g4 = GqElement.create(BigInteger.valueOf(25), gqGroup);
-		GqElement g5 = GqElement.create(BigInteger.valueOf(46), gqGroup);
-		GqElement g6 = GqElement.create(BigInteger.valueOf(12), gqGroup);
-		GqElement g7 = GqElement.create(BigInteger.valueOf(15), gqGroup);
-		GqElement g8 = GqElement.create(BigInteger.valueOf(27), gqGroup);
+		final List<GqElement> gqElements = Arrays.asList(
+				GqElement.create(BigInteger.valueOf(4), gqGroup),
+				GqElement.create(BigInteger.valueOf(57), gqGroup),
+				GqElement.create(BigInteger.valueOf(20), gqGroup),
+				GqElement.create(BigInteger.valueOf(25), gqGroup),
+				GqElement.create(BigInteger.valueOf(46), gqGroup),
+				GqElement.create(BigInteger.valueOf(12), gqGroup),
+				GqElement.create(BigInteger.valueOf(15), gqGroup),
+				GqElement.create(BigInteger.valueOf(27), gqGroup),
+				GqElement.create(BigInteger.valueOf(17), gqGroup),
+				GqElement.create(BigInteger.valueOf(41), gqGroup),
+				GqElement.create(BigInteger.valueOf(51), gqGroup),
+				GqElement.create(BigInteger.valueOf(22), gqGroup),
+				GqElement.create(BigInteger.valueOf(35), gqGroup),
+				GqElement.create(BigInteger.valueOf(45), gqGroup),
+				GqElement.create(BigInteger.valueOf(21), gqGroup));
 
-		List<GqElement> gqElements = new ArrayList<>();
-		gqElements.add(g1);
-		gqElements.add(g2);
-		gqElements.add(g3);
-		gqElements.add(g4);
-		gqElements.add(g5);
-		gqElements.add(g6);
-		gqElements.add(g7);
-		gqElements.add(g8);
+		final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gqElements);
 
-		CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gqElements);
 		assertEquals(expectedCommitmentKey, verifiableCommitmentKey);
 	}
 
