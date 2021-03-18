@@ -66,37 +66,6 @@ public final class ConversionService {
 	}
 
 	/**
-	 * Do not use.
-	 *
-	 * <p>
-	 * Implements the specification IntegerToByteArray algorithm. It is used in tests to show that it is equivalent to the more performant method
-	 * used.
-	 *
-	 * @param x the positive BigInteger to convert.
-	 * @return the byte array representation of this BigInteger.
-	 **/
-	static byte[] integerToByteArraySpec(final BigInteger x) {
-		checkNotNull(x);
-		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
-
-		if (x.compareTo(BigInteger.ZERO) == 0) {
-			return new byte[1];
-		}
-
-		final int bitLength = x.bitLength();
-		final int n = (bitLength + Byte.SIZE - 1) / Byte.SIZE;
-
-		final byte[] output = new byte[n];
-		BigInteger current = x;
-		for (int i = 1; i <= n; i++) {
-			output[n - i] = current.byteValue();
-			current = current.shiftRight(Byte.SIZE);
-		}
-
-		return output;
-	}
-
-	/**
 	 * Converts a byte array to its BigInteger equivalent.
 	 * <p>
 	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation, which is equivalent to the specification of

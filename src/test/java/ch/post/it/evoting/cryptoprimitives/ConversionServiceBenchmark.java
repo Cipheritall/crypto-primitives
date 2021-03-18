@@ -60,6 +60,6 @@ public class ConversionServiceBenchmark {
 	@Fork(value = 1)
 	@Measurement(iterations = 4, time = 5)
 	public byte[] bigIntegerToByteArray(MyState state) {
-		return ConversionService.integerToByteArraySpec(state.randomBigInteger);
+		return ConversionServiceEquivalenceTest.integerToByteArraySpec(state.randomBigInteger);
 	}
 }
