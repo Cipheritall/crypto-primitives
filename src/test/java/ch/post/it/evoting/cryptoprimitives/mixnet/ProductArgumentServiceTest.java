@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestProductGenerator.genProductWitness;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestProductGenerator.getProductStatement;
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;

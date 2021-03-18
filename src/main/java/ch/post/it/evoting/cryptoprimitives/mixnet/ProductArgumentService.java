@@ -185,7 +185,8 @@ final class ProductArgumentService {
 			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
 			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
 
-			final Verifiable verifHadamard = hadamardArgumentService.verifyHadamardArgument(hStatement, hArgument).addErrorMessage("Failed to verify Hadamard Argument.");
+			final Verifiable verifHadamard = hadamardArgumentService.verifyHadamardArgument(hStatement, hArgument)
+					.addErrorMessage("Failed to verify Hadamard Argument.");
 
 			final Verifiable verifSVP = singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
 					.addErrorMessage("Failed to verify Single Value Product Argument.");
@@ -194,10 +195,8 @@ final class ProductArgumentService {
 		} else { // corresponds to the case m=1 (number of ciphertexts is prime), where we omit the Hadamard Argument.
 			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
 
-			final Verifiable verifSVP = singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
+			return singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
 					.addErrorMessage("Failed to verify Single Value Product Argument.");
-
-			return verifSVP;
 		}
 	}
 }
