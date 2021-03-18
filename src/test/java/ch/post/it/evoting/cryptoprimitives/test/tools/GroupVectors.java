@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 public class GroupVectors {

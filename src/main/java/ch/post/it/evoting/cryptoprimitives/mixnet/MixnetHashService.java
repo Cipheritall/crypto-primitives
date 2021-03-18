@@ -18,8 +18,8 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ch.post.it.evoting.cryptoprimitives.HashService;
-import ch.post.it.evoting.cryptoprimitives.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 
 /**
  * {@link HashService} to be used by the different mixnet algorithms. This class ensures that the used message digest has an output length smaller

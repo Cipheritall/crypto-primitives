@@ -32,6 +32,8 @@ import java.util.stream.IntStream;
 import com.google.common.collect.ForwardingList;
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 

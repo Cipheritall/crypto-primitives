@@ -18,7 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.test.tools;
 import java.math.BigInteger;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
 
 public class TestGroupElement implements GroupVectorElement<TestGroup>, HashableBigInteger {
