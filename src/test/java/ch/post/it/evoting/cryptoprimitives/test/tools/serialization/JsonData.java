@@ -70,6 +70,8 @@ public final class JsonData {
 			return clazz.cast(Base64.getDecoder().decode(jsonNode.get(field).asText()));
 		} else if (clazz.equals(Boolean.class)) {
 			return clazz.cast(jsonNode.get(field).asBoolean());
+		} else if (clazz.equals(Integer.class)){
+			return clazz.cast(jsonNode.get(field).asInt());
 		} else {
 			throw new IllegalArgumentException("Unsupported target class.");
 		}

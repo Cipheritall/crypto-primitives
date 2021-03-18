@@ -43,7 +43,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 	private static int m;
 	private static int n;
 	private static int l;
-	private static ArgumentGenerator argumentGenerator;
+	private static TestArgumentGenerator argumentGenerator;
 
 	private static GroupVector<GqElement, GqGroup> cA;
 	private static GroupVector<GqElement, GqGroup> cB;
@@ -55,7 +55,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		m = secureRandom.nextInt(UPPER_BOUND) + 1;
 		n = secureRandom.nextInt(UPPER_BOUND - 1) + 2;
 		l = secureRandom.nextInt(UPPER_BOUND) + 1;
-		argumentGenerator = new ArgumentGenerator(gqGroup);
+		argumentGenerator = new TestArgumentGenerator(gqGroup);
 
 		cA = gqGroupGenerator.genRandomGqElementVector(m);
 		cB = gqGroupGenerator.genRandomGqElementVector(m);
@@ -134,7 +134,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("product argument from different group throws IllegalArgumentException")
 		void shuffleArgumentBuilderDiffGroupProduct() {
-			final ProductArgument otherGroupProductArgument = new ArgumentGenerator(otherGqGroup).genProductArgument(m, n);
+			final ProductArgument otherGroupProductArgument = new TestArgumentGenerator(otherGqGroup).genProductArgument(m, n);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
 					.withCA(cA)
@@ -150,7 +150,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("multi exponentiation argument from different group throws IllegalArgumentException")
 		void shuffleArgumentBuilderDiffGroupMultiExponentiation() {
-			final MultiExponentiationArgument otherGroupMultiExponentiationArgument = new ArgumentGenerator(otherGqGroup)
+			final MultiExponentiationArgument otherGroupMultiExponentiationArgument = new TestArgumentGenerator(otherGqGroup)
 					.genMultiExponentiationArgument(m, n, l);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()

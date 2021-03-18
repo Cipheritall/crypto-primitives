@@ -59,7 +59,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		n = secureRandom.nextInt(DIMENSIONS_BOUND) + 1;
 		l = secureRandom.nextInt(DIMENSIONS_BOUND) + 1;
 
-		final ArgumentGenerator argumentGenerator = new ArgumentGenerator(gqGroup);
+		final TestArgumentGenerator argumentGenerator = new TestArgumentGenerator(gqGroup);
 		final MultiExponentiationArgument multiExponentiationArgument = argumentGenerator.genMultiExponentiationArgument(m, n, l);
 
 		cA0 = multiExponentiationArgument.getcA0();

@@ -56,7 +56,7 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 		m = secureRandom.nextInt(UPPER_BOUND_TEST_SIZE) + 1;
 		l = secureRandom.nextInt(UPPER_BOUND_TEST_SIZE) + 1;
 
-		MultiExponentiationStatementGenerator statementGenerator = new MultiExponentiationStatementGenerator(gqGroup);
+		TestMultiExponentiationStatementGenerator statementGenerator = new TestMultiExponentiationStatementGenerator(gqGroup);
 		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
 		this.CMatrix = statement.getCMatrix();
 		this.C = statement.getC();

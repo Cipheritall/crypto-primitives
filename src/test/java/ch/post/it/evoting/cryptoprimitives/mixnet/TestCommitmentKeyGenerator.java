@@ -25,11 +25,11 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
-public class CommitmentKeyGenerator {
+public class TestCommitmentKeyGenerator {
 
 	private final GqGroupGenerator generator;
 
-	CommitmentKeyGenerator(GqGroup group) {
+	TestCommitmentKeyGenerator(GqGroup group) {
 		checkNotNull(group);
 		this.generator = new GqGroupGenerator(group);
 

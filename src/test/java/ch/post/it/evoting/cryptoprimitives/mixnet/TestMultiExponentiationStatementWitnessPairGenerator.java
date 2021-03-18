@@ -25,7 +25,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
-public class MultiExponentiationStatementWitnessPairGenerator {
+public class TestMultiExponentiationStatementWitnessPairGenerator {
 
 	private final GqGroup gqGroup;
 	private final ZqGroup zqGroup;
@@ -34,7 +34,7 @@ public class MultiExponentiationStatementWitnessPairGenerator {
 	private final MultiExponentiationArgumentService argumentService;
 	private final CommitmentKey commitmentKey;
 
-	MultiExponentiationStatementWitnessPairGenerator(GqGroup group, MultiExponentiationArgumentService argumentService, CommitmentKey commitmentKey) {
+	TestMultiExponentiationStatementWitnessPairGenerator(GqGroup group, MultiExponentiationArgumentService argumentService, CommitmentKey commitmentKey) {
 		this.gqGroup = group;
 		this.zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		this.zqGroupGenerator = new ZqGroupGenerator(zqGroup);

@@ -75,9 +75,6 @@ class ShuffleArgumentService {
 		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public key and commitment key must belong to the same group.");
 
-		// Dimension checking.
-		checkArgument(publicKey.size() == commitmentKey.size(), "The commitment key and public key must be of the same size.");
-
 		this.publicKey = publicKey;
 		this.commitmentKey = commitmentKey;
 		this.randomService = randomService;

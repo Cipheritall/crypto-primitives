@@ -33,7 +33,7 @@ class ProductArgumentTest extends TestGroupSetup {
 
 	private static int m;
 	private static int n;
-	private static ArgumentGenerator argumentGenerator;
+	private static TestArgumentGenerator argumentGenerator;
 
 	private static GqElement commitmentB;
 	private static SingleValueProductArgument singleValueProductArgument;
@@ -44,7 +44,7 @@ class ProductArgumentTest extends TestGroupSetup {
 		// Exclude m = 1 because we want to test the constructor with an Hadamard Argument.
 		m = secureRandom.nextInt(UPPER_BOUND - 1) + 2;
 		n = secureRandom.nextInt(UPPER_BOUND - 1) + 2;
-		argumentGenerator = new ArgumentGenerator(gqGroup);
+		argumentGenerator = new TestArgumentGenerator(gqGroup);
 
 		final ProductArgument productArgument = argumentGenerator.genProductArgument(m, n);
 
@@ -79,7 +79,7 @@ class ProductArgumentTest extends TestGroupSetup {
 	@Test
 	@DisplayName("constructed with Hadamard argument from different group throws IllegalArgumentException")
 	void constructWithDiffGroupHadamard() {
-		final HadamardArgument otherGroupHadamardArgument = new ArgumentGenerator(otherGqGroup).genHadamardArgument(m, n);
+		final HadamardArgument otherGroupHadamardArgument = new TestArgumentGenerator(otherGqGroup).genHadamardArgument(m, n);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ProductArgument(commitmentB, otherGroupHadamardArgument, singleValueProductArgument));
@@ -90,7 +90,7 @@ class ProductArgumentTest extends TestGroupSetup {
 	@Test
 	@DisplayName("constructed with single value product argument from different group throws IllegalArgumentException")
 	void constructWithDiffGroupSingleValueProduct() {
-		final SingleValueProductArgument otherSingleValueProductArgument = new ArgumentGenerator(otherGqGroup).genSingleValueProductArgument(n);
+		final SingleValueProductArgument otherSingleValueProductArgument = new TestArgumentGenerator(otherGqGroup).genSingleValueProductArgument(n);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ProductArgument(commitmentB, hadamardArgument, otherSingleValueProductArgument));

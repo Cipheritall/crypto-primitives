@@ -40,7 +40,7 @@ class HadamardArgumentTest extends TestGroupSetup {
 	void setup() {
 		final int n = secureRandom.nextInt(UPPER_BOUND) + 1;
 		m = secureRandom.nextInt(UPPER_BOUND) + 1;
-		final ArgumentGenerator argumentGenerator = new ArgumentGenerator(gqGroup);
+		final TestArgumentGenerator argumentGenerator = new TestArgumentGenerator(gqGroup);
 
 		commitmentsB = gqGroupGenerator.genRandomGqElementVector(m);
 

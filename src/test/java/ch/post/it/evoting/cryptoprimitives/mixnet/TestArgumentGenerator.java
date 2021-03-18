@@ -26,13 +26,13 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator
 /**
  * Allow to generate at random, based on a gqGroup, the different argument needed in various tests.
  */
-class ArgumentGenerator {
+class TestArgumentGenerator {
 
 	private final GqGroupGenerator gqGroupGenerator;
 	private final ZqGroupGenerator zqGroupGenerator;
 	private final ElGamalGenerator elGamalGenerator;
 
-	ArgumentGenerator(final GqGroup gqGroup) {
+	TestArgumentGenerator(final GqGroup gqGroup) {
 		this.gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		this.zqGroupGenerator = new ZqGroupGenerator(ZqGroup.sameOrderAs(gqGroup));
 		this.elGamalGenerator = new ElGamalGenerator(gqGroup);

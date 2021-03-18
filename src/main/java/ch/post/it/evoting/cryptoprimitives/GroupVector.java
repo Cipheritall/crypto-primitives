@@ -173,7 +173,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * Transforms this vector into a matrix.
 	 * <p>
 	 * The elements of this vector <b><i>v</i></b> of size <i>N</i> = <i>mn</i> are rearranged into a matrix of size <i>m</i> &times; <i>n</i>, where
-	 * element M<sub>i,j</sub> of the matrix corresponds to element v<sub>i + mj</sub> of the vector.
+	 * element M<sub>i,j</sub> of the matrix corresponds to element v<sub>n*i + j</sub> of the vector.
 	 *
 	 * @param numRows    m, the number of rows of the matrix to be created
 	 * @param numColumns n, the number of columns of the matrix to be created
@@ -189,7 +189,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 		// Create the matrix
 		return IntStream.range(0, numRows)
 				.mapToObj(i -> IntStream.range(0, numColumns)
-						.mapToObj(j -> this.get(i + numRows * j))
+						.mapToObj(j -> this.get(numColumns * i + j))
 						.collect(Collectors.toList()))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), GroupMatrix::fromRows));
 	}

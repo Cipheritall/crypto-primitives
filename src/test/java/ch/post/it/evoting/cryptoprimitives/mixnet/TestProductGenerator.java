@@ -25,7 +25,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
-class ProductGenerator {
+class TestProductGenerator {
 
 	static ProductWitness genProductWitness(final int n, final int m, final ZqGroupGenerator zqGroupGenerator) {
 		GroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m);

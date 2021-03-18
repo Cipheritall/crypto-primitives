@@ -33,12 +33,12 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 
-class ArgumentParser {
+class TestArgumentParser {
 
 	private final GqGroup gqGroup;
 	private final ZqGroup zqGroup;
 
-	ArgumentParser(final GqGroup gqGroup) {
+	TestArgumentParser(final GqGroup gqGroup) {
 		this.gqGroup = gqGroup;
 		this.zqGroup = ZqGroup.sameOrderAs(gqGroup);
 	}
@@ -159,6 +159,24 @@ class ArgumentParser {
 				.withtau(tau)
 				.build();
 
+	}
+	ProductArgument parseProductArgument(final JsonData argumentData) {
+		final TestArgumentParser argumentParser = new TestArgumentParser(gqGroup);
+		final SingleValueProductArgument singleValueProductArgument = argumentParser
+				.parseSingleValueProductArgument(argumentData.getJsonData("single_vpa"));
+
+		ProductArgument productArgument;
+		final JsonData cbJsonData = argumentData.getJsonData("c_b");
+		if (!cbJsonData.getJsonNode().isMissingNode()) {
+			final BigInteger cbValue = argumentData.get("c_b", BigInteger.class);
+			final GqElement cb = GqElement.create(cbValue, gqGroup);
+			final HadamardArgument hadamardArgument = argumentParser.parseHadamardArgument(argumentData.getJsonData("hadamard_argument"));
+
+			productArgument = new ProductArgument(cb, hadamardArgument, singleValueProductArgument);
+		} else {
+			productArgument = new ProductArgument(singleValueProductArgument);
+		}
+		return productArgument;
 	}
 
 	ElGamalMultiRecipientCiphertext parseCiphertext(final JsonData ciphertextData) {

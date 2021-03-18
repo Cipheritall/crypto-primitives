@@ -56,14 +56,14 @@ class CommitmentServiceTest {
 	private GqGroup gqGroup;
 	private ZqGroup zqGroup;
 	private CommitmentKey validCommitmentKey;
-	private CommitmentKeyGenerator ckGenerator;
+	private TestCommitmentKeyGenerator ckGenerator;
 
 	@BeforeEach
 	void setup() {
 		gqGroup = GroupTestData.getGqGroup();
 		zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		zqGroupGenerator = new ZqGroupGenerator(zqGroup);
-		ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		validCommitmentKey = ckGenerator.genCommitmentKey(KEY_LENGTH);
 	}
 
@@ -120,7 +120,7 @@ class CommitmentServiceTest {
 		@DisplayName("with elements to be committed to and commitment key in groups of different order throws IllegalArgumentException")
 		void getCommitmentWithCommitmentKeyGroupDifferentOrderThanValuesGroup() {
 			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(differentGqGroup);
+			TestCommitmentKeyGenerator otherGenerator = new TestCommitmentKeyGenerator(differentGqGroup);
 			CommitmentKey differentCommitmentKey = otherGenerator.genCommitmentKey(KEY_LENGTH);
 			assertThrows(IllegalArgumentException.class, () -> CommitmentService.getCommitment(validElements, randomValue, differentCommitmentKey));
 		}
@@ -235,7 +235,7 @@ class CommitmentServiceTest {
 		@DisplayName("with matrix group and commitment key group different order throws IllegalArgumentException")
 		void getCommitmentMatrixWithCommitmentKeyGroupDifferentOrderThanValuesGroup() {
 			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			CommitmentKeyGenerator otherGenerator = new CommitmentKeyGenerator(differentGqGroup);
+			TestCommitmentKeyGenerator otherGenerator = new TestCommitmentKeyGenerator(differentGqGroup);
 			CommitmentKey differentCommitmentKey = otherGenerator.genCommitmentKey(n);
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitmentMatrix(validMatrix, validRandomValues, differentCommitmentKey));
@@ -345,7 +345,7 @@ class CommitmentServiceTest {
 		@DisplayName("with elements to be committed to and commitment key in groups of different order throws IllegalArgumentException")
 		void getCommitmentVectorWithCommitmentKeyGroupDifferentOrderThanValuesGroup() {
 			GqGroup differentGqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
-			CommitmentKeyGenerator otherCkGenerator = new CommitmentKeyGenerator(differentGqGroup);
+			TestCommitmentKeyGenerator otherCkGenerator = new TestCommitmentKeyGenerator(differentGqGroup);
 			CommitmentKey differentCommitmentKey = otherCkGenerator.genCommitmentKey(KEY_LENGTH);
 			assertThrows(IllegalArgumentException.class,
 					() -> CommitmentService.getCommitmentVector(validElements, validRandomElements, differentCommitmentKey));

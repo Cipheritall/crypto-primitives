@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestHadamardGenerators.generateHadamardStatement;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestHadamardGenerators.generateHadamardWitness;
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.mixnet.HadamardGenerators.generateHadamardStatement;
-import static ch.post.it.evoting.cryptoprimitives.mixnet.HadamardGenerators.generateHadamardWitness;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -73,7 +73,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 	private static int n;
 	private static int m;
 
-	private static CommitmentKeyGenerator commitmentKeyGenerator;
+	private static TestCommitmentKeyGenerator commitmentKeyGenerator;
 
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
@@ -88,7 +88,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		m = secureRandom.nextInt(MATRIX_BOUNDS - 1) + 2; // The Hadamard argument only works with 2 or more columns
 		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
 		publicKey = elGamalGenerator.genRandomPublicKey(n);
-		commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
+		commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(n);
 		hashService = TestHashService.create(gqGroup.getQ());
 		hadamardArgumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
@@ -365,7 +365,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with the statement and the argument having different group orders throws an IllegalArgumentException")
 		void verifyHadamardArgumentWithStatementAndArgumentFromDifferentGroups() {
 			HadamardWitness otherWitness = generateHadamardWitness(n, m, otherZqGroup);
-			CommitmentKey otherCommitmentKey = new CommitmentKeyGenerator(otherGqGroup).genCommitmentKey(n);
+			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(n);
 			HadamardStatement otherStatement = generateHadamardStatement(otherWitness, otherCommitmentKey);
 
 			Exception exception = assertThrows(IllegalArgumentException.class,
@@ -528,7 +528,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 			return parametersList.stream().parallel().map(testParameters -> {
 				// Context.
-				final Context context = new Context(testParameters.getContext());
+				final TestContextParser context = new TestContextParser(testParameters.getContext());
 
 				final GqGroup gqGroup = context.getGqGroup();
 				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
@@ -539,7 +539,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 				HadamardStatement hadamardStatement = parseHadamardStatement(gqGroup, input);
 
 				JsonData hadamardArgumentJsonData = input.getJsonData("argument");
-				HadamardArgument hadamardArgument = new ArgumentParser(gqGroup).parseHadamardArgument(hadamardArgumentJsonData);
+				HadamardArgument hadamardArgument = new TestArgumentParser(gqGroup).parseHadamardArgument(hadamardArgumentJsonData);
 
 				// Output.
 				final JsonData output = testParameters.getOutput();

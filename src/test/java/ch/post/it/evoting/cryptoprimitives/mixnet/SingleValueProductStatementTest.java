@@ -50,7 +50,7 @@ class SingleValueProductStatementTest {
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
-		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
 
 		GroupVector<ZqElement, ZqGroup> elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);

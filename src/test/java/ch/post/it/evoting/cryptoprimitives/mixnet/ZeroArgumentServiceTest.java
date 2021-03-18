@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCommitment;
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -95,7 +96,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	@BeforeAll
 	static void setUpAll() throws Exception {
 		// Generate publicKey and commitmentKey.
-		final CommitmentKeyGenerator commitmentKeyGenerator = new CommitmentKeyGenerator(gqGroup);
+		final TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
 
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
@@ -720,7 +721,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			return parametersList.stream().parallel().map(testParameters -> {
 				// Context.
 				final JsonData contextData = testParameters.getContext();
-				final Context context = new Context(contextData);
+				final TestContextParser context = new TestContextParser(contextData);
 				final GqGroup realGqGroup = context.getGqGroup();
 
 				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
@@ -729,7 +730,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 				// Inputs.
 				final JsonData input = testParameters.getInput();
 				final ZeroStatement zeroStatement = parseZeroStatement(realGqGroup, input);
-				final ZeroArgument zeroArgument = new ArgumentParser(realGqGroup).parseZeroArgument(input.getJsonData("argument"));
+				final ZeroArgument zeroArgument = new TestArgumentParser(realGqGroup).parseZeroArgument(input.getJsonData("argument"));
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
@@ -741,16 +742,12 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		private ZeroStatement parseZeroStatement(final GqGroup realGqGroup, final JsonData input) {
 			final JsonData zeroStatementJsonData = input.getJsonData("statement");
-			final BigInteger[] cAValues = zeroStatementJsonData.get("c_a", BigInteger[].class);
-			final BigInteger[] cBValues = zeroStatementJsonData.get("c_b", BigInteger[].class);
-			final BigInteger yValue = zeroStatementJsonData.get("y", BigInteger.class);
+			zeroStatementJsonData.getJsonData("c_a");
 
-			final GroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
-					.map(bi -> GqElement.create(bi, realGqGroup))
-					.collect(toGroupVector());
-			final GroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
-					.map(bi -> GqElement.create(bi, realGqGroup))
-					.collect(toGroupVector());
+			final GroupVector<GqElement, GqGroup> cA = parseCommitment(zeroStatementJsonData, "c_a", realGqGroup);
+			final GroupVector<GqElement, GqGroup> cB = parseCommitment(zeroStatementJsonData, "c_b", realGqGroup);
+
+			final BigInteger yValue = zeroStatementJsonData.get("y", BigInteger.class);
 			final ZqElement y = ZqElement.create(yValue, ZqGroup.sameOrderAs(realGqGroup));
 
 			return new ZeroStatement(cA, cB, y);

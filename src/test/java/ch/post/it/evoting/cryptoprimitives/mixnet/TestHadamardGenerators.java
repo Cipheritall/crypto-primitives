@@ -28,7 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
-class HadamardGenerators {
+class TestHadamardGenerators {
 
 	static HadamardWitness generateHadamardWitness(final int n, final int m, final ZqGroup zqGroup) {
 		ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);

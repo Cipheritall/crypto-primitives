@@ -58,7 +58,7 @@ class ZeroArgumentTest extends TestGroupSetup {
 	static void setUpAll() {
 		final int m = secureRandom.nextInt(UPPER_BOUND) + 1;
 		n = secureRandom.nextInt(UPPER_BOUND) + 1;
-		final ZeroArgument zeroArgument = new ArgumentGenerator(gqGroup).genZeroArgument(m, n);
+		final ZeroArgument zeroArgument = new TestArgumentGenerator(gqGroup).genZeroArgument(m, n);
 
 		cA0 = zeroArgument.getCA0();
 		cBm = zeroArgument.getCBm();

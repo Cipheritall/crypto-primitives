@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestProductGenerator.genProductWitness;
+import static ch.post.it.evoting.cryptoprimitives.mixnet.TestProductGenerator.getProductStatement;
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.genProductWitness;
-import static ch.post.it.evoting.cryptoprimitives.mixnet.ProductGenerator.getProductStatement;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +82,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		hashService = TestHashService.create(gqGroup.getQ());
 		publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(k);
 
-		commitmentKey = new CommitmentKeyGenerator(gqGroup).genCommitmentKey(k);
+		commitmentKey = new TestCommitmentKeyGenerator(gqGroup).genCommitmentKey(k);
 	}
 
 	@Nested
@@ -186,7 +186,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with commitments and commitment key from different group throws IllegalArgumentException")
 		void getProductArgumentWithCommitmentsAndCommitmentKeyFromDifferentGroups() {
 			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
-			CommitmentKey otherCommitmentKey = new CommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
+			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
 			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.getProductArgument(otherStatement, otherWitness));
@@ -402,7 +402,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with statement and argument having different groups throws an IllegalArgumentException")
 		void verifyProductArgumentWithStatementAndArgumentFromDifferentGroups() {
 			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
-			CommitmentKey otherCommitmentKey = new CommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
+			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
 			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
 
 			Exception exception = assertThrows(IllegalArgumentException.class,
@@ -530,9 +530,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/verify-product-argument.json");
 
 			return parametersList.stream().parallel().map(testParameters -> {
-				// Context.
+				// TestContextParser.
 				final JsonData contextData = testParameters.getContext();
-				final Context context = new Context(contextData);
+				final TestContextParser context = new TestContextParser(contextData);
 
 				final GqGroup realGqGroup = context.getGqGroup();
 				final ElGamalMultiRecipientPublicKey realPublicKey = context.parsePublicKey();
@@ -546,21 +546,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 				final ProductStatement productStatement = parseProductStatement(realGqGroup, statement);
 
 				// Product Argument.
-				final ArgumentParser argumentParser = new ArgumentParser(realGqGroup);
-				final SingleValueProductArgument singleValueProductArgument = argumentParser
-						.parseSingleValueProductArgument(argument.getJsonData("single_vpa"));
-
-				ProductArgument productArgument;
-				final JsonData cbJsonData = argument.getJsonData("c_b");
-				if (!cbJsonData.getJsonNode().isMissingNode()) {
-					final BigInteger cbValue = argument.get("c_b", BigInteger.class);
-					final GqElement cb = GqElement.create(cbValue, realGqGroup);
-					final HadamardArgument hadamardArgument = argumentParser.parseHadamardArgument(argument.getJsonData("hadamard_argument"));
-
-					productArgument = new ProductArgument(cb, hadamardArgument, singleValueProductArgument);
-				} else {
-					productArgument = new ProductArgument(singleValueProductArgument);
-				}
+				ProductArgument productArgument = new TestArgumentParser(realGqGroup).parseProductArgument(argument);
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
@@ -581,6 +567,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 			return new ProductStatement(commitments, product);
 		}
+
+
 
 	}
 

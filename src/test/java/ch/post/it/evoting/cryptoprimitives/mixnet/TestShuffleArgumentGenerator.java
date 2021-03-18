@@ -31,7 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
-class ShuffleArgumentGenerator {
+class TestShuffleArgumentGenerator {
 
 	private final GqGroup gqGroup;
 	private final ZqGroupGenerator zqGroupGenerator;
@@ -39,7 +39,7 @@ class ShuffleArgumentGenerator {
 
 	private final PermutationService permutationService;
 
-	ShuffleArgumentGenerator(final GqGroup gqGroup) {
+	TestShuffleArgumentGenerator(final GqGroup gqGroup) {
 		this.gqGroup = gqGroup;
 		final ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		this.zqGroupGenerator = new ZqGroupGenerator(zqGroup);

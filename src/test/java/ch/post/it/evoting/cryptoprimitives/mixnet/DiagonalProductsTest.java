@@ -60,7 +60,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
 		final ElGamalMultiRecipientPublicKey publicKey = elGamalGenerator.genRandomPublicKey(KEY_SIZE);
 
-		final CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		final TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		final CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
 		MixnetHashService hashService = TestHashService.create(gqGroup.getQ());
 		multiExponentiationArgumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(), hashService);
@@ -222,15 +222,15 @@ class DiagonalProductsTest extends TestGroupSetup {
 		// C0 = [ {1, ( 3, 6,  4)} { 4, (12, 16, 6)} ]
 		// C1 = [ {1, (13, 4, 18)} {13, ( 2,  3, 1)} ]
 		ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThree, gSix, gFour));
-		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
-		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
+		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
+		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
 		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
 		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = GroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
 
 		// Create the exponent matrix
 		// A = [0 3 5]
 		// 	   [1 9 1]
-		GroupMatrix<ZqElement, ZqGroup> matrixA = GroupVector.of(zZero, zOne, zThree, zNine, zFive, zOne).toMatrix(2, 3);
+		GroupMatrix<ZqElement, ZqGroup> matrixA = GroupVector.of(zZero, zThree, zFive, zOne, zNine, zOne).toMatrix(2, 3);
 
 		// Create the expected output
 		// D = ( {13, (2, 3, 1)}, {12, (13, 9, 9)}, {8, (13, 16, 13)}, {4, (18, 9, 3)} )
@@ -246,7 +246,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 		// The commitment key and the hash service are only needed for instantiating the service
 		// and are not relevant for the test itself
-		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
 		MixnetHashService hashService = TestHashService.create(q);
 		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),

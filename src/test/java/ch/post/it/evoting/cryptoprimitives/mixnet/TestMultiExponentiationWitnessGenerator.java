@@ -21,10 +21,10 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
-class MultiExponentiationWitnessGenerator {
+class TestMultiExponentiationWitnessGenerator {
 	private final ZqGroupGenerator zqGroupGenerator;
 
-	MultiExponentiationWitnessGenerator(ZqGroup group) {
+	TestMultiExponentiationWitnessGenerator(ZqGroup group) {
 		this.zqGroupGenerator = new ZqGroupGenerator(group);
 	}
 

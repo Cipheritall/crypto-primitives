@@ -44,7 +44,7 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 		n = secureRandom.nextInt(UPPER_BOUND_TEST_SIZE) + 1;
 		m = secureRandom.nextInt(UPPER_BOUND_TEST_SIZE) + 1;
 
-		MultiExponentiationWitnessGenerator witnessGenerator = new MultiExponentiationWitnessGenerator(zqGroup);
+		TestMultiExponentiationWitnessGenerator witnessGenerator = new TestMultiExponentiationWitnessGenerator(zqGroup);
 		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
 		matrixA = witness.getA();
 		exponentsR = witness.getR();

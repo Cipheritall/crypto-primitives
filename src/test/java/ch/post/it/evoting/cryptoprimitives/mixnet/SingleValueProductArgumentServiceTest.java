@@ -90,7 +90,7 @@ class SingleValueProductArgumentServiceTest {
 
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		publicKey = keyPair.getPublicKey();
-		CommitmentKeyGenerator ckGenerator = new CommitmentKeyGenerator(gqGroup);
+		TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		commitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
 		hashService = TestHashService.create(gqGroup.getQ());
 		argumentService = new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey);
@@ -368,7 +368,9 @@ class SingleValueProductArgumentServiceTest {
 				// Inputs.
 				final JsonData input = testParameters.getInput();
 				final SingleValueProductStatement singleValueProductStatement = parseSingleValueProductStatement(gqGroup, zqGroup, input);
-				final SingleValueProductArgument singleValueProductArgument = parseSingleValueProductArgument(gqGroup, zqGroup, input);
+				JsonData singleValueProductArgumentData = input.getJsonData("argument");
+				TestArgumentParser argumentParser = new TestArgumentParser(gqGroup);
+				final SingleValueProductArgument singleValueProductArgument = argumentParser.parseSingleValueProductArgument(singleValueProductArgumentData);
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
@@ -388,39 +390,6 @@ class SingleValueProductArgumentServiceTest {
 			final ZqElement b = ZqElement.create(bValue, zqGroup);
 
 			return new SingleValueProductStatement(ca, b);
-		}
-
-		private SingleValueProductArgument parseSingleValueProductArgument(final GqGroup gqGroup, final ZqGroup zqGroup, final JsonData input) {
-			final JsonData svpArgument = input.getJsonData("argument");
-			final BigInteger cdValue = svpArgument.get("c_d", BigInteger.class);
-			final BigInteger cLowerDeltaValue = svpArgument.get("c_lower_delta", BigInteger.class);
-			final BigInteger cUpperDeltaValue = svpArgument.get("c_upper_delta", BigInteger.class);
-			final BigInteger[] aTildeValues = svpArgument.get("a_tilde", BigInteger[].class);
-			final BigInteger[] bTildeValues = svpArgument.get("b_tilde", BigInteger[].class);
-			final BigInteger rTildeValue = svpArgument.get("r_tilde", BigInteger.class);
-			final BigInteger sTildeValue = svpArgument.get("s_tilde", BigInteger.class);
-
-			final GqElement cd = GqElement.create(cdValue, gqGroup);
-			final GqElement cLowerDelta = GqElement.create(cLowerDeltaValue, gqGroup);
-			final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
-			final GroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
-					.map(bi -> ZqElement.create(bi, zqGroup))
-					.collect(toGroupVector());
-			final GroupVector<ZqElement, ZqGroup> bTilde = Arrays.stream(bTildeValues)
-					.map(bi -> ZqElement.create(bi, zqGroup))
-					.collect(toGroupVector());
-			final ZqElement rTilde = ZqElement.create(rTildeValue, zqGroup);
-			final ZqElement sTilde = ZqElement.create(sTildeValue, zqGroup);
-
-			return new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(aTilde)
-					.withBTilde(bTilde)
-					.withRTilde(rTilde)
-					.withSTilde(sTilde)
-					.build();
 		}
 	}
 

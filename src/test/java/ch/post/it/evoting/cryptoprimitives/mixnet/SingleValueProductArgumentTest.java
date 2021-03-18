@@ -55,7 +55,7 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 	@BeforeAll
 	static void setUpAll() {
 		n = secureRandom.nextInt(UPPER_BOUND) + 2;
-		final SingleValueProductArgument singleValueProductArgument = new ArgumentGenerator(gqGroup).genSingleValueProductArgument(n);
+		final SingleValueProductArgument singleValueProductArgument = new TestArgumentGenerator(gqGroup).genSingleValueProductArgument(n);
 
 		cd = singleValueProductArgument.getCd();
 		cLowerDelta = singleValueProductArgument.getCLowerDelta();

@@ -26,12 +26,12 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 
-class Context {
+class TestContextParser {
 
 	private final JsonData context;
 	private final GqGroup gqGroup;
 
-	Context(final JsonData contextData) {
+	TestContextParser(final JsonData contextData) {
 		final BigInteger p = contextData.get("p", BigInteger.class);
 		final BigInteger q = contextData.get("q", BigInteger.class);
 		final BigInteger g = contextData.get("g", BigInteger.class);
