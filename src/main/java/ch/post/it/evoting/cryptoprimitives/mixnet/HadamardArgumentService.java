@@ -34,6 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -45,7 +46,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class HadamardArgumentService {
 
 	private final RandomService randomService;
-	private final MixnetHashService hashService;
+	private final BoundedHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
@@ -64,7 +65,7 @@ public class HadamardArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key for calculating the commitments.
 	 */
-	HadamardArgumentService(final RandomService randomService, final MixnetHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	HadamardArgumentService(final RandomService randomService, final BoundedHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		checkNotNull(randomService);
 		checkNotNull(hashService);
@@ -91,7 +92,7 @@ public class HadamardArgumentService {
 	 *     <li>be non null</li>
 	 *     <li>commitment c<sub>A</sub> must have the size as the number of columns in matrix A</li>
 	 *     <li>the commitments c<sub>A</sub> must have the same group order than matrix A</li>
-	 *     <li>the matrix A must not have more columns than there are elements in the commitment key</li>
+	 *     <li>the matrix A must not have more rows than there are elements in the commitment key</li>
 	 *     <li>the matrix A must have at least 2 columns</li>
 	 *     <li>the commitments c<sub>A</sub> must correspond to the commitments to matrix A</li>
 	 *     <li>the vector b must be the Hadamard product of the column vectors of matrix A</li>
@@ -117,10 +118,10 @@ public class HadamardArgumentService {
 		// Check dimensions and groups
 		final int m = A.numColumns();
 		final int n = A.numRows();
-		final int k = commitmentKey.size();
+		final int nu = commitmentKey.size();
 		checkArgument(cA.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
 		checkArgument(cA.getGroup().hasSameOrderAs(A.getGroup()), "The matrix A and its commitments must have the same group order q.");
-		checkArgument(n <= k, "The number of rows in the matrix must be smaller than the commitment key size.");
+		checkArgument(n <= nu, "The number of rows in the matrix must be smaller or equal to the commitment key size.");
 
 		// Ensure statement corresponds to witness
 		checkArgument(m >= 2, "The matrix must have at least 2 columns.");

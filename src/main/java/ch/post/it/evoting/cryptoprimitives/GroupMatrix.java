@@ -78,11 +78,13 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * <p>If no rows are provided or if the rows are empty, the matrix is considered empty and has dimensions 0x0. </p>
 	 *
 	 * @param rows the rows of the matrix, which must respect the following:
-	 *             <li>the list must be non-null</li>
-	 *             <li>the list must not contain any nulls</li>
-	 *             <li>all rows must have the same size</li>
-	 *             <li>all elements must be from the same {@link MathematicalGroup} </li>
-	 *             <li>all elements must be the same size</li>
+	 *             <ul>
+	 *             	<li>the list must be non-null</li>
+	 *             	<li>the list must not contain any nulls</li>
+	 *             	<li>all rows must have the same size</li>
+	 *             	<li>all elements must be from the same {@link MathematicalGroup} </li>
+	 *             	<li>all elements must be the same size</li>
+	 *             </ul>
 	 */
 	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
 	GroupMatrix<E, G> fromRows(final List<L> rows) {
@@ -103,11 +105,13 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * <p>If no columns are provided or if the columns are empty, the matrix is considered empty and has dimensions 0x0. </p>
 	 *
 	 * @param columns the columns of the matrix, which must respect the following:
-	 *                <li>the list must be non-null</li>
-	 *                <li>the list must not contain any nulls</li>
-	 *                <li>all columns must have the same size</li>
-	 *                <li>all elements must be from the same {@link MathematicalGroup} </li>
-	 *                <li>all elements must be the same size</li>
+	 *                <ul>
+	 *                	<li>the list must be non-null</li>
+	 *                	<li>the list must not contain any nulls</li>
+	 *                	<li>all columns must have the same size</li>
+	 *                	<li>all elements must be from the same {@link MathematicalGroup} </li>
+	 *                	<li>all elements must be the same size</li>
+	 *                </ul>
 	 */
 	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
 	GroupMatrix<E, G> fromColumns(final List<L> columns) {

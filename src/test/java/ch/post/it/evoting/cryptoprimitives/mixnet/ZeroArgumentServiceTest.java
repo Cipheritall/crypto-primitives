@@ -55,7 +55,9 @@ import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -72,7 +74,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParamete
 class ZeroArgumentServiceTest extends TestGroupSetup {
 
 	private static final BigInteger ZERO = BigInteger.valueOf(0);
-	private static final BigInteger ONE = BigInteger.valueOf(1);
+	private static final BigInteger ONE = BigInteger.ONE;
 	private static final BigInteger TWO = BigInteger.valueOf(2);
 	private static final BigInteger THREE = BigInteger.valueOf(3);
 	private static final BigInteger FOUR = BigInteger.valueOf(4);
@@ -81,7 +83,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	private static final BigInteger SEVEN = BigInteger.valueOf(7);
 	private static final BigInteger EIGHT = BigInteger.valueOf(8);
 	private static final BigInteger NINE = BigInteger.valueOf(9);
-	private static final BigInteger TEN = BigInteger.valueOf(10);
+	private static final BigInteger TEN = BigInteger.TEN;
 	private static final BigInteger ELEVEN = BigInteger.valueOf(11);
 	private static final int KEY_ELEMENTS_NUMBER = 10;
 	private static final SecureRandom secureRandom = new SecureRandom();
@@ -90,7 +92,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	private static CommitmentKey commitmentKey;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static RandomService randomService;
-	private static MixnetHashService hashService;
+	private static BoundedHashService hashService;
 
 	@BeforeAll
 	static void setUpAll() throws Exception {
@@ -630,7 +632,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 					.genRandomInteger(simpleZqGroup.getQ());
 
 			// Mock the hashService.
-			final MixnetHashService hashServiceMock = TestHashService.create(simpleGqGroup.getQ());
+			final BoundedHashService hashServiceMock = TestHashService.create(simpleGqGroup.getQ());
 
 			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
 					hashServiceMock);
@@ -709,9 +711,9 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 				throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, mixnetHashService);
+			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, boundedHashService);
 
 			assertEquals(expectedOutput, service.verifyZeroArgument(zeroStatement, zeroArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));

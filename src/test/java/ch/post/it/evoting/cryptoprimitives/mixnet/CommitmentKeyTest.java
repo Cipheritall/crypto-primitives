@@ -18,9 +18,9 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
@@ -42,14 +43,18 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator
 class CommitmentKeyTest {
 
 	private static GqGroupGenerator generator;
+	private static CommitmentKeyService commitmentKeyService;
+	private static GqGroup gqGroup;
 
 	private GqElement h;
 	private List<GqElement> gs;
 
 	@BeforeAll
-	static void setUpAll() {
-		GqGroup gqGroup = GroupTestData.getGqGroup();
+	static void setUpAll() throws NoSuchAlgorithmException {
+		gqGroup = GroupTestData.getGqGroup();
 		generator = new GqGroupGenerator(gqGroup);
+		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		commitmentKeyService = new CommitmentKeyService(hashService);
 	}
 
 	@BeforeEach
@@ -122,11 +127,11 @@ class CommitmentKeyTest {
 	}
 
 	@Test
-	void getVerifiableCommitmentKey() throws NoSuchAlgorithmException {
+	void getVerifiableCommitmentKey() {
 
 		final int numberOfCommitmentElements = 15;
 		final GqGroup gqGroup = GroupTestData.getGroupP59();
-		final CommitmentKey verifiableCommitmentKey = CommitmentKey.getVerifiableCommitmentKey(numberOfCommitmentElements, gqGroup);
+		final CommitmentKey verifiableCommitmentKey = commitmentKeyService.getVerifiableCommitmentKey(numberOfCommitmentElements, gqGroup);
 
 		assertNotNull(verifiableCommitmentKey.getGroup());
 
@@ -155,21 +160,26 @@ class CommitmentKeyTest {
 	}
 
 	@Test
+	void testGetVerifiableCommitmentKeyThrowsOnTooSmallGroup() {
+		GqGroup group = GroupTestData.getGqGroup();
+		int size = group.getQ().subtract(BigInteger.valueOf(3)).add(BigInteger.ONE).intValueExact();
+		assertThrows(IllegalArgumentException.class, () -> commitmentKeyService.getVerifiableCommitmentKey(size, group));
+	}
+
+	@Test
 	void testGetVerifiableCommitmentKeyNullGpGroup() {
-		assertThrows(NullPointerException.class, () -> CommitmentKey.getVerifiableCommitmentKey(1, null));
+		assertThrows(NullPointerException.class, () -> commitmentKeyService.getVerifiableCommitmentKey(1, null));
 	}
 
 	@Test
 	void testGetVerifiableCommitmentKeyIncorrectNumberOfCommitmentElements() {
-		GqGroup gqGroup = mock(GqGroup.class);
-
 		IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> CommitmentKey.getVerifiableCommitmentKey(0, gqGroup));
-		assertEquals("The desired number of commitment elements must be greater than zero", illegalArgumentException.getMessage());
+				() -> commitmentKeyService.getVerifiableCommitmentKey(0, gqGroup));
+		assertEquals("The desired number of commitment elements must be in the range (0, q - 3]", illegalArgumentException.getMessage());
 
 		illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> CommitmentKey.getVerifiableCommitmentKey(-1, gqGroup));
+				() -> commitmentKeyService.getVerifiableCommitmentKey(-1, gqGroup));
 
-		assertEquals("The desired number of commitment elements must be greater than zero", illegalArgumentException.getMessage());
+		assertEquals("The desired number of commitment elements must be in the range (0, q - 3]", illegalArgumentException.getMessage());
 	}
 }

@@ -53,20 +53,6 @@ pipeline {
 			}
 		}
 
-		stage('Prepare') {
-			steps {
-				cleanWs()
-			}
-		}
-
-		stage('Checkout') {
-			steps {
-				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 's-cicd-evoting', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS']]) {
-					sh "git clone --recursive https://${GIT_USER}:${GIT_PASS}@${GIT_END_URL} ."
-				}
-			}
-		}
-
 		stage('Build') {
 			when {
 				not {

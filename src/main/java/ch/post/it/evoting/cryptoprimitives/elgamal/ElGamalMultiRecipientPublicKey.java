@@ -17,7 +17,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -48,34 +48,26 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPublicKey} object.
 	 *
-	 * @param keyElements <p>the list of public key Gq group publicKeyElements, which must satisfy the conditions of a {@link GroupVector} and
-	 *                    the following:
-	 *                    <li>not be empty</li>
-	 *                    <li>no element must be equal to 1</li>
-	 *                    <li>no element must be equal to the generator of the group they belong to</li></p>
+	 * @param keyElements <p>the list of public key Gq group publicKeyElements. Must respect the following:
+	 *                    <ul>
+	 *                    	<li>the list must be non-null.</li>
+	 *                    	<li>the list must be non-empty.</li>
+	 *                    	<li>the list must contain only non-null elements.</li>
+	 *                    	<li>all elements from the list must be from the same mathematical group.</li>
+	 *                    </ul>
 	 */
 	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
 		this.publicKeyElements = GroupVector.from(keyElements);
 		checkArgument(!publicKeyElements.isEmpty(), "An ElGamal public key must not be empty.");
-		checkArgument(keyElements.stream().map(GqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
-				"An ElGamal public key cannot contain a 1 valued element.");
-		checkArgument(keyElements.stream().allMatch(element -> element.getValue().compareTo(element.getGroup().getGenerator().getValue()) != 0),
-				"An ElGamal public key cannot contain an element value equal to the group generator.");
 	}
 
 	/**
 	 * Implements the specification CompressPublicKey algorithm. It compresses the public key to the requested length.
-	 * <p>
-	 * The {@code length} must comply with the following:
-	 * <ul>
-	 * 	<li>the length must be strictly positive.</li>
-	 * 	<li>the length must be at most the public key size.</li>
-	 * </ul>
 	 *
-	 * @param length l, the requested length for key compression.
-	 * @return An output vector with the first {@code length}-1 elements of the public key followed by the compressed computed element.
+	 * @param length l, the requested length for key compression. Must be strictly positive and at most the public key size.
+	 * @return a compressed public key with the first {@code length}-1 elements of the public key followed by the compressed computed element.
 	 */
-	public List<GqElement> compress(final int length) {
+	public ElGamalMultiRecipientPublicKey compress(final int length) {
 
 		final int k = this.size();
 
@@ -90,12 +82,11 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 
 		keyElements.add(compressedKeyElement);
 
-		return keyElements;
+		return new ElGamalMultiRecipientPublicKey(keyElements);
 	}
 
 	@Override
 	public GqGroup getGroup() {
-		//An ElGamal public key is not empty
 		return this.publicKeyElements.getGroup();
 	}
 
@@ -114,6 +105,13 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 		return this.publicKeyElements.stream();
 	}
 
+	/**
+	 * @return a copy of the key elements as a list.
+	 */
+	public List<GqElement> getKeyElements() {
+		return new ArrayList<>(publicKeyElements);
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
@@ -123,7 +121,7 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 			return false;
 		}
 		final ElGamalMultiRecipientPublicKey publicKey = (ElGamalMultiRecipientPublicKey) o;
-		return publicKeyElements.equals(publicKey.publicKeyElements);
+		return this.publicKeyElements.equals(publicKey.publicKeyElements);
 	}
 
 	@Override

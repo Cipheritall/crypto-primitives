@@ -63,10 +63,12 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * Returns a GroupVector of {@code elements}.
 	 *
 	 * @param elements the list of elements contained by this vector, which must respect the following:
-	 *                 <li>the list must be non-null</li>
-	 *                 <li>the list must not contain any nulls</li>
-	 *                 <li>all elements must be from the same {@link MathematicalGroup} </li>
-	 *                 <li>all elements must be of the same size</li>
+	 *                 <ul>
+		 *                 <li>the list must be non-null</li>
+		 *                 <li>the list must not contain any nulls</li>
+		 *                 <li>all elements must be from the same {@link MathematicalGroup} </li>
+		 *                 <li>all elements must be of the same size</li>
+	 *                 </ul>
 	 */
 	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupVector<E, G> from(final List<E> elements) {
 		//Check null values

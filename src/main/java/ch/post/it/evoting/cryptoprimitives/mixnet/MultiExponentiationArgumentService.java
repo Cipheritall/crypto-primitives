@@ -47,6 +47,7 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -62,7 +63,7 @@ final class MultiExponentiationArgumentService {
 	private final ElGamalMultiRecipientPublicKey pk;
 	private final CommitmentKey ck;
 	private final RandomService randomService;
-	private final MixnetHashService hashService;
+	private final BoundedHashService hashService;
 	private final GqGroup gqGroup;
 	private final ZqGroup zqGroup;
 
@@ -82,7 +83,7 @@ final class MultiExponentiationArgumentService {
 	 * @param hashService   the service providing hashing
 	 */
 	MultiExponentiationArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-			final RandomService randomService, final MixnetHashService hashService) {
+			final RandomService randomService, final BoundedHashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);
@@ -136,11 +137,12 @@ final class MultiExponentiationArgumentService {
 
 		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
 		checkArgument(statement.getM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
-		checkArgument(witness.getDimensionN() <= pk.size(), "The number of rows of matrix A must be less than the size of the public key.");
+		checkArgument(witness.getDimensionN() <= ck.size(),
+				"The number of rows of matrix A must be smaller or equal to the size of the commitment key.");
 
 		final int m = statement.getM();
 		final int n = statement.getN();
-		final int l = CMatrix.isEmpty() ? 0 : CMatrix.get(0, 0).size();
+		final int l = CMatrix.isEmpty() ? 0 : CMatrix.getElementSize();
 
 		checkArgument(l <= pk.size(), "The ciphertexts must be smaller than the public key.");
 

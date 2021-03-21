@@ -52,12 +52,13 @@ public class HashService {
 	 * @return the hash of the input.
 	 *
 	 * <p> NOTE:
-	 * <li>If the input object(s) are modified during the calculation of the hash, the output is undefined.</li>
-	 * <li>It is the caller's responsibility to make sure that the input is not infinite (for example if it contains self-references).</li>
-	 * <li>Inputs of different type that have the same byte representation can hash to the same value (for example the empty string and the empty
+	 * <ul>
+	 * 	<li>If the input object(s) are modified during the calculation of the hash, the output is undefined.</li>
+	 * 	<li>It is the caller's responsibility to make sure that the input is not infinite (for example if it contains self-references).</li>
+	 * 	<li>Inputs of different type that have the same byte representation can hash to the same value (for example the empty string and the empty
 	 * byte array, or the integer 1 and the byte array 0x1). It is the caller's responsibility to make sure to avoid these collisions by making sure
 	 * the domain of each input element is well defined. </li>
-	 * </p>
+	 * </ul>
 	 */
 	public final byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);

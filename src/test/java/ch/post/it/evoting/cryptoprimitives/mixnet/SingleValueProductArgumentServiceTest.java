@@ -50,7 +50,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -70,7 +72,7 @@ class SingleValueProductArgumentServiceTest {
 	private static GqGroup gqGroup;
 	private static ZqGroup zqGroup;
 	private static ZqGroupGenerator zqGroupGenerator;
-	private static MixnetHashService hashService;
+	private static BoundedHashService hashService;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
 	private static SingleValueProductArgumentService argumentService;
@@ -216,7 +218,7 @@ class SingleValueProductArgumentServiceTest {
 			// a = (2, 10)
 			List<ZqElement> a = new ArrayList<>();
 			a.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
-			a.add(ZqElement.create(BigInteger.valueOf(10), specificZqGroup));
+			a.add(ZqElement.create(BigInteger.TEN, specificZqGroup));
 			// r = 5
 			ZqElement r = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			// pk = (8, 16)
@@ -235,10 +237,10 @@ class SingleValueProductArgumentServiceTest {
 			GqElement cdelta = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
 			GqElement cDelta = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
 			List<ZqElement> aTilde = new ArrayList<>(2);
-			aTilde.add(ZqElement.create(BigInteger.valueOf(1), specificZqGroup));
+			aTilde.add(ZqElement.create(BigInteger.ONE, specificZqGroup));
 			aTilde.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
 			List<ZqElement> bTilde = new ArrayList<>(2);
-			bTilde.add(ZqElement.create(BigInteger.valueOf(1), specificZqGroup));
+			bTilde.add(ZqElement.create(BigInteger.ONE, specificZqGroup));
 			bTilde.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
 			ZqElement rTilde = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			ZqElement sTilde = ZqElement.create(BigInteger.valueOf(7), specificZqGroup);
@@ -255,14 +257,14 @@ class SingleValueProductArgumentServiceTest {
 			//Mock random integers
 			RandomService randomService = spy(new RandomService());
 			doReturn(BigInteger.valueOf(3), BigInteger.valueOf(7), // d_0, d_1
-					BigInteger.valueOf(10),                        // r_d
+					BigInteger.TEN,                        // r_d
 					BigInteger.valueOf(4), BigInteger.valueOf(8))  // s_0, s_x
 					.when(randomService).genRandomInteger(specificZqGroup.getQ());
 
 			SingleValueProductStatement statement = new SingleValueProductStatement(commitment, product);
 			SingleValueProductWitness witness = new SingleValueProductWitness(GroupVector.from(a), r);
 
-			MixnetHashService hashService = mock(MixnetHashService.class);
+			BoundedHashService hashService = mock(BoundedHashService.class);
 			when(hashService.recursiveHash(any()))
 					.thenReturn(new byte[] { 0b1010 });
 			SingleValueProductArgumentService svpArgumentProvider = new SingleValueProductArgumentService(randomService, hashService, pk, ck);
@@ -331,9 +333,9 @@ class SingleValueProductArgumentServiceTest {
 				final boolean expectedOutput, String description) throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, mixnetHashService, publicKey,
+			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, boundedHashService, publicKey,
 					commitmentKey);
 
 			assertEquals(expectedOutput,
@@ -374,7 +376,8 @@ class SingleValueProductArgumentServiceTest {
 				final SingleValueProductStatement singleValueProductStatement = parseSingleValueProductStatement(gqGroup, zqGroup, input);
 				JsonData singleValueProductArgumentData = input.getJsonData("argument");
 				TestArgumentParser argumentParser = new TestArgumentParser(gqGroup);
-				final SingleValueProductArgument singleValueProductArgument = argumentParser.parseSingleValueProductArgument(singleValueProductArgumentData);
+				final SingleValueProductArgument singleValueProductArgument = argumentParser
+						.parseSingleValueProductArgument(singleValueProductArgumentData);
 
 				// Output.
 				final JsonData output = testParameters.getOutput();

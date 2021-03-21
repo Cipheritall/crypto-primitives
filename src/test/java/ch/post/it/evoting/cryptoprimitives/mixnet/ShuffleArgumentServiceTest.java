@@ -61,7 +61,9 @@ import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -82,7 +84,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 	private static ElGamalGenerator elGamalGenerator;
 	private static TestCommitmentKeyGenerator commitmentKeyGenerator;
-	private static MixnetHashService hashService;
+	private static BoundedHashService hashService;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -95,16 +97,16 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 	@DisplayName("constructed with")
 	class ConstructorTest {
 
-		private int k;
 		private ElGamalMultiRecipientPublicKey publicKey;
 		private CommitmentKey commitmentKey;
 
 		@BeforeEach
 		void setUp() {
-			k = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			int publicKeySize = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			publicKey = elGamalGenerator.genRandomPublicKey(publicKeySize);
 
-			publicKey = elGamalGenerator.genRandomPublicKey(k);
-			commitmentKey = commitmentKeyGenerator.genCommitmentKey(k);
+			int commitmentKeySize = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			commitmentKey = commitmentKeyGenerator.genCommitmentKey(commitmentKeySize);
 		}
 
 		@Test
@@ -127,7 +129,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("public and commitments keys from different group throws IllegalArgumentException")
 		void constructPublicCommitmentKeysDiffGroup() {
-			final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(k);
+			final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(publicKey.size());
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> new ShuffleArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
@@ -310,7 +312,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			BigInteger SEVEN = BigInteger.valueOf(7);
 			BigInteger EIGHT = BigInteger.valueOf(8);
 			BigInteger NINE = BigInteger.valueOf(9);
-			BigInteger TEN = BigInteger.valueOf(10);
+			BigInteger TEN = BigInteger.TEN;
 
 			// Create GqElements
 			GqElement gOne = gqGroup.getIdentity();
@@ -384,7 +386,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					FOUR, NINE, ZERO, ONE, SEVEN,
 					ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
 					.when(shuffleRandomService).genRandomInteger(q);
-			MixnetHashService shuffleHashService = TestHashService.create(gqGroup.getQ());
+			BoundedHashService shuffleHashService = TestHashService.create(gqGroup.getQ());
 			ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey,
 					shuffleRandomService, shuffleHashService);
 
@@ -490,7 +492,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Necessary to return a constant value, otherwise some assertFalse tests can return true because of changes compensating each other (due
 			// to small test groups).
-			final MixnetHashService hashServiceMock = mock(MixnetHashService.class);
+			final BoundedHashService hashServiceMock = mock(BoundedHashService.class);
 			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
 
 			shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
@@ -765,8 +767,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 				Boolean output, String description) throws NoSuchAlgorithmException {
 
 			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			MixnetHashService mixnetHashService = new MixnetHashService(hashService, pk.getGroup().getQ().bitLength());
-			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, mixnetHashService);
+			BoundedHashService boundedHashService = new BoundedHashService(hashService, pk.getGroup().getQ().bitLength());
+			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, boundedHashService);
 			assertEquals(output, service.verifyShuffleArgument(statement, argument, m, n).isVerified(),
 					String.format("assertion failed for: %s", description));
 		}
