@@ -76,7 +76,7 @@ public class BigIntegerOperations {
 	 *
 	 * @param bases        the list of base values
 	 * @param exponents    the list of exponent values
-	 * @param modulus    the modulus > 1
+	 * @param modulus    the modulus &gt; 1
 	 * @return the product of the powers b[0]^e[0] * b[1]^e[1] * ... * b[n-1]^e[n-1] mod modulus
 	 */
 	public static BigInteger multiModExp(final List<BigInteger> bases, final List<BigInteger> exponents, final BigInteger modulus) {

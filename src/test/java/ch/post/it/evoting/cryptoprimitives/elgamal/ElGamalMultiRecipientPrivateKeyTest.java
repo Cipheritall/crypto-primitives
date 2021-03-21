@@ -19,12 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -35,35 +34,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 
 @DisplayName("A multi-recipient secret key")
 class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 
-	private static ZqElement zqElement;
 	private static ElGamalGenerator elGamalGenerator;
 
 	@BeforeAll
 	static void setUp() {
-		zqElement = zqGroupGenerator.genRandomZqElementMember();
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
-	}
-
-	@Test
-	void givenAnExponentOfZeroThenThrows() {
-		ZqElement zeroExponent = ZqElement.create(BigInteger.ZERO, zqGroup);
-		List<ZqElement> exponents = Arrays.asList(zqElement, zeroExponent);
-		assertThrows(IllegalArgumentException.class, () -> new ElGamalMultiRecipientPrivateKey(exponents));
-	}
-
-	@Test
-	void givenAnExponentOfOneThenThrows() {
-		ZqElement oneExponent = ZqElement.create(BigInteger.ONE, zqGroup);
-		List<ZqElement> exponents = Arrays.asList(zqElement, oneExponent);
-		assertThrows(IllegalArgumentException.class, () -> new ElGamalMultiRecipientPrivateKey(exponents));
 	}
 
 	// Provides parameters for the withInvalidParameters test.
@@ -139,48 +125,94 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 		}
 
 		@Test
-		@DisplayName("a length of 1 on a private key of size 1 returns a vector of size 1 with the same element as the unique private key element.")
+		@DisplayName("a length of 1 on a private key of size 1 returns a compressed private key of size 1 with the same element as the unique private key element.")
 		void compressPrivateKeyOfSizeOne() {
 			final int length = 1;
 			final ElGamalMultiRecipientPrivateKey elGamalMultiRecipientPrivateKey = elGamalGenerator.genRandomPrivateKey(length);
-			final List<ZqElement> vector = elGamalMultiRecipientPrivateKey.compress(length);
+			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
 
 			assertAll(
-					() -> assertEquals(length, vector.size()),
-					() -> assertEquals(elGamalMultiRecipientPrivateKey.get(0), vector.get(0)));
+					() -> assertEquals(length, compressedPrivateKey.size()),
+					() -> assertEquals(elGamalMultiRecipientPrivateKey.get(0), compressedPrivateKey.get(0)));
 		}
 
 		@Test
-		@DisplayName("any valid length returns a vector of size length.")
+		@DisplayName("any valid length returns a compressed private key of size length.")
 		void compressWithValidParameterReturnsCompressedOfExpectedSize() {
 
-			final List<ZqElement> vector = elGamalMultiRecipientPrivateKey.compress(length);
+			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
 
-			assertEquals(length, vector.size());
+			assertEquals(length, compressedPrivateKey.size());
 		}
 
 		@Test
-		@DisplayName("any valid length returns a vector with the same first (length - 1) elements as the private key.")
+		@DisplayName("any valid length returns a compressed private key with the same first (length - 1) elements as the private key.")
 		void compressWithValidParameterReturnsCompressedWithSameFirstLengthMinus1Elements() {
 
-			final List<ZqElement> vector = elGamalMultiRecipientPrivateKey.compress(length);
+			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
 
 			for (int i = 0; i < length - 1; i++) {
-				assertEquals(elGamalMultiRecipientPrivateKey.get(i), vector.get(i));
+				assertEquals(elGamalMultiRecipientPrivateKey.get(i), compressedPrivateKey.get(i));
 			}
 		}
 
 		@Test
-		@DisplayName("any valid length returns a vector with a correct compressed last element.")
+		@DisplayName("any valid length returns a compressed private key with a correct compressed last element.")
 		void compressWithValidParameterReturnsCompressedWithCorrectElement() {
 
-			final List<ZqElement> vector = elGamalMultiRecipientPrivateKey.compress(length);
+			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
 
 			final ZqElement compressedKeyElement = elGamalMultiRecipientPrivateKey.stream()
 					.skip(length - 1L)
 					.reduce(elGamalMultiRecipientPrivateKey.getGroup().getIdentity(), ZqElement::add);
 
-			assertEquals(compressedKeyElement, vector.get(length - 1));
+			assertEquals(compressedKeyElement, compressedPrivateKey.get(length - 1));
 		}
+	}
+
+	@Nested
+	@DisplayName("calling derivePublicKey")
+	class DerivePublicKey {
+
+		private static final int PRIVATE_KEY_SIZE = 10;
+
+		private ElGamalMultiRecipientPrivateKey elGamalMultiRecipientPrivateKey;
+
+		@BeforeEach
+		void setUpEach() {
+			elGamalMultiRecipientPrivateKey = elGamalGenerator.genRandomPrivateKey(PRIVATE_KEY_SIZE);
+		}
+
+		@ParameterizedTest(name = "generator is {0}.")
+		@NullSource
+		@DisplayName("with a null generator throws a NullPointerException.")
+		void nullCheckTest(final GqElement nullGenerator) {
+			assertThrows(NullPointerException.class, () -> elGamalMultiRecipientPrivateKey.derivePublicKey(nullGenerator));
+		}
+
+		@Test
+		@DisplayName("with a generator of different group order throws an IllegalArgumentException.")
+		void differentGroupOrderTest() {
+			final GqElement generatorFromDifferentGroup = GroupTestData.getDifferentGqGroup(gqGroup).getGenerator();
+
+			final IllegalArgumentException illegalArgumentException =
+					assertThrows(IllegalArgumentException.class, () -> elGamalMultiRecipientPrivateKey.derivePublicKey(generatorFromDifferentGroup));
+
+			assertEquals("The private key and the generator must belong to groups of the same order.", illegalArgumentException.getMessage());
+		}
+
+		@Test
+		@DisplayName("with a generator returns the expected public key.")
+		void keyPairHasExpectedPublicKeyTest() {
+
+			final GqElement generator = gqGroup.getGenerator();
+
+			final ElGamalMultiRecipientPublicKey elGamalMultiRecipientPublicKey =
+					new ElGamalMultiRecipientPublicKey(
+							elGamalMultiRecipientPrivateKey.stream().map(generator::exponentiate).collect(Collectors.toList()));
+
+			assertEquals(elGamalMultiRecipientPublicKey, elGamalMultiRecipientPrivateKey.derivePublicKey(generator));
+		}
+
 	}
 }

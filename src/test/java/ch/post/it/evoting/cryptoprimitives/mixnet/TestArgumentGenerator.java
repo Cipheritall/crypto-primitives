@@ -96,4 +96,13 @@ class TestArgumentGenerator {
 				.build();
 	}
 
+	ShuffleArgument genShuffleArgument(final int m, final int n, final int l) {
+		return new ShuffleArgument.Builder()
+				.withCA(gqGroupGenerator.genRandomGqElementVector(m))
+				.withCB(gqGroupGenerator.genRandomGqElementVector(m))
+				.withProductArgument(this.genProductArgument(m, n))
+				.withMultiExponentiationArgument(this.genMultiExponentiationArgument(m, n, l))
+				.build();
+	}
+
 }

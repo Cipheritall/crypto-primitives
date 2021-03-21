@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
@@ -42,7 +41,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
- * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₙ₋₁). The gamma is the left-hand side of a standard
+ * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₗ₋₁). The gamma is the left-hand side of a standard
  * ElGamal encryption. Each phi is the encryption of a different message, using a different public key element and the same randomness.
  */
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
@@ -173,12 +172,14 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *
 	 * @param gamma The gamma (i.e. first) element of the ciphertext. {@code gamma} must be a valid GqElement different from the GqGroup generator.
 	 * @param phis  The phi elements of the ciphertext, which must satisfy the following:
+	 *              <ul>
 	 *              <li>The list must be non-null.</li>
 	 *              <li>The list must not be empty.</li>
 	 *              <li>The list must not contain any null.</li>
 	 *              <li>All elements must be from the same Gq group as gamma.</li>
+	 *              </ul>
+	 * @return A new ElGamalMultiRecipientCiphertext with the specified gamma and phis
 	 */
-	@VisibleForTesting
 	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
@@ -193,7 +194,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	/**
 	 * Creates a neutral element for ciphertext multiplication.
 	 * <p>
-	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₙ₋₁) = (1, 1, ..., 1).
+	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₗ₋₁) = (1, 1, ..., 1).
 	 *
 	 * @param numPhi The number of phis in the neutral element.
 	 * @param group  The {@link GqGroup} of the neutral element.
@@ -271,6 +272,10 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 	public final GqElement getGamma() {
 		return this.gamma;
+	}
+
+	public final GroupVector<GqElement, GqGroup> getPhis(){
+		return this.phis;
 	}
 
 	/**

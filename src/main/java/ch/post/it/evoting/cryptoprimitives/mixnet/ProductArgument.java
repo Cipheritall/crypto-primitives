@@ -23,10 +23,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
-class ProductArgument {
+public class ProductArgument implements HashableList {
 
 	private final SingleValueProductArgument singleValueProductArgument;
 	private GqElement commitmentB;
@@ -49,7 +53,7 @@ class ProductArgument {
 	 * @param hadamardArgument           the Hadamard argument. Non-null.
 	 * @param singleValueProductArgument the Single Value Product argument. Non-null.
 	 */
-	ProductArgument(final GqElement commitmentB, final HadamardArgument hadamardArgument,
+	public ProductArgument(final GqElement commitmentB, final HadamardArgument hadamardArgument,
 			final SingleValueProductArgument singleValueProductArgument) {
 
 		// Null checking.
@@ -80,7 +84,7 @@ class ProductArgument {
 	 *
 	 * @param singleValueProductArgument the Single Value Product Argument. Non-null.
 	 */
-	ProductArgument(final SingleValueProductArgument singleValueProductArgument) {
+	public ProductArgument(final SingleValueProductArgument singleValueProductArgument) {
 		this.singleValueProductArgument = checkNotNull(singleValueProductArgument);
 		this.m = 1;
 		this.n = singleValueProductArgument.getN();
@@ -127,5 +131,13 @@ class ProductArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(commitmentB, hadamardArgument, singleValueProductArgument);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		if(commitmentB == null) {
+			return ImmutableList.of(singleValueProductArgument);
+		}
+		return ImmutableList.of(commitmentB, hadamardArgument, singleValueProductArgument);
 	}
 }

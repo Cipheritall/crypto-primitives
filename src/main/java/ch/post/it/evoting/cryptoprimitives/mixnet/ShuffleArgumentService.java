@@ -35,6 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -52,7 +53,7 @@ class ShuffleArgumentService {
 	private final CommitmentKey commitmentKey;
 
 	private final RandomService randomService;
-	private final MixnetHashService hashService;
+	private final BoundedHashService hashService;
 	private final ProductArgumentService productArgumentService;
 	private final MultiExponentiationArgumentService multiExponentiationArgumentService;
 
@@ -63,7 +64,7 @@ class ShuffleArgumentService {
 	 * @param commitmentKey ck, the commitment key used to compute commitments.
 	 */
 	ShuffleArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey, final RandomService randomService,
-			final MixnetHashService hashService) {
+			final BoundedHashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);

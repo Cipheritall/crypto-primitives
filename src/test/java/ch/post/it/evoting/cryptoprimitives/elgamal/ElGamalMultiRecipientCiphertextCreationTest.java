@@ -75,7 +75,6 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 				Stream.generate(() -> gqGroupGenerator.genMember()).limit(NUM_RECIPIENTS).collect(Collectors.toList());
 		validMessage = new ElGamalMultiRecipientMessage(messageElements);
 
-		// genRandomExponent excludes 0 and 1, for getCiphertext, all values in Z_p are allowed
 		validExponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 
 		validPK = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_RECIPIENTS, randomService).getPublicKey();
@@ -99,7 +98,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@Test
 	void testExponentFromDifferentQThrows() {
 		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup.getQ());
+		ZqElement otherGroupExponent = ZqElement.create(randomService.genRandomInteger(otherGroup.getQ()), otherGroup);
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}
@@ -116,7 +115,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	@Test
 	void testPublicKeyAndExponentFromDifferentGroupsThrows() {
 		ZqGroup otherGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement otherGroupExponent = randomService.genRandomExponent(otherGroup.getQ());
+		ZqElement otherGroupExponent = ZqElement.create(randomService.genRandomInteger(otherGroup.getQ()), otherGroup);
 
 		assertThrows(IllegalArgumentException.class, () -> getCiphertext(validMessage, otherGroupExponent, validPK));
 	}
@@ -190,7 +189,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 				ElGamalMultiRecipientCiphertext.create(
 						GqElement.create(BigInteger.valueOf(9), group),
 						Arrays.asList(
-								GqElement.create(BigInteger.valueOf(1), group),
+								GqElement.create(BigInteger.ONE, group),
 								GqElement.create(BigInteger.valueOf(9), group)
 						)
 				);

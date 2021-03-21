@@ -71,11 +71,12 @@ public final class ConversionService {
 	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation, which is equivalent to the specification of
 	 * ByteArrayToInteger.
 	 *
-	 * @param bytes B, the byte array to convert.
+	 * @param bytes B, the byte array to convert. Must be non-null and non-empty.
 	 * @return a BigInteger corresponding to the provided byte array representation.
 	 */
 	public static BigInteger byteArrayToInteger(final byte[] bytes) {
 		checkNotNull(bytes);
+		checkArgument(bytes.length > 0, "The byte array to convert must be non-empty.");
 		return new BigInteger(1, bytes);
 	}
 }

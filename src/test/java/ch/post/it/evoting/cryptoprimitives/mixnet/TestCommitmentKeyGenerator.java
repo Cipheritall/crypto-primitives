@@ -38,12 +38,12 @@ public class TestCommitmentKeyGenerator {
 	/**
 	 * Generate a random commitment key in the given group and of given size.
 	 *
-	 * @param k the number of g elements of the key.
-	 * @return a new commitment key of length k + 1.
+	 * @param nu the number of g elements of the key.
+	 * @return a new commitment key of length ν.
 	 */
-	CommitmentKey genCommitmentKey(int k) {
+	CommitmentKey genCommitmentKey(int nu) {
 		GqElement h = generator.genNonIdentityNonGeneratorMember();
-		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(k).collect(Collectors.toList());
+		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(nu).collect(Collectors.toList());
 		return new CommitmentKey(h, gList);
 	}
 }

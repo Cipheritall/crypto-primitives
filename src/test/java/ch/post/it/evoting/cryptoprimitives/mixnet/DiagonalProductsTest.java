@@ -35,6 +35,8 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -62,7 +64,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 		final TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		final CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
-		MixnetHashService hashService = TestHashService.create(gqGroup.getQ());
+		BoundedHashService hashService = TestHashService.create(gqGroup.getQ());
 		multiExponentiationArgumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(), hashService);
 
 	}
@@ -248,7 +250,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 		// and are not relevant for the test itself
 		TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
-		MixnetHashService hashService = TestHashService.create(q);
+		BoundedHashService hashService = TestHashService.create(q);
 		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),
 				hashService);
 

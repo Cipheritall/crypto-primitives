@@ -38,10 +38,12 @@ public class ElGamalMultiRecipientKeyPair {
 
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final ElGamalMultiRecipientPrivateKey privateKey;
+	private final int numElements;
 
 	private ElGamalMultiRecipientKeyPair(final ElGamalMultiRecipientPrivateKey privateKey, final ElGamalMultiRecipientPublicKey publicKey) {
 		this.publicKey = publicKey;
 		this.privateKey = privateKey;
+		this.numElements = publicKey.size();
 	}
 
 	/**
@@ -63,14 +65,12 @@ public class ElGamalMultiRecipientKeyPair {
 
 		// Generate the private key as a list of random exponents
 		final List<ZqElement> privateKeyElements =
-				Stream.generate(() -> randomService.genRandomExponent(privateKeyGroup.getQ()))
+				Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(privateKeyGroup.getQ()), privateKeyGroup))
 						.limit(numElements)
 						.collect(Collectors.toList());
-		final ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
 
-		// Calculate the public key from the private key previously generated
-		final List<GqElement> publicKeyElements = privateKeyElements.stream().map(generator::exponentiate).collect(Collectors.toList());
-		final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(publicKeyElements);
+		final ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
+		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
 
 		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
@@ -81,6 +81,40 @@ public class ElGamalMultiRecipientKeyPair {
 
 	public ElGamalMultiRecipientPrivateKey getPrivateKey() {
 		return privateKey;
+	}
+
+	/**
+	 * @return the number of elements contained in the key pair, i.e. the number of "recipients"
+	 */
+	public int size() {
+		return this.numElements;
+	}
+
+	/**
+	 * Returns a key pair containing the {@code private key} and its derived public key with the given {@code generator}.
+	 * <p>
+	 * The private key and the generator must comply with the following:
+	 *  <ul>
+	 *      <li>Must belong to groups of the same order.</li>
+	 * </ul>
+	 *
+	 * @param privateKey the private key from which the public key must be derived. Must be non-null and non-empty.
+	 * @param generator  the group generator to be used for the public key derivation. Must be non-null.
+	 * @return a key pair containing the private key and the derived public key.
+	 */
+	public static ElGamalMultiRecipientKeyPair from(final ElGamalMultiRecipientPrivateKey privateKey, final GqElement generator) {
+		checkNotNull(privateKey);
+		checkNotNull(generator);
+		checkArgument(generator.getGroup().hasSameOrderAs(privateKey.getGroup()),
+				"The private key and the generator must belong to groups of the same order.");
+
+		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
+
+		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
+	}
+
+	public GqGroup getGroup() {
+		return publicKey.getGroup();
 	}
 
 	@Override

@@ -81,6 +81,14 @@ class ConversionServiceTest {
 	}
 
 	@Test
+	void testConversionOfEmptyByteArrayToBigIntegerThrows() {
+		final IllegalArgumentException illegalArgumentException =
+				assertThrows(IllegalArgumentException.class, () -> byteArrayToInteger(new byte[] {}));
+
+		assertEquals("The byte array to convert must be non-empty.", illegalArgumentException.getMessage());
+	}
+
+	@Test
 	void testConversionOfByteArrayWithLeading1ToBigIntegerIsPositive() {
 		byte[] bytes = new byte[] { (byte) 0x80 };
 		BigInteger converted = byteArrayToInteger(bytes);
