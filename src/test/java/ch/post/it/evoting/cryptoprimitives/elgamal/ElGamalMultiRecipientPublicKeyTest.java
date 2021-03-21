@@ -19,9 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,20 +46,6 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 	@BeforeAll
 	static void setUpAll() {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
-	}
-
-	@Test
-	void givenAnKeyElementOfOneThenThrows() {
-		GqElement oneKeyElement = GqElement.create(BigInteger.ONE, gqGroup);
-		List<GqElement> exponents = Arrays.asList(gqGroupGenerator.genMember(), oneKeyElement);
-		assertThrows(IllegalArgumentException.class, () -> new ElGamalMultiRecipientPublicKey(exponents));
-	}
-
-	@Test
-	void givenAnKeyElementEqualToGeneratorThenThrows() {
-		GqElement generatorKeyElement = GqElement.create(gqGroup.getGenerator().getValue(), gqGroup);
-		List<GqElement> exponents = Arrays.asList(gqGroupGenerator.genMember(), generatorKeyElement);
-		assertThrows(IllegalArgumentException.class, () -> new ElGamalMultiRecipientPublicKey(exponents));
 	}
 
 	// Provides parameters for the withInvalidParameters test.
@@ -137,48 +121,48 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 		}
 
 		@Test
-		@DisplayName("a length of 1 on a public key of size 1 returns a vector of size 1 with the same element as the unique private key element.")
+		@DisplayName("a length of 1 on a public key of size 1 returns a compressed public key of size 1 with the same element as the unique private key element.")
 		void compressPublicKeyOfSizeOne() {
 			final int length = 1;
 			final ElGamalMultiRecipientPublicKey elGamalMultiRecipientPublicKey = elGamalGenerator.genRandomPublicKey(length);
-			final List<GqElement> vector = elGamalMultiRecipientPublicKey.compress(length);
+			final ElGamalMultiRecipientPublicKey compressedPublicKey = elGamalMultiRecipientPublicKey.compress(length);
 
 			assertAll(
-					() -> assertEquals(length, vector.size()),
-					() -> assertEquals(elGamalMultiRecipientPublicKey.get(0), vector.get(0)));
+					() -> assertEquals(length, compressedPublicKey.size()),
+					() -> assertEquals(elGamalMultiRecipientPublicKey.get(0), compressedPublicKey.get(0)));
 		}
 
 		@Test
-		@DisplayName("any valid length returns a vector of size length.")
+		@DisplayName("any valid length returns a compressed public key of size length.")
 		void compressWithValidParameterReturnsCompressedOfExpectedSize() {
 
-			final List<GqElement> vector = elGamalMultiRecipientPublicKey.compress(length);
+			final ElGamalMultiRecipientPublicKey compressedPublicKey = elGamalMultiRecipientPublicKey.compress(length);
 
-			assertEquals(length, vector.size());
+			assertEquals(length, compressedPublicKey.size());
 		}
 
 		@Test
-		@DisplayName("any valid length returns a vector with the same first (length - 1) elements as the public key.")
+		@DisplayName("any valid length returns a compressed public key with the same first (length - 1) elements as the public key.")
 		void compressWithValidParameterReturnsCompressedWithSameFirstLengthMinus1Elements() {
 
-			final List<GqElement> vector = elGamalMultiRecipientPublicKey.compress(length);
+			final ElGamalMultiRecipientPublicKey compressedPublicKey = elGamalMultiRecipientPublicKey.compress(length);
 
 			for (int i = 0; i < length - 1; i++) {
-				assertEquals(elGamalMultiRecipientPublicKey.get(i), vector.get(i));
+				assertEquals(elGamalMultiRecipientPublicKey.get(i), compressedPublicKey.get(i));
 			}
 		}
 
 		@Test
-		@DisplayName("any valid length returns a vector with a correct compressed last element.")
+		@DisplayName("any valid length returns a compressed public key with a correct compressed last element.")
 		void compressWithValidParameterReturnsCompressedWithCorrectElement() {
 
-			final List<GqElement> vector = elGamalMultiRecipientPublicKey.compress(length);
+			final ElGamalMultiRecipientPublicKey compressedPublicKey = elGamalMultiRecipientPublicKey.compress(length);
 
 			final GqElement compressedKeyElement = elGamalMultiRecipientPublicKey.stream()
 					.skip(length - 1L)
 					.reduce(elGamalMultiRecipientPublicKey.getGroup().getIdentity(), GqElement::multiply);
 
-			assertEquals(compressedKeyElement, vector.get(length - 1));
+			assertEquals(compressedKeyElement, compressedPublicKey.get(length - 1));
 		}
 	}
 }

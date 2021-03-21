@@ -21,6 +21,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+
 /**
  * Quadratic residues group of integers modulo p, such that p is a safe prime, i.e. p = 2q + 1. In this case q is the order of the group (ie the
  * number of elements of the group).
@@ -29,7 +35,7 @@ import java.util.Objects;
  *
  * <p>Instances of this class are immutable.
  */
-public final class GqGroup implements MathematicalGroup<GqGroup> {
+public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 
 	private final BigInteger p;
 
@@ -45,14 +51,15 @@ public final class GqGroup implements MathematicalGroup<GqGroup> {
 	 * @param g A generator of the group.
 	 *
 	 * <p> Preconditions
-	 * <li>all arguments are non null</li>
-	 * <li>p is prime</li>
-	 * <li>q is prime</li>
-	 * <li>p = 2q + 1</li>
-	 * <li>q is in the range [1, p)</li>
-	 * <li>g is in the range [2, p)</li>
-	 * <li>g is a member of the group</li>
-	 * </p>
+	 *             <ul>
+	 *           		<li>all arguments are non null</li>
+	 * 					<li>p is prime</li>
+	 *     				<li>q is prime</li>
+	 * 					<li>p = 2q + 1</li>
+	 * 					<li>q is in the range [1, p)</li>
+	 * 					<li>g is in the range [2, p)</li>
+	 * 					<li>g is a member of the group</li>
+	 * 				</ul>
 	 */
 	public GqGroup(final BigInteger p, final BigInteger q, final BigInteger g) {
 		checkNotNull(p, "Group Gq parameter p should not be null");
@@ -135,5 +142,10 @@ public final class GqGroup implements MathematicalGroup<GqGroup> {
 	@Override
 	public String toString() {
 		return "Group Gq [p = " + p + ", q = " + q + ", g = " + generator.getValue() + "]";
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), generator);
 	}
 }

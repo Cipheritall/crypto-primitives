@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.mixnet;
+package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
@@ -22,13 +22,10 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
-
 /**
  * Custom hash service used for testing. The output value of this hash service can be bounded to cope with the small groups used in the tests.
  */
-class TestHashService extends MixnetHashService {
+public class TestHashService extends BoundedHashService {
 
 	private static HashService hashService;
 
@@ -50,7 +47,7 @@ class TestHashService extends MixnetHashService {
 	 * @param upperBound the upper bound, exclusive.
 	 * @return a TestHashService.
 	 */
-	public static TestHashService create(final BigInteger lowerBound, final BigInteger upperBound) {
+	public static BoundedHashService create(final BigInteger lowerBound, final BigInteger upperBound) {
 		try {
 			hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		} catch (NoSuchAlgorithmException e) {
@@ -66,7 +63,7 @@ class TestHashService extends MixnetHashService {
 	 * @param upperBound the upper bound, exclusive.
 	 * @return a TestHashService.
 	 */
-	public static TestHashService create(final BigInteger upperBound) {
+	public static BoundedHashService create(final BigInteger upperBound) {
 		return TestHashService.create(BigInteger.ZERO, upperBound);
 	}
 

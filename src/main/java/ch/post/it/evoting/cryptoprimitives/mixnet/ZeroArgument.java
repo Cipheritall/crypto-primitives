@@ -23,8 +23,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -33,7 +37,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Collection of the values contained in a zero argument.
  */
-class ZeroArgument {
+public class ZeroArgument implements HashableList {
 
 	private GqElement cA0;
 	private GqElement cBm;
@@ -114,10 +118,15 @@ class ZeroArgument {
 		return Objects.hash(cA0, cBm, cd, aPrime, bPrime, rPrime, sPrime, tPrime);
 	}
 
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(cA0, cBm, cd, aPrime, bPrime, rPrime, sPrime, tPrime);
+	}
+
 	/**
 	 * Builder to construct a {@link ZeroArgument}.
 	 */
-	static class Builder {
+	public static class Builder {
 
 		private GqElement cA0;
 		private GqElement cBm;
@@ -128,42 +137,42 @@ class ZeroArgument {
 		private ZqElement sPrime;
 		private ZqElement tPrime;
 
-		Builder withCA0(final GqElement cA0) {
+		public Builder withCA0(final GqElement cA0) {
 			this.cA0 = cA0;
 			return this;
 		}
 
-		Builder withCBm(final GqElement cBm) {
+		public Builder withCBm(final GqElement cBm) {
 			this.cBm = cBm;
 			return this;
 		}
 
-		Builder withCd(final GroupVector<GqElement, GqGroup> cd) {
+		public Builder withCd(final GroupVector<GqElement, GqGroup> cd) {
 			this.cd = cd;
 			return this;
 		}
 
-		Builder withAPrime(final GroupVector<ZqElement, ZqGroup> aPrime) {
+		public Builder withAPrime(final GroupVector<ZqElement, ZqGroup> aPrime) {
 			this.aPrime = aPrime;
 			return this;
 		}
 
-		Builder withBPrime(final GroupVector<ZqElement, ZqGroup> bPrime) {
+		public Builder withBPrime(final GroupVector<ZqElement, ZqGroup> bPrime) {
 			this.bPrime = bPrime;
 			return this;
 		}
 
-		Builder withRPrime(final ZqElement rPrime) {
+		public Builder withRPrime(final ZqElement rPrime) {
 			this.rPrime = rPrime;
 			return this;
 		}
 
-		Builder withSPrime(final ZqElement sPrime) {
+		public Builder withSPrime(final ZqElement sPrime) {
 			this.sPrime = sPrime;
 			return this;
 		}
 
-		Builder withTPrime(final ZqElement tPrime) {
+		public Builder withTPrime(final ZqElement tPrime) {
 			this.tPrime = tPrime;
 			return this;
 		}
@@ -181,7 +190,7 @@ class ZeroArgument {
 		 *
 		 * @return A valid Zero Argument.
 		 */
-		ZeroArgument build() {
+		public ZeroArgument build() {
 			// Null checking.
 			checkNotNull(this.cA0);
 			checkNotNull(this.cBm);

@@ -15,10 +15,16 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
 
 /**
  * Defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
@@ -38,6 +44,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 	 *
 	 * @param value the value of the element. Must not be null and must be an element of the group.
 	 * @param group the {@link GqGroup} to which this element belongs.
+	 * @return a new GqElement with the specified value in the given group
 	 */
 	public static GqElement create(final BigInteger value, final GqGroup group) {
 		checkNotNull(value);
@@ -66,7 +73,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 	 *
 	 * @param exponent the exponent to which this {@code SameGroupElement} is to be raised. It must be a member of a group of the same order and be
 	 *                 non null.
-	 * @return (this < sup > exponent < / sup >).
+	 * @return this<sup>exponent</sup>.
 	 */
 	public GqElement exponentiate(final ZqElement exponent) {
 		checkNotNull(exponent);
@@ -74,6 +81,39 @@ public final class GqElement extends GroupElement<GqGroup> {
 
 		final BigInteger valueExponentiated = BigIntegerOperations.modExponentiate(value, exponent.getValue(), this.group.getP());
 		return new GqElement(valueExponentiated, this.group);
+	}
+
+	/**
+	 * Hashes and squares the GqElement.
+	 *
+	 * @param hashService The hash service to be used for hash computation. Must be non-null.
+	 * @return the squared hash of the GqElement.
+	 */
+	public GqElement hashAndSquare(final HashService hashService) {
+		checkNotNull(hashService);
+
+		final byte[] xB = integerToByteArray(this.value);
+
+		final BoundedHashService boundedHashService = new BoundedHashService(hashService, this.group.getQ().bitLength());
+		final byte[] xhB = boundedHashService.recursiveHash(HashableByteArray.from(xB));
+
+		final BigInteger xh = byteArrayToInteger(xhB).add(BigInteger.ONE);
+
+		final BigInteger xhSquare = BigIntegerOperations.modExponentiate(xh, BigInteger.valueOf(2), this.group.getQ());
+		return new GqElement(xhSquare, this.group);
+	}
+
+	/**
+	 * Returns a {@link GqElement} whose value is the inverse of {@code this}.
+	 * <p>
+	 * The inverse of an element x in G<sub>q</sub> is x<sup>q-1</sup>.
+	 *
+	 * @return this<sup>q-1</sup>
+	 */
+	public GqElement inverse() {
+		final BigInteger minusOne = group.getQ().subtract(BigInteger.ONE);
+		final ZqGroup zqGroup = ZqGroup.sameOrderAs(group);
+		return this.exponentiate(ZqElement.create(minusOne, zqGroup));
 	}
 
 	private boolean isOfSameOrderGroup(final ZqElement exponent) {

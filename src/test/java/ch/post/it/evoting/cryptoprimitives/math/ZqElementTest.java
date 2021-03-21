@@ -78,7 +78,7 @@ class ZqElementTest {
 
 	@Test
 	void givenANonRandomExponentValueLessThanQGetExponentValue() {
-		BigInteger exponentValue = new BigInteger("1");
+		BigInteger exponentValue = BigInteger.ONE;
 		ZqElement exponent = ZqElement.create(exponentValue, smallQGroup);
 
 		assertEquals(exponentValue, exponent.getValue(), "The exponent value is not the expected one");
@@ -104,8 +104,8 @@ class ZqElementTest {
 
 	@Test
 	void givenAnExponentWhenGetQThenExpectedQReturned() {
-		BigInteger exponentValue = new BigInteger("2");
-		BigInteger expectedQ = new BigInteger("11");
+		BigInteger exponentValue = BigInteger.valueOf(2);
+		BigInteger expectedQ = BigInteger.valueOf(11);
 		ZqElement exponent = ZqElement.create(exponentValue, smallQGroup);
 
 		assertEquals(expectedQ, exponent.getGroup().getQ(), "The q is not the expected one");
@@ -156,7 +156,7 @@ class ZqElementTest {
 		@DisplayName("a valid int returns the expected q value when getting q.")
 		void givenAnExponentWhenGetQThenExpectedQReturned() {
 			final int value = 2;
-			final BigInteger expectedQ = new BigInteger("11");
+			final BigInteger expectedQ = BigInteger.valueOf(11);
 			final ZqElement exponent = ZqElement.create(value, smallQGroup);
 
 			assertEquals(expectedQ, exponent.getGroup().getQ(), "The q is not the expected one.");
@@ -180,17 +180,17 @@ class ZqElementTest {
 
 	@Test
 	void givenTwoExponentsWhenAddedThenLessThanQ() {
-		BigInteger exponent1Value = new BigInteger("2");
-		BigInteger exponent2Value = new BigInteger("3");
-		BigInteger expectedResult = new BigInteger("5");
+		BigInteger exponent1Value = BigInteger.valueOf(2);
+		BigInteger exponent2Value = BigInteger.valueOf(3);
+		BigInteger expectedResult = BigInteger.valueOf(5);
 
 		addExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
 	}
 
 	@Test
 	void givenTwoExponentsWhenAddedThenEqualsToQ() {
-		BigInteger exponent1Value = new BigInteger("5");
-		BigInteger exponent2Value = new BigInteger("6");
+		BigInteger exponent1Value = BigInteger.valueOf(5);
+		BigInteger exponent2Value = BigInteger.valueOf(6);
 		BigInteger expectedResult = BigInteger.ZERO;
 
 		addExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
@@ -199,7 +199,7 @@ class ZqElementTest {
 	@Test
 	void givenTwoExponentsWhenAddedThenGreaterThanQ() {
 		BigInteger exponent1Value = BigInteger.TEN;
-		BigInteger exponent2Value = new BigInteger("2");
+		BigInteger exponent2Value = BigInteger.valueOf(2);
 		BigInteger expectedResult = BigInteger.ONE;
 
 		addExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
@@ -209,7 +209,7 @@ class ZqElementTest {
 	void givenTwoEqualExponentsWhenAddedThenGreaterThanQ() {
 		BigInteger exponent1Value = BigInteger.TEN;
 		BigInteger exponent2Value = BigInteger.TEN;
-		BigInteger expectedResult = new BigInteger("9");
+		BigInteger expectedResult = BigInteger.valueOf(9);
 
 		addExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
 	}
@@ -217,8 +217,8 @@ class ZqElementTest {
 	@Test
 	void givenTwoExponentsOneEqualToZeroWhenAddedThenSucceeds() {
 		BigInteger exponent1Value = BigInteger.ZERO;
-		BigInteger exponent2Value = new BigInteger("4");
-		BigInteger expectedResult = new BigInteger("4");
+		BigInteger exponent2Value = BigInteger.valueOf(4);
+		BigInteger expectedResult = BigInteger.valueOf(4);
 
 		addExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
 	}
@@ -233,16 +233,16 @@ class ZqElementTest {
 
 	@Test
 	void givenAnExponentLessThanQWhenNegatedThenSucceeds() {
-		BigInteger exponentValue = new BigInteger("9");
-		BigInteger expectedResult = new BigInteger("2");
+		BigInteger exponentValue = BigInteger.valueOf(9);
+		BigInteger expectedResult = BigInteger.valueOf(2);
 
 		negateExponentAndAssert(exponentValue, expectedResult);
 	}
 
 	@Test
 	void givenTwoExponentsWhenSubtractedResultIsPositive() {
-		BigInteger exponent1Value = new BigInteger("3");
-		BigInteger exponent2Value = new BigInteger("2");
+		BigInteger exponent1Value = BigInteger.valueOf(3);
+		BigInteger exponent2Value = BigInteger.valueOf(2);
 		BigInteger expectedResult = BigInteger.ONE;
 
 		subtractExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
@@ -259,8 +259,8 @@ class ZqElementTest {
 
 	@Test
 	void givenTwoExponentsWhenSubtractedResultIsNegative() {
-		BigInteger exponent1Value = new BigInteger("2");
-		BigInteger exponent2Value = new BigInteger("3");
+		BigInteger exponent1Value = BigInteger.valueOf(2);
+		BigInteger exponent2Value = BigInteger.valueOf(3);
 		BigInteger expectedResult = BigInteger.TEN;
 
 		subtractExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
@@ -268,9 +268,9 @@ class ZqElementTest {
 
 	@Test
 	void givenAnExponentWhenSubtractedZeroThenResultIsTheExponent() {
-		BigInteger exponent1Value = new BigInteger("4");
+		BigInteger exponent1Value = BigInteger.valueOf(4);
 		BigInteger exponent2Value = BigInteger.ZERO;
-		BigInteger expectedResult = new BigInteger("4");
+		BigInteger expectedResult = BigInteger.valueOf(4);
 
 		subtractExponentsAndAssert(exponent1Value, exponent2Value, expectedResult);
 	}

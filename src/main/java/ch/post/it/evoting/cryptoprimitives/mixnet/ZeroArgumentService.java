@@ -36,6 +36,7 @@ import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -52,10 +53,10 @@ final class ZeroArgumentService {
 	private final CommitmentKey commitmentKey;
 
 	private final RandomService randomService;
-	private final MixnetHashService hashService;
+	private final BoundedHashService hashService;
 
 	ZeroArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-			final RandomService randomService, final MixnetHashService hashService) {
+			final RandomService randomService, final BoundedHashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);

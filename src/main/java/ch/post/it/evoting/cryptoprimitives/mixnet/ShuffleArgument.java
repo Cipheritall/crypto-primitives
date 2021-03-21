@@ -23,14 +23,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Value class containing the result of a shuffle argument proof.
  */
-class ShuffleArgument {
+public class ShuffleArgument implements HashableList {
 
 	private GroupVector<GqElement, GqGroup> cA;
 	private GroupVector<GqElement, GqGroup> cB;
@@ -39,6 +43,7 @@ class ShuffleArgument {
 
 	private int m;
 	private int n;
+	private int l;
 	private GqGroup group;
 
 	private ShuffleArgument() {
@@ -69,6 +74,10 @@ class ShuffleArgument {
 		return n;
 	}
 
+	int getL() {
+		return l;
+	}
+
 	GqGroup getGroup() {
 		return group;
 	}
@@ -91,29 +100,34 @@ class ShuffleArgument {
 		return Objects.hash(cA, cB, productArgument, multiExponentiationArgument);
 	}
 
-	static class Builder {
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(cA, cB, productArgument, multiExponentiationArgument);
+	}
+
+	public static class Builder {
 
 		private GroupVector<GqElement, GqGroup> cA;
 		private GroupVector<GqElement, GqGroup> cB;
 		private ProductArgument productArgument;
 		private MultiExponentiationArgument multiExponentiationArgument;
 
-		Builder withCA(final GroupVector<GqElement, GqGroup> cA) {
+		public Builder withCA(final GroupVector<GqElement, GqGroup> cA) {
 			this.cA = cA;
 			return this;
 		}
 
-		Builder withCB(final GroupVector<GqElement, GqGroup> cB) {
+		public Builder withCB(final GroupVector<GqElement, GqGroup> cB) {
 			this.cB = cB;
 			return this;
 		}
 
-		Builder withProductArgument(final ProductArgument productArgument) {
+		public Builder withProductArgument(final ProductArgument productArgument) {
 			this.productArgument = productArgument;
 			return this;
 		}
 
-		Builder withMultiExponentiationArgument(final MultiExponentiationArgument multiExponentiationArgument) {
+		public Builder withMultiExponentiationArgument(final MultiExponentiationArgument multiExponentiationArgument) {
 			this.multiExponentiationArgument = multiExponentiationArgument;
 			return this;
 		}
@@ -130,7 +144,7 @@ class ShuffleArgument {
 		 *
 		 * @return A valid Shuffle Argument.
 		 */
-		ShuffleArgument build() {
+		public ShuffleArgument build() {
 			// Null checking.
 			checkNotNull(this.cA);
 			checkNotNull(this.cB);
@@ -161,6 +175,7 @@ class ShuffleArgument {
 
 			shuffleArgument.m = productArgument.getM();
 			shuffleArgument.n = productArgument.getN();
+			shuffleArgument.l = multiExponentiationArgument.getL();
 			shuffleArgument.group = productArgument.getGroup();
 
 			return shuffleArgument;

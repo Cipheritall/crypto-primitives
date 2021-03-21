@@ -16,22 +16,24 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Encapsulates an ElGamal multi recipient private key with N elements, each corresponding to a different recipient. The order of the elements must
  * match that of the elements of the associated public key.
- *
- * <p>Instances of this class are immutable. </p>
+ * <p>
+ * Instances of this class are immutable.
  */
 public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup> {
 
@@ -40,34 +42,26 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPrivateKey} object.
 	 *
-	 * @param keyElements <p>the list of private key Zq keyElements, which must satisfy the conditions of a {@link GroupVector} and
-	 *                    the following:
-	 *                    <li>not be empty</li>
-	 *                    <li>no element must be equal to 0</li>
-	 *                    <li>no element must be equal to 1</li></p>
+	 * @param keyElements the list of private key Zq keyElements. Must respect the following:
+	 *                    <ul>
+	 *                    	<li>the list must be non-null.</li>
+	 *                    	<li>the list must be non-empty.</li>
+	 *                    	<li>the list must contain only non-null elements.</li>
+	 *                    	<li>all elements from the list must be from the same mathematical group.</li>
+	 *                    </ul>
 	 */
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
 		this.privateKeyElements = GroupVector.from(keyElements);
 		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
-		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ZERO) != 0),
-				"An ElGamal private key cannot contain a 0 valued element.");
-		checkArgument(keyElements.stream().map(ZqElement::getValue).allMatch(value -> value.compareTo(BigInteger.ONE) != 0),
-				"An ElGamal private key cannot contain a 1 valued element.");
 	}
 
 	/**
-	 * Implements the specification CompressSecretKey algorithm. It compresses the secret key to the requested length.
-	 * <p>
-	 * The {@code length} must comply with the following:
-	 * <ul>
-	 * 	<li>the length must be strictly positive.</li>
-	 * 	<li>the length must be at most the secret key size.</li>
-	 * </ul>
+	 * Implements the specification CompressSecretKey algorithm. It compresses the private key to the requested length.
 	 *
-	 * @param length l, the requested length for key compression.
-	 * @return An output vector with the first {@code length}-1 elements of the secret key followed by the compressed computed element.
+	 * @param length l, the requested length for key compression. Must be strictly positive and at most the private key size.
+	 * @return a new compressed private key with the first {@code length}-1 elements of the private key followed by the compressed computed element.
 	 */
-	public List<ZqElement> compress(final int length) {
+	public ElGamalMultiRecipientPrivateKey compress(final int length) {
 
 		final int k = this.size();
 
@@ -82,12 +76,28 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 
 		keyElements.add(compressedKeyElement);
 
-		return keyElements;
+		return new ElGamalMultiRecipientPrivateKey(keyElements);
+	}
+
+	/**
+	 * Derives the public key from the private key with the given {@code generator}.
+	 *
+	 * @param generator the group generator to be used for the public key derivation. Must be non-null and must belong to a group of the same order as
+	 *                  the private key group.
+	 * @return the derived public key with the given {@code generator}.
+	 */
+	ElGamalMultiRecipientPublicKey derivePublicKey(final GqElement generator) {
+		checkNotNull(generator);
+		checkArgument(generator.getGroup().hasSameOrderAs(this.getGroup()),
+				"The private key and the generator must belong to groups of the same order.");
+
+		final List<GqElement> publicKeyElements = this.stream().map(generator::exponentiate).collect(Collectors.toList());
+
+		return new ElGamalMultiRecipientPublicKey(publicKeyElements);
 	}
 
 	@Override
 	public ZqGroup getGroup() {
-		//A private key cannot be empty
 		return this.privateKeyElements.getGroup();
 	}
 
@@ -118,7 +128,7 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 			return false;
 		}
 		final ElGamalMultiRecipientPrivateKey that = (ElGamalMultiRecipientPrivateKey) o;
-		return privateKeyElements.equals(that.privateKeyElements);
+		return this.privateKeyElements.equals(that.privateKeyElements);
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -48,7 +49,7 @@ final class ProductArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key to be used for commitments.
 	 */
-	ProductArgumentService(final RandomService randomService, final MixnetHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	ProductArgumentService(final RandomService randomService, final BoundedHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		this.randomService = checkNotNull(randomService);
 		checkNotNull(hashService);

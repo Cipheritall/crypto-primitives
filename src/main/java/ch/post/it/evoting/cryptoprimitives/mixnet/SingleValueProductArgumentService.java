@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -45,11 +46,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 class SingleValueProductArgumentService {
 
 	private final RandomService randomService;
-	private final MixnetHashService hashService;
+	private final BoundedHashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 
-	SingleValueProductArgumentService(final RandomService randomService, final MixnetHashService hashService,
+	SingleValueProductArgumentService(final RandomService randomService, final BoundedHashService hashService,
 			final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey) {
 		this.randomService = checkNotNull(randomService);
 		this.hashService = checkNotNull(hashService);

@@ -35,6 +35,7 @@ interface ElGamalMultiRecipientObject<E extends GroupElement<G>, G extends Mathe
 	 int size();
 
 	/**
+	 * @param i the index of the element to return
 	 * @return the ith element of this actor.
 	 */
 	E get(final int i);

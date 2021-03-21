@@ -104,9 +104,10 @@ class ShuffleServiceTest {
 	@Test
 	void testSpecificValues() {
 		//Define group
-		final BigInteger p = new BigInteger("23");
-		final BigInteger q = new BigInteger("11");
-		final BigInteger g = new BigInteger("2");
+		final BigInteger p = BigInteger.valueOf(23);
+		final BigInteger q = BigInteger.valueOf(11);
+		final BigInteger g = BigInteger.valueOf(2);
+
 		GqGroup localGroup = new GqGroup(p, q, g);
 
 		//Define N
@@ -121,11 +122,9 @@ class ShuffleServiceTest {
 		//Mock random exponents
 		RandomService randomService = mock(RandomService.class);
 		ZqGroup exponentGroup = ZqGroup.sameOrderAs(localGroup);
-		List<ZqElement> randomExponents = Stream.of(7, 5, 3)
-				.map(r -> ZqElement.create(BigInteger.valueOf(r), exponentGroup))
-				.collect(Collectors.toList());
-		when(randomService.genRandomExponent(exponentGroup.getQ()))
-				.thenReturn(randomExponents.get(0), randomExponents.subList(1, randomExponents.size()).toArray(new ZqElement[] {}));
+		List<BigInteger> randomIntegers = Arrays.asList(BigInteger.valueOf(7), BigInteger.valueOf(5), BigInteger.valueOf(3));
+		when(randomService.genRandomInteger(exponentGroup.getQ()))
+				.thenReturn(randomIntegers.get(0), randomIntegers.subList(1, randomIntegers.size()).toArray(new BigInteger[] {}));
 
 		//Create public key
 		List<GqElement> pkElements =
@@ -154,6 +153,7 @@ class ShuffleServiceTest {
 
 		assertEquals(expectedCiphertexts, shuffle.getCiphertexts());
 		assertEquals(permutation, shuffle.getPermutation());
-		assertEquals(randomExponents, shuffle.getReEncryptionExponents());
+		assertEquals(randomIntegers.stream().map(r -> ZqElement.create(r, exponentGroup)).collect(Collectors.toList()),
+				shuffle.getReEncryptionExponents());
 	}
 }
