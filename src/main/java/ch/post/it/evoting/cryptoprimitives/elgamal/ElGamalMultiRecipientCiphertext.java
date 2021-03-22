@@ -42,7 +42,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
- * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₙ₋₁). The gamma is the left-hand side of a standard
+ * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₗ₋₁). The gamma is the left-hand side of a standard
  * ElGamal encryption. Each phi is the encryption of a different message, using a different public key element and the same randomness.
  */
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
@@ -193,7 +193,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	/**
 	 * Creates a neutral element for ciphertext multiplication.
 	 * <p>
-	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₙ₋₁) = (1, 1, ..., 1).
+	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₗ₋₁) = (1, 1, ..., 1).
 	 *
 	 * @param numPhi The number of phis in the neutral element.
 	 * @param group  The {@link GqGroup} of the neutral element.
