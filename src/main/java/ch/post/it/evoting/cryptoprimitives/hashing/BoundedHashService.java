@@ -13,30 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.mixnet;
+package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
-
 /**
- * {@link HashService} to be used by the different mixnet algorithms. This class ensures that the used message digest has an output length smaller
- * than the given maximum bit length.
+ * {@link HashService} to be used by the different mixnet and zero-knowledge proof algorithms.
+ * This class ensures that the used message digest has an output length smaller than the given maximum bit length.
  */
-class MixnetHashService {
+public class BoundedHashService {
 
 	private final HashService delegate;
 
 	/**
-	 * Constructs a MixnetHashService, ensuring that the message digest used by {@code hashService} has an output length (in bits) strictly smaller
+	 * Constructs a BoundedHashService, ensuring that the message digest used by {@code hashService} has an output length (in bits) strictly smaller
 	 * than {@code maxHashLength}.
 	 *
 	 * @param hashService   The {@link HashService} to specialize.
 	 * @param maxHashLength The max hash length in bits (exclusive).
 	 */
-	MixnetHashService(final HashService hashService, final int maxHashLength) {
+	public BoundedHashService(final HashService hashService, final int maxHashLength) {
 		checkNotNull(hashService);
 
 		final int hashBitLength = hashService.getHashLength() * Byte.SIZE;
@@ -48,7 +45,7 @@ class MixnetHashService {
 	/**
 	 * @see HashService#recursiveHash(Hashable...)
 	 */
-	byte[] recursiveHash(final Hashable... values) {
+	public byte[] recursiveHash(final Hashable... values) {
 		return this.delegate.recursiveHash(values);
 	}
 

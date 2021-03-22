@@ -118,10 +118,10 @@ public class GroupTestData {
 	}
 
 	public static GqGroup getGroupP59() {
-		final BigInteger p4 = new BigInteger("59");
-		final BigInteger q4 = new BigInteger("29");
-		final BigInteger g4 = new BigInteger("3");
-		return new GqGroup(p4, q4, g4);
+		final BigInteger p = new BigInteger("59");
+		final BigInteger q = new BigInteger("29");
+		final BigInteger g = new BigInteger("3");
+		return new GqGroup(p, q, g);
 	}
 
 }

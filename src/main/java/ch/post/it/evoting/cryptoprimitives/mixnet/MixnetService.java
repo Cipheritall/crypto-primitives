@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -89,8 +90,8 @@ public final class MixnetService implements Mixnet {
 		final ShuffleWitness shuffleWitness = new ShuffleWitness(phi, r);
 
 		//shuffleArgument
-		final MixnetHashService mixnetHashService = new MixnetHashService(this.hashService, gqGroup.getQ().bitLength());
-		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, mixnetHashService);
+		final BoundedHashService boundedHashService = new BoundedHashService(this.hashService, gqGroup.getQ().bitLength());
+		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, boundedHashService);
 		final ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
 
 		return new VerifiableShuffle(shuffle.getCiphertexts(), shuffleArgument);

@@ -54,7 +54,9 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -71,7 +73,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private int k;
-	private MixnetHashService hashService;
+	private BoundedHashService hashService;
 	private ElGamalMultiRecipientPublicKey publicKey;
 	private CommitmentKey commitmentKey;
 
@@ -268,7 +270,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ElGamalMultiRecipientPublicKey productPublicKey = keyPair.getPublicKey();
 			CommitmentKey productCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
 			RandomService productRandomService = spy(RandomService.class);
-			MixnetHashService productHashService = mock(MixnetHashService.class);
+			BoundedHashService productHashService = mock(BoundedHashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
 			BigInteger one = BigInteger.ONE;
@@ -361,8 +363,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
 
 			// Need to remove 0 as this can lead to a valid proof even though we expect invalid.
-			MixnetHashService mixnetHashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			productArgumentService = new ProductArgumentService(randomService, mixnetHashService, publicKey, commitmentKey);
+			BoundedHashService boundedHashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			productArgumentService = new ProductArgumentService(randomService, boundedHashService, publicKey, commitmentKey);
 
 			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
 			longStatement = getProductStatement(longWitness, commitmentKey);
@@ -515,9 +517,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 				final String description) throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final MixnetHashService mixnetHashService = new MixnetHashService(hashService, publicKey.getGroup().getQ().bitLength());
+			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, mixnetHashService, publicKey,
+			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, boundedHashService, publicKey,
 					commitmentKey);
 
 			assertEquals(expectedOutput, productArgumentService.verifyProductArgument(productStatement, productArgument).verify().isVerified(),
@@ -565,8 +567,6 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 			return new ProductStatement(commitments, product);
 		}
-
-
 
 	}
 

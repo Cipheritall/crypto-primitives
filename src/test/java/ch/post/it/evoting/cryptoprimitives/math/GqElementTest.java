@@ -215,6 +215,21 @@ class GqElementTest {
 		assertThrows(NullPointerException.class, () -> element.exponentiate(null));
 	}
 
+	@Test
+	void testInverseOfOneEqualsOne() {
+		GqElement one = group.getIdentity();
+		assertEquals(one, one.inverse());
+	}
+
+	@Test
+	void testInverse() {
+		for (int i = 1; i < group.getQ().intValueExact(); i++) {
+			ZqElement exponent = ZqElement.create(i, ZqGroup.sameOrderAs(group));
+			GqElement element = group.getGenerator().exponentiate(exponent);
+			assertEquals(group.getIdentity(), element.multiply(element.inverse()));
+		}
+	}
+
 	//Equals
 
 	@Test
