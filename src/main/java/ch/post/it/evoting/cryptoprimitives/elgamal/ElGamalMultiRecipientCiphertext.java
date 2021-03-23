@@ -191,6 +191,38 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
+	 * Converts a given vector of messages into a vector of ciphertexts, using the γ-element of the given ciphertexts and the message as
+	 * (𝜙₀,...,𝜙ₗ₋₁) elements.
+	 * <p>
+	 * The ciphertext vector and the message vector must comply with the following:
+	 * <ul>
+	 *     <li>Both must have the same Gq group</li>
+	 *     <li>Both must have the same size N</li>
+	 *     <li>The ciphertexts and the messages must have the same size l</li>
+	 * </ul>
+	 *
+	 * @param ciphertexts C, the vector of ciphertexts whose γ-elements are to be used. Non null.
+	 * @param messages    M, the vector of messages to be converted to ciphertexts. Non null.
+	 * @return a vector of ciphertexts
+	 */
+	public static GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> convertMessagesToCiphertexts(
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final GroupVector<ElGamalMultiRecipientMessage, GqGroup> messages) {
+		@SuppressWarnings("squid:S00117")
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = checkNotNull(ciphertexts);
+		@SuppressWarnings("squid:S00117")
+		final GroupVector<ElGamalMultiRecipientMessage, GqGroup> M = checkNotNull(messages);
+
+		// Cross checks
+		checkArgument(C.getGroup().equals(M.getGroup()), "The ciphertexts and the messages must have the same group.");
+		checkArgument(C.size() == M.size(), "The ciphertext vector and the message vector must have the same size.");
+		checkArgument(C.getElementSize() == M.getElementSize(), "The ciphertexts and the messages must have the same size.");
+
+		return IntStream.range(0, ciphertexts.size())
+				.mapToObj(i -> ElGamalMultiRecipientCiphertext.create(C.get(i).getGamma(), M.get(i).stream().collect(toList())))
+				.collect(toGroupVector());
+	}
+
+	/**
 	 * Creates a neutral element for ciphertext multiplication.
 	 * <p>
 	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₗ₋₁) = (1, 1, ..., 1).
