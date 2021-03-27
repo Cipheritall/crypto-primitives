@@ -66,11 +66,9 @@ public class ElGamalMultiRecipientKeyPair {
 				Stream.generate(() -> randomService.genRandomExponent(privateKeyGroup.getQ()))
 						.limit(numElements)
 						.collect(Collectors.toList());
-		final ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
 
-		// Calculate the public key from the private key previously generated
-		final List<GqElement> publicKeyElements = privateKeyElements.stream().map(generator::exponentiate).collect(Collectors.toList());
-		final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(publicKeyElements);
+		final ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
+		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
 
 		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
@@ -81,6 +79,29 @@ public class ElGamalMultiRecipientKeyPair {
 
 	public ElGamalMultiRecipientPrivateKey getPrivateKey() {
 		return privateKey;
+	}
+
+	/**
+	 * Returns a key pair containing the {@code private key} and its derived public key with the given {@code generator}.
+	 * <p>
+	 * The private key and the generator must comply with the following:
+	 *  <ul>
+	 *      <li>Must belong to groups of the same order.</li>
+	 * </ul>
+	 *
+	 * @param privateKey the private key from which the public key must be derived. Must be non-null and non-empty.
+	 * @param generator  the group generator to be used for the public key derivation. Must be non-null.
+	 * @return a key pair containing the private key and the derived public key.
+	 */
+	public static ElGamalMultiRecipientKeyPair from(final ElGamalMultiRecipientPrivateKey privateKey, final GqElement generator) {
+		checkNotNull(privateKey);
+		checkNotNull(generator);
+		checkArgument(generator.getGroup().hasSameOrderAs(privateKey.getGroup()),
+				"The private key and the generator must belong to groups of the same order.");
+
+		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
+
+		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
 
 	@Override

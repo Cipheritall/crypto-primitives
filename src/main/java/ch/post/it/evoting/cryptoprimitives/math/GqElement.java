@@ -66,7 +66,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 	 *
 	 * @param exponent the exponent to which this {@code SameGroupElement} is to be raised. It must be a member of a group of the same order and be
 	 *                 non null.
-	 * @return (this < sup > exponent < / sup >).
+	 * @return this<sup>exponent</sup>.
 	 */
 	public GqElement exponentiate(final ZqElement exponent) {
 		checkNotNull(exponent);
