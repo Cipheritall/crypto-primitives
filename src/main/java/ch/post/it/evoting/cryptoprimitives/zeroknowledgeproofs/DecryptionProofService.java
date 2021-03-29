@@ -94,7 +94,7 @@ public class DecryptionProofService {
 	 * @param ciphertext           c, an ElGamal ciphertext for which correct decryption is to be proved. Must be non null.
 	 * @param keyPair              (pk, sk), the pair of public key and secret key used for encryption and decryption. Must be non null.
 	 * @param message              m, the message that is obtained by decrypting c with the secret key {@code sk}. Must be non null.
-	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash.
+	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null. Can be empty.
 	 * @return a decryption proof.
 	 */
 	public DecryptionProof genDecryptionProof(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientKeyPair keyPair,
@@ -102,13 +102,11 @@ public class DecryptionProofService {
 		@SuppressWarnings("squid:S00117")
 		final ElGamalMultiRecipientCiphertext C = checkNotNull(ciphertext);
 		checkNotNull(keyPair);
-		final ElGamalMultiRecipientPrivateKey sk = checkNotNull(keyPair.getPrivateKey());
-		final ElGamalMultiRecipientPublicKey pk = checkNotNull(keyPair.getPublicKey());
+		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
+		final ElGamalMultiRecipientPublicKey pk = keyPair.getPublicKey();
 		final ElGamalMultiRecipientMessage m = checkNotNull(message);
-		ImmutableList<Hashable> iAux = ImmutableList.of();
-		if (auxiliaryInformation != null) {
-			iAux = auxiliaryInformation.stream().map(HashableString::from).collect(ImmutableList.toImmutableList());
-		}
+		checkNotNull(auxiliaryInformation);
+		ImmutableList<Hashable> iAux = auxiliaryInformation.stream().map(HashableString::from).collect(ImmutableList.toImmutableList());
 
 		// Context.
 		final GqGroup gqGroup = ciphertext.getGroup();

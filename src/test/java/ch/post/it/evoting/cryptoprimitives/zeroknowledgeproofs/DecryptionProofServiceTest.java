@@ -170,14 +170,15 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 					() -> assertThrows(NullPointerException.class,
 							() -> decryptionProofService.genDecryptionProof(ciphertext, null, message, auxiliaryInformation)),
 					() -> assertThrows(NullPointerException.class,
-							() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, null, auxiliaryInformation))
+							() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, null, auxiliaryInformation)),
+					() -> assertThrows(NullPointerException.class,
+							() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, null))
 			);
 		}
 
 		@Test
 		@DisplayName("with valid arguments does not throw")
 		void genDecryptionProofWithValidArguments() {
-			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, null));
 			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, ImmutableList.of()));
 			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
 		}

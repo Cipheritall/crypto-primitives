@@ -20,14 +20,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * A decryption proof (e, z) composed of a hash value e and a vector of proof elements z.
  */
-public class DecryptionProof {
+public class DecryptionProof implements GroupVectorElement<ZqGroup>, HashableList {
 
 	private final ZqElement e;
 	private final GroupVector<ZqElement, ZqGroup> z;
@@ -50,6 +55,16 @@ public class DecryptionProof {
 	}
 
 	@Override
+	public ZqGroup getGroup() {
+		return e.getGroup();
+	}
+
+	@Override
+	public int size() {
+		return z.size();
+	}
+
+	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
@@ -64,5 +79,10 @@ public class DecryptionProof {
 	@Override
 	public int hashCode() {
 		return Objects.hash(e, z);
+	}
+
+	@Override
+	public ImmutableList<HashableBigInteger> toHashableForm() {
+		return null;
 	}
 }

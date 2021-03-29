@@ -104,6 +104,10 @@ public class ElGamalMultiRecipientKeyPair {
 		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
 
+	public GqGroup getGroup() {
+		return publicKey.getGroup();
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
