@@ -21,26 +21,26 @@ package ch.post.it.evoting.cryptoprimitives;
 public interface CryptoPrimitives {
 
 	/**
-	 * Generates a random Base16 string following RFC 4648.
+	 * Generates a random string using the Base16 alphabet (RFC 4648). 
 	 *
 	 * @param length l, the length of the string to be generated, in number of chars.
-	 * @return a random Base16-encoded string of {@code length} characters. Must be in range (0, 1000).
+	 * @return a random Base16-encoded string of {@code length} characters. Must be greater than or equal to 1.
 	 */
 	String genRandomBase16String(final int length);
 
 	/**
-	 * Generates a random Base32 string following RFC 4648.
+	 * Generates a random string using the Base32 alphabet (RFC 4648). The method does not expect to produce Base32 decodable output.
 	 *
 	 * @param length l, the length of the string to be generated, in number of chars.
-	 * @return a random Base32-encoded string of {@code length} characters. Must be in range (0, 1000).
+	 * @return a random Base32-encoded string of {@code length} characters. Must be greater than or equal to 1.
 	 */
 	String genRandomBase32String(final int length);
 
 	/**
-	 * Generates a random Base64 string following RFC 4648.
+	 * Generates a random string using the Base64 alphabet (RFC 4648). The method does not expect to produce Base64 decodable output.
 	 *
 	 * @param length l, the length of the string to be generated, in number of chars.
-	 * @return a random Base64-encoded string of {@code length} characters. Must be in range (0, 1000).
+	 * @return a random Base64-encoded string of {@code length} characters. Must be greater than or equal to 1.
 	 */
 	String genRandomBase64String(final int length);
 
