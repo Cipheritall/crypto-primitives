@@ -20,12 +20,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class GqElementTest {
@@ -37,9 +49,10 @@ class GqElementTest {
 
 	@BeforeAll
 	static void setUp() {
-		BigInteger q = BigInteger.valueOf(11);
-		BigInteger p = BigInteger.valueOf(23);
+		final BigInteger q = BigInteger.valueOf(11);
+		final BigInteger p = BigInteger.valueOf(23);
 		g = BigInteger.valueOf(2);
+
 		group = new GqGroup(p, q, g);
 		groupGenerator = new GqGroupGenerator(group);
 	}
@@ -290,5 +303,45 @@ class GqElementTest {
 		GqElement element = GqElement.create(elementValue, group);
 		GqElement inverse = element.invert();
 		assertEquals(expectedInverseValue, inverse.getValue(), "The returned element is not the inverse");
+	}
+
+	@ParameterizedTest(name = "input hash service is {0}.")
+	@NullSource
+	@DisplayName("calling hashAndSquare on a valid gqElement with a null hash service does not throw an exception.")
+	void nullCheckTest(final HashService nullHashService) {
+
+		final GqElement gqElement = GqElement.create(g, group);
+
+		assertThrows(NullPointerException.class, () -> gqElement.hashAndSquare(nullHashService));
+	}
+
+	@ParameterizedTest
+	@MethodSource("onValidGqElementReturnsExpectedResultTestSource")
+	@DisplayName("calling hashAndSquare on a valid gqElement with an hash call returning a specific mocked value returns the expected result.")
+	void onValidGqElementReturnsExpectedResultTest(final byte[] mockedHash, final BigInteger expectedResult) throws IOException {
+
+		final HashService hashService = mock(HashService.class);
+		when(hashService.recursiveHash(any())).thenReturn(mockedHash);
+
+		final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();
+
+		final GqElement gqElement = GqElement.create(g, largeGqGroup);
+
+		assertEquals(expectedResult, gqElement.hashAndSquare(hashService).getValue());
+	}
+
+	private static Stream<Arguments> onValidGqElementReturnsExpectedResultTestSource() {
+
+		return Stream.of(
+				Arguments.of(new byte[] { 0b10 }, BigInteger.valueOf(9)),
+				Arguments.of(new byte[] { 0x00 }, BigInteger.ONE),
+				Arguments.of(new byte[] {
+								0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+								0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+								0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+								0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF },
+						new BigInteger("134078079299425970995740249982058461274793658205923933777235614437217640300735469768018742981669034276900318"
+								+ "58186486050853753882811946569946433649006084096"))
+		);
 	}
 }
