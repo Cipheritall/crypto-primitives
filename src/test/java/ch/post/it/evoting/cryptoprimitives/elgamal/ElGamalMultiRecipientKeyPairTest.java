@@ -98,8 +98,7 @@ class ElGamalMultiRecipientKeyPairTest {
 	}
 
 	/**
-	 * Check that the created key pair elements stay within the bounds [2, q). By creating 10 * q elements, the probability of having a false positive
-	 * is at most (q/(q+1))^(10*q) which converges towards 1/e^10 ~ 0.00005
+	 * Check that the created key pair elements stay within the bounds [0, q).
 	 */
 	@Test
 	void testThatPrivateKeyExponentsWithinBounds() {
@@ -109,7 +108,7 @@ class ElGamalMultiRecipientKeyPairTest {
 		GqGroup smallGroup = new GqGroup(p, q, g);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(smallGroup, 10 * q.intValue(), randomSer);
 		keyPair.getPrivateKey().stream().forEach(sk -> {
-			assertTrue(sk.getValue().compareTo(BigInteger.valueOf(2)) >= 0);
+			assertTrue(sk.getValue().compareTo(BigInteger.ZERO) >= 0);
 			assertTrue(sk.getValue().compareTo(q) < 0);
 		});
 	}
@@ -117,8 +116,8 @@ class ElGamalMultiRecipientKeyPairTest {
 	@Nested
 	@DisplayName("retrieved from a static call to from method")
 	class FromTest {
+		private final ElGamalMultiRecipientPrivateKey privateKey = keyPair.getPrivateKey();
 		private final GqElement generator = publicKeyGroup.getGenerator();
-		final ElGamalMultiRecipientPrivateKey privateKey = keyPair.getPrivateKey();
 
 		@Test
 		@DisplayName("with a null private key or a null generator throws a NullPointerException.")

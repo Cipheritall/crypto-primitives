@@ -53,6 +53,5 @@ We plan for the following improvements to the crypto-primitives library:
 * Enforcing abstractions in mathematical operations. Currently, we have some unnecessary conversions between abstract mathematical objects (such as GqElements) and plain values (such as BigIntegers). We should work more strictly with mathematically abstract classes.
 * Developing a clear naming convention for the translation of mathematical notations to code and using it consistently across the codebase.
 * Investigating the usage of a "context" object that encapsulates values that do not change between protocol executions (group parameters, security level, etc.).
-* Removing the restrictions on the public and secret key domain. Currently, we prevent values of 0 and 1 for the secret key as an additional defense; however, excluding 0 and 1 leads to some tricky edge cases (which are theoretically possible but extremely unlikely). Therefore, we plan to remove the restrictions both on the public and the secret key.
 * Implementing the ByteArrayToString method. This method is currently not used; therefore, we did not implement it yet.
 * Making some randomized unit tests more robust. In very rare cases, some unit tests fail for exceptional edge cases. If you encounter a failure, repeat the unit test.

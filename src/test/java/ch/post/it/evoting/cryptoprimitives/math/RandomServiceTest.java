@@ -17,11 +17,9 @@ package ch.post.it.evoting.cryptoprimitives.math;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.doReturn;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -31,11 +29,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
 class RandomServiceTest {
 
@@ -85,53 +79,6 @@ class RandomServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(BigInteger.ZERO));
 		BigInteger minusOne = BigInteger.ONE.negate();
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(minusOne));
-	}
-
-	@Test
-	void testGenerateRandomIntegerWithinBounds() {
-		BigInteger lowerBound = BigInteger.ONE;
-		BigInteger upperBound = BigInteger.valueOf(1849);
-		BigInteger randomInteger = randomService.genRandomIntegerWithinBounds(lowerBound, upperBound);
-
-		assertTrue(randomInteger.compareTo(lowerBound) >= 0);
-		assertTrue(randomInteger.compareTo(upperBound) < 0);
-	}
-
-	@ParameterizedTest
-	@MethodSource("createLowerAndUpperBounds")
-	void testGenerateRandomIntegerWithinBoundUpperEqualsLowerFails(BigInteger lowerBound, BigInteger upperBound) {
-		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomIntegerWithinBounds(lowerBound, upperBound));
-	}
-
-	@Test
-	void givenNullGroupWhenAttemptToCreateZqElementThenException() {
-		assertThrows(NullPointerException.class, () -> randomService.genRandomExponent(null));
-	}
-
-	@RepeatedTest(10)
-	void testWhenRandomZqElementCreatedThenValueIsInRange() {
-		ZqElement randomExponent = randomService.genRandomExponent(smallGroup.getQ());
-
-		assertTrue(randomExponent.getValue().compareTo(BigInteger.valueOf(2)) >= 0, "The random exponent should be equal or greater than 2");
-		assertTrue(randomExponent.getValue().compareTo(smallGroup.getQ()) < 0, "The random exponent should be less than q");
-	}
-
-	@Test
-	void testGenRandomExponentUsesRandomness() {
-		String errorMessage = "The random exponents should be different";
-
-		RandomService spyRandomService = Mockito.spy(new RandomService());
-
-		doReturn(BigInteger.ZERO, BigInteger.ONE, BigInteger.valueOf(2))
-				.when(spyRandomService).genRandomIntegerWithinBounds(ArgumentMatchers.any(), ArgumentMatchers.any());
-
-		ZqElement exponent1 = randomService.genRandomExponent(largeGroup.getQ());
-		ZqElement exponent2 = randomService.genRandomExponent(largeGroup.getQ());
-		ZqElement exponent3 = randomService.genRandomExponent(largeGroup.getQ());
-
-		assertNotEquals(exponent1.getValue(), exponent2.getValue(), errorMessage);
-		assertNotEquals(exponent1.getValue(), exponent3.getValue(), errorMessage);
-		assertNotEquals(exponent2.getValue(), exponent3.getValue(), errorMessage);
 	}
 
 	@Test

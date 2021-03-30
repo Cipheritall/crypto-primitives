@@ -38,9 +38,9 @@ class GqGroupTest {
 	@BeforeAll
 	static void setUp() {
 
-		p = new BigInteger("23");
-		q = new BigInteger("11");
-		g = new BigInteger("2");
+		p = BigInteger.valueOf(23);
+		q = BigInteger.valueOf(11);
+		g = BigInteger.valueOf(2);
 		smallGroup = new GqGroup(p, q, g);
 		smallGroupGenerator = new GqGroupGenerator(smallGroup);
 	}
@@ -55,7 +55,7 @@ class GqGroupTest {
 
 	@Test
 	void testCreateGroupWithNonPrimeQFails() {
-		BigInteger nonPrime = BigInteger.valueOf(10);
+		BigInteger nonPrime = BigInteger.TEN;
 		assertThrows(IllegalArgumentException.class, () -> new GqGroup(p, nonPrime, g));
 	}
 

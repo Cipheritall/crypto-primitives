@@ -230,7 +230,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			BigInteger SIX = BigInteger.valueOf(6);
 			BigInteger SEVEN = BigInteger.valueOf(7);
 			BigInteger EIGHT = BigInteger.valueOf(8);
-			BigInteger TEN = BigInteger.valueOf(10);
+			BigInteger TEN = BigInteger.TEN;
 
 			// Create GqElements
 			GqElement gThree = GqElement.create(THREE, gqGroup);

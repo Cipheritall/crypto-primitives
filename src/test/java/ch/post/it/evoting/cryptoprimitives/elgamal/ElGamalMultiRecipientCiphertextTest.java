@@ -296,7 +296,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		// Create second ciphertext.
 		final GqElement gammaB = GqElement.create(BigInteger.valueOf(5), group);
 		final List<GqElement> phisB = Arrays
-				.asList(GqElement.create(BigInteger.valueOf(9), group), GqElement.create(BigInteger.valueOf(1), group));
+				.asList(GqElement.create(BigInteger.valueOf(9), group), GqElement.create(BigInteger.ONE, group));
 		final ElGamalMultiRecipientCiphertext ciphertextB = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
 
 		// Expected multiplication result.
@@ -318,7 +318,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 
 		// Create first ciphertext.
 		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
-		ZqElement exponent = randomService.genRandomExponent(group.getQ());
+		ZqElement exponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 		ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
 		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
 
@@ -366,7 +366,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		int noOfMessageElements = 5;
 
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
-		ZqElement exponent = randomService.genRandomExponent(zqGroup.getQ());
+		ZqElement exponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		ElGamalMultiRecipientMessage originalMessage = elGamalGenerator.genRandomMessage(noOfMessageElements);
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalGenerator.encryptMessage(originalMessage, keyPair, zqGroup);
@@ -402,7 +402,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 				.collect(toGroupVector());
 
 		GroupVector<ZqElement, ZqGroup> exponents = Stream
-				.generate(() -> randomService.genRandomExponent(zqGroup.getQ()))
+				.generate(() -> ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup))
 				.limit(elGamalMultiRecipientCiphertexts.size())
 				.collect(toGroupVector());
 
@@ -460,7 +460,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 				.collect(toGroupVector());
 
 		GroupVector<ZqElement, ZqGroup> fourExponents = Stream
-				.generate(() -> randomService.genRandomExponent(zqGroup.getQ()))
+				.generate(() -> ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup))
 				.limit(fiveCipherTexts.size() - 1)
 				.collect(toGroupVector());
 
@@ -472,7 +472,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		GqGroup differentgqGroup = GroupTestData.getDifferentGqGroup(gqGroup);
 
 		GroupVector<ZqElement, ZqGroup> fiveExponents = Stream
-				.generate(() -> randomService.genRandomExponent(differentgqGroup.getQ()))
+				.generate(() -> ZqElement.create(randomService.genRandomInteger(differentgqGroup.getQ()), ZqGroup.sameOrderAs(differentgqGroup)))
 				.limit(fiveCipherTexts.size())
 				.collect(toGroupVector());
 

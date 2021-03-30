@@ -128,7 +128,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		private static final BigInteger SEVEN = BigInteger.valueOf(7);
 		private static final BigInteger EIGHT = BigInteger.valueOf(8);
 		private static final BigInteger NINE = BigInteger.valueOf(9);
-		private static final BigInteger TEN = BigInteger.valueOf(10);
+		private static final BigInteger TEN = BigInteger.TEN;
 
 		//Group values
 		BigInteger p = BigInteger.valueOf(23);

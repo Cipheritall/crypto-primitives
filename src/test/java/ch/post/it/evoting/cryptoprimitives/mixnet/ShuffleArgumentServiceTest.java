@@ -312,7 +312,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			BigInteger SEVEN = BigInteger.valueOf(7);
 			BigInteger EIGHT = BigInteger.valueOf(8);
 			BigInteger NINE = BigInteger.valueOf(9);
-			BigInteger TEN = BigInteger.valueOf(10);
+			BigInteger TEN = BigInteger.TEN;
 
 			// Create GqElements
 			GqElement gOne = gqGroup.getIdentity();

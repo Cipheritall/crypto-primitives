@@ -161,7 +161,7 @@ class CommitmentServiceTest {
 			// a = (2, 10)
 			List<ZqElement> a = new ArrayList<>();
 			a.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
-			a.add(ZqElement.create(BigInteger.valueOf(10), specificZqGroup));
+			a.add(ZqElement.create(BigInteger.TEN, specificZqGroup));
 			// r = 5
 			ZqElement r = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			// ck = (2, 3, 4)
@@ -285,7 +285,7 @@ class CommitmentServiceTest {
 			// a0 = (2, 10)
 			List<ZqElement> a0 = new ArrayList<>(2);
 			a0.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
-			a0.add(ZqElement.create(BigInteger.valueOf(10), specificZqGroup));
+			a0.add(ZqElement.create(BigInteger.TEN, specificZqGroup));
 			// a1 = (3, 4)
 			List<ZqElement> a1 = new ArrayList<>(2);
 			a1.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
@@ -391,7 +391,7 @@ class CommitmentServiceTest {
 			// a = (2, 10)
 			List<ZqElement> a = new ArrayList<>(2);
 			a.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
-			a.add(ZqElement.create(BigInteger.valueOf(10), specificZqGroup));
+			a.add(ZqElement.create(BigInteger.TEN, specificZqGroup));
 			// r = (5, 8)
 			List<ZqElement> r = new ArrayList<>(2);
 			r.add(ZqElement.create(BigInteger.valueOf(5), specificZqGroup));
@@ -404,7 +404,7 @@ class CommitmentServiceTest {
 			// c = (12, 1)
 			List<GqElement> expected = new ArrayList<>(2);
 			expected.add(GqElement.create(BigInteger.valueOf(12), specificGqGroup));
-			expected.add(GqElement.create(BigInteger.valueOf(1), specificGqGroup));
+			expected.add(GqElement.create(BigInteger.ONE, specificGqGroup));
 
 			assertEquals(GroupVector.from(expected),
 					CommitmentService.getCommitmentVector(GroupVector.from(a), GroupVector.from(r), ck));

@@ -74,7 +74,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParamete
 class ZeroArgumentServiceTest extends TestGroupSetup {
 
 	private static final BigInteger ZERO = BigInteger.valueOf(0);
-	private static final BigInteger ONE = BigInteger.valueOf(1);
+	private static final BigInteger ONE = BigInteger.ONE;
 	private static final BigInteger TWO = BigInteger.valueOf(2);
 	private static final BigInteger THREE = BigInteger.valueOf(3);
 	private static final BigInteger FOUR = BigInteger.valueOf(4);
@@ -83,7 +83,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	private static final BigInteger SEVEN = BigInteger.valueOf(7);
 	private static final BigInteger EIGHT = BigInteger.valueOf(8);
 	private static final BigInteger NINE = BigInteger.valueOf(9);
-	private static final BigInteger TEN = BigInteger.valueOf(10);
+	private static final BigInteger TEN = BigInteger.TEN;
 	private static final BigInteger ELEVEN = BigInteger.valueOf(11);
 	private static final int KEY_ELEMENTS_NUMBER = 10;
 	private static final SecureRandom secureRandom = new SecureRandom();

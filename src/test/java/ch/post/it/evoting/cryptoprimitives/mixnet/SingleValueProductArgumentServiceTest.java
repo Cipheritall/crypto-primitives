@@ -218,7 +218,7 @@ class SingleValueProductArgumentServiceTest {
 			// a = (2, 10)
 			List<ZqElement> a = new ArrayList<>();
 			a.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
-			a.add(ZqElement.create(BigInteger.valueOf(10), specificZqGroup));
+			a.add(ZqElement.create(BigInteger.TEN, specificZqGroup));
 			// r = 5
 			ZqElement r = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			// pk = (8, 16)
@@ -237,10 +237,10 @@ class SingleValueProductArgumentServiceTest {
 			GqElement cdelta = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
 			GqElement cDelta = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
 			List<ZqElement> aTilde = new ArrayList<>(2);
-			aTilde.add(ZqElement.create(BigInteger.valueOf(1), specificZqGroup));
+			aTilde.add(ZqElement.create(BigInteger.ONE, specificZqGroup));
 			aTilde.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
 			List<ZqElement> bTilde = new ArrayList<>(2);
-			bTilde.add(ZqElement.create(BigInteger.valueOf(1), specificZqGroup));
+			bTilde.add(ZqElement.create(BigInteger.ONE, specificZqGroup));
 			bTilde.add(ZqElement.create(BigInteger.valueOf(2), specificZqGroup));
 			ZqElement rTilde = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			ZqElement sTilde = ZqElement.create(BigInteger.valueOf(7), specificZqGroup);
@@ -257,7 +257,7 @@ class SingleValueProductArgumentServiceTest {
 			//Mock random integers
 			RandomService randomService = spy(new RandomService());
 			doReturn(BigInteger.valueOf(3), BigInteger.valueOf(7), // d_0, d_1
-					BigInteger.valueOf(10),                        // r_d
+					BigInteger.TEN,                        // r_d
 					BigInteger.valueOf(4), BigInteger.valueOf(8))  // s_0, s_x
 					.when(randomService).genRandomInteger(specificZqGroup.getQ());
 
@@ -376,7 +376,8 @@ class SingleValueProductArgumentServiceTest {
 				final SingleValueProductStatement singleValueProductStatement = parseSingleValueProductStatement(gqGroup, zqGroup, input);
 				JsonData singleValueProductArgumentData = input.getJsonData("argument");
 				TestArgumentParser argumentParser = new TestArgumentParser(gqGroup);
-				final SingleValueProductArgument singleValueProductArgument = argumentParser.parseSingleValueProductArgument(singleValueProductArgumentData);
+				final SingleValueProductArgument singleValueProductArgument = argumentParser
+						.parseSingleValueProductArgument(singleValueProductArgumentData);
 
 				// Output.
 				final JsonData output = testParameters.getOutput();

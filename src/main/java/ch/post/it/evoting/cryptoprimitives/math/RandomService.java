@@ -61,28 +61,6 @@ public class RandomService {
 	}
 
 	/**
-	 * Generates a random integer within bounds.
-	 * <p>
-	 * The {@code lowerBound} and {@code upperBound} parameters must comply with the following:
-	 * <ul>
-	 *     <li>The upper bound must be greater than the lower bound.</li>
-	 * </ul>
-	 *
-	 * @param lowerBound a, inclusive. Must be non null.
-	 * @param upperbound b, exclusive. Must be non null.
-	 * @return a BigInteger within the bounds.
-	 */
-	BigInteger genRandomIntegerWithinBounds(final BigInteger lowerBound, final BigInteger upperbound) {
-		checkNotNull(lowerBound);
-		checkNotNull(upperbound);
-		checkArgument(upperbound.compareTo(lowerBound) > 0,
-				"Upper bound %s must be greater than the lower bound %s.", upperbound, lowerBound);
-
-		final BigInteger r = genRandomInteger(upperbound.subtract(lowerBound));
-		return lowerBound.add(r);
-	}
-
-	/**
 	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase16String(int)
 	 */
 	public String genRandomBase16String(final int length) {
@@ -137,24 +115,6 @@ public class RandomService {
 
 		// Truncate to desired length.
 		return encodedString.substring(0, length);
-	}
-
-	/**
-	 * Generates a uniformly distributed random exponent within the group of integers modulo q (but excluding 0 and 1).
-	 *
-	 * @param upperBound q, the upper bound. Must be non null and greater than 2.
-	 * @return a random element of the group, with value in [2, q).
-	 */
-	public ZqElement genRandomExponent(final BigInteger upperBound) {
-		checkNotNull(upperBound);
-
-		final BigInteger two = BigInteger.valueOf(2);
-
-		checkArgument(upperBound.compareTo(two) > 0, "The provided upperBound element must be greater than 2.");
-
-		final BigInteger value = genRandomIntegerWithinBounds(two, upperBound);
-
-		return ZqElement.create(value, new ZqGroup(upperBound));
 	}
 
 	/**

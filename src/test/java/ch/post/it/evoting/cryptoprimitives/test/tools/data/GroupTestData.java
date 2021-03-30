@@ -38,24 +38,24 @@ public class GroupTestData {
 	static {
 		// More groups can be added to this class as needed.
 
-		final BigInteger p1 = new BigInteger("11");
-		final BigInteger q1 = new BigInteger("5");
-		final BigInteger g1 = new BigInteger("3");
+		final BigInteger p1 = BigInteger.valueOf(11);
+		final BigInteger q1 = BigInteger.valueOf(5);
+		final BigInteger g1 = BigInteger.valueOf(3);
 		final GqGroup group1 = new GqGroup(p1, q1, g1);
 
-		final BigInteger p2 = new BigInteger("23");
-		final BigInteger q2 = new BigInteger("11");
-		final BigInteger g2 = new BigInteger("2");
+		final BigInteger p2 = BigInteger.valueOf(23);
+		final BigInteger q2 = BigInteger.valueOf(11);
+		final BigInteger g2 = BigInteger.valueOf(2);
 		final GqGroup group2 = new GqGroup(p2, q2, g2);
 
-		final BigInteger p3 = new BigInteger("47");
-		final BigInteger q3 = new BigInteger("23");
-		final BigInteger g3 = new BigInteger("2");
+		final BigInteger p3 = BigInteger.valueOf(47);
+		final BigInteger q3 = BigInteger.valueOf(23);
+		final BigInteger g3 = BigInteger.valueOf(2);
 		final GqGroup group3 = new GqGroup(p3, q3, g3);
 
-		final BigInteger p4 = new BigInteger("59");
-		final BigInteger q4 = new BigInteger("29");
-		final BigInteger g4 = new BigInteger("3");
+		final BigInteger p4 = BigInteger.valueOf(59);
+		final BigInteger q4 = BigInteger.valueOf(29);
+		final BigInteger g4 = BigInteger.valueOf(3);
 		final GqGroup group4 = new GqGroup(p4, q4, g4);
 
 		smallTestGroups = ImmutableList.of(group1, group2, group3, group4);
@@ -118,9 +118,9 @@ public class GroupTestData {
 	}
 
 	public static GqGroup getGroupP59() {
-		final BigInteger p = new BigInteger("59");
-		final BigInteger q = new BigInteger("29");
-		final BigInteger g = new BigInteger("3");
+		final BigInteger p = BigInteger.valueOf(59);
+		final BigInteger q = BigInteger.valueOf(29);
+		final BigInteger g = BigInteger.valueOf(3);
 		return new GqGroup(p, q, g);
 	}
 

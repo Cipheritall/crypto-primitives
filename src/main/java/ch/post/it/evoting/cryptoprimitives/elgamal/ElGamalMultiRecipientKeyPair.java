@@ -63,7 +63,7 @@ public class ElGamalMultiRecipientKeyPair {
 
 		// Generate the private key as a list of random exponents
 		final List<ZqElement> privateKeyElements =
-				Stream.generate(() -> randomService.genRandomExponent(privateKeyGroup.getQ()))
+				Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(privateKeyGroup.getQ()), privateKeyGroup))
 						.limit(numElements)
 						.collect(Collectors.toList());
 
