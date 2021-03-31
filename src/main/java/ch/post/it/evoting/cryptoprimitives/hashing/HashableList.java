@@ -17,6 +17,8 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -28,13 +30,16 @@ public interface HashableList extends Hashable {
 	ImmutableList<? extends Hashable> toHashableForm();
 
 	/**
-	 * Utility function which creates a HashableList who's hashable form is the provided list.
+	 * Utility function which creates an immutable HashableList who's hashable form is the provided list.
 	 *
 	 * @param list the hashable form. Non null.
 	 * @return A new HashableList who's hashable form is {@code list}
 	 */
-	static HashableList from(final ImmutableList<Hashable> list) {
+	static HashableList from(final List<? extends Hashable> list) {
 		checkNotNull(list);
-		return () -> list;
+
+		// The copy has to be done outside of the lambda, otherwise it will be made only when #toHashableForm is called.
+		final ImmutableList<? extends Hashable> immutableList = ImmutableList.copyOf(list);
+		return () -> immutableList;
 	}
 }
