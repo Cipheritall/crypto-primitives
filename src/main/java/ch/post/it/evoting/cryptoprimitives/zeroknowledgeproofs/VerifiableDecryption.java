@@ -36,6 +36,18 @@ public class VerifiableDecryption {
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
 	private final GroupVector<DecryptionProof, ZqGroup> decryptionProofs;
 
+	/**
+	 * Instantiates a verifiable decryption from the given ciphertexts and decryption proofs.
+	 * <p>
+	 * The ciphertext and decryption proof vectors must comply with the following:
+	 * <ul>
+	 *     <li>have the same size</li>
+	 *     <li>have the same group order</li>
+	 * </ul>
+	 *
+	 * @param ciphertexts      a vector of partially decrypted ciphertexts. Must be non null.
+	 * @param decryptionProofs a vector of proofs showing that the ciphertexts have been correctly decrypted. Must be non null.
+	 */
 	VerifiableDecryption(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
 			final GroupVector<DecryptionProof, ZqGroup> decryptionProofs) {
 		checkNotNull(ciphertexts);

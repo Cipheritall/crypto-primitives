@@ -54,6 +54,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
 
 		// Cross-checks
+		checkArgument(!C.isEmpty(), "There must be at least one ciphertext.");
 		checkArgument(C.getElementSize() <= sk.size(), "The ciphertexts must be at most as long as the keys in the key pair.");
 		checkArgument(C.getGroup().equals(keyPair.getGroup()), "The ciphertexts and the key pair must have the same group.");
 

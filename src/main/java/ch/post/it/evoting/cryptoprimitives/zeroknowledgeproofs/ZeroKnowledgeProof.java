@@ -20,6 +20,9 @@ import java.util.List;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 
+/**
+ * Provides methods for generating zero-knowledge proofs.
+ */
 public interface ZeroKnowledgeProof {
 
 	/**
@@ -31,9 +34,9 @@ public interface ZeroKnowledgeProof {
 	 *     <li>the ciphertexts must be smaller or equal to the length of the key pair</li>
 	 * </ul>
 	 *
-	 * @param ciphertexts          C, a vector of ciphertexts to be decrypted. Non null.
+	 * @param ciphertexts          C, a vector of ciphertexts to be decrypted. Non null and non empty.
 	 * @param keyPair              (pk, sk), a pair of a public key and a secret key. Non null.
-	 * @param auxiliaryInformation i<sub>Aux</sub>, a list of context specific strings. Can be empty.
+	 * @param auxiliaryInformation i<sub>Aux</sub>, a list of context specific strings. Non null. Can be empty.
 	 * @return a {@link VerifiableDecryption} containing the partially decrypted ciphertexts and a decryption proof for each message
 	 */
 	VerifiableDecryption genVerifiableDecryptions(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientKeyPair keyPair,

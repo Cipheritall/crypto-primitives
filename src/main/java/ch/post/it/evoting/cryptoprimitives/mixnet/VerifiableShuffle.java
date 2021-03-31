@@ -21,11 +21,22 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 
+/**
+ * A verifiable shuffle consisting of shuffled votes and an argument for the correctness of the shuffle.
+ * <p>
+ * Instances of this class are immutable.
+ */
 public class VerifiableShuffle {
 
 	private final ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertextList;
 	private final ShuffleArgument shuffleArgument;
 
+	/**
+	 * Instantiates a verifiable shuffle from the given shuffled ciphertexts and shuffle proof.
+	 *
+	 * @param shuffledCiphertextList a list of shuffled ciphertexts
+	 * @param shuffleArgument 		 a shuffle argument proving the correctness of the shuffle
+	 */
 	public VerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> shuffledCiphertextList, final ShuffleArgument shuffleArgument) {
 		this.shuffledCiphertextList = ImmutableList.copyOf(shuffledCiphertextList);
 		this.shuffleArgument = shuffleArgument;

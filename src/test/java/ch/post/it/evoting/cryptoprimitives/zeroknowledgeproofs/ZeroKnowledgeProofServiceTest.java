@@ -79,23 +79,32 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	@DisplayName("Generating verifiable messages with null arguments throws a NullPointerException")
-	void genVerifiableMessagesWithNullArguments() {
+	@DisplayName("Generating verifiable decryptions with null arguments throws a NullPointerException")
+	void genVerifiableDecryptionsWithNullArguments() {
 		assertThrows(NullPointerException.class, () -> zeroKnowledgeProofservice.genVerifiableDecryptions(null, keyPair, auxiliaryInformation));
 		assertThrows(NullPointerException.class, () -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, null, auxiliaryInformation));
 		assertThrows(NullPointerException.class, () -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, keyPair, null));
 	}
 
 	@Test
-	@DisplayName("Generating verifiable messages with valid arguments does not throw")
-	void genVerifiableMessagesWithValidArguments() {
+	@DisplayName("Generating verifiable decryptions with valid arguments does not throw")
+	void genVerifiableDecryptionsWithValidArguments() {
 		assertDoesNotThrow(() -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, keyPair, ImmutableList.of()));
 		assertDoesNotThrow(() -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, keyPair, auxiliaryInformation));
 	}
 
 	@Test
-	@DisplayName("Generating verifiable messages with too long ciphertexts throws an IllegalArgumentException")
-	void genVerifiableMessagesWithTooLongCiphertexts() {
+	@DisplayName("Generating verifiable decryptions with an empty list ciphertexts throws an IllegalArgumentException")
+	void genVerifiableDecryptionsWithEmptyCiphertextList() {
+		ciphertexts = GroupVector.of();
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, keyPair, auxiliaryInformation));
+		assertEquals("There must be at least one ciphertext.", exception.getMessage());
+	}
+
+	@Test
+	@DisplayName("Generating verifiable decryptions with too long ciphertexts throws an IllegalArgumentException")
+	void genVerifiableDecryptionsWithTooLongCiphertexts() {
 		ciphertexts = elGamalGenerator.genRandomCiphertextVector(numCiphertexts, keyLength + 1);
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, keyPair, auxiliaryInformation));
@@ -103,8 +112,8 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	@DisplayName("Generating verifiable messages with ciphertexts and keys from different groups throws an IllegalArgumentException")
-	void genVerifiableMessagesWithIncompatibleGroups() {
+	@DisplayName("Generating verifiable decryptions with ciphertexts and keys from different groups throws an IllegalArgumentException")
+	void genVerifiableDecryptionsWithIncompatibleGroups() {
 		ciphertexts = new ElGamalGenerator(otherGqGroup).genRandomCiphertextVector(numCiphertexts, ciphertextLength);
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> zeroKnowledgeProofservice.genVerifiableDecryptions(ciphertexts, keyPair, auxiliaryInformation));
@@ -112,8 +121,8 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	@DisplayName("Generating verifiable messages with specific values returns expected result")
-	void genVerifiableMessagesWithSpecificValues() {
+	@DisplayName("Generating verifiable decryptions with specific values returns expected result")
+	void genVerifiableDecryptionsWithSpecificValues() {
 		BigInteger p = BigInteger.valueOf(23);
 		BigInteger q = BigInteger.valueOf(11);
 		BigInteger g = BigInteger.valueOf(2);
