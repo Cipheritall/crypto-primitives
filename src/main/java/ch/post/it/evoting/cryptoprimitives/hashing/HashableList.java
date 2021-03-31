@@ -15,17 +15,26 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 
 /**
- * Interface to be implemented by classes whose hashable form is an {@link ImmutableList} of {@link Hashable} objects.
+ * Interface to be implemented by classes whose hashable form is a list of {@link Hashable} objects.
  */
 public interface HashableList extends Hashable {
 
 	@Override
 	ImmutableList<? extends Hashable> toHashableForm();
 
+	/**
+	 * Utility function which creates a HashableList who's hashable form is the provided list.
+	 *
+	 * @param list the hashable form. Non null.
+	 * @return A new HashableList who's hashable form is {@code list}
+	 */
 	static HashableList from(final ImmutableList<Hashable> list) {
+		checkNotNull(list);
 		return () -> list;
 	}
 }

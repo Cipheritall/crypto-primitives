@@ -16,25 +16,24 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 /**
- * Represents an object that is hashable by the recursive hash algorithm. This interface must NOT be implemented directly. Instead objects should
- * implement the sub-interfaces representing the particular hashable form of a Java type.
- * <p>
- * The allowed types returned by the {@code toHashableForm} method are the following:
+ * Represents an object which can by hashed by the recursive hash algorithm {@link HashService#recursiveHash(Hashable...)}. This interface must NOT be implemented directly. Instead classes should
+ * implement one of the sub-interfaces representing the particular hashable type. The collection of sub-interfaces represent the types supported by
+ * the recursive hash, which is akin to a union type. These sub-interfaces map one to one to a Java type.
+ * The supported types by the recursive hash and their respective Hashable form are:
  * <ul>
- *     <li>byte[]</li>
- *     <li>String</li>
- *     <li>BigInteger</li>
- *     <li>List<Hashable></li>
+ *     <li>byte[], see {@link HashableByteArray}</li>
+ *     <li>String, see {@link HashableString}</li>
+ *     <li>BigInteger, see {@link HashableBigInteger}</li>
+ *     <li>List<Hashable>, see {@link HashableList}</li>
  * </ul>
- *
- * @see HashService#recursiveHash(Hashable...)
  */
 public interface Hashable {
 
 	/**
-	 * Converts an object to its hashable form. The allowed return types are defined by the recursive hash algorithm.
+	 * Converts a Hashable type object to its concrete type, which can be hashed using the recursive hash. See the class docstring for the compatible
+	 * return types.
 	 *
-	 * @return the hashable form of the object.
+	 * @return the hashable form of the object. Should not be null.
 	 * @see HashService#recursiveHash(Hashable...)
 	 */
 	Object toHashableForm();

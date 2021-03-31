@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Interface to be implemented by classes whose hashable form is a single {@link String}.
  */
@@ -23,7 +25,14 @@ public interface HashableString extends Hashable {
 	@Override
 	String toHashableForm();
 
+	/**
+	 * Utility function which creates a HashableString who's hashable form is the provided string.
+	 *
+	 * @param string the hashable form. Non null.
+	 * @return A new HashableString who's hashable form is {@code string}
+	 */
 	static HashableString from(final String string) {
+		checkNotNull(string);
 		return () -> string;
 	}
 }

@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Interface to be implemented by classes whose hashable form is a byte array.
  */
@@ -23,7 +25,14 @@ public interface HashableByteArray extends Hashable {
 	@Override
 	byte[] toHashableForm();
 
+	/**
+	 * Utility function which creates a HashableByteArray who's hashable form is the provided byte array.
+	 *
+	 * @param byteArray the hashable form. Non null.
+	 * @return A new HashableByteArray who's hashable form is {@code byteArray}
+	 */
 	static HashableByteArray from(final byte[] byteArray) {
+		checkNotNull(byteArray);
 		return () -> byteArray;
 	}
 }
