@@ -23,6 +23,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
@@ -178,7 +178,6 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *              <li>The list must not contain any null.</li>
 	 *              <li>All elements must be from the same Gq group as gamma.</li>
 	 */
-	@VisibleForTesting
 	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
 
@@ -287,6 +286,13 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	@Override
 	public Stream<GqElement> stream() {
 		return Stream.concat(Stream.of(this.gamma), this.phis.stream());
+	}
+
+	/**
+	 * @return a copy of the phis as a list.
+	 */
+	public List<GqElement> getPhis() {
+		return new ArrayList<>(phis);
 	}
 
 	@Override

@@ -121,7 +121,7 @@ public class MultiExponentiationArgument {
 		return Objects.hash(cA0, cBVector, EVector, aVector, r, b, s, tau);
 	}
 
-	static class Builder {
+	public static class Builder {
 
 		private GqElement cA0;
 		private GroupVector<GqElement, GqGroup> cBVector;
@@ -132,46 +132,42 @@ public class MultiExponentiationArgument {
 		private ZqElement s;
 		private ZqElement tau;
 
-		Builder() {
-			//Intentionally left blank
-		}
-
-		Builder withcA0(final GqElement cA0) {
+		public Builder withcA0(final GqElement cA0) {
 			this.cA0 = cA0;
 			return this;
 		}
 
-		Builder withcBVector(final GroupVector<GqElement, GqGroup> cBVector) {
+		public Builder withcBVector(final GroupVector<GqElement, GqGroup> cBVector) {
 			this.cBVector = cBVector;
 			return this;
 		}
 
-		Builder withEVector(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector) {
+		public Builder withEVector(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector) {
 			this.EVector = EVector;
 			return this;
 		}
 
-		Builder withaVector(final GroupVector<ZqElement, ZqGroup> aVector) {
+		public Builder withaVector(final GroupVector<ZqElement, ZqGroup> aVector) {
 			this.aVector = aVector;
 			return this;
 		}
 
-		Builder withr(final ZqElement r) {
+		public Builder withr(final ZqElement r) {
 			this.r = r;
 			return this;
 		}
 
-		Builder withb(final ZqElement b) {
+		public Builder withb(final ZqElement b) {
 			this.b = b;
 			return this;
 		}
 
-		Builder withs(final ZqElement s) {
+		public Builder withs(final ZqElement s) {
 			this.s = s;
 			return this;
 		}
 
-		Builder withtau(final ZqElement tau) {
+		public Builder withtau(final ZqElement tau) {
 			this.tau = tau;
 			return this;
 		}
@@ -189,7 +185,7 @@ public class MultiExponentiationArgument {
 		 *
 		 * @return A valid Multi Exponentiation Argument.
 		 */
-		MultiExponentiationArgument build() {
+		public MultiExponentiationArgument build() {
 			// Null checking.
 			checkNotNull(this.cA0);
 			checkNotNull(this.cBVector);

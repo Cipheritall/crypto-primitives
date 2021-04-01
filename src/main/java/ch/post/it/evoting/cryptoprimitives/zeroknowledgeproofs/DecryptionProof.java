@@ -37,7 +37,7 @@ public class DecryptionProof implements GroupVectorElement<ZqGroup>, HashableLis
 	private final ZqElement e;
 	private final GroupVector<ZqElement, ZqGroup> z;
 
-	DecryptionProof(final ZqElement e, final GroupVector<ZqElement, ZqGroup> z) {
+	public DecryptionProof(final ZqElement e, final GroupVector<ZqElement, ZqGroup> z) {
 		checkNotNull(e);
 		checkNotNull(z);
 		checkArgument(e.getGroup().equals(z.getGroup()), "e and z must have the same group.");

@@ -33,7 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Collection of the values contained in a single value product argument.
  */
-class SingleValueProductArgument {
+public class SingleValueProductArgument {
 
 	private GqElement cd;
 	private GqElement cLowerDelta;
@@ -109,7 +109,7 @@ class SingleValueProductArgument {
 		return Objects.hash(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
 	}
 
-	static class Builder {
+	public static class Builder {
 
 		private GqElement cd;
 		private GqElement cLowerDelta;
@@ -119,37 +119,37 @@ class SingleValueProductArgument {
 		private ZqElement rTilde;
 		private ZqElement sTilde;
 
-		Builder withCd(final GqElement cd) {
+		public Builder withCd(final GqElement cd) {
 			this.cd = cd;
 			return this;
 		}
 
-		Builder withCLowerDelta(final GqElement cLowerDelta) {
+		public Builder withCLowerDelta(final GqElement cLowerDelta) {
 			this.cLowerDelta = cLowerDelta;
 			return this;
 		}
 
-		Builder withCUpperDelta(final GqElement cUpperDelta) {
+		public Builder withCUpperDelta(final GqElement cUpperDelta) {
 			this.cUpperDelta = cUpperDelta;
 			return this;
 		}
 
-		Builder withATilde(final GroupVector<ZqElement, ZqGroup> aTilde) {
+		public Builder withATilde(final GroupVector<ZqElement, ZqGroup> aTilde) {
 			this.aTilde = aTilde;
 			return this;
 		}
 
-		Builder withBTilde(final GroupVector<ZqElement, ZqGroup> bTilde) {
+		public Builder withBTilde(final GroupVector<ZqElement, ZqGroup> bTilde) {
 			this.bTilde = bTilde;
 			return this;
 		}
 
-		Builder withRTilde(final ZqElement rTilde) {
+		public Builder withRTilde(final ZqElement rTilde) {
 			this.rTilde = rTilde;
 			return this;
 		}
 
-		Builder withSTilde(final ZqElement sTilde) {
+		public Builder withSTilde(final ZqElement sTilde) {
 			this.sTilde = sTilde;
 			return this;
 		}
@@ -167,7 +167,7 @@ class SingleValueProductArgument {
 		 *
 		 * @return A valid Single Value Product Argument.
 		 */
-		SingleValueProductArgument build() {
+		public SingleValueProductArgument build() {
 			// Null checking.
 			checkNotNull(this.cd);
 			checkNotNull(this.cLowerDelta);

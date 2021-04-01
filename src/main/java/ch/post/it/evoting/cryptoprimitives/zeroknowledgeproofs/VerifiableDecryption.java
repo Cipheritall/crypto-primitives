@@ -48,7 +48,7 @@ public class VerifiableDecryption {
 	 * @param ciphertexts      a vector of partially decrypted ciphertexts. Must be non null.
 	 * @param decryptionProofs a vector of proofs showing that the ciphertexts have been correctly decrypted. Must be non null.
 	 */
-	VerifiableDecryption(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+	public VerifiableDecryption(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
 			final GroupVector<DecryptionProof, ZqGroup> decryptionProofs) {
 		checkNotNull(ciphertexts);
 		checkNotNull(decryptionProofs);

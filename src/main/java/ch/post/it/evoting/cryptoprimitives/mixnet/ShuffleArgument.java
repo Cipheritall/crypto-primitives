@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 /**
  * Value class containing the result of a shuffle argument proof.
  */
-class ShuffleArgument {
+public class ShuffleArgument {
 
 	private GroupVector<GqElement, GqGroup> cA;
 	private GroupVector<GqElement, GqGroup> cB;
@@ -91,29 +91,29 @@ class ShuffleArgument {
 		return Objects.hash(cA, cB, productArgument, multiExponentiationArgument);
 	}
 
-	static class Builder {
+	public static class Builder {
 
 		private GroupVector<GqElement, GqGroup> cA;
 		private GroupVector<GqElement, GqGroup> cB;
 		private ProductArgument productArgument;
 		private MultiExponentiationArgument multiExponentiationArgument;
 
-		Builder withCA(final GroupVector<GqElement, GqGroup> cA) {
+		public Builder withCA(final GroupVector<GqElement, GqGroup> cA) {
 			this.cA = cA;
 			return this;
 		}
 
-		Builder withCB(final GroupVector<GqElement, GqGroup> cB) {
+		public Builder withCB(final GroupVector<GqElement, GqGroup> cB) {
 			this.cB = cB;
 			return this;
 		}
 
-		Builder withProductArgument(final ProductArgument productArgument) {
+		public Builder withProductArgument(final ProductArgument productArgument) {
 			this.productArgument = productArgument;
 			return this;
 		}
 
-		Builder withMultiExponentiationArgument(final MultiExponentiationArgument multiExponentiationArgument) {
+		public Builder withMultiExponentiationArgument(final MultiExponentiationArgument multiExponentiationArgument) {
 			this.multiExponentiationArgument = multiExponentiationArgument;
 			return this;
 		}
@@ -130,7 +130,7 @@ class ShuffleArgument {
 		 *
 		 * @return A valid Shuffle Argument.
 		 */
-		ShuffleArgument build() {
+		public ShuffleArgument build() {
 			// Null checking.
 			checkNotNull(this.cA);
 			checkNotNull(this.cB);

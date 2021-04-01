@@ -17,6 +17,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -102,6 +103,13 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	@Override
 	public Stream<GqElement> stream() {
 		return this.publicKeyElements.stream();
+	}
+
+	/**
+	 * @return a copy of the key elements as a list.
+	 */
+	public List<GqElement> getKeyElements() {
+		return new ArrayList<>(publicKeyElements);
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
-class HadamardArgument {
+public class HadamardArgument {
 
 	private final GroupVector<GqElement, GqGroup> commitmentsB;
 	private final ZeroArgument zeroArgument;
@@ -45,7 +45,7 @@ class HadamardArgument {
 	 * @param commitmentsB a {@link GroupVector} of {@link GqElement}s. Non-null.
 	 * @param zeroArgument a {@link ZeroArgument}. Non-null.
 	 */
-	HadamardArgument(final GroupVector<GqElement, GqGroup> commitmentsB, final ZeroArgument zeroArgument) {
+	public HadamardArgument(final GroupVector<GqElement, GqGroup> commitmentsB, final ZeroArgument zeroArgument) {
 		checkNotNull(commitmentsB);
 		checkNotNull(zeroArgument);
 
