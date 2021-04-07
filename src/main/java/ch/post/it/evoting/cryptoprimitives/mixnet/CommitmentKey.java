@@ -147,14 +147,18 @@ class CommitmentKey implements HashableList {
 	/**
 	 * Creates a commitment key, with the {@code numberOfCommitmentElements} specifying the commitment key's desired number of elements.
 	 *
-	 * @param numberOfElements k, the desired number of elements of the commitment key. Must be strictly positive.
-	 * @param gqGroup          the gqGroup to which the commitment key belongs. Must be non null.
+	 *
+	 * @param numberOfElements k, the desired number of elements of the commitment key. Must be strictly positive and smaller or equal to q - 3, where
+	 *                           q is the order of the {@code gqGroup}.
+	 * @param gqGroup          the quadratic residue group to which the commitment key belongs. Must be non null.
 	 * @return the created commitment key.
 	 */
 	static CommitmentKey getVerifiableCommitmentKey(final int numberOfElements, final GqGroup gqGroup) throws NoSuchAlgorithmException {
 
 		checkArgument(numberOfElements > 0, "The desired number of commitment elements must be greater than zero");
 		checkNotNull(gqGroup);
+		checkArgument(BigInteger.valueOf(numberOfElements).compareTo(gqGroup.getQ().subtract(BigInteger.valueOf(3))) <= 0,
+				"The group does not contain enough elements to generate the requested commitment key");
 
 		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 

@@ -155,6 +155,13 @@ class CommitmentKeyTest {
 	}
 
 	@Test
+	void testGetVerifiableCommitmentKeyThrowsOnTooSmallGroup() {
+		GqGroup group = GroupTestData.getGqGroup();
+		int size = group.getQ().subtract(BigInteger.valueOf(3)).add(BigInteger.ONE).intValueExact();
+		assertThrows(IllegalArgumentException.class, () -> CommitmentKey.getVerifiableCommitmentKey(size, group));
+	}
+
+	@Test
 	void testGetVerifiableCommitmentKeyNullGpGroup() {
 		assertThrows(NullPointerException.class, () -> CommitmentKey.getVerifiableCommitmentKey(1, null));
 	}
