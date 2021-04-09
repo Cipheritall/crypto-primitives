@@ -30,7 +30,6 @@ public interface Mixnet {
 	 * @param mixingPublicKey  pk, the {@link ElGamalMultiRecipientPublicKey} to be used for re-encrypting
 	 * @return the Bayer-Groth shuffle proof and the shuffled ciphertexts as {@link VerifiableShuffle}
 	 */
-
 	VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
-			final ElGamalMultiRecipientPublicKey mixingPublicKey) throws NoSuchAlgorithmException;
+			final ElGamalMultiRecipientPublicKey publicKey) throws NoSuchAlgorithmException;
 }

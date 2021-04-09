@@ -97,16 +97,16 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 	@DisplayName("constructed with")
 	class ConstructorTest {
 
-		private int k;
 		private ElGamalMultiRecipientPublicKey publicKey;
 		private CommitmentKey commitmentKey;
 
 		@BeforeEach
 		void setUp() {
-			k = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			int publicKeySize = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			publicKey = elGamalGenerator.genRandomPublicKey(publicKeySize);
 
-			publicKey = elGamalGenerator.genRandomPublicKey(k);
-			commitmentKey = commitmentKeyGenerator.genCommitmentKey(k);
+			int commitmentKeySize = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 2) + 2;
+			commitmentKey = commitmentKeyGenerator.genCommitmentKey(commitmentKeySize);
 		}
 
 		@Test
@@ -129,7 +129,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("public and commitments keys from different group throws IllegalArgumentException")
 		void constructPublicCommitmentKeysDiffGroup() {
-			final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(k);
+			final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(publicKey.size());
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> new ShuffleArgumentService(otherPublicKey, commitmentKey, randomService, hashService));

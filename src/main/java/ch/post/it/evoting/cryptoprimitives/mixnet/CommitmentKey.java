@@ -45,7 +45,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 /**
  * Represents a public key of {@link GqElement}s that is used for the calculation of a commitment. Instances of this class are immutable.
  *
- * <p>A commitment key is of the form (h, g<sub>1</sub>, ..., g<sub>k</sub>)</p>
+ * <p>A commitment key is of the form (h, g<sub>1</sub>, ..., g<sub>ν</sub>)</p>
  */
 class CommitmentKey implements HashableList {
 
@@ -108,7 +108,7 @@ class CommitmentKey implements HashableList {
 	/**
 	 * Creates a stream of the elements of the commitment key.
 	 *
-	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>k</sub> in that order
+	 * @return a stream of h, g<sub>1</sub>, ..., g<sub>ν</sub> in that order
 	 */
 	Stream<GqElement> stream() {
 		return Stream.concat(Stream.of(this.h), this.gElements.stream());
@@ -148,7 +148,7 @@ class CommitmentKey implements HashableList {
 	 * Creates a commitment key, with the {@code numberOfCommitmentElements} specifying the commitment key's desired number of elements.
 	 *
 	 *
-	 * @param numberOfElements k, the desired number of elements of the commitment key. Must be strictly positive and smaller or equal to q - 3, where
+	 * @param numberOfElements ν, the desired number of elements of the commitment key. Must be strictly positive and smaller or equal to q - 3, where
 	 *                           q is the order of the {@code gqGroup}.
 	 * @param gqGroup          the quadratic residue group to which the commitment key belongs. Must be non null.
 	 * @return the created commitment key.
@@ -196,4 +196,5 @@ class CommitmentKey implements HashableList {
 		return new CommitmentKey(commitmentKeyElements.get(0), commitmentKeyElements.subList(1, commitmentKeyElements.size()));
 
 	}
+
 }

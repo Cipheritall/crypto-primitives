@@ -208,7 +208,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			witness = generateHadamardWitness(n + 1, m, zqGroup);
 			statement = generateHadamardStatement(witness, commitmentKeyGenerator.genCommitmentKey(n + 1));
 			Exception exception = assertThrows(IllegalArgumentException.class, () -> hadamardArgumentService.getHadamardArgument(statement, witness));
-			assertEquals("The number of rows in the matrix must be smaller than the commitment key size.", exception.getMessage());
+			assertEquals("The number of rows in the matrix must be smaller or equal to the commitment key size.", exception.getMessage());
 		}
 
 		@Test

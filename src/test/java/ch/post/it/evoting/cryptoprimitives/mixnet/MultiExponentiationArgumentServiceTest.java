@@ -66,7 +66,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParamete
 
 class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
-	private static final int KEY_ELEMENTS_NUMBER = 11;
+	private static final int COMMITMENT_KEY_SIZE = 11;
 	private static MultiExponentiationArgumentService argumentService;
 	private static TestMultiExponentiationStatementGenerator statementGenerator;
 	private static TestMultiExponentiationWitnessGenerator witnessGenerator;
@@ -77,6 +77,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 	private static RandomService randomService;
 	private static TestMultiExponentiationArgumentGenerator argumentGenerator;
 	private static BoundedHashService hashService;
+	private static int publicKeySize;
 	private int n;
 	private int m;
 	private int l;
@@ -84,10 +85,11 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 	@BeforeAll
 	static void setUpAll() {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
-		publicKey = elGamalGenerator.genRandomPublicKey(KEY_ELEMENTS_NUMBER);
+		publicKeySize = secureRandom.nextInt(10) + 1;
+		publicKey = elGamalGenerator.genRandomPublicKey(publicKeySize);
 
 		final TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(gqGroup);
-		commitmentKey = commitmentKeyGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
+		commitmentKey = commitmentKeyGenerator.genCommitmentKey(COMMITMENT_KEY_SIZE);
 		randomService = new RandomService();
 
 		hashService = TestHashService.create(gqGroup.getQ());
@@ -102,9 +104,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 	@BeforeEach
 	void setup() {
-		n = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-		m = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
-		l = secureRandom.nextInt(KEY_ELEMENTS_NUMBER - 1) + 1;
+		n = secureRandom.nextInt(COMMITMENT_KEY_SIZE - 1) + 1;
+		m = secureRandom.nextInt(COMMITMENT_KEY_SIZE - 1) + 1;
+		l = secureRandom.nextInt(publicKeySize) + 1;
 	}
 
 	////////// Utilities
@@ -293,7 +295,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void publicKeyAndCommitmentKeyFromDifferentGroupsThrows() {
 			TestCommitmentKeyGenerator otherGenerator = new TestCommitmentKeyGenerator(otherGqGroup);
-			CommitmentKey otherKey = otherGenerator.genCommitmentKey(KEY_ELEMENTS_NUMBER);
+			CommitmentKey otherKey = otherGenerator.genCommitmentKey(COMMITMENT_KEY_SIZE);
 			assertThrowsIllegalArgumentExceptionWithMessage("The public key and commitment key must belong to the same group",
 					() -> new MultiExponentiationArgumentService(publicKey, otherKey, randomService, hashService));
 		}
@@ -331,11 +333,11 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		}
 
 		@Test
-		void testExponentsMatrixNSizeNotSmallerThanKeySizeThrows() {
-			int n = KEY_ELEMENTS_NUMBER + 1;
+		void testExponentsMatrixNSizeNotSmallerThanCommitmentKeySizeThrows() {
+			int n = COMMITMENT_KEY_SIZE + 1;
 			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
 			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
-			assertThrowsIllegalArgumentExceptionWithMessage("The number of rows of matrix A must be less than the size of the public key.",
+			assertThrowsIllegalArgumentExceptionWithMessage("The number of rows of matrix A must be smaller or equal to the size of the commitment key.",
 					() -> argumentService.getMultiExponentiationArgument(statement, witness));
 		}
 
@@ -400,7 +402,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testThatLongerCiphertextsThanKeyThrows() {
-			int l = KEY_ELEMENTS_NUMBER + 1;
+			int l = COMMITMENT_KEY_SIZE + 1;
 			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
 			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
 			assertThrowsIllegalArgumentExceptionWithMessage("The ciphertexts must be smaller than the public key.",

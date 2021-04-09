@@ -137,11 +137,12 @@ final class MultiExponentiationArgumentService {
 
 		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
 		checkArgument(statement.getM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
-		checkArgument(witness.getDimensionN() <= pk.size(), "The number of rows of matrix A must be less than the size of the public key.");
+		checkArgument(witness.getDimensionN() <= ck.size(),
+				"The number of rows of matrix A must be smaller or equal to the size of the commitment key.");
 
 		final int m = statement.getM();
 		final int n = statement.getN();
-		final int l = CMatrix.isEmpty() ? 0 : CMatrix.get(0, 0).size();
+		final int l = CMatrix.isEmpty() ? 0 : CMatrix.getElementSize();
 
 		checkArgument(l <= pk.size(), "The ciphertexts must be smaller than the public key.");
 

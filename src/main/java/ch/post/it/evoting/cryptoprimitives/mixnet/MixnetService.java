@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -48,28 +49,30 @@ public final class MixnetService implements Mixnet {
 	}
 
 	MixnetService(final HashService hashService) {
-		this.hashService = hashService;
+		this.hashService = checkNotNull(hashService);
 		randomService = new RandomService();
 		final PermutationService permutationService = new PermutationService(randomService);
 		shuffleService = new ShuffleService(randomService, permutationService);
 	}
 
 	@Override
-	public VerifiableShuffle genVerifiableShuffle(List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
-			ElGamalMultiRecipientPublicKey publicKey) throws NoSuchAlgorithmException {
+	public VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
+			final ElGamalMultiRecipientPublicKey publicKey) throws NoSuchAlgorithmException {
 		checkNotNull(inputCiphertexts);
 		final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts = ImmutableList.copyOf(inputCiphertexts);
 		checkNotNull(publicKey);
 
 		final int N = ciphertexts.size();
 
-		checkArgument(N >= 2, "N must be >= 2");
+		checkArgument(2 <= N, "N must be >= 2");
+		checkArgument(BigInteger.valueOf(N).compareTo(publicKey.getGroup().getQ().subtract(BigInteger.valueOf(3))) <= 0,
+				"N must be smaller or equal to q - 3");
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
 		final GqGroup gqGroup = publicKey.getGroup();
-		checkArgument(gqGroup.equals(C.getGroup()), "InputCiphertextList must have the same group as publicKey");
+		checkArgument(gqGroup.equals(C.getGroup()), "Ciphertexts must have the same group as the publicKey");
 
-		checkArgument(ciphertexts.get(0).size() <= publicKey.size(), "The ciphertext must not contain more elements than the publicKey");
+		checkArgument(ciphertexts.get(0).size() <= publicKey.size(), "Ciphertexts must not contain more elements than the publicKey");
 
 		final Shuffle shuffle = shuffleService.genShuffle(ciphertexts, publicKey);
 
