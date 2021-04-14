@@ -47,7 +47,7 @@ public class TestHashService extends BoundedHashService {
 	 * @param upperBound the upper bound, exclusive.
 	 * @return a TestHashService.
 	 */
-	public static TestHashService create(final BigInteger lowerBound, final BigInteger upperBound) {
+	public static BoundedHashService create(final BigInteger lowerBound, final BigInteger upperBound) {
 		try {
 			hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		} catch (NoSuchAlgorithmException e) {
@@ -63,7 +63,7 @@ public class TestHashService extends BoundedHashService {
 	 * @param upperBound the upper bound, exclusive.
 	 * @return a TestHashService.
 	 */
-	public static TestHashService create(final BigInteger upperBound) {
+	public static BoundedHashService create(final BigInteger upperBound) {
 		return TestHashService.create(BigInteger.ZERO, upperBound);
 	}
 

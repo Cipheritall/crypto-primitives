@@ -45,6 +45,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -157,7 +158,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, zqGroupGenerator.genRandomZqElementMember(), keyPair.getPublicKey());
 			auxiliaryInformation = Arrays.asList("aux", "1");
 
-			TestHashService hashService = TestHashService.create(gqGroup.getQ());
+			BoundedHashService hashService = TestHashService.create(gqGroup.getQ());
 			decryptionProofService = new DecryptionProofService(randomService, hashService);
 		}
 
@@ -264,7 +265,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			RandomService randomService = spy(RandomService.class);
 			// b = (4, 7, 5)
 			doReturn(FOUR, SEVEN, FIVE).when(randomService).genRandomInteger(q);
-			TestHashService hashService = TestHashService.create(q);
+			BoundedHashService hashService = TestHashService.create(q);
 			DecryptionProofService service = new DecryptionProofService(randomService, hashService);
 
 			// Create expected output

@@ -18,10 +18,13 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
@@ -30,6 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -38,6 +42,26 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 	private final DecryptionProofService decryptionProofService;
 
+	/**
+	 * Instantiates a zero knowledge proof service which operates in a given group.
+	 * A security provider must already be loaded that contains the "SHA-256" algorithm.
+	 *
+	 * @param group the group in which all zero knowledge proofs take place. The bit length of q must be greater than 256. Not null.
+	 */
+	public ZeroKnowledgeProofService(GqGroup group){
+		checkNotNull(group);
+		final RandomService randomService = new RandomService();
+		HashService hashService;
+		try {
+			hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		} catch (NoSuchAlgorithmException exception) {
+			throw new IllegalStateException("Badly configured message digest instance.");
+		}
+		final BoundedHashService boundedHashService = new BoundedHashService(hashService, group.getQ().bitLength());
+		decryptionProofService = new DecryptionProofService(randomService, boundedHashService);
+	}
+
+	@VisibleForTesting
 	public ZeroKnowledgeProofService(final RandomService randomService, final BoundedHashService hashService) {
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 	}

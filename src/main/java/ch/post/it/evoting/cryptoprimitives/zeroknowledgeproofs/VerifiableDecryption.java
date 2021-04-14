@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
@@ -66,11 +65,11 @@ public class VerifiableDecryption {
 	 *
 	 * @return an immutable list of {@link ElGamalMultiRecipientCiphertext}s
 	 */
-	public List<ElGamalMultiRecipientCiphertext> getCiphertexts() {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getCiphertexts() {
 		return ciphertexts;
 	}
 
-	public List<DecryptionProof> getDecryptionProofs() {
+	public GroupVector<DecryptionProof, ZqGroup> getDecryptionProofs() {
 		return decryptionProofs;
 	}
 

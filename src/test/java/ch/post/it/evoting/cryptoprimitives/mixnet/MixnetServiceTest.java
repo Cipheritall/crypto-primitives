@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,8 @@ import org.junit.jupiter.api.Test;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
@@ -50,13 +50,13 @@ class MixnetServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	void testMixnetCreationWithNullHashServiceThrows(){
-		assertThrows(NullPointerException.class, () -> new MixnetService(null));
+	void testMixnetCreationWithNullGqGroupThrows(){
+		assertThrows(NullPointerException.class, () -> new MixnetService((GqGroup) null));
 	}
 
 	@Test
 	void testNullChecking() {
-		HashService hashService = mock(HashService.class);
+		BoundedHashService hashService = mock(BoundedHashService.class);
 		Mixnet mixnet = new MixnetService(hashService);
 
 		List<ElGamalMultiRecipientCiphertext> inputCiphertextList = new ElGamalGenerator(gqGroup).genRandomCiphertextVector(5, 5);
@@ -66,9 +66,8 @@ class MixnetServiceTest extends TestGroupSetup {
 
 	@Test
 	void testMultipleCipherTextsCheck() {
-		HashService hashService = mock(HashService.class);
+		BoundedHashService hashService = mock(BoundedHashService.class);
 		Mixnet mixnet = new MixnetService(hashService);
-
 		ElGamalMultiRecipientCiphertext cipherText = mock(ElGamalMultiRecipientCiphertext.class);
 		List<ElGamalMultiRecipientCiphertext> inputCiphertextList = Collections.singletonList(cipherText);
 
@@ -84,7 +83,7 @@ class MixnetServiceTest extends TestGroupSetup {
 
 	@Test
 	void testNumberOfCiphertextsTooLargeThrows() {
-		HashService hashService = mock(HashService.class);
+		BoundedHashService hashService = mock(BoundedHashService.class);
 		Mixnet mixnet = new MixnetService(hashService);
 
 		int maxNumberCiphertexts = gqGroup.getQ().intValueExact() + 3;
@@ -99,11 +98,15 @@ class MixnetServiceTest extends TestGroupSetup {
 
 	@Test
 	void testSameGroup() {
-		HashService hashService = mock(HashService.class);
+		BoundedHashService hashService = mock(BoundedHashService.class);
 		Mixnet mixnet = new MixnetService(hashService);
 
+		int minNumberOfVotes = 2;
+		int maxGroupCommitmentKeySize = otherGqGroup.getQ().intValueExact() - 3;
+		int Nc = secureRandom.nextInt(maxGroupCommitmentKeySize - minNumberOfVotes) + minNumberOfVotes;
+		int l = secureRandom.nextInt(keySize) + 1;
 		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(otherGqGroup);
-		List<ElGamalMultiRecipientCiphertext> inputCiphertextList = elGamalGenerator.genRandomCiphertextVector(2, 2);
+		List<ElGamalMultiRecipientCiphertext> inputCiphertextList = elGamalGenerator.genRandomCiphertextVector(Nc, l);
 
 		IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> mixnet.genVerifiableShuffle(inputCiphertextList, publicKey));
@@ -111,12 +114,12 @@ class MixnetServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	void testValidShuffle() throws NoSuchAlgorithmException {
+	void testValidShuffle() {
 		GqGroup group = GroupTestData.getGroupP59();
 
 		publicKey = new ElGamalGenerator(group).genRandomPublicKey(keySize);
 
-		HashService hashService = mock(HashService.class);
+		BoundedHashService hashService = mock(BoundedHashService.class);
 		Mixnet mixnet = new MixnetService(hashService);
 		when(hashService.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
 
@@ -129,16 +132,14 @@ class MixnetServiceTest extends TestGroupSetup {
 
 		assertNotNull(verifiableShuffle);
 		assertNotNull(verifiableShuffle.getShuffleArgument());
-		assertEquals(inputCiphertextList.size(), verifiableShuffle.getShuffledCiphertextList().size());
+		assertEquals(inputCiphertextList.size(), verifiableShuffle.getShuffledCiphertexts().size());
 
 	}
 
 	@Test
-	void testSizeOfCiphertextsGreaterThanPublicKeySize() {
-		HashService hashService = mock(HashService.class);
+	void testNumberOfCipherTextsGreaterthanPublicKey() {
+		BoundedHashService hashService = TestHashService.create(gqGroup.getQ());
 		Mixnet mixnet = new MixnetService(hashService);
-
-		when(hashService.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
 
 		int Nc = secureRandom.nextInt(gqGroup.getQ().intValueExact() - 4) + 2;
 		int l = keySize + 1;

@@ -15,7 +15,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -24,12 +23,19 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKe
 public interface Mixnet {
 
 	/**
-	 * Shuffles (including re-encryption) and provides a Bayer-Groth proof of the shuffle
+	 * Shuffles (including re-encryption) and provides a Bayer-Groth argument of the shuffle.
+	 *<p>
+	 * Additionally to the individual arguments preconditions the following cross-argument preconditions must be met:
+	 * <ul>
+	 *     <li>All ciphertexts and the public key must be from the same group</li>
+	 *     <li>The size of the ciphertexts must be smaller or equal to the public key size and greater than 0</li>
+	 * </ul>
 	 *
-	 * @param inputCiphertexts C,	the {@link ElGamalMultiRecipientCiphertext} to be shuffled
-	 * @param mixingPublicKey  pk, the {@link ElGamalMultiRecipientPublicKey} to be used for re-encrypting
-	 * @return the Bayer-Groth shuffle proof and the shuffled ciphertexts as {@link VerifiableShuffle}
+	 * @param ciphertexts C,	the collection of {@link ElGamalMultiRecipientCiphertext} to be shuffled. Must not be null and must not contain
+	 *                       nulls. All elements must be from the same group and of the same size. The number of elements must be in the range
+	 *                       [2, q - 2) where q is the order of the group.
+	 * @param publicKey  pk, the {@link ElGamalMultiRecipientPublicKey} to be used for re-encrypting. Not null.
+	 * @return the Bayer-Groth shuffle proof and the shuffled ciphertexts as a {@link VerifiableShuffle}
 	 */
-	VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
-			final ElGamalMultiRecipientPublicKey publicKey) throws NoSuchAlgorithmException;
+	VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey);
 }

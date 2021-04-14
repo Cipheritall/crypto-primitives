@@ -23,7 +23,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -173,10 +172,13 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 *
 	 * @param gamma The gamma (i.e. first) element of the ciphertext. {@code gamma} must be a valid GqElement different from the GqGroup generator.
 	 * @param phis  The phi elements of the ciphertext, which must satisfy the following:
+	 *              <ul>
 	 *              <li>The list must be non-null.</li>
 	 *              <li>The list must not be empty.</li>
 	 *              <li>The list must not contain any null.</li>
 	 *              <li>All elements must be from the same Gq group as gamma.</li>
+	 *              </ul>
+	 * @return A new ElGamalMultiRecipientCiphertext with the specified gamma and phis
 	 */
 	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
 		checkNotNull(gamma);
@@ -272,6 +274,10 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		return this.gamma;
 	}
 
+	public final GroupVector<GqElement, GqGroup> getPhis(){
+		return this.phis;
+	}
+
 	/**
 	 * @return the ith phi element.
 	 */
@@ -286,13 +292,6 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	@Override
 	public Stream<GqElement> stream() {
 		return Stream.concat(Stream.of(this.gamma), this.phis.stream());
-	}
-
-	/**
-	 * @return a copy of the phis as a list.
-	 */
-	public List<GqElement> getPhis() {
-		return new ArrayList<>(phis);
 	}
 
 	@Override

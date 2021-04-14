@@ -31,13 +31,14 @@ public class BoundedHashService {
 	 * than {@code maxHashLength}.
 	 *
 	 * @param hashService   The {@link HashService} to specialize.
-	 * @param maxHashLength The max hash length in bits (exclusive).
+	 * @param maxHashBitLength The max hash length in bits (exclusive).
 	 */
-	public BoundedHashService(final HashService hashService, final int maxHashLength) {
+	public BoundedHashService(final HashService hashService, final int maxHashBitLength) {
 		checkNotNull(hashService);
 
 		final int hashBitLength = hashService.getHashLength() * Byte.SIZE;
-		checkArgument(hashBitLength < maxHashLength, "The hash message digest must have an output length strictly smaller than maxHashLength.");
+		checkArgument(hashBitLength < maxHashBitLength,
+				"The hash message digest must have an output length strictly smaller than the specified max hash length.");
 
 		this.delegate = hashService;
 	}

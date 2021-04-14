@@ -659,4 +659,3 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 	}
 }
-

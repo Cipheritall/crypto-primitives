@@ -38,10 +38,12 @@ public class ElGamalMultiRecipientKeyPair {
 
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final ElGamalMultiRecipientPrivateKey privateKey;
+	private final int numElements;
 
 	private ElGamalMultiRecipientKeyPair(final ElGamalMultiRecipientPrivateKey privateKey, final ElGamalMultiRecipientPublicKey publicKey) {
 		this.publicKey = publicKey;
 		this.privateKey = privateKey;
+		this.numElements = publicKey.size();
 	}
 
 	/**
@@ -79,6 +81,13 @@ public class ElGamalMultiRecipientKeyPair {
 
 	public ElGamalMultiRecipientPrivateKey getPrivateKey() {
 		return privateKey;
+	}
+
+	/**
+	 * @return the number of elements contained in the key pair, i.e. the number of "recipients"
+	 */
+	public int size() {
+		return this.numElements;
 	}
 
 	/**

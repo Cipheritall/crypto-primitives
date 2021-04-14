@@ -44,6 +44,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 	 *
 	 * @param value the value of the element. Must not be null and must be an element of the group.
 	 * @param group the {@link GqGroup} to which this element belongs.
+	 * @return a new GqElement with the specified value in the given group
 	 */
 	public static GqElement create(final BigInteger value, final GqGroup group) {
 		checkNotNull(value);

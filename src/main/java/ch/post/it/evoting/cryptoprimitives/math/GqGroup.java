@@ -51,14 +51,15 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 	 * @param g A generator of the group.
 	 *
 	 * <p> Preconditions
-	 * <li>all arguments are non null</li>
-	 * <li>p is prime</li>
-	 * <li>q is prime</li>
-	 * <li>p = 2q + 1</li>
-	 * <li>q is in the range [1, p)</li>
-	 * <li>g is in the range [2, p)</li>
-	 * <li>g is a member of the group</li>
-	 * </p>
+	 *             <ul>
+	 *           		<li>all arguments are non null</li>
+	 * 					<li>p is prime</li>
+	 *     				<li>q is prime</li>
+	 * 					<li>p = 2q + 1</li>
+	 * 					<li>q is in the range [1, p)</li>
+	 * 					<li>g is in the range [2, p)</li>
+	 * 					<li>g is a member of the group</li>
+	 * 				</ul>
 	 */
 	public GqGroup(final BigInteger p, final BigInteger q, final BigInteger g) {
 		checkNotNull(p, "Group Gq parameter p should not be null");

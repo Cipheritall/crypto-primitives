@@ -21,10 +21,10 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
  * the recursive hash, which is akin to a union type. These sub-interfaces map one to one to a Java type.
  * The supported types by the recursive hash and their respective Hashable form are:
  * <ul>
- *     <li>byte[], see {@link HashableByteArray}</li>
- *     <li>String, see {@link HashableString}</li>
- *     <li>BigInteger, see {@link HashableBigInteger}</li>
- *     <li>List<Hashable>, see {@link HashableList}</li>
+ *     <li>{@code byte[]}, see {@link HashableByteArray}</li>
+ *     <li>{@code String}, see {@link HashableString}</li>
+ *     <li>{@code BigInteger}, see {@link HashableBigInteger}</li>
+ *     <li>{@code List<Hashable>}, see {@link HashableList}</li>
  * </ul>
  */
 public interface Hashable {

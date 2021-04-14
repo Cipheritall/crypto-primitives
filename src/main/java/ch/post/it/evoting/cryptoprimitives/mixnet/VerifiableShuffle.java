@@ -43,7 +43,7 @@ public class VerifiableShuffle {
 		this.shuffleArgument = shuffleArgument;
 	}
 
-	public List<ElGamalMultiRecipientCiphertext> getShuffledCiphertextList() {
+	public List<ElGamalMultiRecipientCiphertext> getShuffledCiphertexts() {
 		return shuffledCiphertextList;
 	}
 

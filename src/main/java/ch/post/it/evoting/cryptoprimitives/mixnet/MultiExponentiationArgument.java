@@ -132,6 +132,10 @@ public class MultiExponentiationArgument {
 		private ZqElement s;
 		private ZqElement tau;
 
+		public Builder() {
+			//Intentionally left blank
+		}
+
 		public Builder withcA0(final GqElement cA0) {
 			this.cA0 = cA0;
 			return this;
