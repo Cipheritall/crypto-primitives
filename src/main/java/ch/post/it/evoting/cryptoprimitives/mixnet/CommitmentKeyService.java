@@ -38,12 +38,11 @@ public class CommitmentKeyService {
 	 * @return true if the group is large enough to generate a key of the desired size, false otherwise.
 	 */
 	static boolean canGenerateKey(int numberOfElements, GqGroup group) {
-		checkArgument(numberOfElements > 0);
 		checkNotNull(group);
 
 		BigInteger requestedKeySize = BigInteger.valueOf(numberOfElements);
 		BigInteger maxKeySize = group.getQ().subtract(BigInteger.valueOf(3));
-		return requestedKeySize.compareTo(maxKeySize) <= 0;
+		return 0 < numberOfElements && requestedKeySize.compareTo(maxKeySize) <= 0;
 	}
 
 	/**
@@ -58,7 +57,7 @@ public class CommitmentKeyService {
 	CommitmentKey getVerifiableCommitmentKey(final int numberOfElements, final GqGroup gqGroup) {
 
 		checkNotNull(gqGroup);
-		checkArgument(canGenerateKey(numberOfElements, gqGroup), "The desired number of commitment elements must be in the range [0, q - 3)");
+		checkArgument(canGenerateKey(numberOfElements, gqGroup), "The desired number of commitment elements must be in the range (0, q - 3]");
 
 		int count = 0;
 		int i = 0;

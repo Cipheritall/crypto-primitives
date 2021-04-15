@@ -103,7 +103,7 @@ class MixnetServiceTest extends TestGroupSetup {
 
 		int minNumberOfVotes = 2;
 		int maxGroupCommitmentKeySize = otherGqGroup.getQ().intValueExact() - 3;
-		int Nc = secureRandom.nextInt(maxGroupCommitmentKeySize - minNumberOfVotes) + minNumberOfVotes;
+		int Nc = secureRandom.nextInt(maxGroupCommitmentKeySize - minNumberOfVotes + 1) + minNumberOfVotes;
 		int l = secureRandom.nextInt(keySize) + 1;
 		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(otherGqGroup);
 		List<ElGamalMultiRecipientCiphertext> inputCiphertextList = elGamalGenerator.genRandomCiphertextVector(Nc, l);

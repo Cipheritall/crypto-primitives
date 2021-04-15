@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -45,13 +44,14 @@ class CommitmentKeyTest {
 
 	private static GqGroupGenerator generator;
 	private static CommitmentKeyService commitmentKeyService;
+	private static GqGroup gqGroup;
 
 	private GqElement h;
 	private List<GqElement> gs;
 
 	@BeforeAll
 	static void setUpAll() throws NoSuchAlgorithmException {
-		GqGroup gqGroup = GroupTestData.getGqGroup();
+		gqGroup = GroupTestData.getGqGroup();
 		generator = new GqGroupGenerator(gqGroup);
 		HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		commitmentKeyService = new CommitmentKeyService(hashService);
@@ -173,15 +173,13 @@ class CommitmentKeyTest {
 
 	@Test
 	void testGetVerifiableCommitmentKeyIncorrectNumberOfCommitmentElements() {
-		GqGroup gqGroup = mock(GqGroup.class);
-
 		IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> commitmentKeyService.getVerifiableCommitmentKey(0, gqGroup));
-		assertEquals("The desired number of commitment elements must be greater than zero", illegalArgumentException.getMessage());
+		assertEquals("The desired number of commitment elements must be in the range (0, q - 3]", illegalArgumentException.getMessage());
 
 		illegalArgumentException = assertThrows(IllegalArgumentException.class,
 				() -> commitmentKeyService.getVerifiableCommitmentKey(-1, gqGroup));
 
-		assertEquals("The desired number of commitment elements must be greater than zero", illegalArgumentException.getMessage());
+		assertEquals("The desired number of commitment elements must be in the range (0, q - 3]", illegalArgumentException.getMessage());
 	}
 }
