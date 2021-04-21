@@ -41,23 +41,20 @@ public final class MixnetService implements Mixnet {
 	private final RandomService randomService;
 	private final ShuffleService shuffleService;
 	private final HashService hashService;
-	private final BoundedHashService shuffleHashService;
+	private final HashService shuffleHashService;
 	private final CommitmentKeyService commitmentKeyService;
 
 	/**
 	 * Instantiates a mixnet service. A security provider must already be loaded containing the "SHA-256" algorithm.
-	 *
-	 * @param group the group in which all zero knowledge proofs take place. Must be non null and the bit length of q must be greater than 256.
 	 */
-	public MixnetService(final GqGroup group) {
-		checkNotNull(group);
+	public MixnetService() {
 		try {
 			this.hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		} catch (NoSuchAlgorithmException exception) {
 			throw new IllegalStateException("Badly configured message digest instance.");
 		}
 		this.commitmentKeyService = new CommitmentKeyService(hashService);
-		this.shuffleHashService = new BoundedHashService(hashService, group.getQ().bitLength());
+		this.shuffleHashService = hashService; //Two seperate hash services are needed for testing
 		this.randomService = new RandomService();
 		final PermutationService permutationService = new PermutationService(randomService);
 		this.shuffleService = new ShuffleService(randomService, permutationService);
@@ -69,7 +66,7 @@ public final class MixnetService implements Mixnet {
 	 * @param shuffleHashService the hash service to use for the shuffle proof. Not null.
 	 */
 	@VisibleForTesting
-	public MixnetService(final BoundedHashService shuffleHashService) {
+	public MixnetService(final HashService shuffleHashService) {
 		checkNotNull(shuffleHashService);
 		try {
 			this.hashService = new HashService(MessageDigest.getInstance("SHA-256"));
@@ -122,7 +119,8 @@ public final class MixnetService implements Mixnet {
 		final ShuffleWitness shuffleWitness = new ShuffleWitness(phi, r);
 
 		//shuffleArgument
-		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, shuffleHashService);
+		final ShuffleArgumentService shuffleArgumentService =
+				new ShuffleArgumentService(publicKey, ck, randomService, new BoundedHashService(shuffleHashService, gqGroup.getQ().bitLength()));
 		final ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
 
 		return new VerifiableShuffle(shuffle.getCiphertexts(), shuffleArgument);
