@@ -15,17 +15,15 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.SecureRandom;
 import java.util.stream.IntStream;
 
-import org.checkerframework.common.value.qual.IntRange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
@@ -72,13 +70,29 @@ class VerifiableDecryptionTest extends TestGroupSetup {
 	@DisplayName("Constructing a VerifiableDecryption with different number of DecryptionProofs throws an IllegalArgumentException")
 	void constructVerifiableDecryptionWithCiphertextVectorDifferentSizeThanDecryptionProofList() {
 		ciphertexts = elGamalGenerator.genRandomCiphertextVector(numCiphertexts + 1, numPhis);
-		assertThrows(IllegalArgumentException.class, () -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+		assertEquals("Each ciphertext must have exactly one decryption proof.", illegalArgumentException.getMessage());
+	}
+
+	@Test
+	@DisplayName("Constructing a VerifiableDecryption with different elements size throws an IllegalArgumentException")
+	void constructVerifiableDecryptionDifferentElementsSize() {
+		ciphertexts = elGamalGenerator.genRandomCiphertextVector(numCiphertexts, numPhis + 1);
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+		assertEquals("The ciphertexts and decryption proofs elements must have the same size.", illegalArgumentException.getMessage());
 	}
 
 	@Test
 	@DisplayName("Constructing a VerifiableDecryption with DecryptionProofs from group of different order throws an IllegalArgumentException")
 	void constructVerifiableDecryptionWithCiphertextVectorDifferentGroupOrderThanDecryptionProofList() {
 		ciphertexts = new ElGamalGenerator(otherGqGroup).genRandomCiphertextVector(numCiphertexts, numPhis);
-		assertThrows(IllegalArgumentException.class, () -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+		assertEquals("The ciphertexts and decryption proofs must have groups of the same order.", illegalArgumentException.getMessage());
 	}
 }

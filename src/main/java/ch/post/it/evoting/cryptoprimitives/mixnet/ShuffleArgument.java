@@ -39,6 +39,7 @@ public class ShuffleArgument {
 
 	private int m;
 	private int n;
+	private int l;
 	private GqGroup group;
 
 	private ShuffleArgument() {
@@ -67,6 +68,10 @@ public class ShuffleArgument {
 
 	int getN() {
 		return n;
+	}
+
+	int getL() {
+		return l;
 	}
 
 	GqGroup getGroup() {
@@ -161,6 +166,7 @@ public class ShuffleArgument {
 
 			shuffleArgument.m = productArgument.getM();
 			shuffleArgument.n = productArgument.getN();
+			shuffleArgument.l = multiExponentiationArgument.getL();
 			shuffleArgument.group = productArgument.getGroup();
 
 			return shuffleArgument;

@@ -125,7 +125,7 @@ public final class MixnetService implements Mixnet {
 		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, shuffleHashService);
 		final ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
 
-		return new VerifiableShuffle(shuffle.getCiphertexts(), shuffleArgument);
+		return new VerifiableShuffle(GroupVector.from(shuffle.getCiphertexts()), shuffleArgument);
 	}
 
 }

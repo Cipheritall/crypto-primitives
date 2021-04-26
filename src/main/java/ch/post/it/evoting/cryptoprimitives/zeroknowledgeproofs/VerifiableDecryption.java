@@ -38,10 +38,11 @@ public class VerifiableDecryption {
 	/**
 	 * Instantiates a verifiable decryption from the given ciphertexts and decryption proofs.
 	 * <p>
-	 * The ciphertext and decryption proof vectors must comply with the following:
+	 * The ciphertexts and decryption proof vectors must comply with the following:
 	 * <ul>
 	 *     <li>have the same size</li>
 	 *     <li>have the same group order</li>
+	 *     <li>their elements must have the same size</li>
 	 * </ul>
 	 *
 	 * @param ciphertexts      a vector of partially decrypted ciphertexts. Must be non null.
@@ -53,6 +54,8 @@ public class VerifiableDecryption {
 		checkNotNull(decryptionProofs);
 
 		checkArgument(ciphertexts.size() == decryptionProofs.size(), "Each ciphertext must have exactly one decryption proof.");
+		checkArgument(ciphertexts.getElementSize() == decryptionProofs.getElementSize(),
+				"The ciphertexts and decryption proofs elements must have the same size.");
 		checkArgument(ciphertexts.getGroup().hasSameOrderAs(decryptionProofs.getGroup()),
 				"The ciphertexts and decryption proofs must have groups of the same order.");
 

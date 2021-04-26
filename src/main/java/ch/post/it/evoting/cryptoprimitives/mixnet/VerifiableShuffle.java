@@ -15,12 +15,15 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Objects;
 
-import com.google.common.collect.ImmutableList;
-
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * A verifiable shuffle consisting of shuffled votes and an argument for the correctness of the shuffle.
@@ -29,22 +32,41 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCipherte
  */
 public class VerifiableShuffle {
 
-	private final ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertextList;
+	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
 	private final ShuffleArgument shuffleArgument;
 
 	/**
 	 * Instantiates a verifiable shuffle from the given shuffled ciphertexts and shuffle proof.
+	 * <p>
+	 * The vector of shuffled ciphertexts and the shuffle argument must comply with the following:
+	 * <ul>
+	 *     <li>the size of the vector of shuffled ciphertexts must be equal to the size of the shuffle argument {@code N = n * m}</li>
+	 *     <li>the size of each shuffled ciphertext element must be equal to the dimension {@code l} of the shuffle argument</li>
+	 *     <li>have the same group</li>
+	 * </ul>
 	 *
-	 * @param shuffledCiphertextList a list of shuffled ciphertexts
-	 * @param shuffleArgument 		 a shuffle argument proving the correctness of the shuffle
+	 * @param shuffledCiphertexts a vector of shuffled ciphertexts. Must be non-null.
+	 * @param shuffleArgument     a shuffle argument proving the correctness of the shuffle. Must be non-null.
 	 */
-	public VerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> shuffledCiphertextList, final ShuffleArgument shuffleArgument) {
-		this.shuffledCiphertextList = ImmutableList.copyOf(shuffledCiphertextList);
+	public VerifiableShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts,
+			final ShuffleArgument shuffleArgument) {
+
+		checkNotNull(shuffledCiphertexts);
+		checkNotNull(shuffleArgument);
+
+		checkArgument(shuffledCiphertexts.size() == shuffleArgument.getN() * shuffleArgument.getM(),
+				"Shuffle ciphertext vector's size must be N = n * m.");
+		checkArgument(shuffledCiphertexts.getElementSize() == shuffleArgument.getL(),
+				"Shuffled ciphertexts elements size must be dimension l of shuffle argument.");
+		checkArgument(shuffledCiphertexts.getGroup().equals(shuffleArgument.getGroup()),
+				"Shuffled ciphertext vector and shuffle argument must have the same group.");
+
+		this.shuffledCiphertexts = shuffledCiphertexts;
 		this.shuffleArgument = shuffleArgument;
 	}
 
 	public List<ElGamalMultiRecipientCiphertext> getShuffledCiphertexts() {
-		return shuffledCiphertextList;
+		return shuffledCiphertexts;
 	}
 
 	public ShuffleArgument getShuffleArgument() {
@@ -60,12 +82,12 @@ public class VerifiableShuffle {
 			return false;
 		}
 		final VerifiableShuffle that = (VerifiableShuffle) o;
-		return Objects.equals(shuffledCiphertextList, that.shuffledCiphertextList) && Objects
+		return Objects.equals(shuffledCiphertexts, that.shuffledCiphertexts) && Objects
 				.equals(shuffleArgument, that.shuffleArgument);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(shuffledCiphertextList, shuffleArgument);
+		return Objects.hash(shuffledCiphertexts, shuffleArgument);
 	}
 }
