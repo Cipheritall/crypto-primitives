@@ -22,7 +22,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
 
@@ -92,10 +91,12 @@ public final class GqElement extends GroupElement<GqGroup> {
 	public GqElement hashAndSquare(final HashService hashService) {
 		checkNotNull(hashService);
 
+		checkArgument(hashService.getHashLength() * Byte.SIZE < this.getGroup().getQ().bitLength(),
+				"The hash length must be smaller than the bit length of this GqGroup's q.");
+
 		final byte[] xB = integerToByteArray(this.value);
 
-		final BoundedHashService boundedHashService = new BoundedHashService(hashService, this.group.getQ().bitLength());
-		final byte[] xhB = boundedHashService.recursiveHash(HashableByteArray.from(xB));
+		final byte[] xhB = hashService.recursiveHash(HashableByteArray.from(xB));
 
 		final BigInteger xh = byteArrayToInteger(xhB).add(BigInteger.ONE);
 

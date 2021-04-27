@@ -35,7 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -53,7 +53,7 @@ class ShuffleArgumentService {
 	private final CommitmentKey commitmentKey;
 
 	private final RandomService randomService;
-	private final BoundedHashService hashService;
+	private final HashService hashService;
 	private final ProductArgumentService productArgumentService;
 	private final MultiExponentiationArgumentService multiExponentiationArgumentService;
 
@@ -64,7 +64,7 @@ class ShuffleArgumentService {
 	 * @param commitmentKey ck, the commitment key used to compute commitments.
 	 */
 	ShuffleArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey, final RandomService randomService,
-			final BoundedHashService hashService) {
+			final HashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);
@@ -74,6 +74,11 @@ class ShuffleArgumentService {
 
 		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public key and commitment key must belong to the same group.");
+
+		// Check hash length
+		final BigInteger q = publicKey.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		this.publicKey = publicKey;
 		this.commitmentKey = commitmentKey;

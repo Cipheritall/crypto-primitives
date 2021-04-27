@@ -21,7 +21,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -46,6 +49,23 @@ public class HashService {
 	}
 
 	/**
+	 * Instantiates a recursive hash service with a default SHA-256 message digest.
+	 *
+	 * @throws IllegalStateException if the creation of the SHA-256 message digest failed.
+	 */
+	public HashService() {
+		final MessageDigest messageDigest;
+		try {
+			messageDigest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
+		}
+
+		this.hashFunction = messageDigest::digest;
+		this.hashLength = messageDigest.getDigestLength();
+	}
+
+	/**
 	 * Computes the hash of multiple (potentially) recursive inputs.
 	 *
 	 * @param values the objects to be hashed.
@@ -60,9 +80,10 @@ public class HashService {
 	 * the domain of each input element is well defined. </li>
 	 * </ul>
 	 */
-	public final byte[] recursiveHash(final Hashable... values) {
+	public byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);
 		checkArgument(values.length != 0, "Cannot hash no values.");
+		checkArgument(Arrays.stream(values).allMatch(Objects::nonNull), "Values contain a null value which cannot be hashed.");
 
 		if (values.length > 1) {
 			final HashableList valuesList = HashableList.from(ImmutableList.copyOf(values));

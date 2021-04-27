@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -307,12 +309,21 @@ class GqElementTest {
 
 	@ParameterizedTest(name = "input hash service is {0}.")
 	@NullSource
-	@DisplayName("calling hashAndSquare on a valid gqElement with a null hash service does not throw an exception.")
+	@DisplayName("calling hashAndSquare on a valid gqElement with a null hash service throws an exception.")
 	void nullCheckTest(final HashService nullHashService) {
 
 		final GqElement gqElement = GqElement.create(g, group);
 
 		assertThrows(NullPointerException.class, () -> gqElement.hashAndSquare(nullHashService));
+	}
+
+	@Test
+	@DisplayName("calling hashAndSquare on a valid element with a hash service with a too big hash length throws an exception.")
+	void hashAndSquareWithIncompatibleHashService() throws NoSuchAlgorithmException {
+		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final GqElement gqElement = GqElement.create(g, group);
+
+		assertThrows(IllegalArgumentException.class, () -> gqElement.hashAndSquare(hashService));
 	}
 
 	@ParameterizedTest

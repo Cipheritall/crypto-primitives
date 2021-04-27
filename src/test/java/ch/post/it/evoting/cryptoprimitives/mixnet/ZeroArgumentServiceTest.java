@@ -55,7 +55,6 @@ import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -92,7 +91,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	private static CommitmentKey commitmentKey;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static RandomService randomService;
-	private static BoundedHashService hashService;
+	private static HashService hashService;
 
 	@BeforeAll
 	static void setUpAll() throws Exception {
@@ -123,6 +122,15 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 				() -> assertThrows(NullPointerException.class,
 						() -> new ZeroArgumentService(publicKey, commitmentKey, randomService, null))
 		);
+	}
+
+	@Test
+	@DisplayName("Constructing a ZeroArgumentService with a hashService that has a too long hash length throws an IllegalArgumentException")
+	void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
+		HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> new ZeroArgumentService(publicKey, commitmentKey, randomService, otherHashService));
+		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
 	}
 
 	@Test
@@ -632,10 +640,10 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 					.genRandomInteger(simpleZqGroup.getQ());
 
 			// Mock the hashService.
-			final BoundedHashService hashServiceMock = TestHashService.create(simpleGqGroup.getQ());
+			final HashService hashService = TestHashService.create(simpleGqGroup.getQ());
 
 			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
-					hashServiceMock);
+					hashService);
 
 			// Verification.
 			final ZeroArgument zeroArgument = simpleZeroArgumentService.getZeroArgument(simpleZeroStatement, simpleZeroWitness);
@@ -711,9 +719,8 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 				throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, boundedHashService);
+			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 
 			assertEquals(expectedOutput, service.verifyZeroArgument(zeroStatement, zeroArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));

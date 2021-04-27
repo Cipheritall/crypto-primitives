@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.8.0.0</version>
+	<version>0.8.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -27,16 +27,17 @@
 		<maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
 		<maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
 		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-		<maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
+		<maven-release-plugin.version>3.0.0-M4</maven-release-plugin.version>
 		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-		<maven-source-plugin.version>3.2.0</maven-source-plugin.version>
+		<maven-source-plugin.version>3.2.1</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
 
 		<!-- Project settings -->
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.outputTimestamp>2021-04-27T00:00:00Z</project.build.outputTimestamp>
 
 		<!--  Sonar  -->
 		<sonar.scm.disabled>true</sonar.scm.disabled>
@@ -215,6 +216,9 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>${maven-javadoc-plugin.version}</version>
+					<configuration>
+						<notimestamp>true</notimestamp>
+					</configuration>
 				</plugin>
 				<!-- JaCoCo -->
 				<plugin>

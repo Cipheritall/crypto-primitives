@@ -61,7 +61,6 @@ import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -84,7 +83,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 	private static ElGamalGenerator elGamalGenerator;
 	private static TestCommitmentKeyGenerator commitmentKeyGenerator;
-	private static BoundedHashService hashService;
+	private static HashService hashService;
 
 	@BeforeAll
 	static void setUpAll() {
@@ -124,6 +123,15 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					() -> assertThrows(NullPointerException.class, () -> new ShuffleArgumentService(publicKey, commitmentKey, null, hashService)),
 					() -> assertThrows(NullPointerException.class, () -> new ShuffleArgumentService(publicKey, commitmentKey, randomService, null))
 			);
+		}
+
+		@Test
+		@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
+		void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
+			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> new ShuffleArgumentService(publicKey, commitmentKey, randomService, otherHashService));
+			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
 		}
 
 		@Test
@@ -386,7 +394,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					FOUR, NINE, ZERO, ONE, SEVEN,
 					ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
 					.when(shuffleRandomService).genRandomInteger(q);
-			BoundedHashService shuffleHashService = TestHashService.create(gqGroup.getQ());
+			HashService shuffleHashService = TestHashService.create(gqGroup.getQ());
 			ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey,
 					shuffleRandomService, shuffleHashService);
 
@@ -492,7 +500,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Necessary to return a constant value, otherwise some assertFalse tests can return true because of changes compensating each other (due
 			// to small test groups).
-			final BoundedHashService hashServiceMock = mock(BoundedHashService.class);
+			final HashService hashServiceMock = mock(HashService.class);
 			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
 
 			shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
@@ -767,8 +775,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 				Boolean output, String description) throws NoSuchAlgorithmException {
 
 			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			BoundedHashService boundedHashService = new BoundedHashService(hashService, pk.getGroup().getQ().bitLength());
-			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, boundedHashService);
+			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, hashService);
 			assertEquals(output, service.verifyShuffleArgument(statement, argument, m, n).isVerified(),
 					String.format("assertion failed for: %s", description));
 		}

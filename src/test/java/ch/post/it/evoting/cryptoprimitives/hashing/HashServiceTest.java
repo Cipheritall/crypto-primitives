@@ -16,6 +16,8 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -65,6 +68,13 @@ class HashServiceTest {
 		hashService = new HashService(messageDigest);
 		secureRandom = new SecureRandom();
 		randomService = new RandomService();
+	}
+
+	@Test
+	void testEmptySHA256Constructor() {
+		final HashService hashService = assertDoesNotThrow((ThrowingSupplier<HashService>) HashService::new);
+
+		assertEquals(32, hashService.getHashLength());
 	}
 
 	@Test
@@ -161,7 +171,10 @@ class HashServiceTest {
 
 	@Test
 	void testRecursiveHashOfNullThrows() {
-		assertThrows(NullPointerException.class, () -> hashService.recursiveHash((Hashable) null));
+		final IllegalArgumentException illegalArgumentException =
+				assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash((Hashable) null));
+
+		assertEquals("Values contain a null value which cannot be hashed.", illegalArgumentException.getMessage());
 	}
 
 	@Test
@@ -334,16 +347,6 @@ class HashServiceTest {
 		return new Split(HashableByteArray.from(first), HashableByteArray.from(second));
 	}
 
-	private static class Split {
-		final HashableByteArray start;
-		final HashableByteArray end;
-
-		Split(HashableByteArray start, HashableByteArray end) {
-			this.start = start;
-			this.end = end;
-		}
-	}
-
 	@Test
 	void testThatSimilarCharactersHashToDifferentValues() {
 		HashableString first = HashableString.from("e");
@@ -356,5 +359,15 @@ class HashServiceTest {
 	//Utilities
 	static HashableList hashableListOf(Hashable... items) {
 		return HashableList.from(ImmutableList.copyOf(items));
+	}
+
+	private static class Split {
+		final HashableByteArray start;
+		final HashableByteArray end;
+
+		Split(HashableByteArray start, HashableByteArray end) {
+			this.start = start;
+			this.end = end;
+		}
 	}
 }
