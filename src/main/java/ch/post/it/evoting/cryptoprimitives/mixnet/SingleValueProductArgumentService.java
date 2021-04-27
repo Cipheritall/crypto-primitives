@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -46,16 +46,21 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 class SingleValueProductArgumentService {
 
 	private final RandomService randomService;
-	private final BoundedHashService hashService;
+	private final HashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 
-	SingleValueProductArgumentService(final RandomService randomService, final BoundedHashService hashService,
+	SingleValueProductArgumentService(final RandomService randomService, final HashService hashService,
 			final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey) {
 		this.randomService = checkNotNull(randomService);
 		this.hashService = checkNotNull(hashService);
 		this.publicKey = checkNotNull(publicKey);
 		this.commitmentKey = checkNotNull(commitmentKey);
+
+		// Check hash length
+		final BigInteger q = publicKey.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 	}
 
 	/**
@@ -97,6 +102,7 @@ class SingleValueProductArgumentService {
 		checkArgument(ca.equals(getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
 		final ZqGroup group = b.getGroup();
+
 		final ZqElement one = ZqElement.create(1, group); // Identity for multiplication
 		checkArgument(b.equals(a.stream().reduce(one, ZqElement::multiply)),
 				"The product of the provided elements does not give the provided product.");

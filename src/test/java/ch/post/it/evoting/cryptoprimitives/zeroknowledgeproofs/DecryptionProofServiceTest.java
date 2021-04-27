@@ -25,6 +25,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +50,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -72,8 +74,88 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 	static void setupAll() {
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
 
-		BoundedHashService hashService = TestHashService.create(gqGroup.getQ());
+		HashService hashService = TestHashService.create(gqGroup.getQ());
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
+	}
+
+	static class TestValues {
+		// Create groups
+		private final BigInteger p = BigInteger.valueOf(23);
+		private final BigInteger q = BigInteger.valueOf(11);
+		private final BigInteger g = BigInteger.valueOf(2);
+		private final GqGroup gqGroup = new GqGroup(p, q, g);
+		private final ZqGroup zqGroup = new ZqGroup(q);
+
+		// Create BigIntegers
+		private final BigInteger TWO = BigInteger.valueOf(2);
+		private final BigInteger THREE = BigInteger.valueOf(3);
+		private final BigInteger FOUR = BigInteger.valueOf(4);
+		private final BigInteger FIVE = BigInteger.valueOf(5);
+		private final BigInteger SIX = BigInteger.valueOf(6);
+		private final BigInteger SEVEN = BigInteger.valueOf(7);
+		private final BigInteger EIGHT = BigInteger.valueOf(8);
+		private final BigInteger TEN = BigInteger.TEN;
+
+		// Create GqElements
+		private final GqElement gThree = GqElement.create(THREE, gqGroup);
+		private final GqElement gFour = GqElement.create(FOUR, gqGroup);
+		private final GqElement gEight = GqElement.create(EIGHT, gqGroup);
+		private final GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
+
+		// Create ZqElements
+		private final ZqElement zTwo = ZqElement.create(TWO, zqGroup);
+		private final ZqElement zThree = ZqElement.create(THREE, zqGroup);
+		private final ZqElement zFive = ZqElement.create(FIVE, zqGroup);
+		private final ZqElement zSix = ZqElement.create(SIX, zqGroup);
+		private final ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
+		private final ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
+		private final ZqElement zTen = ZqElement.create(TEN, zqGroup);
+
+		// Create input arguments
+		// c = {9, (18, 9, 13)}
+		// sk = (3, 7, 2)
+		// pk = (8, 13, 4)
+		// m = (4, 8, 3)
+		// iAux = "Auxiliary Data"
+		private final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(Arrays.asList(gFour, gEight, gThree));
+		private final ElGamalMultiRecipientPublicKey pk = new ElGamalMultiRecipientPublicKey(Arrays.asList(gEight, gThirteen, gFour));
+		private final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(Arrays.asList(zThree, zSeven, zTwo));
+		private final ElGamalMultiRecipientCiphertext c = ElGamalMultiRecipientCiphertext.getCiphertext(m, zFive, pk);
+		private final List<String> iAux = Collections.singletonList("Auxiliary Data");
+
+		private final List<BigInteger> randomValues = Arrays.asList(FOUR, SEVEN, FIVE);
+
+		// Create output arguments
+		private final ZqElement e = zEight;
+		private final GroupVector<ZqElement, ZqGroup> z = GroupVector.of(zSix, zEight, zTen);
+
+		private ElGamalMultiRecipientKeyPair createKeyPair() {
+			final ElGamalMultiRecipientKeyPair keyPair = mock(ElGamalMultiRecipientKeyPair.class);
+			when(keyPair.getPrivateKey()).thenReturn(sk);
+			when(keyPair.getPublicKey()).thenReturn(pk);
+			return keyPair;
+		}
+
+		private RandomService getSpecificRandomService() {
+			return new RandomService() {
+				final Iterator<BigInteger> values = randomValues.iterator();
+
+				@Override
+				public BigInteger genRandomInteger(BigInteger upperBound) {
+					return values.next();
+				}
+			};
+		}
+
+		private DecryptionProofService createDecryptionProofService() {
+			final RandomService randomService = getSpecificRandomService();
+			final HashService hashService = TestHashService.create(q);
+			return new DecryptionProofService(randomService, hashService);
+		}
+
+		private DecryptionProof createDecryptionProof() {
+			return new DecryptionProof(e, z);
+		}
 	}
 
 	@Nested
@@ -165,6 +247,9 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			GroupVector<GqElement, GqGroup> messageElements = gqGroupGenerator.genRandomGqElementVector(messageLength);
 			message = new ElGamalMultiRecipientMessage(messageElements);
 			ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, zqGroupGenerator.genRandomZqElementMember(), keyPair.getPublicKey());
+
+			HashService hashService = TestHashService.create(gqGroup.getQ());
+			decryptionProofService = new DecryptionProofService(randomService, hashService);
 		}
 
 		@Test
@@ -187,6 +272,16 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		void genDecryptionProofWithValidArguments() {
 			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, ImmutableList.of()));
 			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
+		}
+
+		@Test
+		@DisplayName("with a hashService that has a too long hash length throws an IllegalArgumentException")
+		void genDecryptionProofWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
+			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			DecryptionProofService otherProofService = new DecryptionProofService(randomService, otherHashService);
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> otherProofService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
+			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
 		}
 
 		@Test
@@ -331,7 +426,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 					otherZqGroupGenerator.genRandomZqElementVector(messageLength));
 			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
-			assertEquals("The decryption proof must have the same group order as the ciphertext, the message and the public key.", exception.getMessage());
+			assertEquals("The decryption proof must have the same group order as the ciphertext, the message and the public key.",
+					exception.getMessage());
 		}
 
 		@Test
@@ -352,7 +448,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 					zqGroupGenerator.genRandomZqElementVector(keyLength + 1));
 			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
-			assertEquals("The ciphertext, the message and the decryption proof must be smaller than or equal to the public key.", exception.getMessage());
+			assertEquals("The ciphertext, the message and the decryption proof must be smaller than or equal to the public key.",
+					exception.getMessage());
 		}
 
 		@Test
@@ -403,7 +500,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			final DecryptionProof proof1 = service1.genDecryptionProof(c, keyPair, m, iAux);
 			final DecryptionProof proof2 = service2.genDecryptionProof(c, keyPair, m, Collections.emptyList());
 
-			final ElGamalMultiRecipientPublicKey pkPrime = new ElGamalMultiRecipientPublicKey(Arrays.asList(values.gEight, values.gEight, values.gFour));
+			final ElGamalMultiRecipientPublicKey pkPrime = new ElGamalMultiRecipientPublicKey(
+					Arrays.asList(values.gEight, values.gEight, values.gFour));
 
 			assertFalse(service1.verifyDecryption(c, pkPrime, m, proof1, iAux));
 			assertFalse(service2.verifyDecryption(c, pkPrime, m, proof2, Collections.emptyList()));
@@ -452,86 +550,6 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 			assertFalse(service1.verifyDecryption(c, keyPair.getPublicKey(), m, proof1, iAuxPrime));
 			assertFalse(service2.verifyDecryption(c, keyPair.getPublicKey(), m, proof2, iAuxPrime));
-		}
-	}
-
-	static class TestValues {
-		// Create groups
-		private final BigInteger p = BigInteger.valueOf(23);
-		private final BigInteger q = BigInteger.valueOf(11);
-		private final BigInteger g = BigInteger.valueOf(2);
-		private final GqGroup gqGroup = new GqGroup(p, q, g);
-		private final ZqGroup zqGroup = new ZqGroup(q);
-
-		// Create BigIntegers
-		private final BigInteger TWO = BigInteger.valueOf(2);
-		private final BigInteger THREE = BigInteger.valueOf(3);
-		private final BigInteger FOUR = BigInteger.valueOf(4);
-		private final BigInteger FIVE = BigInteger.valueOf(5);
-		private final BigInteger SIX = BigInteger.valueOf(6);
-		private final BigInteger SEVEN = BigInteger.valueOf(7);
-		private final BigInteger EIGHT = BigInteger.valueOf(8);
-		private final BigInteger TEN = BigInteger.TEN;
-
-		// Create GqElements
-		private final GqElement gThree = GqElement.create(THREE, gqGroup);
-		private final GqElement gFour = GqElement.create(FOUR, gqGroup);
-		private final GqElement gEight = GqElement.create(EIGHT, gqGroup);
-		private final GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
-
-		// Create ZqElements
-		private final ZqElement zTwo = ZqElement.create(TWO, zqGroup);
-		private final ZqElement zThree = ZqElement.create(THREE, zqGroup);
-		private final ZqElement zFive = ZqElement.create(FIVE, zqGroup);
-		private final ZqElement zSix = ZqElement.create(SIX, zqGroup);
-		private final ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
-		private final ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
-		private final ZqElement zTen = ZqElement.create(TEN, zqGroup);
-
-		// Create input arguments
-		// c = {9, (18, 9, 13)}
-		// sk = (3, 7, 2)
-		// pk = (8, 13, 4)
-		// m = (4, 8, 3)
-		// iAux = "Auxiliary Data"
-		private final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(Arrays.asList(gFour, gEight, gThree));
-		private final ElGamalMultiRecipientPublicKey pk = new ElGamalMultiRecipientPublicKey(Arrays.asList(gEight, gThirteen, gFour));
-		private final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(Arrays.asList(zThree, zSeven, zTwo));
-		private final ElGamalMultiRecipientCiphertext c = ElGamalMultiRecipientCiphertext.getCiphertext(m, zFive, pk);
-		private final List<String> iAux = Collections.singletonList("Auxiliary Data");
-
-		private final List<BigInteger> randomValues = Arrays.asList(FOUR, SEVEN, FIVE);
-
-		// Create output arguments
-		private final ZqElement e = zEight;
-		private final GroupVector<ZqElement, ZqGroup> z = GroupVector.of(zSix, zEight, zTen);
-
-		private ElGamalMultiRecipientKeyPair createKeyPair() {
-			final ElGamalMultiRecipientKeyPair keyPair = mock(ElGamalMultiRecipientKeyPair.class);
-			when(keyPair.getPrivateKey()).thenReturn(sk);
-			when(keyPair.getPublicKey()).thenReturn(pk);
-			return keyPair;
-		}
-
-		private RandomService getSpecificRandomService() {
-			return new RandomService() {
-				final Iterator<BigInteger> values = randomValues.iterator();
-
-				@Override
-				public BigInteger genRandomInteger(BigInteger upperBound) {
-					return values.next();
-				}
-			};
-		}
-
-		private DecryptionProofService createDecryptionProofService() {
-			final RandomService randomService = getSpecificRandomService();
-			final BoundedHashService hashService = TestHashService.create(q);
-			return new DecryptionProofService(randomService, hashService);
-		}
-
-		private DecryptionProof createDecryptionProof() {
-			return new DecryptionProof(e, z);
 		}
 	}
 }

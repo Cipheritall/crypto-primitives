@@ -51,7 +51,6 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -76,7 +75,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 	private static TestMultiExponentiationStatementWitnessPairGenerator statementWitnessPairGenerator;
 	private static RandomService randomService;
 	private static TestMultiExponentiationArgumentGenerator argumentGenerator;
-	private static BoundedHashService hashService;
+	private static HashService hashService;
 	private static int publicKeySize;
 	private int n;
 	private int m;
@@ -254,7 +253,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 					.build();
 		}
 
-		private BoundedHashService hashService() {
+		private HashService hashService() {
 			return TestHashService.create(q);
 		}
 
@@ -290,6 +289,13 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 					() -> assertThrows(NullPointerException.class,
 							() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, null))
 			);
+		}
+
+		@Test
+		void hashServiceWithTooLongHashLengthThrows() throws NoSuchAlgorithmException {
+			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			assertThrowsIllegalArgumentExceptionWithMessage("The hash service's bit length must be smaller than the bit length of q.",
+					() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 		}
 
 		@Test
@@ -337,7 +343,8 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			int n = COMMITMENT_KEY_SIZE + 1;
 			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
 			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
-			assertThrowsIllegalArgumentExceptionWithMessage("The number of rows of matrix A must be smaller or equal to the size of the commitment key.",
+			assertThrowsIllegalArgumentExceptionWithMessage(
+					"The number of rows of matrix A must be smaller or equal to the size of the commitment key.",
 					() -> argumentService.getMultiExponentiationArgument(statement, witness));
 		}
 
@@ -603,10 +610,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 				final String description) throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
 			final MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService,
-					boundedHashService);
+					hashService);
 
 			assertEquals(expectedOutput, service.verifyMultiExponentiationArgument(statement, argument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));
