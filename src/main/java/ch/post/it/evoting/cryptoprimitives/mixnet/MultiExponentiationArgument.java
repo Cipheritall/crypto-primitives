@@ -23,9 +23,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -34,7 +38,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Value class representing the result of a multi exponentiation proof.
  */
-public class MultiExponentiationArgument {
+public class MultiExponentiationArgument implements HashableList {
 
 	private GqElement cA0;
 	private GroupVector<GqElement, GqGroup> cBVector;
@@ -119,6 +123,11 @@ public class MultiExponentiationArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(cA0, cBVector, EVector, aVector, r, b, s, tau);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(cA0, cBVector, EVector, aVector, r, b, s, tau);
 	}
 
 	public static class Builder {

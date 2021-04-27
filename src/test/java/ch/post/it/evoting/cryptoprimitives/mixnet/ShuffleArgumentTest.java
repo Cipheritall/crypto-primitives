@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -32,6 +34,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -72,6 +75,19 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		}
 
 		multiExponentiationArgument = argumentGenerator.genMultiExponentiationArgument(m, n, l);
+	}
+
+	@Test
+	@DisplayName("hashed with recursiveHash does not throw")
+	void hashWithRecursiveHash() throws NoSuchAlgorithmException {
+		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final ShuffleArgument shuffleArgument = new ShuffleArgument.Builder()
+				.withCA(cA)
+				.withCB(cB)
+				.withProductArgument(productArgument)
+				.withMultiExponentiationArgument(multiExponentiationArgument)
+				.build();
+		assertDoesNotThrow(() -> hashService.recursiveHash(shuffleArgument));
 	}
 
 	@Nested

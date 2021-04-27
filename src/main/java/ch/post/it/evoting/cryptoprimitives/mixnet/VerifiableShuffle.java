@@ -21,8 +21,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
@@ -30,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  * <p>
  * Instances of this class are immutable.
  */
-public class VerifiableShuffle {
+public class VerifiableShuffle implements HashableList {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
 	private final ShuffleArgument shuffleArgument;
@@ -89,5 +93,10 @@ public class VerifiableShuffle {
 	@Override
 	public int hashCode() {
 		return Objects.hash(shuffledCiphertexts, shuffleArgument);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(shuffledCiphertexts, shuffleArgument);
 	}
 }

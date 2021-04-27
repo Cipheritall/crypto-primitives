@@ -23,8 +23,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -33,7 +37,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Collection of the values contained in a zero argument.
  */
-public class ZeroArgument {
+public class ZeroArgument implements HashableList {
 
 	private GqElement cA0;
 	private GqElement cBm;
@@ -112,6 +116,11 @@ public class ZeroArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(cA0, cBm, cd, aPrime, bPrime, rPrime, sPrime, tPrime);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(cA0, cBm, cd, aPrime, bPrime, rPrime, sPrime, tPrime);
 	}
 
 	/**

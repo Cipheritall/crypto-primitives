@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -82,7 +82,7 @@ public class DecryptionProof implements GroupVectorElement<ZqGroup>, HashableLis
 	}
 
 	@Override
-	public ImmutableList<HashableBigInteger> toHashableForm() {
-		return null;
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(e, z);
 	}
 }

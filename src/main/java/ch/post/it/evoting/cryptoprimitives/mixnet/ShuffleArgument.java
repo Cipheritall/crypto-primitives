@@ -23,14 +23,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Value class containing the result of a shuffle argument proof.
  */
-public class ShuffleArgument {
+public class ShuffleArgument implements HashableList {
 
 	private GroupVector<GqElement, GqGroup> cA;
 	private GroupVector<GqElement, GqGroup> cB;
@@ -94,6 +98,11 @@ public class ShuffleArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(cA, cB, productArgument, multiExponentiationArgument);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(cA, cB, productArgument, multiExponentiationArgument);
 	}
 
 	public static class Builder {

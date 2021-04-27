@@ -23,10 +23,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
-public class ProductArgument {
+public class ProductArgument implements HashableList {
 
 	private final SingleValueProductArgument singleValueProductArgument;
 	private GqElement commitmentB;
@@ -127,5 +131,13 @@ public class ProductArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(commitmentB, hadamardArgument, singleValueProductArgument);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		if(commitmentB == null) {
+			return ImmutableList.of(singleValueProductArgument);
+		}
+		return ImmutableList.of(commitmentB, hadamardArgument, singleValueProductArgument);
 	}
 }

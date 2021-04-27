@@ -20,11 +20,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
-public class HadamardArgument {
+public class HadamardArgument implements HashableList {
 
 	private final GroupVector<GqElement, GqGroup> commitmentsB;
 	private final ZeroArgument zeroArgument;
@@ -96,5 +100,10 @@ public class HadamardArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(commitmentsB, zeroArgument);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(commitmentsB, zeroArgument);
 	}
 }

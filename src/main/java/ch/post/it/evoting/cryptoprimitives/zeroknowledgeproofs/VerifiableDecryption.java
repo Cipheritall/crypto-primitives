@@ -20,8 +20,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -30,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>
  * Instances of this class are immutable.
  */
-public class VerifiableDecryption {
+public class VerifiableDecryption implements HashableList {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
 	private final GroupVector<DecryptionProof, ZqGroup> decryptionProofs;
@@ -91,5 +95,10 @@ public class VerifiableDecryption {
 	@Override
 	public int hashCode() {
 		return Objects.hash(ciphertexts, decryptionProofs);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(ciphertexts, decryptionProofs);
 	}
 }

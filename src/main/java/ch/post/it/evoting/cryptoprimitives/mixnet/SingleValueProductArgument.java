@@ -23,8 +23,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -33,7 +37,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Collection of the values contained in a single value product argument.
  */
-public class SingleValueProductArgument {
+public class SingleValueProductArgument implements HashableList {
 
 	private GqElement cd;
 	private GqElement cLowerDelta;
@@ -107,6 +111,11 @@ public class SingleValueProductArgument {
 	@Override
 	public int hashCode() {
 		return Objects.hash(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
 	}
 
 	public static class Builder {
