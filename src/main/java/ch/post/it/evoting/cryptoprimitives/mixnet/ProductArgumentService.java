@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -49,19 +49,27 @@ final class ProductArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key to be used for commitments.
 	 */
-	ProductArgumentService(final RandomService randomService, final BoundedHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	ProductArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
-		this.randomService = checkNotNull(randomService);
+		checkNotNull(randomService);
 		checkNotNull(hashService);
 		checkNotNull(publicKey);
-		this.commitmentKey = checkNotNull(commitmentKey);
-		this.hadamardArgumentService = new HadamardArgumentService(this.randomService, hashService, publicKey, this.commitmentKey);
-		this.singleValueProductArgumentService = new SingleValueProductArgumentService(this.randomService, hashService, publicKey,
-				this.commitmentKey);
+		checkNotNull(commitmentKey);
 
 		// Group checking
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()),
 				"The public key and the commitment key must have the same group.");
+
+		// Check hash length
+		final BigInteger q = publicKey.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
+
+		this.randomService = randomService;
+		this.commitmentKey = commitmentKey;
+		this.hadamardArgumentService = new HadamardArgumentService(this.randomService, hashService, publicKey, this.commitmentKey);
+		this.singleValueProductArgumentService = new SingleValueProductArgumentService(this.randomService, hashService, publicKey,
+				this.commitmentKey);
 	}
 
 	/**

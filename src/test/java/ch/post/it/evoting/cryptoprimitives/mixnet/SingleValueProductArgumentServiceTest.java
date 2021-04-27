@@ -50,7 +50,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -72,7 +71,7 @@ class SingleValueProductArgumentServiceTest {
 	private static GqGroup gqGroup;
 	private static ZqGroup zqGroup;
 	private static ZqGroupGenerator zqGroupGenerator;
-	private static BoundedHashService hashService;
+	private static HashService hashService;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
 	private static SingleValueProductArgumentService argumentService;
@@ -122,6 +121,15 @@ class SingleValueProductArgumentServiceTest {
 				() -> assertThrows(NullPointerException.class,
 						() -> new SingleValueProductArgumentService(randomService, hashService, publicKey, null))
 		);
+	}
+
+	@Test
+	@DisplayName("Constructing a SingleValueProductArgumentService with a hashService that has a too long hash length throws an IllegalArgumentException")
+	void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
+		HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> new SingleValueProductArgumentService(randomService, otherHashService, publicKey, commitmentKey));
+		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
 	}
 
 	@Nested
@@ -264,7 +272,7 @@ class SingleValueProductArgumentServiceTest {
 			SingleValueProductStatement statement = new SingleValueProductStatement(commitment, product);
 			SingleValueProductWitness witness = new SingleValueProductWitness(GroupVector.from(a), r);
 
-			BoundedHashService hashService = mock(BoundedHashService.class);
+			HashService hashService = mock(HashService.class);
 			when(hashService.recursiveHash(any()))
 					.thenReturn(new byte[] { 0b1010 });
 			SingleValueProductArgumentService svpArgumentProvider = new SingleValueProductArgumentService(randomService, hashService, pk, ck);
@@ -333,9 +341,8 @@ class SingleValueProductArgumentServiceTest {
 				final boolean expectedOutput, String description) throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, boundedHashService, publicKey,
+			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, hashService, publicKey,
 					commitmentKey);
 
 			assertEquals(expectedOutput,

@@ -34,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -46,7 +46,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class HadamardArgumentService {
 
 	private final RandomService randomService;
-	private final BoundedHashService hashService;
+	private final HashService hashService;
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final CommitmentKey commitmentKey;
 	private final ZeroArgumentService zeroArgumentService;
@@ -65,7 +65,7 @@ public class HadamardArgumentService {
 	 * @param publicKey     the public key.
 	 * @param commitmentKey the commitment key for calculating the commitments.
 	 */
-	HadamardArgumentService(final RandomService randomService, final BoundedHashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
+	HadamardArgumentService(final RandomService randomService, final HashService hashService, final ElGamalMultiRecipientPublicKey publicKey,
 			final CommitmentKey commitmentKey) {
 		checkNotNull(randomService);
 		checkNotNull(hashService);
@@ -75,6 +75,11 @@ public class HadamardArgumentService {
 		// Check group and dimension of the public and commitment key
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()),
 				"The public key and the commitment key must belong to the same group.");
+
+		// Check hash length
+		final BigInteger q = publicKey.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		this.randomService = randomService;
 		this.hashService = hashService;
@@ -119,6 +124,8 @@ public class HadamardArgumentService {
 		final int m = A.numColumns();
 		final int n = A.numRows();
 		final int nu = commitmentKey.size();
+
+
 		checkArgument(cA.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
 		checkArgument(cA.getGroup().hasSameOrderAs(A.getGroup()), "The matrix A and its commitments must have the same group order q.");
 		checkArgument(n <= nu, "The number of rows in the matrix must be smaller or equal to the commitment key size.");
@@ -276,6 +283,7 @@ public class HadamardArgumentService {
 		final GroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
 		final GroupVector<ZqElement, ZqGroup> aPrime = argument.getZeroArgument().getAPrime();
 
+
 		// Cross-check groups and dimensions
 		checkArgument(statement.getGroup().equals(argument.getGroup()),
 				"The statement's and the argument's groups must have the same order.");
@@ -283,8 +291,8 @@ public class HadamardArgumentService {
 
 		final ZqGroup zqGroup = aPrime.getGroup();
 		final GqGroup gqGroup = cA.getGroup();
-		final BigInteger p = cA.getGroup().getP();
-		final BigInteger q = cA.getGroup().getQ();
+		final BigInteger p = gqGroup.getP();
+		final BigInteger q = gqGroup.getQ();
 
 		// Start verification
 		final int m = cA.size();

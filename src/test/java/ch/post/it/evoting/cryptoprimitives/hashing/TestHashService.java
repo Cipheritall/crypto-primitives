@@ -25,17 +25,18 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Custom hash service used for testing. The output value of this hash service can be bounded to cope with the small groups used in the tests.
  */
-public class TestHashService extends BoundedHashService {
+public class TestHashService extends HashService {
 
 	private static HashService hashService;
 
 	private final BigInteger lowerBound;
 	private final BigInteger upperBound;
 
-	private TestHashService(final HashService hashService, final BigInteger lowerBound, final BigInteger upperBound) {
+	private TestHashService(final MessageDigest digest, final BigInteger lowerBound, final BigInteger upperBound) {
 		// Ensure the check regarding the output length is satisfied.
-		super(hashService, (hashService.getHashLength() * Byte.SIZE) + 1);
+		super(digest);
 
+		hashService = new HashService(digest);
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}
@@ -47,14 +48,14 @@ public class TestHashService extends BoundedHashService {
 	 * @param upperBound the upper bound, exclusive.
 	 * @return a TestHashService.
 	 */
-	public static BoundedHashService create(final BigInteger lowerBound, final BigInteger upperBound) {
+	public static HashService create(final BigInteger lowerBound, final BigInteger upperBound) {
+		MessageDigest digest;
 		try {
-			hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			digest = MessageDigest.getInstance("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException("Failed to instantiate test hash service.");
 		}
-
-		return new TestHashService(hashService, lowerBound, upperBound);
+			return new TestHashService(digest, lowerBound, upperBound);
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class TestHashService extends BoundedHashService {
 	 * @param upperBound the upper bound, exclusive.
 	 * @return a TestHashService.
 	 */
-	public static BoundedHashService create(final BigInteger upperBound) {
+	public static HashService create(final BigInteger upperBound) {
 		return TestHashService.create(BigInteger.ZERO, upperBound);
 	}
 
@@ -81,4 +82,8 @@ public class TestHashService extends BoundedHashService {
 		return integerToByteArray(hashValueInBounds);
 	}
 
+	@Override
+	public int getHashLength() {
+		return (this.upperBound.subtract(BigInteger.ONE).bitLength()) / Byte.SIZE;
+	}
 }

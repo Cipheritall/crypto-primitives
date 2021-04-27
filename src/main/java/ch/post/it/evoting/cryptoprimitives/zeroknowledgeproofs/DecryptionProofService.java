@@ -37,7 +37,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalService;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -52,9 +52,9 @@ public class DecryptionProofService {
 
 	private final ElGamalService elGamalService = new ElGamalService();
 	private final RandomService randomService;
-	private final BoundedHashService hashService;
+	private final HashService hashService;
 
-	DecryptionProofService(final RandomService randomService, final BoundedHashService hashService) {
+	DecryptionProofService(final RandomService randomService, final HashService hashService) {
 		this.randomService = checkNotNull(randomService);
 		this.hashService = checkNotNull(hashService);
 	}
@@ -113,6 +113,8 @@ public class DecryptionProofService {
 		// Context.
 		final GqGroup gqGroup = ciphertext.getGroup();
 		final GqElement g = gqGroup.getGenerator();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < gqGroup.getQ().bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		// Cross-checks.
 		checkArgument(C.size() <= sk.size(), "The ciphertext length cannot be greater than the secret key length.");

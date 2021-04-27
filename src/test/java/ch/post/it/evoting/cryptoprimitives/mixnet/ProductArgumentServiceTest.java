@@ -54,7 +54,6 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -73,7 +72,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private int k;
-	private BoundedHashService hashService;
+	private HashService hashService;
 	private ElGamalMultiRecipientPublicKey publicKey;
 	private CommitmentKey commitmentKey;
 
@@ -103,12 +102,21 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		}
 
 		@Test
+		@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
+		void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
+			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> new ProductArgumentService(randomService, otherHashService, publicKey, commitmentKey));
+			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
+		}
+
+		@Test
 		@DisplayName("with public key from different group than commitment key throws an IllegalArgumentException")
 		void constructProductArgumentWithPublicKeyGroupDifferentCommitmentKeyGroup() {
 			ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalGenerator(otherGqGroup).genRandomPublicKey(k);
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> new ProductArgumentService(randomService, hashService, otherPublicKey, commitmentKey));
-			assertEquals("The public key and the commitment key must belong to the same group.", exception.getMessage());
+			assertEquals("The public key and the commitment key must have the same group.", exception.getMessage());
 		}
 	}
 
@@ -270,7 +278,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ElGamalMultiRecipientPublicKey productPublicKey = keyPair.getPublicKey();
 			CommitmentKey productCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
 			RandomService productRandomService = spy(RandomService.class);
-			BoundedHashService productHashService = mock(BoundedHashService.class);
+			HashService productHashService = mock(HashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
 			BigInteger one = BigInteger.ONE;
@@ -363,8 +371,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
 
 			// Need to remove 0 as this can lead to a valid proof even though we expect invalid.
-			BoundedHashService boundedHashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			productArgumentService = new ProductArgumentService(randomService, boundedHashService, publicKey, commitmentKey);
+			HashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 
 			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
 			longStatement = getProductStatement(longWitness, commitmentKey);
@@ -517,9 +525,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 				final String description) throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, boundedHashService, publicKey,
+			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, hashService, publicKey,
 					commitmentKey);
 
 			assertEquals(expectedOutput, productArgumentService.verifyProductArgument(productStatement, productArgument).verify().isVerified(),
