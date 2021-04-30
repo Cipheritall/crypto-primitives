@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -161,7 +162,10 @@ class HashServiceTest {
 
 	@Test
 	void testRecursiveHashOfNullThrows() {
-		assertThrows(NullPointerException.class, () -> hashService.recursiveHash((Hashable) null));
+		final IllegalArgumentException illegalArgumentException =
+				assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash((Hashable) null));
+
+		assertEquals("Values contain a null value which cannot be hashed.", illegalArgumentException.getMessage());
 	}
 
 	@Test
@@ -334,16 +338,6 @@ class HashServiceTest {
 		return new Split(HashableByteArray.from(first), HashableByteArray.from(second));
 	}
 
-	private static class Split {
-		final HashableByteArray start;
-		final HashableByteArray end;
-
-		Split(HashableByteArray start, HashableByteArray end) {
-			this.start = start;
-			this.end = end;
-		}
-	}
-
 	@Test
 	void testThatSimilarCharactersHashToDifferentValues() {
 		HashableString first = HashableString.from("e");
@@ -356,5 +350,15 @@ class HashServiceTest {
 	//Utilities
 	static HashableList hashableListOf(Hashable... items) {
 		return HashableList.from(ImmutableList.copyOf(items));
+	}
+
+	private static class Split {
+		final HashableByteArray start;
+		final HashableByteArray end;
+
+		Split(HashableByteArray start, HashableByteArray end) {
+			this.start = start;
+			this.end = end;
+		}
 	}
 }

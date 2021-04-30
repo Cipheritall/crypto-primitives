@@ -21,7 +21,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,7 @@ public class HashService {
 	public final byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);
 		checkArgument(values.length != 0, "Cannot hash no values.");
+		checkArgument(Arrays.stream(values).allMatch(Objects::nonNull), "Values contain a null value which cannot be hashed.");
 
 		if (values.length > 1) {
 			final HashableList valuesList = HashableList.from(ImmutableList.copyOf(values));
