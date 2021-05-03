@@ -52,7 +52,6 @@ import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -70,7 +69,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 	private static final int MATRIX_BOUNDS = 10;
 	private static final RandomService randomService = new RandomService();
 
-	private static BoundedHashService hashService;
+	private static HashService hashService;
 
 	private static int n;
 	private static int m;
@@ -111,6 +110,15 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 				() -> assertThrows(NullPointerException.class, () -> new HadamardArgumentService(randomService, hashService, null, commitmentKey)),
 				() -> assertThrows(NullPointerException.class, () -> new HadamardArgumentService(randomService, hashService, publicKey, null))
 		);
+	}
+
+	@Test
+	@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
+	void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
+		HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> new HadamardArgumentService(randomService, otherHashService, publicKey, commitmentKey));
+		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
 	}
 
 	@Test
@@ -279,7 +287,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			ElGamalMultiRecipientPublicKey hadamardPublicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gqNine, gqFour));
 			CommitmentKey hadamardCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
 			RandomService hadamardRandomService = spy(RandomService.class);
-			BoundedHashService hadamardHashService = mock(BoundedHashService.class);
+			HashService hadamardHashService = mock(HashService.class);
 
 			BigInteger zero = BigInteger.ZERO;
 			BigInteger one = BigInteger.ONE;
@@ -415,7 +423,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
 
 			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
-			BoundedHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			HashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
 			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 			assertFalse(argumentService.verifyHadamardArgument(statement, badArgument).verify().isVerified());
 		}
@@ -438,7 +446,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			HadamardArgument badArgument = new HadamardArgument(argument.getCommitmentsB(), badZeroArgument);
 
 			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
-			BoundedHashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
+			HashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
 			HadamardArgumentService argumentService = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 
 			final VerificationResult verificationResult = argumentService.verifyHadamardArgument(statement, badArgument).verify();
@@ -529,9 +537,8 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 				throws NoSuchAlgorithmException {
 
 			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-			final BoundedHashService boundedHashService = new BoundedHashService(hashService, publicKey.getGroup().getQ().bitLength());
 
-			final HadamardArgumentService service = new HadamardArgumentService(randomService, boundedHashService, publicKey, commitmentKey);
+			final HadamardArgumentService service = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 
 			assertEquals(expectedOutput, service.verifyHadamardArgument(hadamardStatement, hadamardArgument).verify().isVerified(),
 					String.format("assertion failed for: %s", description));

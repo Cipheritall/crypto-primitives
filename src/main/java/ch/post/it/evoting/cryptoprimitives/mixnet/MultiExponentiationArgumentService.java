@@ -47,7 +47,7 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -63,7 +63,7 @@ final class MultiExponentiationArgumentService {
 	private final ElGamalMultiRecipientPublicKey pk;
 	private final CommitmentKey ck;
 	private final RandomService randomService;
-	private final BoundedHashService hashService;
+	private final HashService hashService;
 	private final GqGroup gqGroup;
 	private final ZqGroup zqGroup;
 
@@ -83,7 +83,7 @@ final class MultiExponentiationArgumentService {
 	 * @param hashService   the service providing hashing
 	 */
 	MultiExponentiationArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-			final RandomService randomService, final BoundedHashService hashService) {
+			final RandomService randomService, final HashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);
@@ -93,6 +93,11 @@ final class MultiExponentiationArgumentService {
 
 		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public key and commitment key must belong to the same group");
+
+		// Check hash length
+		final BigInteger q = publicKey.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		this.pk = publicKey;
 		this.ck = commitmentKey;

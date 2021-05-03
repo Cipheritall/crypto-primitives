@@ -36,7 +36,7 @@ import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -53,10 +53,10 @@ final class ZeroArgumentService {
 	private final CommitmentKey commitmentKey;
 
 	private final RandomService randomService;
-	private final BoundedHashService hashService;
+	private final HashService hashService;
 
 	ZeroArgumentService(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-			final RandomService randomService, final BoundedHashService hashService) {
+			final RandomService randomService, final HashService hashService) {
 
 		// Null checking.
 		checkNotNull(publicKey);
@@ -66,6 +66,11 @@ final class ZeroArgumentService {
 
 		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public and commitment keys are not from the same group.");
+
+		// Check hash length
+		final BigInteger q = publicKey.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		this.publicKey = publicKey;
 		this.commitmentKey = commitmentKey;
@@ -108,15 +113,16 @@ final class ZeroArgumentService {
 		// Cross group checking.
 		checkArgument(y.getGroup().equals(exponentsR.getGroup()), "The statement y and witness exponents must be part of the same group.");
 
+
 		// Ensure the statement and witness are corresponding.
 		final GroupVector<GqElement, GqGroup> computedCommitmentsA = getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 		checkArgument(commitmentsA.equals(computedCommitmentsA), "The statement's Ca commitments must be equal to the witness' commitment matrix A.");
 		final GroupVector<GqElement, GqGroup> computedCommitmentsB = getCommitmentMatrix(matrixB, exponentsS, commitmentKey);
 		checkArgument(commitmentsB.equals(computedCommitmentsB), "The statement's Cb commitments must be equal to the witness' commitment matrix B.");
 
-		final ZqGroup zqGroup = y.getGroup();
-
 		// The specifications uses the indices [1,m] for matrixA and [0,m-1] for matrixB. In the code, we use [0,m-1] for both indices.
+		final ZqGroup zqGroup = y.getGroup();
+		final BigInteger q = zqGroup.getQ();
 		final int m = matrixA.numColumns();
 		final ZqElement starMapSum = IntStream.range(0, m)
 				.mapToObj(i -> starMap(matrixA.getColumn(i), matrixB.getColumn(i), y))
@@ -127,7 +133,6 @@ final class ZeroArgumentService {
 		// Algorithm operations.
 
 		final int n = matrixA.numRows();
-		final BigInteger q = zqGroup.getQ();
 		final GroupVector<ZqElement, ZqGroup> a0 = randomService.genRandomVector(q, n);
 		final GroupVector<ZqElement, ZqGroup> bm = randomService.genRandomVector(q, n);
 		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);

@@ -40,7 +40,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCipherte
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -66,8 +66,8 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 
 	@BeforeEach
 	void setup() {
-		BoundedHashService boundedHashService = TestHashService.create(gqGroup.getQ());
-		zeroKnowledgeProofservice = new ZeroKnowledgeProofService(randomService, boundedHashService);
+		HashService hashService = TestHashService.create(gqGroup.getQ());
+		zeroKnowledgeProofservice = new ZeroKnowledgeProofService(randomService, hashService);
 		elGamalGenerator = new ElGamalGenerator(gqGroup);
 
 		final int maxLength = 10;
@@ -180,7 +180,7 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		doReturn(GroupVector.from(Arrays.asList(zThree, zEight)), GroupVector.from(Arrays.asList(zTwo, zFour)))
 				.when(randomService)
 				.genRandomVector(q, 2);
-		BoundedHashService hashService = TestHashService.create(q);
+		HashService hashService = TestHashService.create(q);
 		ZeroKnowledgeProofService service = new ZeroKnowledgeProofService(randomService, hashService);
 
 		// Create expected output

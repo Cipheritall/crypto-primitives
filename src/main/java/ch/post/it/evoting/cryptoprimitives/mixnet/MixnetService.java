@@ -19,6 +19,7 @@ import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentKeyService.ca
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -29,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.BoundedHashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -41,23 +41,20 @@ public final class MixnetService implements Mixnet {
 	private final RandomService randomService;
 	private final ShuffleService shuffleService;
 	private final HashService hashService;
-	private final BoundedHashService shuffleHashService;
+	private final HashService shuffleHashService;
 	private final CommitmentKeyService commitmentKeyService;
 
 	/**
 	 * Instantiates a mixnet service. A security provider must already be loaded containing the "SHA-256" algorithm.
-	 *
-	 * @param group the group in which all zero knowledge proofs take place. Must be non null and the bit length of q must be greater than 256.
 	 */
-	public MixnetService(final GqGroup group) {
-		checkNotNull(group);
+	public MixnetService() {
 		try {
 			this.hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		} catch (NoSuchAlgorithmException exception) {
 			throw new IllegalStateException("Badly configured message digest instance.");
 		}
 		this.commitmentKeyService = new CommitmentKeyService(hashService);
-		this.shuffleHashService = new BoundedHashService(hashService, group.getQ().bitLength());
+		this.shuffleHashService = hashService; //Two separate hash services are needed for checking the hash length
 		this.randomService = new RandomService();
 		final PermutationService permutationService = new PermutationService(randomService);
 		this.shuffleService = new ShuffleService(randomService, permutationService);
@@ -69,7 +66,7 @@ public final class MixnetService implements Mixnet {
 	 * @param shuffleHashService the hash service to use for the shuffle proof. Not null.
 	 */
 	@VisibleForTesting
-	public MixnetService(final BoundedHashService shuffleHashService) {
+	public MixnetService(final HashService shuffleHashService) {
 		checkNotNull(shuffleHashService);
 		try {
 			this.hashService = new HashService(MessageDigest.getInstance("SHA-256"));
@@ -97,6 +94,10 @@ public final class MixnetService implements Mixnet {
 		checkArgument(C.getElementSize() <= publicKey.size(), "Ciphertexts must not contain more elements than the publicKey");
 		checkArgument(2 <= N, "N must be >= 2");
 		checkArgument(canGenerateKey(C.size(), C.getGroup()), "N must be smaller or equal to q - 3");
+
+		final BigInteger q = C.getGroup().getQ();
+		checkArgument(shuffleHashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		//Group checking
 		checkArgument(publicKey.getGroup().equals(C.getGroup()), "Ciphertexts must have the same group as the publicKey");

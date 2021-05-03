@@ -62,7 +62,7 @@ public class HashService {
 	 * the domain of each input element is well defined. </li>
 	 * </ul>
 	 */
-	public final byte[] recursiveHash(final Hashable... values) {
+	public byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);
 		checkArgument(values.length != 0, "Cannot hash no values.");
 		checkArgument(Arrays.stream(values).allMatch(Objects::nonNull), "Values contain a null value which cannot be hashed.");
