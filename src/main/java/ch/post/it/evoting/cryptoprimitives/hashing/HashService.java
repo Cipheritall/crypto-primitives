@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,23 @@ public class HashService {
 	 */
 	public HashService(final MessageDigest messageDigest) {
 		checkNotNull(messageDigest);
+		this.hashFunction = messageDigest::digest;
+		this.hashLength = messageDigest.getDigestLength();
+	}
+
+	/**
+	 * Instantiates a recursive hash service with a default SHA-256 message digest.
+	 *
+	 * @throws IllegalStateException if the creation of the SHA-256 message digest failed.
+	 */
+	public HashService() {
+		final MessageDigest messageDigest;
+		try {
+			messageDigest = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
+		}
+
 		this.hashFunction = messageDigest::digest;
 		this.hashLength = messageDigest.getDigestLength();
 	}

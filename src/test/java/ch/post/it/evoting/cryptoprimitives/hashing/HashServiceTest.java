@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -66,6 +68,13 @@ class HashServiceTest {
 		hashService = new HashService(messageDigest);
 		secureRandom = new SecureRandom();
 		randomService = new RandomService();
+	}
+
+	@Test
+	void testEmptySHA256Constructor() {
+		final HashService hashService = assertDoesNotThrow((ThrowingSupplier<HashService>) HashService::new);
+
+		assertEquals(32, hashService.getHashLength());
 	}
 
 	@Test
