@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.math;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.stream.Stream;
 
@@ -26,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GqGroupLoader;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 
 class GqElementValidationTest {
 
@@ -37,12 +36,9 @@ class GqElementValidationTest {
 	private static BigInteger elementValue;
 
 	@BeforeAll
-	public static void setUp() throws IOException {
-
-		group = new GqGroupLoader("/subgroup.json").getGroup();
-
+	public static void setUp() {
+		group = GroupTestData.getLargeGqGroup();
 		p = group.getP();
-
 		elementValue = BigInteger.ONE;
 	}
 
