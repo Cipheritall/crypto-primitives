@@ -77,6 +77,10 @@ public class ElGamalGenerator {
 		return GroupMatrix.fromRows(generateElementMatrix(numRows, numColumns, () -> genRandomCiphertext(ciphertextSize)));
 	}
 
+	public GroupVector<ElGamalMultiRecipientMessage, GqGroup> genRandomMessageVector(int size, int messageSize) {
+		return GroupVector.from(generateElementList(size, () -> genRandomMessage(messageSize)));
+	}
+
 	/**
 	 * Generate a random list of ciphertexts encrypted with the same publicKey.
 	 */

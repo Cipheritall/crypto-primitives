@@ -329,7 +329,7 @@ class GqElementTest {
 	@ParameterizedTest
 	@MethodSource("onValidGqElementReturnsExpectedResultTestSource")
 	@DisplayName("calling hashAndSquare on a valid gqElement with an hash call returning a specific mocked value returns the expected result.")
-	void onValidGqElementReturnsExpectedResultTest(final byte[] mockedHash, final BigInteger expectedResult) throws IOException {
+	void onValidGqElementReturnsExpectedResultTest(final byte[] mockedHash, final BigInteger expectedResult) {
 
 		final HashService hashService = mock(HashService.class);
 		when(hashService.recursiveHash(any())).thenReturn(mockedHash);
