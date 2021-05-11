@@ -64,7 +64,7 @@ The following functionalities and improvements are included in release 0.8:
 * Removed the exclusion of 0 and 1 when generating exponents (corresponds to Gitlab issue [#7](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/7)).
 * Clarified the purpose of GenRandomBaseXXString methods (corresponds to Gitlab issue [#8](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/8)).
 * Decoupled the size of the commitment key and the size of the public key in the mix net.
-
+* Fixed the problem with some randomized unit tests failing for exceptional edge cases.
 
 ## Future work
 
@@ -78,4 +78,3 @@ We plan for the following improvements to the crypto-primitives library:
 * Developing a clear naming convention for the translation of mathematical notations to code and using it consistently across the codebase.
 * Investigating the usage of a "context" object that encapsulates values that do not change between protocol executions (group parameters, security level, etc.).
 * Implementing the ByteArrayToString method. This method is currently not used; therefore, we did not implement it yet.
-* Making some randomized unit tests more robust. In very rare cases, some unit tests fail for exceptional edge cases. If you encounter a failure, repeat the unit test.

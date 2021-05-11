@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.test.tools.data;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -103,14 +104,16 @@ public class GroupTestData {
 	}
 
 	/**
-	 * Get the {@link GqGroup} defined in the "subgroup.json" file. As opposed to the groups defined in this class, this group is large with 2048 bits
-	 * p and q.
+	 * Get a {@link GqGroup} large group with 2048 bits p and q.
 	 *
 	 * @return a {@link GqGroup}.
-	 * @throws IOException if loading the group from the file fails.
 	 */
-	public static GqGroup getLargeGqGroup() throws IOException {
-		return new GqGroupLoader("/subgroup.json").getGroup();
+	public static GqGroup getLargeGqGroup() {
+		try {
+			return new GqGroupLoader("/large-group.json").getGroup();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Cannot read large group from file.", e);
+		}
 	}
 
 	private static GqGroup getRandomGqGroupFrom(final List<GqGroup> groups) {
