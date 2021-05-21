@@ -75,6 +75,9 @@ class ShuffleArgumentService {
 		// Group checking.
 		checkArgument(publicKey.getGroup().equals(commitmentKey.getGroup()), "The public key and commitment key must belong to the same group.");
 
+		// Commitment key size checking
+		checkArgument(commitmentKey.size() >= 2, "The commitment key must be at least of size 2.");
+
 		// Check hash length
 		final BigInteger q = publicKey.getGroup().getQ();
 		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
@@ -103,7 +106,7 @@ class ShuffleArgumentService {
 	 * @param statement the {@link ShuffleStatement} for the shuffle argument.
 	 * @param witness   the {@link ShuffleWitness} for the shuffle argument.
 	 * @param m         the number of rows to use for ciphertext matrices. Strictly positive integer.
-	 * @param n         the number of columns to use for ciphertext matrices. Strictly positive integer.
+	 * @param n         the number of columns to use for ciphertext matrices. Strictly greater than one.
 	 * @return a {@link ShuffleArgument}.
 	 */
 	ShuffleArgument getShuffleArgument(final ShuffleStatement statement, final ShuffleWitness witness, final int m, final int n) {
@@ -111,7 +114,7 @@ class ShuffleArgumentService {
 		checkNotNull(witness);
 
 		checkArgument(m > 0, "The number of rows for the ciphertext matrices must be strictly positive.");
-		checkArgument(n > 0, "The number of columns for the ciphertext matrices must be strictly positive.");
+		checkArgument(n > 1, "The number of columns for the ciphertext matrices must be greater than or equal to 2.");
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsC = statement.getCiphertexts();
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertextsCPrime = statement.getShuffledCiphertexts();
@@ -119,6 +122,8 @@ class ShuffleArgumentService {
 		final GroupVector<ZqElement, ZqGroup> randomness = witness.getRandomness();
 
 		// Cross dimensions checking.
+		checkArgument(n <= commitmentKey.size(),
+				"The number of columns for the ciphertext matrices must be smaller than or equal to the commitment key size.");
 		checkArgument(ciphertextsC.size() == permutation.getSize(),
 				"The statement ciphertexts must have the same size as the permutation.");
 
@@ -132,6 +137,7 @@ class ShuffleArgumentService {
 		final int N = permutation.getSize();
 		final int l = ciphertextsC.get(0).size();
 
+		checkArgument(0 < l, "The ciphertexts must have at least 1 element.");
 		checkArgument(l <= publicKey.size(), "The ciphertexts must be smaller than the public key.");
 
 		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
@@ -292,7 +298,7 @@ class ShuffleArgumentService {
 	 * @param statement the statement for which the argument is to be verified. Non null.
 	 * @param argument  the argument to be verified. Non null.
 	 * @param m         the number of rows to use for ciphertext matrices. Strictly positive integer.
-	 * @param n         the number of columns to use for ciphertext matrices. Strictly positive integer.
+	 * @param n         the number of columns to use for ciphertext matrices. Strictly greater than one.
 	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
 	VerificationResult verifyShuffleArgument(final ShuffleStatement statement, final ShuffleArgument argument, final int m, final int n) {
@@ -300,9 +306,11 @@ class ShuffleArgumentService {
 		checkNotNull(argument);
 
 		checkArgument(m > 0, "The number of rows for the ciphertext matrices must be strictly positive.");
-		checkArgument(n > 0, "The number of columns for the ciphertext matrices must be strictly positive.");
+		checkArgument(n > 1, "The number of columns for the ciphertext matrices must be greater than or equal to 2.");
 
 		// Cross dimensions checking.
+		checkArgument(n <= commitmentKey.size(),
+				"The number of columns for the ciphertext matrices must be smaller than or equal to the commitment key size.");
 		checkArgument(m == argument.getM(), "The m dimension of the argument must be equal to the input parameter m.");
 		checkArgument(m * n == statement.getN(), "The product m * n must be equal to the statement's ciphertexts' size.");
 
@@ -316,6 +324,9 @@ class ShuffleArgumentService {
 		final GroupVector<GqElement, GqGroup> cB = argument.getcB();
 		final ProductArgument productArgument = argument.getProductArgument();
 		final MultiExponentiationArgument multiExponentiationArgument = argument.getMultiExponentiationArgument();
+
+		checkArgument(0 < ciphertextsC.getElementSize(), "The ciphertexts must have at least 1 element.");
+		checkArgument(ciphertextsC.getElementSize() <= publicKey.size(), "The ciphertexts must be smaller than the public key.");
 
 		final GqGroup gqGroup = statement.getGroup();
 		final ZqGroup zqGroup = multiExponentiationArgument.getR().getGroup();

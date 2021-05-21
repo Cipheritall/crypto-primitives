@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -38,8 +37,10 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -71,19 +72,21 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	private static final RandomService randomService = new RandomService();
 	private static final SecureRandom secureRandom = new SecureRandom();
 
-	private int k;
-	private HashService hashService;
-	private ElGamalMultiRecipientPublicKey publicKey;
-	private CommitmentKey commitmentKey;
+	private static int k;
+	private static int mu;
+	private static HashService hashService;
+	private static ElGamalMultiRecipientPublicKey publicKey;
+	private static CommitmentKey commitmentKey;
 
-	@BeforeEach
-	void setup() {
-		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
+	@BeforeAll
+	static void setupAll() {
+		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 1) + 1;
+		mu = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
 
 		hashService = TestHashService.create(gqGroup.getQ());
 		publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(k);
 
-		commitmentKey = new TestCommitmentKeyGenerator(gqGroup).genCommitmentKey(k);
+		commitmentKey = new TestCommitmentKeyGenerator(gqGroup).genCommitmentKey(mu);
 	}
 
 	@Nested
@@ -135,7 +138,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setup() {
-			n = secureRandom.nextInt(k - 1) + 2;
+			n = secureRandom.nextInt(mu - 1) + 2;
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
 
 			witness = genProductWitness(n, m, zqGroupGenerator);
@@ -174,7 +177,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with witness having a size incompatible with the commitment key throws an IllegalArgumentException")
 		void getProductArgumentWithWitnessSizeIncompatibleWithCommitmentKeySize() {
 			// Create a matrix with too many rows
-			GroupMatrix<ZqElement, ZqGroup> otherMatrixA = zqGroupGenerator.genRandomZqElementMatrix(k + 1, m);
+			GroupMatrix<ZqElement, ZqGroup> otherMatrixA = zqGroupGenerator.genRandomZqElementMatrix(mu + 1, m);
 			ProductWitness otherWitness = new ProductWitness(otherMatrixA, exponentsR);
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.getProductArgument(statement, otherWitness));
@@ -196,11 +199,22 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with commitments and commitment key from different group throws IllegalArgumentException")
 		void getProductArgumentWithCommitmentsAndCommitmentKeyFromDifferentGroups() {
 			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
-			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
+			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(mu);
 			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.getProductArgument(otherStatement, otherWitness));
 			assertEquals("The commitment key and the commitments must have the same group.", exception.getMessage());
+		}
+
+		@Test
+		@DisplayName("with a matrix with 1 row throws an IllegalArgumentException")
+		void getProductArgumentWithOneRowMatrix() {
+			ProductWitness smallWitness = genProductWitness(1, m, zqGroupGenerator);
+			ProductStatement smallStatement = getProductStatement(smallWitness, commitmentKey);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.getProductArgument(smallStatement, smallWitness));
+			assertEquals("The number of rows n must be greater than or equal to 2.", exception.getMessage());
 		}
 
 		@Test
@@ -212,8 +226,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductArgument argument = assertDoesNotThrow(() -> productArgumentService.getProductArgument(smallStatement, smallWitness));
 
 			// Check that the output is the same as with getSingleValueProductArgument
-			assertNull(argument.getCommitmentB());
-			assertNull(argument.getHadamardArgument());
+			assertFalse(argument.getCommitmentB().isPresent());
+			assertFalse(argument.getHadamardArgument().isPresent());
 
 			SingleValueProductStatement sStatement = new SingleValueProductStatement(smallStatement.getCommitments().get(0),
 					smallStatement.getProduct());
@@ -356,46 +370,55 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifyProductArgumentTest {
 
-		private ProductArgumentService productArgumentService;
+		private final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, hashService, publicKey,
+				commitmentKey);
 
 		private int n;
-		private int m;
-		private ProductStatement longStatement;
-		private ProductArgument longArgument;
-		private ProductStatement shortStatement;
-		private ProductArgument shortArgument;
 
 		@BeforeEach
 		void setup() {
-			n = secureRandom.nextInt(k - 1) + 2;
-			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
-
-			// Need to remove 0 as this can lead to a valid proof even though we expect invalid.
-			HashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
-			productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
-
-			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
-			longStatement = getProductStatement(longWitness, commitmentKey);
-			longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
-
-			ProductWitness shortWitness = genProductWitness(n, 1, zqGroupGenerator);
-			shortStatement = getProductStatement(shortWitness, commitmentKey);
-			shortArgument = productArgumentService.getProductArgument(shortStatement, shortWitness);
+			n = secureRandom.nextInt(mu - 1) + 2;
 		}
 
-		@Test
+		Stream<Arguments> statementArgumentProvider() {
+			final int n = secureRandom.nextInt(mu - 1) + 2;
+
+			// Create ProductStatement and ProductArgument for testing with m > 1
+			final int m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
+			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
+			ProductStatement longStatement = getProductStatement(longWitness, commitmentKey);
+			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
+
+			// Create ProductStatement and ProductArgument for testing with m = 1
+			ProductWitness shortWitness = genProductWitness(n, 1, zqGroupGenerator);
+			ProductStatement shortStatement = getProductStatement(shortWitness, commitmentKey);
+			ProductArgument shortArgument = productArgumentService.getProductArgument(shortStatement, shortWitness);
+
+			return Stream.of(
+					Arguments.of(longStatement, longArgument),
+					Arguments.of(shortStatement, shortArgument)
+			);
+		}
+
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
 		@DisplayName("with null arguments throws a NullPointerException")
-		void verifyProductArgumentWithNullArguments() {
-			assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(null, longArgument));
-			assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(longStatement, null));
+		void verifyProductArgumentMGreaterOneWithNullArguments(final ProductStatement statement, final ProductArgument argument) {
+			assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(null, argument));
+			assertThrows(NullPointerException.class, () -> productArgumentService.verifyProductArgument(statement, null));
 		}
 
 		@Test
 		@DisplayName("with null cb when m > 1 throws a NullPointerException")
 		void verifyProductArgumentWithNullCb() {
+			final int m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
+			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
+			ProductStatement longStatement = getProductStatement(longWitness, commitmentKey);
+			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
+
 			ProductArgument argumentWithNullCb = spy(longArgument);
-			when(argumentWithNullCb.getCommitmentB()).thenReturn(null);
-			Exception exception = assertThrows(NullPointerException.class,
+			when(argumentWithNullCb.getCommitmentB()).thenReturn(Optional.empty());
+			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullCb));
 			assertEquals("The product argument must contain a commitment b for m > 1.", exception.getMessage());
 		}
@@ -403,50 +426,65 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with null HadamardArgument when m > 1 throws a NullPointerException")
 		void verifyProductArgumentWithNullHadamardArgument() {
+			final int m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
+			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
+			ProductStatement longStatement = getProductStatement(longWitness, commitmentKey);
+			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
+
 			ProductArgument argumentWithNullHadamard = spy(longArgument);
-			when(argumentWithNullHadamard.getHadamardArgument()).thenReturn(null);
-			Exception exception = assertThrows(NullPointerException.class,
+			when(argumentWithNullHadamard.getHadamardArgument()).thenReturn(Optional.empty());
+			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullHadamard));
 			assertEquals("The product argument must contain a Hadamard argument for m > 1.", exception.getMessage());
 		}
 
-		@Test
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
 		@DisplayName("with statement and argument having different groups throws an IllegalArgumentException")
-		void verifyProductArgumentWithStatementAndArgumentFromDifferentGroups() {
+		void verifyProductArgumentWithStatementAndArgumentFromDifferentGroups(final ProductStatement statement, final ProductArgument argument) {
+			final int m = argument.getM();
 			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
-			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(k);
+			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(mu);
 			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
 
 			Exception exception = assertThrows(IllegalArgumentException.class,
-					() -> productArgumentService.verifyProductArgument(otherStatement, longArgument));
+					() -> productArgumentService.verifyProductArgument(otherStatement, argument));
 			assertEquals("The statement and the argument must have compatible groups.", exception.getMessage());
 		}
 
-		@Test
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
 		@DisplayName("with statement and argument having different sizes throws an IllegalArgumentException")
-		void verifyProductArgumentWithStatementAndArgumentOfDifferentSizes() {
+		void verifyProductArgumentWithStatementAndArgumentOfDifferentSizes(final ProductStatement statement, final ProductArgument argument) {
+			final int m = argument.getM();
 			ProductWitness otherWitness = genProductWitness(n, m + 1, zqGroupGenerator);
 			ProductStatement otherStatement = getProductStatement(otherWitness, commitmentKey);
 
 			Exception exception = assertThrows(IllegalArgumentException.class,
-					() -> productArgumentService.verifyProductArgument(otherStatement, longArgument));
+					() -> productArgumentService.verifyProductArgument(otherStatement, argument));
 			assertEquals("The statement and the argument must have the same m.",
 					exception.getMessage());
 		}
 
-		@Test
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
 		@DisplayName("with correct input returns true")
-		void verifyProductArgumentWithCorrectInput() {
-			assertTrue(productArgumentService.verifyProductArgument(longStatement, longArgument).verify().isVerified());
-			assertTrue(productArgumentService.verifyProductArgument(shortStatement, shortArgument).verify().isVerified());
+		void verifyProductArgumentWithCorrectInput(final ProductStatement statement, final ProductArgument argument) {
+			assertTrue(productArgumentService.verifyProductArgument(statement, argument).verify().isVerified());
 		}
 
 		@Test
 		@DisplayName("with an incorrect c_b returns false")
 		void verifyProductArgumentWithBadCommitment() {
-			GqElement badCommitment = longArgument.getCommitmentB();
+			final int m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
+			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
+			ProductStatement longStatement = getProductStatement(longWitness, commitmentKey);
+			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
+
+			GqElement badCommitment = longArgument.getCommitmentB().orElseThrow(() -> new IllegalArgumentException("Missing commitmentB"));
 			badCommitment = badCommitment.multiply(gqGroup.getGenerator());
-			ProductArgument badArgument = new ProductArgument(badCommitment, longArgument.getHadamardArgument(),
+			ProductArgument badArgument = new ProductArgument(badCommitment,
+					longArgument.getHadamardArgument().orElseThrow(() -> new IllegalArgumentException("Missing HadamardArgument")),
 					longArgument.getSingleValueProductArgument());
 
 			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
@@ -457,24 +495,32 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with an incorrect HadamardArgument returns false")
 		void verifyProductArgumentWithBadHadamardArgument() {
-			HadamardArgument hadamardArgument = longArgument.getHadamardArgument();
+			final int m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2; // m > 1
+			ProductWitness longWitness = genProductWitness(n, m, zqGroupGenerator);
+			ProductStatement longStatement = getProductStatement(longWitness, commitmentKey);
+			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
+
+			HadamardArgument hadamardArgument = longArgument.getHadamardArgument()
+					.orElseThrow(() -> new IllegalArgumentException("Missing HadamardArgument"));
 			GroupVector<GqElement, GqGroup> cUpperB = hadamardArgument.getCommitmentsB();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
 			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
 			HadamardArgument badHadamardArgument = new HadamardArgument(badcUpperB, hadamardArgument.getZeroArgument());
-			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), badHadamardArgument,
-					longArgument.getSingleValueProductArgument());
+			ProductArgument badArgument = new ProductArgument(
+					longArgument.getCommitmentB().orElseThrow(() -> new IllegalArgumentException("Missing commitmentB")),
+					badHadamardArgument, longArgument.getSingleValueProductArgument());
 
 			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
 			assertFalse(verificationResult.isVerified());
 			assertEquals("Failed to verify Hadamard Argument.", verificationResult.getErrorMessages().element());
 		}
 
-		@Test
-		@DisplayName("with an incorrect SingleValueProductArgument (m >= 2) returns false")
-		void verifyProductArgumentWithBadSingleValueProductArgumentMGreaterThanOne() {
-			SingleValueProductArgument sArgument = longArgument.getSingleValueProductArgument();
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
+		@DisplayName("with an incorrect SingleValueProductArgument returns false")
+		void verifyProductArgumentWithBadSingleValueProductArgument(final ProductStatement statement, final ProductArgument argument) {
+			SingleValueProductArgument sArgument = argument.getSingleValueProductArgument();
 			ZqElement rTilde = sArgument.getRTilde();
 
 			ZqElement badRTilde = rTilde.add(ZqElement.create(BigInteger.ONE, zqGroup));
@@ -487,32 +533,14 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 					.withRTilde(badRTilde)
 					.withSTilde(sArgument.getSTilde())
 					.build();
-			ProductArgument badArgument = new ProductArgument(longArgument.getCommitmentB(), longArgument.getHadamardArgument(), badSArgument);
+			ProductArgument badArgument;
+			if (argument.getCommitmentB().isPresent() && argument.getHadamardArgument().isPresent()) {
+				badArgument = new ProductArgument(argument.getCommitmentB().get(), argument.getHadamardArgument().get(), badSArgument);
+			} else {
+				badArgument = new ProductArgument(badSArgument);
+			}
 
-			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
-			assertFalse(verificationResult.isVerified());
-			assertEquals("Failed to verify Single Value Product Argument.", verificationResult.getErrorMessages().element());
-		}
-
-		@Test
-		@DisplayName("with an incorrect SingleValueProductArgument (m = 1) returns false")
-		void verifyProductArgumentWithBadSingleValueProductArgumentMEqualsOne() {
-			SingleValueProductArgument sArgument = shortArgument.getSingleValueProductArgument();
-			ZqElement rTilde = sArgument.getRTilde();
-
-			ZqElement badRTilde = rTilde.add(ZqElement.create(BigInteger.ONE, zqGroup));
-			SingleValueProductArgument badSArgument = new SingleValueProductArgument.Builder()
-					.withCd(sArgument.getCd())
-					.withCLowerDelta(sArgument.getCLowerDelta())
-					.withCUpperDelta(sArgument.getCUpperDelta())
-					.withATilde(sArgument.getATilde())
-					.withBTilde(sArgument.getBTilde())
-					.withRTilde(badRTilde)
-					.withSTilde(sArgument.getSTilde())
-					.build();
-			ProductArgument badArgument = new ProductArgument(badSArgument);
-
-			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(shortStatement, badArgument).verify();
+			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(statement, badArgument).verify();
 			assertFalse(verificationResult.isVerified());
 			assertEquals("Failed to verify Single Value Product Argument.", verificationResult.getErrorMessages().element());
 		}

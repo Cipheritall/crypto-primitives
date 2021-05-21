@@ -339,6 +339,15 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		}
 
 		@Test
+		void testExponentsMatrixMSizeEqualsZeroThrows() {
+			int m = 0;
+			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
+			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
+			assertThrowsIllegalArgumentExceptionWithMessage("The dimension m must be strictly positive.",
+					() -> argumentService.getMultiExponentiationArgument(statement, witness));
+		}
+
+		@Test
 		void testExponentsMatrixNSizeNotSmallerThanCommitmentKeySizeThrows() {
 			int n = COMMITMENT_KEY_SIZE + 1;
 			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);

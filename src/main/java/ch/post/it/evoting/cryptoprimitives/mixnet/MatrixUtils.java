@@ -30,7 +30,7 @@ class MatrixUtils {
 	 * as possible to the dimensions of a square matrix, resulting in the smallest size of the shuffle argument.
 	 *
 	 * @param vectorSize N, the vector size to decompose into size-optimal matrix dimensions. Must be greater than or equal to 2.
-	 * @return an array [m, n] with m the number of rows, n the number of columns and m x n = N.
+	 * @return an array [m, n] with m the number of rows, n the number of columns and m x n = N, where m <= n.
 	 */
 	static int[] getMatrixDimensions(final int vectorSize) {
 		checkArgument(vectorSize >= 2, "The size to decompose must be greater than or equal to 2.");

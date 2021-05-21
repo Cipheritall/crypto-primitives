@@ -90,9 +90,9 @@ public final class MixnetService implements Mixnet {
 
 		//Ensure
 		final int N = C.size();
+		checkArgument(2 <= N, "N must be >= 2");
 		checkArgument(0 <= C.getElementSize(), "Ciphertexts must contain at least one element.");
 		checkArgument(C.getElementSize() <= publicKey.size(), "Ciphertexts must not contain more elements than the publicKey");
-		checkArgument(2 <= N, "N must be >= 2");
 		checkArgument(canGenerateKey(C.size(), C.getGroup()), "N must be smaller or equal to q - 3");
 
 		final BigInteger q = C.getGroup().getQ();
@@ -127,6 +127,51 @@ public final class MixnetService implements Mixnet {
 		final ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
 
 		return new VerifiableShuffle(GroupVector.from(shuffle.getCiphertexts()), shuffleArgument);
+	}
+
+	@Override
+	public VerificationResult verifyShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts,
+			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts, final ShuffleArgument shuffleArgument,
+			final ElGamalMultiRecipientPublicKey publicKey) {
+		checkNotNull(ciphertexts);
+		checkNotNull(shuffledCiphertexts);
+		checkNotNull(shuffleArgument);
+		final ElGamalMultiRecipientPublicKey pk = checkNotNull(publicKey);
+
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = GroupVector.from(shuffledCiphertexts);
+
+		// Ensure
+		final int k = pk.size();
+		final int l = C.getElementSize();
+		final int N = C.size();
+		checkArgument(2 <= N, "N must be >= 2");
+		checkArgument(0 <= l, "Ciphertexts must contain at least one element.");
+		checkArgument(l <= k, "Ciphertexts must not contain more elements than the publicKey");
+		checkArgument(canGenerateKey(C.size(), C.getGroup()), "N must be smaller or equal to q - 3");
+
+		// Group checking
+		checkArgument(C.getGroup().equals(C_prime.getGroup()), "The shuffled and re-encrypted ciphertexts must have the same group than the un-shuffled ciphertexts.");
+		checkArgument(C.getGroup().equals(shuffleArgument.getGroup()), "The ciphertexts and the shuffle argument must have the same group.");
+		checkArgument(C.getGroup().equals(pk.getGroup()), "The public key and the ciphertexts must have to the same group.");
+
+		// Dimension checking
+		checkArgument(C.getElementSize() == C_prime.getElementSize(), "All ciphertexts must have the same number of elements.");
+		checkArgument(C.size() == C_prime.size(), "There must be as many shuffled and re-encrypted ciphertexts, as un-shuffled ciphertexts.");
+		final GqGroup gqGroup = C.getGroup();
+
+
+		// Operations
+		final int[] matrixDimensions = MatrixUtils.getMatrixDimensions(N);
+		final int m = matrixDimensions[0];
+		final int n = matrixDimensions[1];
+
+		final CommitmentKey ck = commitmentKeyService.getVerifiableCommitmentKey(n, gqGroup);
+		final ShuffleStatement shuffleStatement = new ShuffleStatement(C, C_prime);
+
+		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(pk, ck, randomService, shuffleHashService);
+
+		return shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n);
 	}
 
 }

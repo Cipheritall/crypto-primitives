@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+
 public interface ElGamal {
 
 	/**
@@ -25,4 +27,12 @@ public interface ElGamal {
 	 * @return the decrypted plaintext message as {@link ElGamalMultiRecipientMessage}
 	 */
 	ElGamalMultiRecipientMessage getMessage(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPrivateKey secretKey);
+
+	/**
+	 * Picks encryption parameters for the given seed.
+	 *
+	 * @param seed the seed used for the parameters generation.
+	 * @return a {@link GqGroup} containing parameters p, q and g.
+	 */
+	GqGroup getEncryptionParameters(final String seed);
 }
