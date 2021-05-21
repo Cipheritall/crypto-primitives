@@ -43,6 +43,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₗ₋₁). The gamma is the left-hand side of a standard
  * ElGamal encryption. Each phi is the encryption of a different message, using a different public key element and the same randomness.
+ * <p>
+ * An ElGamal multi-recipient ciphertext cannot be empty. It contains always a γ and at least one 𝜙.
  */
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
@@ -132,7 +134,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		checkArgument(message.getGroup().hasSameOrderAs(exponent.getGroup()), "Exponent and message groups must be of the same order.");
 		checkArgument(message.getGroup().equals(publicKey.getGroup()), "Message and public key must belong to the same group. ");
 
-		//The message is guaranteed to be non empty by the checks performed during the construction of the ElGamalMultiRecipientMessage
+		checkArgument(0 < message.size(), "The message must contain at least one element.");
 		checkArgument(message.size() <= publicKey.size(), "There cannot be more message elements than public key elements.");
 
 		final int n = message.size();

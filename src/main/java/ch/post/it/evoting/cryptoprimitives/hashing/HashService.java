@@ -26,9 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 
@@ -111,19 +111,10 @@ public class HashService {
 					return recursiveHash(listOfHashables.get(0));
 				}
 
-				//Compute hashes of list elements
-				final List<byte[]> subHashes = listOfHashables.stream().map(this::recursiveHash).collect(Collectors.toList());
-				final int totalSize = subHashes.size() * subHashes.get(0).length;
+				// Compute and concatenate hashes of list elements.
+				final byte[] concatenatedHashes = Bytes.concat(listOfHashables.stream().map(this::recursiveHash).toArray(byte[][]::new));
 
-				//Concatenate hashes of list elements
-				final byte[] concatenatedSubHashes = new byte[totalSize];
-				int offset = 0;
-				for (byte[] subHash : subHashes) {
-					System.arraycopy(subHash, 0, concatenatedSubHashes, offset, subHash.length);
-					offset += subHash.length;
-				}
-
-				return this.hashFunction.apply(concatenatedSubHashes);
+				return this.hashFunction.apply(concatenatedHashes);
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}

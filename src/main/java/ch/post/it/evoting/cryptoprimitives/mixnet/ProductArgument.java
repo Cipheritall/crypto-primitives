@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 
@@ -33,12 +34,11 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 public class ProductArgument implements HashableList {
 
 	private final SingleValueProductArgument singleValueProductArgument;
-	private GqElement commitmentB;
-	private HadamardArgument hadamardArgument;
-
 	private final int m;
 	private final int n;
 	private final GqGroup group;
+	private GqElement commitmentB;
+	private HadamardArgument hadamardArgument;
 
 	/**
 	 * Constructs a {@link ProductArgument}.
@@ -91,12 +91,12 @@ public class ProductArgument implements HashableList {
 		this.group = singleValueProductArgument.getGroup();
 	}
 
-	GqElement getCommitmentB() {
-		return commitmentB;
+	Optional<GqElement> getCommitmentB() {
+		return Optional.ofNullable(commitmentB);
 	}
 
-	HadamardArgument getHadamardArgument() {
-		return hadamardArgument;
+	Optional<HadamardArgument> getHadamardArgument() {
+		return Optional.ofNullable(hadamardArgument);
 	}
 
 	SingleValueProductArgument getSingleValueProductArgument() {
@@ -135,7 +135,7 @@ public class ProductArgument implements HashableList {
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		if(commitmentB == null) {
+		if (commitmentB == null) {
 			return ImmutableList.of(singleValueProductArgument);
 		}
 		return ImmutableList.of(commitmentB, hadamardArgument, singleValueProductArgument);

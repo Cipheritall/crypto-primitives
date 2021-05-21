@@ -23,7 +23,7 @@ import java.util.LinkedList;
 /**
  * Represents the result of a verification. Contains a list of errors in case of failure.
  */
-interface VerificationResult {
+public interface VerificationResult {
 
 	/**
 	 * @return {@code true} iff this verification succeeded.
