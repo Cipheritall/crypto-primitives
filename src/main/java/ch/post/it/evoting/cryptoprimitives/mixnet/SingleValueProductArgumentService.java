@@ -98,7 +98,7 @@ class SingleValueProductArgumentService {
 
 		// Ensure that the statement corresponds to the witness
 		final int n = a.size();
-		checkArgument(n >= 2, "The size n of the witness must be at least 2.");
+		checkArgument(2 <= n, "The size n of the witness must be at least 2.");
 		checkArgument(ca.equals(getCommitment(a, r, commitmentKey)),
 				"The provided commitment does not correspond to the elements, randomness and commitment key provided.");
 		final ZqGroup group = b.getGroup();

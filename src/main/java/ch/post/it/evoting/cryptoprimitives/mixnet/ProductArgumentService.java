@@ -103,6 +103,8 @@ final class ProductArgumentService {
 
 		// Dimension check
 		checkArgument(cA.size() == r.size(), "The commitments A and the exponents r must have the same size.");
+		checkArgument(0 < A.numColumns(), "The number of columns m must be strictly positive.");
+		checkArgument(1 < A.numRows(), "The number of rows n must be greater than or equal to 2.");
 		checkArgument(A.numRows() <= commitmentKey.size(),
 				"The matrix' number of rows cannot be greater than the commitment key size.");
 
@@ -185,11 +187,10 @@ final class ProductArgumentService {
 				"The statement and the argument must have the same m.");
 
 		if (m > 1) {
-			checkNotNull(argument.getCommitmentB(), "The product argument must contain a commitment b for m > 1.");
-			checkNotNull(argument.getHadamardArgument(), "The product argument must contain a Hadamard argument for m > 1.");
-
-			final GqElement cb = argument.getCommitmentB();
-			final HadamardArgument hArgument = argument.getHadamardArgument();
+			final GqElement cb = argument.getCommitmentB()
+					.orElseThrow(() -> new IllegalArgumentException("The product argument must contain a commitment b for m > 1."));
+			final HadamardArgument hArgument = argument.getHadamardArgument()
+					.orElseThrow(() -> new IllegalArgumentException("The product argument must contain a Hadamard argument for m > 1."));
 
 			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
 			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);

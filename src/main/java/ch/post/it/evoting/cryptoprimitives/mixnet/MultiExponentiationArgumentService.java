@@ -127,10 +127,6 @@ final class MultiExponentiationArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
-		//Group checking
-		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement must belong to the same group as the public key and commitment key.");
-		checkArgument(this.gqGroup.hasSameOrderAs(witness.getGroup()), "The witness must belong to a ZqGroup of order q.");
-		final BigInteger q = this.gqGroup.getQ();
 
 		//Dimension checking
 		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
@@ -142,13 +138,22 @@ final class MultiExponentiationArgumentService {
 
 		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
 		checkArgument(statement.getM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
+		checkArgument(witness.getDimensionM() > 0, "The dimension m must be strictly positive.");
+		checkArgument(witness.getDimensionN() > 0, "The dimension n must be strictly positive.");
 		checkArgument(witness.getDimensionN() <= ck.size(),
 				"The number of rows of matrix A must be smaller or equal to the size of the commitment key.");
+		checkArgument(!CMatrix.isEmpty(), "The ciphertext matrix C must not be empty.");
+
+		//Group checking
+		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement must belong to the same group as the public key and commitment key.");
+		checkArgument(this.gqGroup.hasSameOrderAs(witness.getGroup()), "The witness must belong to a ZqGroup of order q.");
+		final BigInteger q = this.gqGroup.getQ();
 
 		final int m = statement.getM();
 		final int n = statement.getN();
-		final int l = CMatrix.isEmpty() ? 0 : CMatrix.getElementSize();
+		final int l = CMatrix.getElementSize();
 
+		checkArgument(0 < l, "The ciphertexts must have at least 1 element.");
 		checkArgument(l <= pk.size(), "The ciphertexts must be smaller than the public key.");
 
 		//Ensure that C is the result of the re-encryption and multi exponentiation of matrix C with exponents matrix A
@@ -305,7 +310,7 @@ final class MultiExponentiationArgumentService {
 				"The ciphertexts matrix must have as many columns as the exponents matrix has rows.");
 		checkArgument(ciphertexts.numRows() + 1 == exponents.numColumns(),
 				"The exponents matrix must have one more column than the ciphertexts matrix has rows.");
-		checkArgument(ciphertexts.get(0, 0).size() <= this.pk.size(),
+		checkArgument(ciphertexts.getElementSize() <= this.pk.size(),
 				"There must be at least the same number of key elements than ciphertexts' phis.");
 
 		// Group checking.

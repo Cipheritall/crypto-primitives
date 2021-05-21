@@ -38,7 +38,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
- * Represents an ElGamal message containing mutliple elements.
+ * Represents an ElGamal message containing multiple elements.
  * <p>
  * This class is immutable.
  */

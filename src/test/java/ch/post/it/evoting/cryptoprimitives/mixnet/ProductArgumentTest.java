@@ -48,14 +48,14 @@ class ProductArgumentTest extends TestGroupSetup {
 
 		final ProductArgument productArgument = argumentGenerator.genProductArgument(m, n);
 
-		commitmentB = productArgument.getCommitmentB();
-		hadamardArgument = productArgument.getHadamardArgument();
+		commitmentB = productArgument.getCommitmentB().orElse(null);
+		hadamardArgument = productArgument.getHadamardArgument().orElse(null);
 		singleValueProductArgument = productArgument.getSingleValueProductArgument();
 	}
 
 	@Test
 	@DisplayName("constructed with null arguments throws a NullPointerException")
-	void constructMultiValueProductArgumentWithNullArguments() {
+	void constructProductArgumentWithNullArguments() {
 		assertAll(
 				() -> assertThrows(NullPointerException.class,
 						() -> new ProductArgument(null, hadamardArgument, singleValueProductArgument)),

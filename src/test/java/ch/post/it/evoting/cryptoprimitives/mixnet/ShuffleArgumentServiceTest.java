@@ -143,6 +143,16 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					() -> new ShuffleArgumentService(otherPublicKey, commitmentKey, randomService, hashService));
 			assertEquals("The public key and commitment key must belong to the same group.", exception.getMessage());
 		}
+
+		@Test
+		@DisplayName("commitment key with only 1 element throws IllegalArgumentException")
+		void constructCommitmentKeyTooShort() {
+			final CommitmentKey shortCommitmentKey = commitmentKeyGenerator.genCommitmentKey(1);
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> new ShuffleArgumentService(publicKey, shortCommitmentKey, randomService, hashService));
+			assertEquals("The commitment key must be at least of size 2.", exception.getMessage());
+		}
 	}
 
 	@Nested
@@ -219,9 +229,18 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			assertEquals("The number of rows for the ciphertext matrices must be strictly positive.", rowsIllegalArgumentException.getMessage());
 
 			final IllegalArgumentException columnsIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-					() -> shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, 0));
-			assertEquals("The number of columns for the ciphertext matrices must be strictly positive.",
+					() -> shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, 1));
+			assertEquals("The number of columns for the ciphertext matrices must be greater than or equal to 2.",
 					columnsIllegalArgumentException.getMessage());
+		}
+
+		@Test
+		@DisplayName("ciphertext matrix column count bigger than commitment key size throws IllegalArgumentException")
+		void getShuffleArgumentTooShortCommitmentKey() {
+			final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, 1, KEY_ELEMENTS_NUMBER + 1));
+			assertEquals("The number of columns for the ciphertext matrices must be smaller than or equal to the commitment key size.",
+					illegalArgumentException.getMessage());
 		}
 
 		@Test
@@ -546,9 +565,18 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			assertEquals("The number of rows for the ciphertext matrices must be strictly positive.", rowsIllegalArgumentException.getMessage());
 
 			final IllegalArgumentException columnsIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, 0));
-			assertEquals("The number of columns for the ciphertext matrices must be strictly positive.",
+					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, 1));
+			assertEquals("The number of columns for the ciphertext matrices must be greater than or equal to 2.",
 					columnsIllegalArgumentException.getMessage());
+		}
+
+		@Test
+		@DisplayName("ciphertext matrix column count bigger than commitment key size throws IllegalArgumentException")
+		void verifyShuffleArgumentTooShortCommitmentKey() {
+			final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, 1, KEY_ELEMENTS_NUMBER + 1));
+			assertEquals("The number of columns for the ciphertext matrices must be smaller than or equal to the commitment key size.",
+					illegalArgumentException.getMessage());
 		}
 
 		@Test
@@ -669,11 +697,11 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					.build();
 
 			ProductArgument badProductArgument;
-			if (m == 1) {
-				badProductArgument = new ProductArgument(badSingleValueProductArgument);
-			} else {
-				badProductArgument = new ProductArgument(productArgument.getCommitmentB(), productArgument.getHadamardArgument(),
+			if (productArgument.getCommitmentB().isPresent() && productArgument.getHadamardArgument().isPresent()) {
+				badProductArgument = new ProductArgument(productArgument.getCommitmentB().get(), productArgument.getHadamardArgument().get(),
 						badSingleValueProductArgument);
+			} else {
+				badProductArgument = new ProductArgument(badSingleValueProductArgument);
 			}
 
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
