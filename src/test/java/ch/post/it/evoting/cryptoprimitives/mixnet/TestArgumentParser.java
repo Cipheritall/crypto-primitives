@@ -70,14 +70,14 @@ class TestArgumentParser {
 		final ZqElement t = ZqElement.create(tValue, zqGroup);
 
 		return new ZeroArgument.Builder()
-				.withCA0(cA0)
-				.withCBm(cBm)
-				.withCd(cd)
-				.withAPrime(aPrime)
-				.withBPrime(bPrime)
-				.withRPrime(r)
-				.withSPrime(s)
-				.withTPrime(t)
+				.with_c_A_0(cA0)
+				.with_c_B_m(cBm)
+				.with_c_d(cd)
+				.with_a_prime(aPrime)
+				.with_b_prime(bPrime)
+				.with_r_prime(r)
+				.with_s_prime(s)
+				.with_t_prime(t)
 				.build();
 	}
 
@@ -115,13 +115,13 @@ class TestArgumentParser {
 		final ZqElement sTilde = ZqElement.create(sTildeValue, zqGroup);
 
 		return new SingleValueProductArgument.Builder()
-				.withCd(cd)
-				.withCLowerDelta(cLowerDelta)
-				.withCUpperDelta(cUpperDelta)
-				.withATilde(aTilde)
-				.withBTilde(bTilde)
-				.withRTilde(rTilde)
-				.withSTilde(sTilde)
+				.with_c_d(cd)
+				.with_c_delta(cLowerDelta)
+				.with_c_Delta(cUpperDelta)
+				.with_a_tilde(aTilde)
+				.with_b_tilde(bTilde)
+				.with_r_tilde(rTilde)
+				.with_s_tilde(sTilde)
 				.build();
 	}
 
@@ -149,14 +149,14 @@ class TestArgumentParser {
 		final ZqElement tau = ZqElement.create(tauValue, zqGroup);
 
 		return new MultiExponentiationArgument.Builder()
-				.withcA0(cA0)
-				.withcBVector(cB)
-				.withEVector(E)
-				.withaVector(a)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau)
+				.with_c_A_0(cA0)
+				.with_c_B(cB)
+				.with_E(E)
+				.with_a(a)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau)
 				.build();
 
 	}

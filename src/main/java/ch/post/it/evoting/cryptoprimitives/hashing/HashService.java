@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
@@ -82,39 +84,40 @@ public class HashService {
 	 */
 	public byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);
-		checkArgument(values.length != 0, "Cannot hash no values.");
 		checkArgument(Arrays.stream(values).allMatch(Objects::nonNull), "Values contain a null value which cannot be hashed.");
+		checkArgument(values.length != 0, "Cannot hash no values.");
 
 		if (values.length > 1) {
-			final HashableList valuesList = HashableList.from(ImmutableList.copyOf(values));
-			return recursiveHash(valuesList);
+			final HashableList v = HashableList.from(ImmutableList.copyOf(values));
+			return recursiveHash(v);
 		} else {
 			final Hashable value = values[0];
 
 			if (value instanceof HashableByteArray) {
-				final byte[] byteArrayValue = ((HashableByteArray) value).toHashableForm();
-				return this.hashFunction.apply(byteArrayValue);
+				final byte[] w = ((HashableByteArray) value).toHashableForm();
+				return this.hashFunction.apply(w);
 			} else if (value instanceof HashableString) {
-				final String stringValue = ((HashableString) value).toHashableForm();
-				return this.hashFunction.apply(ConversionService.stringToByteArray(stringValue));
+				final String w = ((HashableString) value).toHashableForm();
+				return this.hashFunction.apply(ConversionService.stringToByteArray(w));
 			} else if (value instanceof HashableBigInteger) {
-				final BigInteger bigIntegerValue = ((HashableBigInteger) value).toHashableForm();
-				checkArgument(bigIntegerValue.compareTo(BigInteger.ZERO) >= 0);
-				return this.hashFunction.apply(integerToByteArray(bigIntegerValue));
+				final BigInteger w = ((HashableBigInteger) value).toHashableForm();
+				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
+				return this.hashFunction.apply(integerToByteArray(w));
 			} else if (value instanceof HashableList) {
-				final HashableList list = (HashableList) value;
-				final List<? extends Hashable> listOfHashables = list.toHashableForm();
+				final ImmutableList<? extends Hashable> w = ((HashableList) value).toHashableForm();
 
-				checkArgument(!listOfHashables.isEmpty(), "Cannot hash an empty list.");
+				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 
-				if (listOfHashables.size() == 1) {
-					return recursiveHash(listOfHashables.get(0));
+				if (w.size() == 1) {
+					return recursiveHash(w.get(0));
 				}
 
-				// Compute and concatenate hashes of list elements.
-				final byte[] concatenatedHashes = Bytes.concat(listOfHashables.stream().map(this::recursiveHash).toArray(byte[][]::new));
+				final byte[][] subHashes = w.stream()
+						.map(this::recursiveHash)
+						.toArray(byte[][]::new);
+				final byte[] concatenatedSubHashes = Bytes.concat(subHashes);
 
-				return this.hashFunction.apply(concatenatedHashes);
+				return this.hashFunction.apply(concatenatedSubHashes);
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}

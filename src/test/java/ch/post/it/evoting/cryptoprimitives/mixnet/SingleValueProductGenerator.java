@@ -41,8 +41,8 @@ public class SingleValueProductGenerator {
 	}
 
 	static SingleValueProductStatement getSingleValueProductStatement(final SingleValueProductWitness witness, final CommitmentKey commitmentKey) {
-		final GroupVector<ZqElement, ZqGroup> elements = witness.getElements();
-		final ZqElement randomness = witness.getRandomness();
+		final GroupVector<ZqElement, ZqGroup> elements = witness.get_a();
+		final ZqElement randomness = witness.get_r();
 		final ZqGroup zqGroup = elements.getGroup();
 		final ZqElement product = elements.stream().reduce(ZqElement.create(BigInteger.ONE, zqGroup), ZqElement::multiply);
 		final GqElement commitment = CommitmentService.getCommitment(elements, randomness, commitmentKey);

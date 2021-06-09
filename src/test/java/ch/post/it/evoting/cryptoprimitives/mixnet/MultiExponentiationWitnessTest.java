@@ -46,9 +46,9 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 
 		TestMultiExponentiationWitnessGenerator witnessGenerator = new TestMultiExponentiationWitnessGenerator(zqGroup);
 		MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
-		matrixA = witness.getA();
-		exponentsR = witness.getR();
-		exponentsRho = witness.getRho();
+		matrixA = witness.get_A();
+		exponentsR = witness.get_r();
+		exponentsRho = witness.get_rho();
 	}
 
 	@Test

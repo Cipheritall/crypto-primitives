@@ -60,14 +60,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 		n = secureRandom.nextInt(UPPER_BOUND) + 1;
 		final ZeroArgument zeroArgument = new TestArgumentGenerator(gqGroup).genZeroArgument(m, n);
 
-		cA0 = zeroArgument.getCA0();
-		cBm = zeroArgument.getCBm();
-		cd = zeroArgument.getCd();
-		aPrime = zeroArgument.getAPrime();
-		bPrime = zeroArgument.getBPrime();
-		rPrime = zeroArgument.getRPrime();
-		sPrime = zeroArgument.getSPrime();
-		tPrime = zeroArgument.getTPrime();
+		cA0 = zeroArgument.get_c_A_0();
+		cBm = zeroArgument.get_c_B_m();
+		cd = zeroArgument.get_c_d();
+		aPrime = zeroArgument.get_a_prime();
+		bPrime = zeroArgument.get_b_prime();
+		rPrime = zeroArgument.get_r_prime();
+		sPrime = zeroArgument.get_s_prime();
+		tPrime = zeroArgument.get_t_prime();
 	}
 
 	@Nested
@@ -79,14 +79,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 		@DisplayName("all initialized fields does not throw")
 		void zeroArgumentBuilderValidFields() {
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(rPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(aPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(rPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 
 			assertDoesNotThrow(builder::build);
 		}
@@ -112,14 +112,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 				final ZqElement sPrime, final ZqElement tPrime) {
 
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(rPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(aPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(rPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 
 			assertThrows(NullPointerException.class, builder::build);
 		}
@@ -130,14 +130,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 			final GqElement otherGroupCA0 = otherGqGroupGenerator.genMember();
 
 			final Builder builder = new Builder()
-					.withCA0(otherGroupCA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(rPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(otherGroupCA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(aPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(rPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("cA0, cBm, cd must belong to the same group.", exception.getMessage());
@@ -149,14 +149,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 			final ZqElement otherGroupRPrime = otherZqGroupGenerator.genRandomZqElementMember();
 
 			final Builder builder = new Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(otherGroupRPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(aPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(otherGroupRPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("aPrime, bPrime, rPrime, sPrime, tPrime must belong to the same group.", exception.getMessage());
@@ -172,14 +172,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 			final ZqElement otherGroupTPrime = otherZqGroupGenerator.genRandomZqElementMember();
 
 			final Builder builder = new Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(otherGroupAPrime)
-					.withBPrime(otherGroupBPrime)
-					.withRPrime(otherGroupRPrime)
-					.withSPrime(otherGroupSPrime)
-					.withTPrime(otherGroupTPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(otherGroupAPrime)
+					.with_b_prime(otherGroupBPrime)
+					.with_r_prime(otherGroupRPrime)
+					.with_s_prime(otherGroupSPrime)
+					.with_t_prime(otherGroupTPrime);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("GqGroup and ZqGroup of argument inputs are not compatible.", exception.getMessage());
@@ -191,14 +191,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 			final GroupVector<ZqElement, ZqGroup> longerAPrime = zqGroupGenerator.genRandomZqElementVector(n + 1);
 
 			final Builder builder = new Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(longerAPrime)
-					.withBPrime(bPrime)
-					.withRPrime(rPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(longerAPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(rPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The vectors aPrime and bPrime must have the same size.", exception.getMessage());
@@ -209,14 +209,14 @@ class ZeroArgumentTest extends TestGroupSetup {
 		void zeroArgumentBuilderBuildCdBadSize() {
 			GroupVector<GqElement, GqGroup> badCd = gqGroupGenerator.genRandomGqElementVector(4);
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(badCd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(rPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(badCd)
+					.with_a_prime(aPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(rPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 
 			assertThrows(IllegalArgumentException.class, builder::build);
 		}

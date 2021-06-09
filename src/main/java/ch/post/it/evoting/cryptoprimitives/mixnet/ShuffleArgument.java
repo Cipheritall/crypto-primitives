@@ -34,10 +34,11 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 /**
  * Value class containing the result of a shuffle argument proof.
  */
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class ShuffleArgument implements HashableList {
 
-	private GroupVector<GqElement, GqGroup> cA;
-	private GroupVector<GqElement, GqGroup> cB;
+	private GroupVector<GqElement, GqGroup> c_A;
+	private GroupVector<GqElement, GqGroup> c_B;
 	private ProductArgument productArgument;
 	private MultiExponentiationArgument multiExponentiationArgument;
 
@@ -50,12 +51,12 @@ public class ShuffleArgument implements HashableList {
 		// Intentionally left blank.
 	}
 
-	GroupVector<GqElement, GqGroup> getcA() {
-		return cA;
+	GroupVector<GqElement, GqGroup> get_c_A() {
+		return c_A;
 	}
 
-	GroupVector<GqElement, GqGroup> getcB() {
-		return cB;
+	GroupVector<GqElement, GqGroup> get_c_N() {
+		return c_B;
 	}
 
 	ProductArgument getProductArgument() {
@@ -66,15 +67,15 @@ public class ShuffleArgument implements HashableList {
 		return multiExponentiationArgument;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
 	}
 
-	int getL() {
+	int get_l() {
 		return l;
 	}
 
@@ -91,43 +92,43 @@ public class ShuffleArgument implements HashableList {
 			return false;
 		}
 		final ShuffleArgument that = (ShuffleArgument) o;
-		return cA.equals(that.cA) && cB.equals(that.cB) && productArgument.equals(that.productArgument) && multiExponentiationArgument
+		return c_A.equals(that.c_A) && c_B.equals(that.c_B) && productArgument.equals(that.productArgument) && multiExponentiationArgument
 				.equals(that.multiExponentiationArgument);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cA, cB, productArgument, multiExponentiationArgument);
+		return Objects.hash(c_A, c_B, productArgument, multiExponentiationArgument);
 	}
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(cA, cB, productArgument, multiExponentiationArgument);
+		return ImmutableList.of(c_A, c_B, productArgument, multiExponentiationArgument);
 	}
 
 	public static class Builder {
 
-		private GroupVector<GqElement, GqGroup> cA;
-		private GroupVector<GqElement, GqGroup> cB;
+		private GroupVector<GqElement, GqGroup> c_A;
+		private GroupVector<GqElement, GqGroup> c_B;
 		private ProductArgument productArgument;
 		private MultiExponentiationArgument multiExponentiationArgument;
 
-		public Builder withCA(final GroupVector<GqElement, GqGroup> cA) {
-			this.cA = cA;
+		public Builder with_c_A(final GroupVector<GqElement, GqGroup> c_A) {
+			this.c_A = c_A;
 			return this;
 		}
 
-		public Builder withCB(final GroupVector<GqElement, GqGroup> cB) {
-			this.cB = cB;
+		public Builder with_c_B(final GroupVector<GqElement, GqGroup> c_B) {
+			this.c_B = c_B;
 			return this;
 		}
 
-		public Builder withProductArgument(final ProductArgument productArgument) {
+		public Builder with_productArgument(final ProductArgument productArgument) {
 			this.productArgument = productArgument;
 			return this;
 		}
 
-		public Builder withMultiExponentiationArgument(final MultiExponentiationArgument multiExponentiationArgument) {
+		public Builder with_multiExponentiationArgument(final MultiExponentiationArgument multiExponentiationArgument) {
 			this.multiExponentiationArgument = multiExponentiationArgument;
 			return this;
 		}
@@ -146,36 +147,36 @@ public class ShuffleArgument implements HashableList {
 		 */
 		public ShuffleArgument build() {
 			// Null checking.
-			checkNotNull(this.cA);
-			checkNotNull(this.cB);
+			checkNotNull(this.c_A);
+			checkNotNull(this.c_B);
 			checkNotNull(this.productArgument);
 			checkNotNull(this.multiExponentiationArgument);
 
 			// Cross group checking.
 			final List<GqGroup> gqGroups = Arrays
-					.asList(this.cA.getGroup(), this.cB.getGroup(), this.productArgument.getGroup(), this.multiExponentiationArgument.getGroup());
+					.asList(this.c_A.getGroup(), this.c_B.getGroup(), this.productArgument.getGroup(), this.multiExponentiationArgument.getGroup());
 			checkArgument(allEqual(gqGroups.stream(), g -> g),
 					"The commitments cA, cB, the product and the multi exponentiation arguments must belong to the same group.");
 
 			// Cross dimensions checking.
 			final List<Integer> mDimensions = Arrays
-					.asList(this.cA.size(), this.cB.size(), this.productArgument.getM(), this.multiExponentiationArgument.getM());
+					.asList(this.c_A.size(), this.c_B.size(), this.productArgument.get_m(), this.multiExponentiationArgument.get_m());
 			checkArgument(allEqual(mDimensions.stream(), d -> d),
 					"The commitments cA, cB and the product and multi exponentiation arguments must have the same dimension m.");
 
-			checkArgument(this.productArgument.getN() == this.multiExponentiationArgument.getN(),
+			checkArgument(this.productArgument.get_n() == this.multiExponentiationArgument.get_n(),
 					"The product and multi exponentiation arguments must have the same dimension n.");
 
 			// Build the argument.
 			final ShuffleArgument shuffleArgument = new ShuffleArgument();
-			shuffleArgument.cA = this.cA;
-			shuffleArgument.cB = this.cB;
+			shuffleArgument.c_A = this.c_A;
+			shuffleArgument.c_B = this.c_B;
 			shuffleArgument.productArgument = this.productArgument;
 			shuffleArgument.multiExponentiationArgument = this.multiExponentiationArgument;
 
-			shuffleArgument.m = productArgument.getM();
-			shuffleArgument.n = productArgument.getN();
-			shuffleArgument.l = multiExponentiationArgument.getL();
+			shuffleArgument.m = productArgument.get_m();
+			shuffleArgument.n = productArgument.get_n();
+			shuffleArgument.l = multiExponentiationArgument.get_l();
 			shuffleArgument.group = productArgument.getGroup();
 
 			return shuffleArgument;

@@ -37,16 +37,17 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Collection of the values contained in a zero argument.
  */
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class ZeroArgument implements HashableList {
 
-	private GqElement cA0;
-	private GqElement cBm;
-	private GroupVector<GqElement, GqGroup> cd;
-	private GroupVector<ZqElement, ZqGroup> aPrime;
-	private GroupVector<ZqElement, ZqGroup> bPrime;
-	private ZqElement rPrime;
-	private ZqElement sPrime;
-	private ZqElement tPrime;
+	private GqElement c_A_0;
+	private GqElement c_B_m;
+	private GroupVector<GqElement, GqGroup> c_d;
+	private GroupVector<ZqElement, ZqGroup> a_prime;
+	private GroupVector<ZqElement, ZqGroup> b_prime;
+	private ZqElement r_prime;
+	private ZqElement s_prime;
+	private ZqElement t_prime;
 
 	private int m;
 	private int n;
@@ -56,43 +57,43 @@ public class ZeroArgument implements HashableList {
 		// Intentionally left blank.
 	}
 
-	GqElement getCA0() {
-		return cA0;
+	GqElement get_c_A_0() {
+		return c_A_0;
 	}
 
-	GqElement getCBm() {
-		return cBm;
+	GqElement get_c_B_m() {
+		return c_B_m;
 	}
 
-	GroupVector<GqElement, GqGroup> getCd() {
-		return cd;
+	GroupVector<GqElement, GqGroup> get_c_d() {
+		return c_d;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getAPrime() {
-		return aPrime;
+	GroupVector<ZqElement, ZqGroup> get_a_prime() {
+		return a_prime;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getBPrime() {
-		return bPrime;
+	GroupVector<ZqElement, ZqGroup> get_b_prime() {
+		return b_prime;
 	}
 
-	ZqElement getRPrime() {
-		return rPrime;
+	ZqElement get_r_prime() {
+		return r_prime;
 	}
 
-	ZqElement getSPrime() {
-		return sPrime;
+	ZqElement get_s_prime() {
+		return s_prime;
 	}
 
-	ZqElement getTPrime() {
-		return tPrime;
+	ZqElement get_t_prime() {
+		return t_prime;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
 	}
 
@@ -109,18 +110,19 @@ public class ZeroArgument implements HashableList {
 			return false;
 		}
 		final ZeroArgument that = (ZeroArgument) o;
-		return cA0.equals(that.cA0) && cBm.equals(that.cBm) && cd.equals(that.cd) && aPrime.equals(that.aPrime) && bPrime.equals(that.bPrime)
-				&& rPrime.equals(that.rPrime) && sPrime.equals(that.sPrime) && tPrime.equals(that.tPrime);
+		return c_A_0.equals(that.c_A_0) && c_B_m.equals(that.c_B_m) && c_d.equals(that.c_d) && a_prime.equals(that.a_prime) && b_prime
+				.equals(that.b_prime)
+				&& r_prime.equals(that.r_prime) && s_prime.equals(that.s_prime) && t_prime.equals(that.t_prime);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cA0, cBm, cd, aPrime, bPrime, rPrime, sPrime, tPrime);
+		return Objects.hash(c_A_0, c_B_m, c_d, a_prime, b_prime, r_prime, s_prime, t_prime);
 	}
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(cA0, cBm, cd, aPrime, bPrime, rPrime, sPrime, tPrime);
+		return ImmutableList.of(c_A_0, c_B_m, c_d, a_prime, b_prime, r_prime, s_prime, t_prime);
 	}
 
 	/**
@@ -128,52 +130,52 @@ public class ZeroArgument implements HashableList {
 	 */
 	public static class Builder {
 
-		private GqElement cA0;
-		private GqElement cBm;
-		private GroupVector<GqElement, GqGroup> cd;
-		private GroupVector<ZqElement, ZqGroup> aPrime;
-		private GroupVector<ZqElement, ZqGroup> bPrime;
-		private ZqElement rPrime;
-		private ZqElement sPrime;
-		private ZqElement tPrime;
+		private GqElement c_A_0;
+		private GqElement c_B_m;
+		private GroupVector<GqElement, GqGroup> c_d;
+		private GroupVector<ZqElement, ZqGroup> a_prime;
+		private GroupVector<ZqElement, ZqGroup> b_prime;
+		private ZqElement r_prime;
+		private ZqElement s_prime;
+		private ZqElement t_prime;
 
-		public Builder withCA0(final GqElement cA0) {
-			this.cA0 = cA0;
+		public Builder with_c_A_0(final GqElement c_A_0) {
+			this.c_A_0 = c_A_0;
 			return this;
 		}
 
-		public Builder withCBm(final GqElement cBm) {
-			this.cBm = cBm;
+		public Builder with_c_B_m(final GqElement c_B_m) {
+			this.c_B_m = c_B_m;
 			return this;
 		}
 
-		public Builder withCd(final GroupVector<GqElement, GqGroup> cd) {
-			this.cd = cd;
+		public Builder with_c_d(final GroupVector<GqElement, GqGroup> c_d) {
+			this.c_d = c_d;
 			return this;
 		}
 
-		public Builder withAPrime(final GroupVector<ZqElement, ZqGroup> aPrime) {
-			this.aPrime = aPrime;
+		public Builder with_a_prime(final GroupVector<ZqElement, ZqGroup> a_prime) {
+			this.a_prime = a_prime;
 			return this;
 		}
 
-		public Builder withBPrime(final GroupVector<ZqElement, ZqGroup> bPrime) {
-			this.bPrime = bPrime;
+		public Builder with_b_prime(final GroupVector<ZqElement, ZqGroup> b_prime) {
+			this.b_prime = b_prime;
 			return this;
 		}
 
-		public Builder withRPrime(final ZqElement rPrime) {
-			this.rPrime = rPrime;
+		public Builder with_r_prime(final ZqElement r_prime) {
+			this.r_prime = r_prime;
 			return this;
 		}
 
-		public Builder withSPrime(final ZqElement sPrime) {
-			this.sPrime = sPrime;
+		public Builder with_s_prime(final ZqElement s_prime) {
+			this.s_prime = s_prime;
 			return this;
 		}
 
-		public Builder withTPrime(final ZqElement tPrime) {
-			this.tPrime = tPrime;
+		public Builder with_t_prime(final ZqElement t_prime) {
+			this.t_prime = t_prime;
 			return this;
 		}
 
@@ -192,43 +194,43 @@ public class ZeroArgument implements HashableList {
 		 */
 		public ZeroArgument build() {
 			// Null checking.
-			checkNotNull(this.cA0);
-			checkNotNull(this.cBm);
-			checkNotNull(this.cd);
-			checkNotNull(this.aPrime);
-			checkNotNull(this.bPrime);
-			checkNotNull(this.rPrime);
-			checkNotNull(this.sPrime);
-			checkNotNull(this.tPrime);
+			checkNotNull(this.c_A_0);
+			checkNotNull(this.c_B_m);
+			checkNotNull(this.c_d);
+			checkNotNull(this.a_prime);
+			checkNotNull(this.b_prime);
+			checkNotNull(this.r_prime);
+			checkNotNull(this.s_prime);
+			checkNotNull(this.t_prime);
 
 			// Cross group checking.
-			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(cA0, cBm, cd);
-			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(aPrime, bPrime, rPrime, sPrime, tPrime);
+			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(c_A_0, c_B_m, c_d);
+			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(a_prime, b_prime, r_prime, s_prime, t_prime);
 			checkArgument(allEqual(gqGroupMembers.stream(), GroupVectorElement::getGroup), "cA0, cBm, cd must belong to the same group.");
 			checkArgument(allEqual(zqGroupMembers.stream(), GroupVectorElement::getGroup),
 					"aPrime, bPrime, rPrime, sPrime, tPrime must belong to the same group.");
-			checkArgument(cA0.getGroup().hasSameOrderAs(aPrime.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
+			checkArgument(c_A_0.getGroup().hasSameOrderAs(a_prime.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
 
 			// Cross dimensions checking.
-			checkArgument(aPrime.size() == bPrime.size(), "The vectors aPrime and bPrime must have the same size.");
+			checkArgument(a_prime.size() == b_prime.size(), "The vectors aPrime and bPrime must have the same size.");
 
 			// Dimensions checking.
-			checkArgument((cd.size() - 1) % 2 == 0, "cd must be of size 2m + 1.");
+			checkArgument((c_d.size() - 1) % 2 == 0, "cd must be of size 2m + 1.");
 
 			// Build the argument.
 			final ZeroArgument zeroArgument = new ZeroArgument();
-			zeroArgument.cA0 = this.cA0;
-			zeroArgument.cBm = this.cBm;
-			zeroArgument.cd = this.cd;
-			zeroArgument.aPrime = this.aPrime;
-			zeroArgument.bPrime = this.bPrime;
-			zeroArgument.rPrime = this.rPrime;
-			zeroArgument.sPrime = this.sPrime;
-			zeroArgument.tPrime = this.tPrime;
+			zeroArgument.c_A_0 = this.c_A_0;
+			zeroArgument.c_B_m = this.c_B_m;
+			zeroArgument.c_d = this.c_d;
+			zeroArgument.a_prime = this.a_prime;
+			zeroArgument.b_prime = this.b_prime;
+			zeroArgument.r_prime = this.r_prime;
+			zeroArgument.s_prime = this.s_prime;
+			zeroArgument.t_prime = this.t_prime;
 
-			zeroArgument.m = (cd.size() - 1) / 2;
-			zeroArgument.n = aPrime.size();
-			zeroArgument.group = cA0.getGroup();
+			zeroArgument.m = (c_d.size() - 1) / 2;
+			zeroArgument.n = a_prime.size();
+			zeroArgument.group = c_A_0.getGroup();
 
 			return zeroArgument;
 		}

@@ -28,10 +28,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 /**
  * Represents the statement for a zero argument, consisting of two commitments and a y value for bilinear mapping.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ZeroStatement {
 
-	private final GroupVector<GqElement, GqGroup> commitmentsA;
-	private final GroupVector<GqElement, GqGroup> commitmentsB;
+	private final GroupVector<GqElement, GqGroup> c_A;
+	private final GroupVector<GqElement, GqGroup> c_B;
 	private final ZqElement y;
 
 	/**
@@ -44,37 +45,37 @@ class ZeroStatement {
 	 *     <li>value y must be part of the same group as the commitments</li>
 	 * </ul>
 	 *
-	 * @param commitmentsA c<sub>A</sub>, a list of {@link GqElement}s.
-	 * @param commitmentsB c<sub>B</sub>, a list of {@link GqElement}s.
+	 * @param c_A c<sub>A</sub>, a list of {@link GqElement}s.
+	 * @param c_B c<sub>B</sub>, a list of {@link GqElement}s.
 	 * @param y            The value defining the bilinear mapping.
 	 */
-	ZeroStatement(final GroupVector<GqElement, GqGroup> commitmentsA, final GroupVector<GqElement, GqGroup> commitmentsB, final ZqElement y) {
+	ZeroStatement(final GroupVector<GqElement, GqGroup> c_A, final GroupVector<GqElement, GqGroup> c_B, final ZqElement y) {
 		// Null checking.
-		this.commitmentsA = checkNotNull(commitmentsA);
-		this.commitmentsB = checkNotNull(commitmentsB);
+		this.c_A = checkNotNull(c_A);
+		this.c_B = checkNotNull(c_B);
 		this.y = checkNotNull(y);
 
 		// Cross dimension checking.
-		checkArgument(this.commitmentsA.size() == this.commitmentsB.size(), "The two commitments vectors must have the same size.");
+		checkArgument(this.c_A.size() == this.c_B.size(), "The two commitments vectors must have the same size.");
 
 		// Cross group checking.
-		if (!commitmentsA.isEmpty()) {
-			final GqGroup group = this.commitmentsA.getGroup();
-			checkArgument(group.equals(this.commitmentsB.getGroup()), "The two commitments must be part of the same group.");
+		if (!c_A.isEmpty()) {
+			final GqGroup group = this.c_A.getGroup();
+			checkArgument(group.equals(this.c_B.getGroup()), "The two commitments must be part of the same group.");
 			checkArgument(group.hasSameOrderAs(this.y.getGroup()), "The y value group must be of the same order as the group of the commitments.");
 		}
 
 	}
 
-	GroupVector<GqElement, GqGroup> getCommitmentsA() {
-		return commitmentsA;
+	GroupVector<GqElement, GqGroup> get_c_A() {
+		return c_A;
 	}
 
-	GroupVector<GqElement, GqGroup> getCommitmentsB() {
-		return commitmentsB;
+	GroupVector<GqElement, GqGroup> get_c_B() {
+		return c_B;
 	}
 
-	ZqElement getY() {
+	ZqElement get_y() {
 		return y;
 	}
 
@@ -87,11 +88,11 @@ class ZeroStatement {
 			return false;
 		}
 		final ZeroStatement that = (ZeroStatement) o;
-		return commitmentsA.equals(that.commitmentsA) && commitmentsB.equals(that.commitmentsB) && y.equals(that.y);
+		return c_A.equals(that.c_A) && c_B.equals(that.c_B) && y.equals(that.y);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(commitmentsA, commitmentsB, y);
+		return Objects.hash(c_A, c_B, y);
 	}
 }

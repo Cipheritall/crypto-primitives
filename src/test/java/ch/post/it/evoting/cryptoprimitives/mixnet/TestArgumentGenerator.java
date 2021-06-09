@@ -40,26 +40,26 @@ class TestArgumentGenerator {
 
 	ZeroArgument genZeroArgument(final int m, final int n) {
 		return new ZeroArgument.Builder()
-				.withCA0(gqGroupGenerator.genMember())
-				.withCBm(gqGroupGenerator.genMember())
-				.withCd(gqGroupGenerator.genRandomGqElementVector(2 * m + 1))
-				.withAPrime(zqGroupGenerator.genRandomZqElementVector(n))
-				.withBPrime(zqGroupGenerator.genRandomZqElementVector(n))
-				.withRPrime(zqGroupGenerator.genRandomZqElementMember())
-				.withSPrime(zqGroupGenerator.genRandomZqElementMember())
-				.withTPrime(zqGroupGenerator.genRandomZqElementMember())
+				.with_c_A_0(gqGroupGenerator.genMember())
+				.with_c_B_m(gqGroupGenerator.genMember())
+				.with_c_d(gqGroupGenerator.genRandomGqElementVector(2 * m + 1))
+				.with_a_prime(zqGroupGenerator.genRandomZqElementVector(n))
+				.with_b_prime(zqGroupGenerator.genRandomZqElementVector(n))
+				.with_r_prime(zqGroupGenerator.genRandomZqElementMember())
+				.with_s_prime(zqGroupGenerator.genRandomZqElementMember())
+				.with_t_prime(zqGroupGenerator.genRandomZqElementMember())
 				.build();
 	}
 
 	SingleValueProductArgument genSingleValueProductArgument(final int n) {
 		return new SingleValueProductArgument.Builder()
-				.withCd(gqGroupGenerator.genMember())
-				.withCLowerDelta(gqGroupGenerator.genMember())
-				.withCUpperDelta(gqGroupGenerator.genMember())
-				.withATilde(zqGroupGenerator.genRandomZqElementVector(n))
-				.withBTilde(zqGroupGenerator.genRandomZqElementVector(n))
-				.withRTilde(zqGroupGenerator.genRandomZqElementMember())
-				.withSTilde(zqGroupGenerator.genRandomZqElementMember())
+				.with_c_d(gqGroupGenerator.genMember())
+				.with_c_delta(gqGroupGenerator.genMember())
+				.with_c_Delta(gqGroupGenerator.genMember())
+				.with_a_tilde(zqGroupGenerator.genRandomZqElementVector(n))
+				.with_b_tilde(zqGroupGenerator.genRandomZqElementVector(n))
+				.with_r_tilde(zqGroupGenerator.genRandomZqElementMember())
+				.with_s_tilde(zqGroupGenerator.genRandomZqElementMember())
 				.build();
 	}
 
@@ -85,23 +85,23 @@ class TestArgumentGenerator {
 
 	MultiExponentiationArgument genMultiExponentiationArgument(final int m, final int n, final int l) {
 		return new MultiExponentiationArgument.Builder()
-				.withcA0(gqGroupGenerator.genMember())
-				.withcBVector(gqGroupGenerator.genRandomGqElementVector(2 * m))
-				.withEVector(elGamalGenerator.genRandomCiphertextVector(2 * m, l))
-				.withaVector(zqGroupGenerator.genRandomZqElementVector(n))
-				.withr(zqGroupGenerator.genRandomZqElementMember())
-				.withb(zqGroupGenerator.genRandomZqElementMember())
-				.withs(zqGroupGenerator.genRandomZqElementMember())
-				.withtau(zqGroupGenerator.genRandomZqElementMember())
+				.with_c_A_0(gqGroupGenerator.genMember())
+				.with_c_B(gqGroupGenerator.genRandomGqElementVector(2 * m))
+				.with_E(elGamalGenerator.genRandomCiphertextVector(2 * m, l))
+				.with_a(zqGroupGenerator.genRandomZqElementVector(n))
+				.with_r(zqGroupGenerator.genRandomZqElementMember())
+				.with_b(zqGroupGenerator.genRandomZqElementMember())
+				.with_s(zqGroupGenerator.genRandomZqElementMember())
+				.with_tau(zqGroupGenerator.genRandomZqElementMember())
 				.build();
 	}
 
 	ShuffleArgument genShuffleArgument(final int m, final int n, final int l) {
 		return new ShuffleArgument.Builder()
-				.withCA(gqGroupGenerator.genRandomGqElementVector(m))
-				.withCB(gqGroupGenerator.genRandomGqElementVector(m))
-				.withProductArgument(this.genProductArgument(m, n))
-				.withMultiExponentiationArgument(this.genMultiExponentiationArgument(m, n, l))
+				.with_c_A(gqGroupGenerator.genRandomGqElementVector(m))
+				.with_c_B(gqGroupGenerator.genRandomGqElementVector(m))
+				.with_productArgument(this.genProductArgument(m, n))
+				.with_multiExponentiationArgument(this.genMultiExponentiationArgument(m, n, l))
 				.build();
 	}
 

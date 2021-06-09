@@ -47,10 +47,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Service to compute a cryptographic argument for the validity of a shuffle.
  */
+@SuppressWarnings("java:S117")
 class ShuffleArgumentService {
 
-	private final ElGamalMultiRecipientPublicKey publicKey;
-	private final CommitmentKey commitmentKey;
+	private final ElGamalMultiRecipientPublicKey pk;
+	private final CommitmentKey ck;
 
 	private final RandomService randomService;
 	private final HashService hashService;
@@ -83,8 +84,8 @@ class ShuffleArgumentService {
 		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
 				"The hash service's bit length must be smaller than the bit length of q.");
 
-		this.publicKey = publicKey;
-		this.commitmentKey = commitmentKey;
+		this.pk = publicKey;
+		this.ck = commitmentKey;
 		this.randomService = randomService;
 		this.hashService = hashService;
 		this.productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
@@ -113,44 +114,42 @@ class ShuffleArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_vector = statement.get_C();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = statement.get_C_prime();
+		final Permutation pi = witness.get_pi();
+		final GroupVector<ZqElement, ZqGroup> rho_vector = witness.get_rho();
+		final int N = pi.size();
+		final int l = C_vector.getElementSize();
+		final int k = pk.size();
+
 		checkArgument(m > 0, "The number of rows for the ciphertext matrices must be strictly positive.");
 		checkArgument(n > 1, "The number of columns for the ciphertext matrices must be greater than or equal to 2.");
 
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsC = statement.getCiphertexts();
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertextsCPrime = statement.getShuffledCiphertexts();
-		final Permutation permutation = witness.getPermutation();
-		final GroupVector<ZqElement, ZqGroup> randomness = witness.getRandomness();
-
 		// Cross dimensions checking.
-		checkArgument(n <= commitmentKey.size(),
+		checkArgument(n <= ck.size(),
 				"The number of columns for the ciphertext matrices must be smaller than or equal to the commitment key size.");
-		checkArgument(ciphertextsC.size() == permutation.getSize(),
-				"The statement ciphertexts must have the same size as the permutation.");
+		checkArgument(C_vector.size() == pi.size(), "The statement ciphertexts must have the same size as the permutation.");
 
 		// Cross group checking.
-		checkArgument(ciphertextsC.getGroup().hasSameOrderAs(randomness.getGroup()),
-				"The randomness group must have the order of the ciphertexts group.");
+		checkArgument(C_vector.getGroup().hasSameOrderAs(rho_vector.getGroup()), "The randomness group must have the order of the ciphertexts group.");
 
 		// Ensure the statement corresponds to the witness.
-		final GqGroup gqGroup = ciphertextsC.getGroup();
-		final ZqGroup zqGroup = randomness.getGroup();
-		final int N = permutation.getSize();
-		final int l = ciphertextsC.get(0).size();
-
+		final GqGroup gqGroup = C_vector.getGroup();
+		final ZqGroup zqGroup = rho_vector.getGroup();
 		checkArgument(0 < l, "The ciphertexts must have at least 1 element.");
-		checkArgument(l <= publicKey.size(), "The ciphertexts must be smaller than the public key.");
+		checkArgument(l <= k, "The ciphertexts must be smaller than the public key.");
 
-		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
-		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = randomness.stream()
-				.map(rho -> getCiphertext(ones, rho, publicKey))
+		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessage.ones(gqGroup, l);
+		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = rho_vector.stream()
+				.map(rho_i -> getCiphertext(one, rho_i, pk))
 				.collect(toList());
-		final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = permutation.stream()
-				.mapToObj(ciphertextsC::get)
+		final List<ElGamalMultiRecipientCiphertext> C_pi = pi.stream()
+				.mapToObj(C_vector::get)
 				.collect(toList());
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computedShuffledCiphertextsCPrime = IntStream.range(0, N)
-				.mapToObj(i -> encryptedOnes.get(i).multiply(shuffledCiphertexts.get(i)))
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computed_C_prime = IntStream.range(0, N)
+				.mapToObj(i -> encryptedOnes.get(i).multiply(C_pi.get(i)))
 				.collect(toGroupVector());
-		checkArgument(shuffledCiphertextsCPrime.equals(computedShuffledCiphertextsCPrime),
+		checkArgument(C_prime.equals(computed_C_prime),
 				"The shuffled ciphertexts provided in the statement do not correspond to the re-encryption and shuffle of C under pi and rho.");
 
 		checkArgument(N == n * m, String.format("The ciphertexts vectors must be decomposable into m * n matrices: %d != %d * %d.", N, m, n));
@@ -162,59 +161,59 @@ class ShuffleArgumentService {
 
 		// Compute vector r, matrix A and vector c_A
 		final GroupVector<ZqElement, ZqGroup> r = randomService.genRandomVector(q, m);
-		final GroupVector<ZqElement, ZqGroup> permutationVector = permutation.stream()
+		final GroupVector<ZqElement, ZqGroup> pi_vector = pi.stream()
 				.mapToObj(BigInteger::valueOf)
 				.map(value -> ZqElement.create(value, zqGroup))
 				.collect(toGroupVector());
-		final GroupMatrix<ZqElement, ZqGroup> matrixA = permutationVector.toMatrix(m, n).transpose();
-		final GroupVector<GqElement, GqGroup> cA = getCommitmentMatrix(matrixA, r, commitmentKey);
+		final GroupMatrix<ZqElement, ZqGroup> A = pi_vector.toMatrix(m, n).transpose();
+		final GroupVector<GqElement, GqGroup> c_A = getCommitmentMatrix(A, r, ck);
 
 		// Compute x.
-		final byte[] xHash = hashService.recursiveHash(
+		final byte[] x_bytes = hashService.recursiveHash(
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
-				publicKey,
-				commitmentKey,
-				ciphertextsC,
-				shuffledCiphertextsCPrime,
-				cA
+				pk,
+				ck,
+				C_vector,
+				C_prime,
+				c_A
 		);
-		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(xHash), zqGroup);
+		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(x_bytes), zqGroup);
 
 		// Compute vector s, vector b, matrix B and vector c_B.
 		final GroupVector<ZqElement, ZqGroup> s = randomService.genRandomVector(q, m);
-		final GroupVector<ZqElement, ZqGroup> bVector = permutation.stream()
+		final GroupVector<ZqElement, ZqGroup> b_vector = pi.stream()
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toGroupVector());
-		final GroupMatrix<ZqElement, ZqGroup> matrixB = bVector.toMatrix(m, n).transpose();
-		final GroupVector<GqElement, GqGroup> cB = getCommitmentMatrix(matrixB, s, commitmentKey);
+		final GroupMatrix<ZqElement, ZqGroup> B = b_vector.toMatrix(m, n).transpose();
+		final GroupVector<GqElement, GqGroup> c_B = getCommitmentMatrix(B, s, ck);
 
 		// Compute y and z.
-		final byte[] yHash = hashService.recursiveHash(
-				cB,
+		final byte[] y_bytes = hashService.recursiveHash(
+				c_B,
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
-				publicKey,
-				commitmentKey,
-				ciphertextsC,
-				shuffledCiphertextsCPrime,
-				cA
+				pk,
+				ck,
+				C_vector,
+				C_prime,
+				c_A
 		);
-		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(yHash), zqGroup);
+		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(y_bytes), zqGroup);
 
-		final byte[] zHash = hashService.recursiveHash(
+		final byte[] z_bytes = hashService.recursiveHash(
 				HashableString.from("1"),
-				cB,
+				c_B,
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
-				publicKey,
-				commitmentKey,
-				ciphertextsC,
-				shuffledCiphertextsCPrime,
-				cA
+				pk,
+				ck,
+				C_vector,
+				C_prime,
+				c_A
 		);
-		final ZqElement z = ZqElement.create(ConversionService.byteArrayToInteger(zHash), zqGroup);
+		final ZqElement z = ZqElement.create(ConversionService.byteArrayToInteger(z_bytes), zqGroup);
 
 		// Compute Zneg, c_{-z}.
 		final GroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate)
@@ -222,18 +221,18 @@ class ShuffleArgumentService {
 				.collect(toGroupVector())
 				.toMatrix(m, n)
 				.transpose();
-		final GroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toGroupVector());
-		final GroupVector<GqElement, GqGroup> cNegativeZ = getCommitmentMatrix(negativeZ, zeros, commitmentKey);
+		final GroupVector<ZqElement, ZqGroup> zero = Stream.generate(zqGroup::getIdentity).limit(m).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> c_minus_z = getCommitmentMatrix(negativeZ, zero, ck);
 
 		// Compute c_D.
-		final GroupVector<GqElement, GqGroup> cAPowY = cA.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
-		final GroupVector<GqElement, GqGroup> cD = vectorEntryWiseProduct(cAPowY, cB);
+		final GroupVector<GqElement, GqGroup> c_A_y = c_A.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> c_D = vectorEntryWiseProduct(c_A_y, c_B);
 
 		// Compute matrix D.
-		final GroupMatrix<ZqElement, ZqGroup> yTimesA = matrixA.rowStream()
+		final GroupMatrix<ZqElement, ZqGroup> yTimesA = A.rowStream()
 				.map(row -> row.stream().map(y::multiply).collect(toList()))
 				.collect(collectingAndThen(toList(), GroupMatrix::fromRows));
-		final GroupMatrix<ZqElement, ZqGroup> matrixD = matrixSum(yTimesA, matrixB);
+		final GroupMatrix<ZqElement, ZqGroup> D = matrixSum(yTimesA, B);
 
 		// Compute vector t.
 		final GroupVector<ZqElement, ZqGroup> t = IntStream.range(0, r.size())
@@ -247,30 +246,30 @@ class ShuffleArgumentService {
 		final ZqElement b = computeProductB(N, y, xPowers, z, zqGroup);
 
 		// Compute pStatement.
-		final ProductStatement pStatement = new ProductStatement(vectorEntryWiseProduct(cD, cNegativeZ), b);
+		final ProductStatement pStatement = new ProductStatement(vectorEntryWiseProduct(c_D, c_minus_z), b);
 
 		// Compute pWitness.
-		final GroupMatrix<ZqElement, ZqGroup> pWitnessMatrix = matrixSum(matrixD, negativeZ);
+		final GroupMatrix<ZqElement, ZqGroup> pWitnessMatrix = matrixSum(D, negativeZ);
 		final ProductWitness pWitness = new ProductWitness(pWitnessMatrix, t);
 
 		// Compute productArgument.
 		final ProductArgument productArgument = productArgumentService.getProductArgument(pStatement, pWitness);
 
 		// Compute rho.
-		final ZqElement rho = IntStream.range(0, randomness.size())
-				.mapToObj(i -> randomness.get(i).multiply(bVector.get(i)))
+		final ZqElement rho = IntStream.range(0, rho_vector.size())
+				.mapToObj(i -> rho_vector.get(i).multiply(b_vector.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add)
 				.negate();
 
 		// Compute ciphertext C. The vector x is computed previously as xPowers.
-		final ElGamalMultiRecipientCiphertext ciphertextC = getCiphertextVectorExponentiation(ciphertextsC, xPowers);
+		final ElGamalMultiRecipientCiphertext C = getCiphertextVectorExponentiation(C_vector, xPowers);
 
 		// Compute mStatement.
-		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(shuffledCiphertextsCPrime.toMatrix(m, n),
-				ciphertextC, cB);
+		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(C_prime.toMatrix(m, n),
+				C, c_B);
 
 		// Compute mWitness.
-		final MultiExponentiationWitness mWitness = new MultiExponentiationWitness(matrixB, s, rho);
+		final MultiExponentiationWitness mWitness = new MultiExponentiationWitness(B, s, rho);
 
 		// Compute multiExponentiationArgument.
 		final MultiExponentiationArgument multiExponentiationArgument = multiExponentiationArgumentService
@@ -278,10 +277,10 @@ class ShuffleArgumentService {
 
 		final ShuffleArgument.Builder builder = new ShuffleArgument.Builder();
 		return builder
-				.withCA(cA)
-				.withCB(cB)
-				.withProductArgument(productArgument)
-				.withMultiExponentiationArgument(multiExponentiationArgument)
+				.with_c_A(c_A)
+				.with_c_B(c_B)
+				.with_productArgument(productArgument)
+				.with_multiExponentiationArgument(multiExponentiationArgument)
 				.build();
 	}
 
@@ -309,100 +308,99 @@ class ShuffleArgumentService {
 		checkArgument(n > 1, "The number of columns for the ciphertext matrices must be greater than or equal to 2.");
 
 		// Cross dimensions checking.
-		checkArgument(n <= commitmentKey.size(),
+		checkArgument(n <= ck.size(),
 				"The number of columns for the ciphertext matrices must be smaller than or equal to the commitment key size.");
-		checkArgument(m == argument.getM(), "The m dimension of the argument must be equal to the input parameter m.");
-		checkArgument(m * n == statement.getN(), "The product m * n must be equal to the statement's ciphertexts' size.");
+		checkArgument(m == argument.get_m(), "The m dimension of the argument must be equal to the input parameter m.");
+		checkArgument(m * n == statement.get_N(), "The product m * n must be equal to the statement's ciphertexts' size.");
 
 		// Cross group checking.
 		checkArgument(statement.getGroup().equals(argument.getGroup()), "The statement and the argument must have compatible groups.");
 
 		// Retrieve elements.
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsC = statement.getCiphertexts();
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertextsCPrime = statement.getShuffledCiphertexts();
-		final GroupVector<GqElement, GqGroup> cA = argument.getcA();
-		final GroupVector<GqElement, GqGroup> cB = argument.getcB();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_vector = statement.get_C();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = statement.get_C_prime();
+		final GroupVector<GqElement, GqGroup> c_A = argument.get_c_A();
+		final GroupVector<GqElement, GqGroup> c_B = argument.get_c_N();
 		final ProductArgument productArgument = argument.getProductArgument();
 		final MultiExponentiationArgument multiExponentiationArgument = argument.getMultiExponentiationArgument();
 
-		checkArgument(0 < ciphertextsC.getElementSize(), "The ciphertexts must have at least 1 element.");
-		checkArgument(ciphertextsC.getElementSize() <= publicKey.size(), "The ciphertexts must be smaller than the public key.");
+		checkArgument(0 < C_vector.getElementSize(), "The ciphertexts must have at least 1 element.");
+		checkArgument(C_vector.getElementSize() <= pk.size(), "The ciphertexts must be smaller than the public key.");
 
 		final GqGroup gqGroup = statement.getGroup();
-		final ZqGroup zqGroup = multiExponentiationArgument.getR().getGroup();
+		final ZqGroup zqGroup = multiExponentiationArgument.get_r().getGroup();
 		final BigInteger p = gqGroup.getP();
 		final BigInteger q = gqGroup.getQ();
-		final int N = statement.getN();
+		final int N = statement.get_N();
 
 		// Compute x, y and z.
-		final byte[] xHash = hashService.recursiveHash(
+		final byte[] x_bytes = hashService.recursiveHash(
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
-				publicKey,
-				commitmentKey,
-				ciphertextsC,
-				shuffledCiphertextsCPrime,
-				cA
+				pk,
+				ck,
+				C_vector,
+				C_prime,
+				c_A
 		);
-		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(xHash), zqGroup);
+		final ZqElement x = ZqElement.create(ConversionService.byteArrayToInteger(x_bytes), zqGroup);
 
-		final byte[] yHash = hashService.recursiveHash(
-				cB,
+		final byte[] y_bytes = hashService.recursiveHash(
+				c_B,
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
-				publicKey,
-				commitmentKey,
-				ciphertextsC,
-				shuffledCiphertextsCPrime,
-				cA
+				pk,
+				ck,
+				C_vector,
+				C_prime,
+				c_A
 		);
-		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(yHash), zqGroup);
+		final ZqElement y = ZqElement.create(ConversionService.byteArrayToInteger(y_bytes), zqGroup);
 
-		final byte[] zHash = hashService.recursiveHash(
+		final byte[] z_bytes = hashService.recursiveHash(
 				HashableString.from("1"),
-				cB,
+				c_B,
 				HashableBigInteger.from(p),
 				HashableBigInteger.from(q),
-				publicKey,
-				commitmentKey,
-				ciphertextsC,
-				shuffledCiphertextsCPrime,
-				cA
+				pk,
+				ck,
+				C_vector,
+				C_prime,
+				c_A
 		);
-		final ZqElement z = ZqElement.create(ConversionService.byteArrayToInteger(zHash), zqGroup);
+		final ZqElement z = ZqElement.create(ConversionService.byteArrayToInteger(z_bytes), zqGroup);
 
 		// Compute Zneg, c_{-z}.
-		final GroupMatrix<ZqElement, ZqGroup> negativeZ = Stream.generate(z::negate)
+		final GroupMatrix<ZqElement, ZqGroup> Z_neg = Stream.generate(z::negate)
 				.limit(N)
 				.collect(toGroupVector())
 				.toMatrix(m, n)
 				.transpose();
-		final GroupVector<ZqElement, ZqGroup> zeros = Stream.generate(zqGroup::getIdentity).limit(m).collect(toGroupVector());
-		final GroupVector<GqElement, GqGroup> cNegativeZ = getCommitmentMatrix(negativeZ, zeros, commitmentKey);
+		final GroupVector<ZqElement, ZqGroup> zero = Stream.generate(zqGroup::getIdentity).limit(m).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> c_minus_z = getCommitmentMatrix(Z_neg, zero, ck);
 
 		// Compute c_D.
-		final GroupVector<GqElement, GqGroup> cAPowY = cA.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
-		final GroupVector<GqElement, GqGroup> cD = vectorEntryWiseProduct(cAPowY, cB);
+		final GroupVector<GqElement, GqGroup> c_A_y = c_A.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> c_D = vectorEntryWiseProduct(c_A_y, c_B);
 
 		// Pre-compute x^i for i=0..N used multiple times.
-		final GroupVector<ZqElement, ZqGroup> xPowers = precomputeXPowers(x, N);
+		final GroupVector<ZqElement, ZqGroup> x_vector = precomputeXPowers(x, N);
 
 		// Compute b.
-		final ZqElement b = computeProductB(N, y, xPowers, z, zqGroup);
+		final ZqElement b = computeProductB(N, y, x_vector, z, zqGroup);
 
 		// Compute pStatement.
-		final ProductStatement pStatement = new ProductStatement(vectorEntryWiseProduct(cD, cNegativeZ), b);
+		final ProductStatement pStatement = new ProductStatement(vectorEntryWiseProduct(c_D, c_minus_z), b);
 
 		// Verify product argument.
 		final Verifiable productVerif = productArgumentService.verifyProductArgument(pStatement, productArgument)
 				.addErrorMessage("Failed to verify Product Argument.");
 
 		// Compute ciphertext C. The vector x is computed previously as xPowers.
-		final ElGamalMultiRecipientCiphertext ciphertextC = getCiphertextVectorExponentiation(ciphertextsC, xPowers);
+		final ElGamalMultiRecipientCiphertext C = getCiphertextVectorExponentiation(C_vector, x_vector);
 
 		// Compute mStatement.
-		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(shuffledCiphertextsCPrime.toMatrix(m, n),
-				ciphertextC, cB);
+		final MultiExponentiationStatement mStatement = new MultiExponentiationStatement(C_prime.toMatrix(m, n), C, c_B);
 
 		final Verifiable multiVerif = multiExponentiationArgumentService.verifyMultiExponentiationArgument(mStatement, multiExponentiationArgument)
 				.addErrorMessage("Failed to verify MultiExponentiation Argument.");

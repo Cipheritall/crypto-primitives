@@ -60,7 +60,7 @@ class PermutationTest {
 	}
 
 	private TreeSet<Integer> computePermutationValues(Permutation permutation) {
-		return IntStream.range(0, permutation.getSize()).map(permutation::get).boxed().collect(Collectors.toCollection(TreeSet::new));
+		return IntStream.range(0, permutation.size()).map(permutation::get).boxed().collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ class PermutationTest {
 	void getSizeReturnsSize() {
 		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = permutationService.genPermutation(size);
-		assertEquals(size, permutation.getSize());
+		assertEquals(size, permutation.size());
 	}
 
 	@Test
@@ -98,7 +98,7 @@ class PermutationTest {
 		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = permutationService.genPermutation(size);
 
-		final int[] expectedArray = IntStream.range(0, permutation.getSize())
+		final int[] expectedArray = IntStream.range(0, permutation.size())
 				.map(permutation::get)
 				.toArray();
 

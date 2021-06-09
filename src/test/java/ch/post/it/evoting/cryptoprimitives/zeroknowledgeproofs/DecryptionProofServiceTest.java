@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +43,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
@@ -60,6 +68,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 class DecryptionProofServiceTest extends TestGroupSetup {
 
@@ -334,6 +344,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 	@Nested
 	@DisplayName("Verifying a decryption proof...")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifyDecryptionTest {
 
 		private ElGamalMultiRecipientCiphertext ciphertext;
@@ -478,7 +489,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			final DecryptionProof proof1 = service1.genDecryptionProof(c, keyPair, m, iAux);
 			final DecryptionProof proof2 = service2.genDecryptionProof(c, keyPair, m, Collections.emptyList());
 
-			final ElGamalMultiRecipientCiphertext cPrime = ElGamalMultiRecipientCiphertext.create(values.gEight, c.getPhis());
+			final ElGamalMultiRecipientCiphertext cPrime = ElGamalMultiRecipientCiphertext.create(values.gEight, c.getPhi());
 
 			assertFalse(service1.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof1, iAux));
 			assertFalse(service2.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof2, Collections.emptyList()));
@@ -546,10 +557,79 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			final DecryptionProof proof2 = service2.genDecryptionProof(c, keyPair, m, Collections.emptyList());
 
 			final List<String> iAuxPrime = new ArrayList<>(iAux);
-			iAuxPrime.add("prime");
+			iAuxPrime.add("primes");
 
 			assertFalse(service1.verifyDecryption(c, keyPair.getPublicKey(), m, proof1, iAuxPrime));
 			assertFalse(service2.verifyDecryption(c, keyPair.getPublicKey(), m, proof2, iAuxPrime));
+		}
+
+		private Stream<Arguments> jsonFileArgumentProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/zeroknowledgeproofs/verify-decryption.json");
+
+			return parametersList.stream().parallel().map(testParameters -> {
+				// Context.
+				final JsonData context = testParameters.getContext();
+				final BigInteger p = context.get("p", BigInteger.class);
+				final BigInteger q = context.get("q", BigInteger.class);
+				final BigInteger g = context.get("g", BigInteger.class);
+
+				final GqGroup gqGroup = new GqGroup(p, q, g);
+				final ZqGroup zqGroup = new ZqGroup(q);
+
+				final JsonData input = testParameters.getInput();
+
+				// Parse ciphertext parameters.
+				final JsonData ciphertextData = input.getJsonData("ciphertext");
+
+				final GqElement gamma = GqElement.create(ciphertextData.get("gamma", BigInteger.class), gqGroup);
+				final BigInteger[] phisAArray = ciphertextData.get("phis", BigInteger[].class);
+				final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElement.create(phiA, gqGroup)).collect(toList());
+				final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gamma, phi);
+
+				// Parse key pair parameters
+				final BigInteger[] pkArray = input.get("public_key", BigInteger[].class);
+				final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElement.create(skA, gqGroup)).collect(toList());
+				final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
+
+				// Parse message parameters
+				final BigInteger[] messageArray = input.get("message", BigInteger[].class);
+				final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElement.create(mA, gqGroup)).collect(toList());
+				final ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(messageElements);
+
+				// Parse decryption proof parameters
+				final JsonData proof = input.getJsonData("proof");
+
+				final ZqElement e = ZqElement.create(proof.get("e", BigInteger.class), zqGroup);
+
+				final BigInteger[] zArray = proof.get("z", BigInteger[].class);
+				final GroupVector<ZqElement, ZqGroup> z = Arrays.stream(zArray)
+						.map(zA -> ZqElement.create(zA, zqGroup))
+						.collect(toGroupVector());
+				final DecryptionProof decryptionProof = new DecryptionProof(e, z);
+
+				// Parse auxiliary information parameters
+				final String[] auxInformation = input.get("additional_information", String[].class);
+				final List<String> auxiliaryInformation = Arrays.asList(auxInformation);
+
+				// Parse output parameters
+				final JsonData output = testParameters.getOutput();
+
+				final Boolean result = output.get("verif_result", Boolean.class);
+
+				return Arguments.of(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation, result, testParameters.getDescription());
+			});
+		}
+
+		@ParameterizedTest()
+		@MethodSource("jsonFileArgumentProvider")
+		@DisplayName("with real values gives expected result")
+		void verifyDecryptionProofWithRealValues(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPublicKey publicKey,
+				final ElGamalMultiRecipientMessage message, final DecryptionProof decryptionProof, final List<String> auxiliaryInformation,
+				final boolean expected, final String description) {
+			final DecryptionProofService decryptionProofService = new DecryptionProofService(randomService, new HashService());
+			final boolean actual = assertDoesNotThrow(
+					() -> decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
+			assertEquals(expected, actual, String.format("assertion failed for: %s", description));
 		}
 	}
 }

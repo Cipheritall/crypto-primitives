@@ -41,6 +41,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  *
  * <p>Instances of this class are immutable. </p>
  */
+@SuppressWarnings("java:S117")
 public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
 	private final GroupVector<GqElement, GqGroup> publicKeyElements;
@@ -68,19 +69,18 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	 * @return a compressed public key with the first {@code length}-1 elements of the public key followed by the compressed computed element.
 	 */
 	public ElGamalMultiRecipientPublicKey compress(final int length) {
-
-		final int k = this.size();
-
 		checkArgument(0 < length, "The requested length for key compression must be strictly positive.");
-		checkArgument(length <= k, "The requested length for key compression must be at most the public key size.");
+		checkArgument(length <= this.size(), "The requested length for key compression must be at most the public key size.");
+		final int l = length;
 
-		final GqElement compressedKeyElement = this.stream()
-				.skip(length - 1L)
-				.reduce(this.getGroup().getIdentity(), GqElement::multiply);
+		final GqElement identity = this.getGroup().getIdentity();
+		final GqElement pk_prime = this.stream()
+				.skip(l - 1L)
+				.reduce(identity, GqElement::multiply);
 
-		final List<GqElement> keyElements = new LinkedList<>(this.publicKeyElements.subList(0, length - 1));
+		final List<GqElement> keyElements = new LinkedList<>(this.publicKeyElements.subList(0, l - 1));
 
-		keyElements.add(compressedKeyElement);
+		keyElements.add(pk_prime);
 
 		return new ElGamalMultiRecipientPublicKey(keyElements);
 	}

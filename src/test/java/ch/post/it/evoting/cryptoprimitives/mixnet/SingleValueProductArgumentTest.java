@@ -57,46 +57,46 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 		n = secureRandom.nextInt(UPPER_BOUND) + 2;
 		final SingleValueProductArgument singleValueProductArgument = new TestArgumentGenerator(gqGroup).genSingleValueProductArgument(n);
 
-		cd = singleValueProductArgument.getCd();
-		cLowerDelta = singleValueProductArgument.getCLowerDelta();
-		cUpperDelta = singleValueProductArgument.getCUpperDelta();
-		aTilde = singleValueProductArgument.getATilde();
-		bTilde = singleValueProductArgument.getBTilde();
-		rTilde = singleValueProductArgument.getRTilde();
-		sTilde = singleValueProductArgument.getSTilde();
+		cd = singleValueProductArgument.get_c_d();
+		cLowerDelta = singleValueProductArgument.get_c_delta();
+		cUpperDelta = singleValueProductArgument.get_c_Delta();
+		aTilde = singleValueProductArgument.get_a_tilde();
+		bTilde = singleValueProductArgument.get_b_tilde();
+		rTilde = singleValueProductArgument.get_r_tilde();
+		sTilde = singleValueProductArgument.get_s_tilde();
 	}
 
 	@Test
 	void testEquals() {
 		// Create singleValueProdArgument 1 == singleValueProdArgument 2 != singleValueProdArgument 3
 		SingleValueProductArgument singleValueProdArgument1 = new SingleValueProductArgument.Builder()
-				.withCd(cd)
-				.withCLowerDelta(cLowerDelta)
-				.withCUpperDelta(cUpperDelta)
-				.withATilde(aTilde)
-				.withBTilde(bTilde)
-				.withRTilde(rTilde)
-				.withSTilde(sTilde)
+				.with_c_d(cd)
+				.with_c_delta(cLowerDelta)
+				.with_c_Delta(cUpperDelta)
+				.with_a_tilde(aTilde)
+				.with_b_tilde(bTilde)
+				.with_r_tilde(rTilde)
+				.with_s_tilde(sTilde)
 				.build();
 
 		SingleValueProductArgument singleValueProdArgument2 = new SingleValueProductArgument.Builder()
-				.withCd(cd)
-				.withCLowerDelta(cLowerDelta)
-				.withCUpperDelta(cUpperDelta)
-				.withATilde(aTilde)
-				.withBTilde(bTilde)
-				.withRTilde(rTilde)
-				.withSTilde(sTilde)
+				.with_c_d(cd)
+				.with_c_delta(cLowerDelta)
+				.with_c_Delta(cUpperDelta)
+				.with_a_tilde(aTilde)
+				.with_b_tilde(bTilde)
+				.with_r_tilde(rTilde)
+				.with_s_tilde(sTilde)
 				.build();
 
 		SingleValueProductArgument singleValueProdArgument3 = new SingleValueProductArgument.Builder()
-				.withCd(gqGroupGenerator.otherElement(cd))
-				.withCLowerDelta(cLowerDelta)
-				.withCUpperDelta(cUpperDelta)
-				.withATilde(aTilde)
-				.withBTilde(bTilde)
-				.withRTilde(rTilde)
-				.withSTilde(sTilde)
+				.with_c_d(gqGroupGenerator.otherElement(cd))
+				.with_c_delta(cLowerDelta)
+				.with_c_Delta(cUpperDelta)
+				.with_a_tilde(aTilde)
+				.with_b_tilde(bTilde)
+				.with_r_tilde(rTilde)
+				.with_s_tilde(sTilde)
 				.build();
 
 		assertEquals(singleValueProdArgument1, singleValueProdArgument1);
@@ -114,13 +114,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 		@DisplayName("all initialized fields does not throw")
 		void singleValueProductBuilderValidFields() {
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(aTilde)
-					.withBTilde(bTilde)
-					.withRTilde(rTilde)
-					.withSTilde(sTilde);
+					.with_c_d(cd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(aTilde)
+					.with_b_tilde(bTilde)
+					.with_r_tilde(rTilde)
+					.with_s_tilde(sTilde);
 
 			assertDoesNotThrow(builder::build);
 		}
@@ -145,13 +145,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 				final ZqElement sTilde) {
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(aTilde)
-					.withBTilde(bTilde)
-					.withRTilde(rTilde)
-					.withSTilde(sTilde);
+					.with_c_d(cd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(aTilde)
+					.with_b_tilde(bTilde)
+					.with_r_tilde(rTilde)
+					.with_s_tilde(sTilde);
 
 			assertThrows(NullPointerException.class, builder::build);
 		}
@@ -162,13 +162,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 			final GqElement otherGroupCd = otherGqGroupGenerator.genNonIdentityMember();
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(otherGroupCd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(aTilde)
-					.withBTilde(bTilde)
-					.withRTilde(rTilde)
-					.withSTilde(sTilde);
+					.with_c_d(otherGroupCd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(aTilde)
+					.with_b_tilde(bTilde)
+					.with_r_tilde(rTilde)
+					.with_s_tilde(sTilde);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("cd, cLowerDelta, cUpperDelta must belong to the same group.", exception.getMessage());
@@ -180,13 +180,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 			final ZqElement otherGroupRTilde = otherZqGroupGenerator.genRandomZqElementMember();
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(aTilde)
-					.withBTilde(bTilde)
-					.withRTilde(otherGroupRTilde)
-					.withSTilde(sTilde);
+					.with_c_d(cd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(aTilde)
+					.with_b_tilde(bTilde)
+					.with_r_tilde(otherGroupRTilde)
+					.with_s_tilde(sTilde);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("aTilde, bTilde, rTilde, sTilde must belong to the same group.", exception.getMessage());
@@ -201,13 +201,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 			final ZqElement otherGroupSTilde = otherZqGroupGenerator.genRandomZqElementMember();
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(otherGroupATilde)
-					.withBTilde(otherGroupBTilde)
-					.withRTilde(otherGroupRTilde)
-					.withSTilde(otherGroupSTilde);
+					.with_c_d(cd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(otherGroupATilde)
+					.with_b_tilde(otherGroupBTilde)
+					.with_r_tilde(otherGroupRTilde)
+					.with_s_tilde(otherGroupSTilde);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("GqGroup and ZqGroup of argument inputs are not compatible.", exception.getMessage());
@@ -219,13 +219,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 			final GroupVector<ZqElement, ZqGroup> longerATilde = zqGroupGenerator.genRandomZqElementVector(n + 1);
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(longerATilde)
-					.withBTilde(bTilde)
-					.withRTilde(rTilde)
-					.withSTilde(sTilde);
+					.with_c_d(cd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(longerATilde)
+					.with_b_tilde(bTilde)
+					.with_r_tilde(rTilde)
+					.with_s_tilde(sTilde);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The vectors aTilde and bTilde must have the same size.", exception.getMessage());
@@ -238,13 +238,13 @@ class SingleValueProductArgumentTest extends TestGroupSetup {
 			final GroupVector<ZqElement, ZqGroup> shorterBTilde = zqGroupGenerator.genRandomZqElementVector(1);
 
 			final SingleValueProductArgument.Builder builder = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cLowerDelta)
-					.withCUpperDelta(cUpperDelta)
-					.withATilde(shorterATilde)
-					.withBTilde(shorterBTilde)
-					.withRTilde(rTilde)
-					.withSTilde(sTilde);
+					.with_c_d(cd)
+					.with_c_delta(cLowerDelta)
+					.with_c_Delta(cUpperDelta)
+					.with_a_tilde(shorterATilde)
+					.with_b_tilde(shorterBTilde)
+					.with_r_tilde(rTilde)
+					.with_s_tilde(sTilde);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The size of vectors aTilde and bTilde must be greater than or equal to 2.", exception.getMessage());

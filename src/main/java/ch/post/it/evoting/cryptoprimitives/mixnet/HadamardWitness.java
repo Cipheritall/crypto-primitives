@@ -23,12 +23,13 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@SuppressWarnings({"java:S100", "java:S116"})
 class HadamardWitness {
 
-	private final GroupMatrix<ZqElement, ZqGroup> matrixA;
-	private final GroupVector<ZqElement, ZqGroup> vectorB;
-	private final GroupVector<ZqElement, ZqGroup> exponentsR;
-	private final ZqElement exponentS;
+	private final GroupMatrix<ZqElement, ZqGroup> A;
+	private final GroupVector<ZqElement, ZqGroup> b;
+	private final GroupVector<ZqElement, ZqGroup> r;
+	private final ZqElement s;
 
 	/**
 	 * Constructs a {@code HadamardWitness} object.
@@ -53,39 +54,39 @@ class HadamardWitness {
 		checkNotNull(exponents);
 		checkNotNull(randomness);
 
-		this.matrixA = matrix;
-		this.vectorB = vector;
-		this.exponentsR = exponents;
-		this.exponentS = randomness;
+		this.A = matrix;
+		this.b = vector;
+		this.r = exponents;
+		this.s = randomness;
 
 		// Dimension checks
-		checkArgument(matrixA.numRows() == vectorB.size(),
+		checkArgument(A.numRows() == b.size(),
 				"The matrix A must have the same number of rows as the vector b has elements.");
-		checkArgument(matrixA.numColumns() == exponentsR.size(),
+		checkArgument(A.numColumns() == r.size(),
 				"The matrix A must have the same number of columns as the exponents r have elements.");
 
 		// Group checks
-		checkArgument(matrixA.getGroup().equals(vectorB.getGroup()),
+		checkArgument(A.getGroup().equals(b.getGroup()),
 				"The matrix A and the vector b must have the same group.");
-		checkArgument(matrixA.getGroup().equals(exponentsR.getGroup()),
+		checkArgument(A.getGroup().equals(r.getGroup()),
 				"The matrix A and the exponents r must have the same group.");
-		checkArgument(exponentsR.getGroup().equals(exponentS.getGroup()),
+		checkArgument(r.getGroup().equals(s.getGroup()),
 				"The exponents r and the exponent s must have the same group.");
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> getMatrixA() {
-		return matrixA;
+	GroupMatrix<ZqElement, ZqGroup> get_A() {
+		return A;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getVectorB() {
-		return vectorB;
+	GroupVector<ZqElement, ZqGroup> get_b() {
+		return b;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getExponentsR() {
-		return exponentsR;
+	GroupVector<ZqElement, ZqGroup> get_r() {
+		return r;
 	}
 
-	ZqElement getExponentS() {
-		return exponentS;
+	ZqElement get_s() {
+		return s;
 	}
 }

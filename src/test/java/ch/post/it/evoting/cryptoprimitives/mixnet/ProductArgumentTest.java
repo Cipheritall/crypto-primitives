@@ -48,7 +48,7 @@ class ProductArgumentTest extends TestGroupSetup {
 
 		final ProductArgument productArgument = argumentGenerator.genProductArgument(m, n);
 
-		commitmentB = productArgument.getCommitmentB().orElse(null);
+		commitmentB = productArgument.get_c_b().orElse(null);
 		hadamardArgument = productArgument.getHadamardArgument().orElse(null);
 		singleValueProductArgument = productArgument.getSingleValueProductArgument();
 	}

@@ -62,28 +62,28 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		final TestArgumentGenerator argumentGenerator = new TestArgumentGenerator(gqGroup);
 		final MultiExponentiationArgument multiExponentiationArgument = argumentGenerator.genMultiExponentiationArgument(m, n, l);
 
-		cA0 = multiExponentiationArgument.getcA0();
-		cBVector = multiExponentiationArgument.getcBVector();
-		EVector = multiExponentiationArgument.getEVector();
-		aVector = multiExponentiationArgument.getaVector();
-		r = multiExponentiationArgument.getR();
-		b = multiExponentiationArgument.getB();
-		s = multiExponentiationArgument.getS();
-		tau = multiExponentiationArgument.getTau();
+		cA0 = multiExponentiationArgument.getc_A_0();
+		cBVector = multiExponentiationArgument.get_c_B();
+		EVector = multiExponentiationArgument.get_E();
+		aVector = multiExponentiationArgument.get_a();
+		r = multiExponentiationArgument.get_r();
+		b = multiExponentiationArgument.get_b();
+		s = multiExponentiationArgument.get_s();
+		tau = multiExponentiationArgument.get_tau();
 	}
 
 	@Test
 	void builtWithAllSetDoesNotThrow() {
 		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		assertDoesNotThrow(() -> builder
-				.withcA0(cA0)
-				.withcBVector(cBVector)
-				.withEVector(EVector)
-				.withaVector(aVector)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau)
+				.with_c_A_0(cA0)
+				.with_c_B(cBVector)
+				.with_E(EVector)
+				.with_a(aVector)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau)
 				.build()
 		);
 	}
@@ -108,14 +108,14 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 			ZqElement s, ZqElement tau) {
 
 		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
-		builder.withcA0(cA0)
-				.withcBVector(cBVector)
-				.withEVector(EVector)
-				.withaVector(aVector)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau);
+		builder.with_c_A_0(cA0)
+				.with_c_B(cBVector)
+				.with_E(EVector)
+				.with_a(aVector)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau);
 		assertThrows(NullPointerException.class, builder::build);
 	}
 
@@ -124,14 +124,14 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		final GqElement otherGroupCA0 = otherGqGroupGenerator.genMember();
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
-		builder.withcA0(otherGroupCA0)
-				.withcBVector(cBVector)
-				.withEVector(EVector)
-				.withaVector(aVector)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau);
+		builder.with_c_A_0(otherGroupCA0)
+				.with_c_B(cBVector)
+				.with_E(EVector)
+				.with_a(aVector)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 		assertEquals("cA0, cBVector, EVector must belong to the same group.", exception.getMessage());
@@ -142,14 +142,14 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		final ZqElement otherGroupR = otherZqGroupGenerator.genRandomZqElementMember();
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
-		builder.withcA0(cA0)
-				.withcBVector(cBVector)
-				.withEVector(EVector)
-				.withaVector(aVector)
-				.withr(otherGroupR)
-				.withb(b)
-				.withs(s)
-				.withtau(tau);
+		builder.with_c_A_0(cA0)
+				.with_c_B(cBVector)
+				.with_E(EVector)
+				.with_a(aVector)
+				.with_r(otherGroupR)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 		assertEquals("aVector, r, b, s, tau, must belong to the same group.", exception.getMessage());
@@ -164,14 +164,14 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		final ZqElement otherGroupTau = otherZqGroupGenerator.genRandomZqElementMember();
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
-		builder.withcA0(cA0)
-				.withcBVector(cBVector)
-				.withEVector(EVector)
-				.withaVector(otherGroupAVector)
-				.withr(otherGroupR)
-				.withb(otherGroupB)
-				.withs(otherGroupS)
-				.withtau(otherGroupTau);
+		builder.with_c_A_0(cA0)
+				.with_c_B(cBVector)
+				.with_E(EVector)
+				.with_a(otherGroupAVector)
+				.with_r(otherGroupR)
+				.with_b(otherGroupB)
+				.with_s(otherGroupS)
+				.with_tau(otherGroupTau);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 		assertEquals("GqGroup and ZqGroup of argument inputs are not compatible.", exception.getMessage());
@@ -182,14 +182,14 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 		final GroupVector<GqElement, GqGroup> longerCBVector = gqGroupGenerator.genRandomGqElementVector(2 * m + 1);
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
-		builder.withcA0(cA0)
-				.withcBVector(longerCBVector)
-				.withEVector(EVector)
-				.withaVector(aVector)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau);
+		builder.with_c_A_0(cA0)
+				.with_c_B(longerCBVector)
+				.with_E(EVector)
+				.with_a(aVector)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 		assertEquals("The vectors cB and E must have the same size.", exception.getMessage());
@@ -202,14 +202,14 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 				.genRandomCiphertextVector(2 * m + 1, l);
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
-		builder.withcA0(cA0)
-				.withcBVector(longerCBVector)
-				.withEVector(longerEVector)
-				.withaVector(aVector)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau);
+		builder.with_c_A_0(cA0)
+				.with_c_B(longerCBVector)
+				.with_E(longerEVector)
+				.with_a(aVector)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau);
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 		assertEquals("cB and E must be of size 2 * m.", exception.getMessage());
