@@ -132,7 +132,12 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * @return the transpose of this matrix
 	 */
 	public GroupMatrix<E, G> transpose() {
-		return new GroupMatrix<>(IntStream.range(0, numColumns).mapToObj(this::getColumn).collect(toImmutableList()));
+		final int n = numColumns;
+		return new GroupMatrix<>(
+				IntStream.range(0, n)
+						.mapToObj(this::getColumn)
+						.collect(toImmutableList())
+		);
 	}
 
 	public int numRows() {
@@ -147,10 +152,11 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 * @return true if either matrix dimension is 0.
 	 */
 	public boolean isEmpty() {
-		return isEmpty(this.rows);
+		return this.numRows == 0 || this.numColumns == 0;
 	}
 
-	private boolean isEmpty(final ImmutableList<GroupVector<E, G>> matrix) {
+	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
+	boolean isEmpty(final ImmutableList<GroupVector<E, G>> matrix) {
 		return matrix.isEmpty() || matrix.get(0).isEmpty();
 	}
 
@@ -190,7 +196,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	/**
 	 * @return A flat stream of the matrix elements, row after row.
 	 */
-	public Stream<E> stream() {
+	public Stream<E> flatStream() {
 		return this.rowStream().flatMap(GroupVector::stream);
 	}
 
@@ -266,6 +272,17 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 */
 	public Integer getElementSize() {
 		return elementSize;
+	}
+
+	/**
+	 * Returns a matrix with the columns of this matrix, between the fromIdx, inclusive, to toIdx, exclusive.
+	 * If fromIdx and toIdx are equal, returns an empty matrix.
+	 */
+	public GroupMatrix<E, G> subColumns(final int fromIdx, final int toIdx) {
+		checkArgument(fromIdx >= 0);
+		checkArgument(fromIdx <= toIdx);
+		checkArgument(toIdx <= this.numColumns());
+		return GroupMatrix.fromColumns(this.transpose().rows.subList(fromIdx, toIdx));
 	}
 
 	@Override

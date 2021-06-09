@@ -242,14 +242,14 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		private MultiExponentiationArgument createArgument() {
 			return new MultiExponentiationArgument.Builder()
-					.withcA0(cA0)
-					.withcBVector(cB)
-					.withEVector(eVector)
-					.withaVector(aVector)
-					.withr(r)
-					.withb(b)
-					.withs(s)
-					.withtau(tau)
+					.with_c_A_0(cA0)
+					.with_c_B(cB)
+					.with_E(eVector)
+					.with_a(aVector)
+					.with_r(r)
+					.with_b(b)
+					.with_s(s)
+					.with_tau(tau)
 					.build();
 		}
 
@@ -371,11 +371,11 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			MultiExponentiationStatement statement = statementWitnessPair.getStatement();
 			MultiExponentiationWitness witness = statementWitnessPair.getWitness();
 
-			ElGamalMultiRecipientCiphertext computedC = statement.getC();
+			ElGamalMultiRecipientCiphertext computedC = statement.get_C();
 			ElGamalMultiRecipientCiphertext differentC = Generators.genWhile(
 					() -> elGamalGenerator.genRandomCiphertext(l), ciphertext -> ciphertext.equals(computedC));
 			MultiExponentiationStatement statementWithInvalidC = new MultiExponentiationStatement(
-					statement.getCMatrix(), differentC, statement.getcA());
+					statement.get_C_matrix(), differentC, statement.get_c_A());
 
 			assertThrowsIllegalArgumentExceptionWithMessage(
 					"The computed multi exponentiation ciphertext does not correspond to the one provided in the statement.",
@@ -388,7 +388,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 			MultiExponentiationStatement statement = statementWitnessPair.getStatement();
 			MultiExponentiationWitness witness = statementWitnessPair.getWitness();
 
-			GroupVector<GqElement, GqGroup> computeCommitmentToA = statement.getcA();
+			GroupVector<GqElement, GqGroup> computeCommitmentToA = statement.get_c_A();
 			GqElement firstElement = computeCommitmentToA.get(0);
 			GqElement differentFirstElement = Generators.genWhile(gqGroupGenerator::genMember, element -> element.equals(firstElement));
 
@@ -400,7 +400,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 									.skip(1)
 					).collect(toGroupVector());
 			MultiExponentiationStatement invalidStatement = new MultiExponentiationStatement(
-					statement.getCMatrix(), statement.getC(), differentCommitmentToA);
+					statement.get_C_matrix(), statement.get_C(), differentCommitmentToA);
 
 			assertThrowsIllegalArgumentExceptionWithMessage("The commitment provided does not correspond to the matrix A.",
 					() -> argumentService.getMultiExponentiationArgument(invalidStatement, witness));

@@ -58,6 +58,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Service to generate multi exponentiation arguments.
  */
+@SuppressWarnings("java:S117")
 final class MultiExponentiationArgumentService {
 
 	private final ElGamalMultiRecipientPublicKey pk;
@@ -127,99 +128,97 @@ final class MultiExponentiationArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> C_matrix = statement.get_C_matrix();
+		final ElGamalMultiRecipientCiphertext C = statement.get_C();
+		final GroupVector<GqElement, GqGroup> c_A = statement.get_c_A();
+		final GroupMatrix<ZqElement, ZqGroup> A = witness.get_A();
+		final GroupVector<ZqElement, ZqGroup> r_vector = witness.get_r();
+		final ZqElement rho = witness.get_rho();
+		final int m = statement.get_m();
+		final int n = statement.get_n();
+		final int l = C_matrix.isEmpty() ? 0 : C_matrix.getElementSize();
+		final int k_size = pk.size();
+		final int nu = ck.size();
+		final BigInteger q = this.gqGroup.getQ();
 
 		//Dimension checking
-		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
-		final ElGamalMultiRecipientCiphertext CCiphertext = statement.getC();
-		final GroupVector<GqElement, GqGroup> cA = statement.getcA();
-		final GroupMatrix<ZqElement, ZqGroup> AMatrix = witness.getA();
-		final GroupVector<ZqElement, ZqGroup> rVector = witness.getR();
-		final ZqElement rho = witness.getRho();
-
-		checkArgument(statement.getN() == witness.getDimensionN(), "Statement and witness do not have compatible n dimension.");
-		checkArgument(statement.getM() == witness.getDimensionM(), "Statement and witness do not have compatible m dimension.");
-		checkArgument(witness.getDimensionM() > 0, "The dimension m must be strictly positive.");
-		checkArgument(witness.getDimensionN() > 0, "The dimension n must be strictly positive.");
-		checkArgument(witness.getDimensionN() <= ck.size(),
-				"The number of rows of matrix A must be smaller or equal to the size of the commitment key.");
-		checkArgument(!CMatrix.isEmpty(), "The ciphertext matrix C must not be empty.");
+		checkArgument(statement.get_n() == witness.get_n(), "Statement and witness do not have compatible n dimension.");
+		checkArgument(statement.get_m() == witness.get_m(), "Statement and witness do not have compatible m dimension.");
+		checkArgument(witness.get_m() > 0, "The dimension m must be strictly positive.");
+		checkArgument(witness.get_n() > 0, "The dimension n must be strictly positive.");
+		checkArgument(witness.get_n() <= nu, "The number of rows of matrix A must be smaller or equal to the size of the commitment key.");
+		checkArgument(!C_matrix.isEmpty(), "The ciphertext matrix C must not be empty.");
 
 		//Group checking
 		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement must belong to the same group as the public key and commitment key.");
 		checkArgument(this.gqGroup.hasSameOrderAs(witness.getGroup()), "The witness must belong to a ZqGroup of order q.");
-		final BigInteger q = this.gqGroup.getQ();
-
-		final int m = statement.getM();
-		final int n = statement.getN();
-		final int l = CMatrix.getElementSize();
 
 		checkArgument(0 < l, "The ciphertexts must have at least 1 element.");
-		checkArgument(l <= pk.size(), "The ciphertexts must be smaller than the public key.");
+		checkArgument(l <= k_size, "The ciphertexts must be smaller than the public key.");
 
 		//Ensure that C is the result of the re-encryption and multi exponentiation of matrix C with exponents matrix A
-		final ElGamalMultiRecipientCiphertext computedCCiphertext = multiExponentiation(CMatrix, AMatrix, rho, m, l);
-		checkArgument(CCiphertext.equals(computedCCiphertext),
+		final ElGamalMultiRecipientCiphertext computedCCiphertext = multiExponentiation(C_matrix, A, rho, m, l);
+		checkArgument(C.equals(computedCCiphertext),
 				"The computed multi exponentiation ciphertext does not correspond to the one provided in the statement.");
 
 		//Ensure that cA is the commitment to matrix A
-		checkArgument(cA.equals(getCommitmentMatrix(AMatrix, rVector, ck)), "The commitment provided does not correspond to the matrix A.");
+		checkArgument(c_A.equals(getCommitmentMatrix(A, r_vector, ck)), "The commitment provided does not correspond to the matrix A.");
 
 		//Algorithm
-		//Generate a0, r0, bs, ss, taus,
-		final GroupVector<ZqElement, ZqGroup> a0 = randomService.genRandomVector(q, n);
-		final ZqElement r0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
-		final List<ZqElement> mutableBs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
-		final List<ZqElement> mutableSs = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
-		final List<ZqElement> mutableTaus = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		//Generate a_0, r_0, b, s, tau,
+		final GroupVector<ZqElement, ZqGroup> a_0 = randomService.genRandomVector(q, n);
+		final ZqElement r_0 = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
+		final List<ZqElement> b_mutable = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		final List<ZqElement> s_mutable = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
+		final List<ZqElement> tau_mutable = new ArrayList<>(randomService.genRandomVector(q, 2 * m));
 		final ZqElement zero = ZqElement.create(0, zqGroup);
-		mutableBs.set(m, zero);
-		mutableSs.set(m, zero);
-		mutableTaus.set(m, rho);
-		final GroupVector<ZqElement, ZqGroup> bVector = GroupVector.from(mutableBs);
-		final GroupVector<ZqElement, ZqGroup> sVector = GroupVector.from(mutableSs);
-		final GroupVector<ZqElement, ZqGroup> tauVector = GroupVector.from(mutableTaus);
+		b_mutable.set(m, zero);
+		s_mutable.set(m, zero);
+		tau_mutable.set(m, rho);
+		final GroupVector<ZqElement, ZqGroup> b_vector = GroupVector.from(b_mutable);
+		final GroupVector<ZqElement, ZqGroup> s_vector = GroupVector.from(s_mutable);
+		final GroupVector<ZqElement, ZqGroup> tau_vector = GroupVector.from(tau_mutable);
 
-		//Compute cA0
-		final GqElement cA0 = getCommitment(a0, r0, ck);
+		//Compute c_A_0
+		final GqElement c_A_0 = getCommitment(a_0, r_0, ck);
 
 		//Compute diagonal products
-		final GroupMatrix<ZqElement, ZqGroup> prependedAMatrix = AMatrix.prependColumn(a0);
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> diagonalProducts = getDiagonalProducts(CMatrix, prependedAMatrix);
+		final GroupMatrix<ZqElement, ZqGroup> A_prepended = A.prependColumn(a_0);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> D = getDiagonalProducts(C_matrix, A_prepended);
 
 		//Compute commitments to individual values of b
-		final GroupVector<GqElement, GqGroup> cBVector = IntStream.range(0, 2 * m)
-				.mapToObj(k -> getCommitment(GroupVector.of(bVector.get(k)), sVector.get(k), ck))
+		final GroupVector<GqElement, GqGroup> c_B = IntStream.range(0, 2 * m)
+				.mapToObj(k -> getCommitment(GroupVector.of(b_vector.get(k)), s_vector.get(k), ck))
 				.collect(toGroupVector());
 
 		//Compute re-encrypted diagonal products
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector =
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E =
 				IntStream.range(0, 2 * m)
 						.boxed()
 						.flatMap(k -> Stream.of(k)
-								.map(bVector::get)
+								.map(b_vector::get)
 								.map(gqGroup.getGenerator()::exponentiate)
-								.map(gPowBk -> constantMessage(gPowBk, l))
-								.map(gPowBkMessage -> getCiphertext(gPowBkMessage, tauVector.get(k), pk)
-										.multiply(diagonalProducts.get(k))))
+								.map(g_b_k -> constantMessage(g_b_k, l))
+								.map(g_b_k_vector -> getCiphertext(g_b_k_vector, tau_vector.get(k), pk).multiply(D.get(k))))
 						.collect(toGroupVector());
 
 		//Compute challenge hash
-		final byte[] hash = hashService.recursiveHash(
+		final byte[] x_bytes = hashService.recursiveHash(
 				HashableBigInteger.from(gqGroup.getP()),
 				HashableBigInteger.from(gqGroup.getQ()),
 				pk,
 				ck,
-				CMatrix,
-				CCiphertext,
-				cA,
-				cA0,
-				cBVector,
-				EVector
+				C_matrix,
+				C,
+				c_A,
+				c_A_0,
+				c_B,
+				E
 		);
-		final ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
+		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
 		//Compute as, r, b, s, tau
-		final ImmutableList<ZqElement> xPowI = LongStream.range(0, 2L * m)
+		final ImmutableList<ZqElement> xPowers = LongStream.range(0, 2L * m)
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toImmutableList());
@@ -229,53 +228,58 @@ final class MultiExponentiationArgumentService {
 		final GroupVector<ZqElement, ZqGroup> neutralVector = Stream.generate(() -> zero)
 				.limit(n)
 				.collect(toGroupVector());
-		final GroupVector<ZqElement, ZqGroup> aVector = IntStream.range(0, m + 1)
-				.mapToObj(i -> vectorScalarMultiplication(xPowI.get(i), prependedAMatrix.getColumn(i)))
+		final GroupVector<ZqElement, ZqGroup> a = IntStream.range(0, m + 1)
+				.mapToObj(i -> vectorScalarMultiplication(xPowers.get(i), A_prepended.getColumn(i)))
 				.reduce(neutralVector, MultiExponentiationArgumentService::vectorSum);
 
-		final GroupVector<ZqElement, ZqGroup> prependedrVector = rVector.prepend(r0);
+		final GroupVector<ZqElement, ZqGroup> r_vector_prepended = r_vector.prepend(r_0);
 		final ZqElement r = IntStream.range(0, m + 1)
-				.mapToObj(i -> xPowI.get(i).multiply(prependedrVector.get(i)))
+				.mapToObj(i -> xPowers.get(i).multiply(r_vector_prepended.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement b = IntStream.range(0, 2 * m)
-				.mapToObj(k -> xPowI.get(k).multiply(bVector.get(k)))
+				.mapToObj(k -> xPowers.get(k).multiply(b_vector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement s = IntStream.range(0, 2 * m)
-				.mapToObj(k -> xPowI.get(k).multiply(sVector.get(k)))
+				.mapToObj(k -> xPowers.get(k).multiply(s_vector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement tau = IntStream.range(0, 2 * m)
-				.mapToObj(k -> xPowI.get(k).multiply(tauVector.get(k)))
+				.mapToObj(k -> xPowers.get(k).multiply(tau_vector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		return builder
-				.withcA0(cA0)
-				.withcBVector(cBVector)
-				.withEVector(EVector)
-				.withaVector(aVector)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau)
+				.with_c_A_0(c_A_0)
+				.with_c_B(c_B)
+				.with_E(E)
+				.with_a(a)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau)
 				.build();
 	}
 
 	@VisibleForTesting
-	ElGamalMultiRecipientCiphertext multiExponentiation(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix,
-			final GroupMatrix<ZqElement, ZqGroup> AMatrix, final ZqElement rho, final int m, final int ciphertextSize) {
+	ElGamalMultiRecipientCiphertext multiExponentiation(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> C,
+			final GroupMatrix<ZqElement, ZqGroup> AMatrix, final ZqElement rho, final int m, final int l) {
 
-		final ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertext.neutralElement(ciphertextSize, gqGroup);
-		//Due to 0 indexing the index i+1 in the spec on the matrix A becomes index i here
+		final ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup);
+
 		final ElGamalMultiRecipientCiphertext multiExponentiationProduct = IntStream.range(0, m)
-				.mapToObj(i -> getCiphertextVectorExponentiation(CMatrix.getRow(i), AMatrix.getColumn(i)))
+				.mapToObj(i -> {
+					final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_i = C.getRow(i);
+					//Due to 0 indexing the index i+1 in the spec on the matrix A becomes index i here
+					final GroupVector<ZqElement, ZqGroup> a_i_plus_1 = AMatrix.getColumn(i);
+					return getCiphertextVectorExponentiation(C_i, a_i_plus_1);
+				})
 				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
 
-		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, ciphertextSize);
-		final ElGamalMultiRecipientCiphertext onesCiphertext = getCiphertext(ones, rho, pk);
-		return onesCiphertext.multiply(multiExponentiationProduct);
+		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessage.ones(gqGroup, l);
+		final ElGamalMultiRecipientCiphertext oneCiphertext = getCiphertext(one, rho, pk);
+		return oneCiphertext.multiply(multiExponentiationProduct);
 	}
 
 	/**
@@ -310,7 +314,7 @@ final class MultiExponentiationArgumentService {
 				"The ciphertexts matrix must have as many columns as the exponents matrix has rows.");
 		checkArgument(ciphertexts.numRows() + 1 == exponents.numColumns(),
 				"The exponents matrix must have one more column than the ciphertexts matrix has rows.");
-		checkArgument(ciphertexts.getElementSize() <= this.pk.size(),
+		checkArgument(ciphertexts.getElementSize() <= pk.size(),
 				"There must be at least the same number of key elements than ciphertexts' phis.");
 
 		// Group checking.
@@ -318,13 +322,15 @@ final class MultiExponentiationArgumentService {
 		checkArgument(ciphertexts.getGroup().hasSameOrderAs(exponents.getGroup()),
 				"The exponents group must have the order of the ciphertexts group.");
 
+		//Variable reassignment
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
+		final GroupMatrix<ZqElement, ZqGroup> A = exponents;
+		final int m = C.numRows();
+		final int l = C.getElementSize();
+
 		// Algorithm.
-
-		final int m = ciphertexts.numRows();
-		final int l = ciphertexts.get(0, 0).size();
-
 		// Corresponds to the dk of the specifications.
-		final ElGamalMultiRecipientCiphertext ciphertextMultiplicationIdentity = ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup);
+		final ElGamalMultiRecipientCiphertext d_k = ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup);
 
 		// Compute the diagonal products D.
 		return IntStream.range(0, 2 * m)
@@ -342,11 +348,11 @@ final class MultiExponentiationArgumentService {
 					return IntStream.range(lowerBound, upperBound)
 							.mapToObj(i -> {
 								final int j = (k - m) + i + 1;
-								final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextRowI = ciphertexts.getRow(i);
-								final GroupVector<ZqElement, ZqGroup> exponentsColumnJ = exponents.getColumn(j);
-								return ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(ciphertextRowI, exponentsColumnJ);
+								final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_i = C.getRow(i);
+								final GroupVector<ZqElement, ZqGroup> a_j = A.getColumn(j);
+								return getCiphertextVectorExponentiation(C_i, a_j);
 							})
-							.reduce(ciphertextMultiplicationIdentity, ElGamalMultiRecipientCiphertext::multiply);
+							.reduce(d_k, ElGamalMultiRecipientCiphertext::multiply);
 				})
 				.collect(toGroupVector());
 	}
@@ -368,72 +374,73 @@ final class MultiExponentiationArgumentService {
 		checkArgument(statement.getGroup().equals(argument.getGroup()), "Statement and argument must belong to the same group.");
 
 		//Size checking
-		checkArgument(statement.getM() == argument.getM(), "m dimension doesn't match.");
-		checkArgument(statement.getN() == argument.getN(), "n dimension doesn't match.");
-		checkArgument(statement.getL() == argument.getL(), "l dimension doesn't match.");
+		checkArgument(statement.get_m() == argument.get_m(), "m dimension doesn't match.");
+		checkArgument(statement.get_n() == argument.get_n(), "n dimension doesn't match.");
+		checkArgument(statement.get_l() == argument.get_l(), "l dimension doesn't match.");
 
 		//Extract variables from statement and argument
-		int m = statement.getM();
-		int l = statement.getL();
-		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix = statement.getCMatrix();
-		final ElGamalMultiRecipientCiphertext C = statement.getC();
-		final GroupVector<GqElement, GqGroup> cA = statement.getcA();
-
-		final GqElement cA0 = argument.getcA0();
-		final GroupVector<GqElement, GqGroup> cBVector = argument.getcBVector();
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector = argument.getEVector();
-		final GroupVector<ZqElement, ZqGroup> aVector = argument.getaVector();
-		final ZqElement r = argument.getR();
-		final ZqElement b = argument.getB();
-		final ZqElement s = argument.getS();
-		final ZqElement tau = argument.getTau();
+		int m = statement.get_m();
+		int l = statement.get_l();
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> C_matrix = statement.get_C_matrix();
+		final ElGamalMultiRecipientCiphertext C = statement.get_C();
+		final GroupVector<GqElement, GqGroup> c_A = statement.get_c_A();
+		final GqElement c_A_0 = argument.getc_A_0();
+		final GroupVector<GqElement, GqGroup> c_B = argument.get_c_B();
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = argument.get_E();
+		final GroupVector<ZqElement, ZqGroup> a = argument.get_a();
+		final ZqElement r = argument.get_r();
+		final ZqElement b = argument.get_b();
+		final ZqElement s = argument.get_s();
+		final ZqElement tau = argument.get_tau();
+		final BigInteger p = this.gqGroup.getP();
+		final BigInteger q = this.gqGroup.getQ();
 
 		//Algorithm
-		final byte[] hash = hashService.recursiveHash(
-				HashableBigInteger.from(this.gqGroup.getP()),
-				HashableBigInteger.from(this.gqGroup.getQ()),
-				this.pk,
-				this.ck,
-				CMatrix,
+		final byte[] x_bytes = hashService.recursiveHash(
+				HashableBigInteger.from(p),
+				HashableBigInteger.from(q),
+				pk,
+				ck,
+				C_matrix,
 				C,
-				cA,
-				cA0,
-				cBVector,
-				EVector);
+				c_A,
+				c_A_0,
+				c_B,
+				E);
 
 		//Hash value is guaranteed to be smaller than q
-		final ZqElement x = ZqElement.create(byteArrayToInteger(hash), zqGroup);
+		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
-		final Verifiable verifCbm = create(() -> cBVector.get(m).equals(gqGroup.getIdentity()), "cB_m must equal one.");
-		final Verifiable verifEm = create(() -> EVector.get(m).equals(C), "E_m must equal C.");
+		final Verifiable verifCbm = create(() -> c_B.get(m).equals(gqGroup.getIdentity()), "cB_m must equal one.");
+		final Verifiable verifEm = create(() -> E.get(m).equals(C), "E_m must equal C.");
 
-		final Memoizer<ZqElement> xPowI = new Memoizer<>(i -> x.exponentiate(BigInteger.valueOf(i)));
+		final Memoizer<ZqElement> xPowers = new Memoizer<>(i -> x.exponentiate(BigInteger.valueOf(i)));
 
-		final GqElement prodCa = prodExp(cA.prepend(cA0), xPowI);
-		final GqElement commA = getCommitment(aVector, r, ck);
+		final GqElement prodCa = prodExp(c_A.prepend(c_A_0), xPowers);
+		final GqElement commA = getCommitment(a, r, ck);
 		final Verifiable verifA = create(() -> prodCa.equals(commA), "product Ca must equal commitment A.");
 
-		final GqElement prodCb = prodExp(cBVector, xPowI);
+		final GqElement prodCb = prodExp(c_B, xPowers);
 		final GqElement commB = getCommitment(GroupVector.of(b), s, ck);
 		final Verifiable verifB = create(() -> prodCb.equals(commB), "product Cb must equal commitment B.");
 
-		final ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, EVector.size())
+		final ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, E.size())
 				.boxed()
 				.flatMap(i -> Stream.of(i)
-						.map(EVector::get)
-						.map(Ek -> Ek.exponentiate(xPowI.apply(i))))
+						.map(E::get)
+						.map(E_k -> E_k.exponentiate(xPowers.apply(i))))
 				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
 		final ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
 				.map(gqGroup.getGenerator()::exponentiate)
-				.map(gPowB -> constantMessage(gPowB, l))
-				.map(gPowBMessage -> getCiphertext(gPowBMessage, tau, pk))
+				.map(g_b -> constantMessage(g_b, l))
+				.map(g_b_vector -> getCiphertext(g_b_vector, tau, pk))
 				.collect(onlyElement());
 		final ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
 				.boxed()
-				.flatMap(j -> Stream.of(j)
-						.map(i -> xPowI.apply(m - i - 1))
-						.map(xExponentiated -> vectorScalarMultiplication(xExponentiated, aVector))
-						.map(powers -> getCiphertextVectorExponentiation(CMatrix.getRow(j), powers)))
+				.flatMap(i -> Stream.of(i)
+						.map(__ -> xPowers.apply(m - i - 1))
+						.map(x_m_minus_i_minus_1 -> vectorScalarMultiplication(x_m_minus_i_minus_1, a))
+						.map(powers -> getCiphertextVectorExponentiation(C_matrix.getRow(i), powers)))
 				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
 		final Verifiable verifEC = create(() -> prodE.equals(encryptedGb.multiply(prodC)),
 				"product E must equal ciphertext product of Gb and product C.");

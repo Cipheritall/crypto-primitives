@@ -28,10 +28,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 /**
  * Represents a statement used for the calculation of a product argument.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ProductStatement {
 
-	private final GroupVector<GqElement, GqGroup> commitments;
-	private final ZqElement product;
+	private final GroupVector<GqElement, GqGroup> c_A;
+	private final ZqElement b;
 	private final int m;
 	private final GqGroup group;
 
@@ -40,30 +41,30 @@ class ProductStatement {
 	 * <p>
 	 * Both - the commitments and the product - must be non null and have the same order <i>q</i>.
 	 *
-	 * @param commitments <b><i>c</i></b><sub>A</sub>, a vector of {@link GqElement}s
-	 * @param product     <i>b</i>, a {@link ZqElement}
+	 * @param c_A <b><i>c</i></b><sub>A</sub>, a vector of {@link GqElement}s
+	 * @param b     <i>b</i>, a {@link ZqElement}
 	 */
-	ProductStatement(final GroupVector<GqElement, GqGroup> commitments, final ZqElement product) {
-		checkNotNull(commitments);
-		checkNotNull(product);
-		checkArgument(commitments.getGroup().hasSameOrderAs(product.getGroup()),
+	ProductStatement(final GroupVector<GqElement, GqGroup> c_A, final ZqElement b) {
+		checkNotNull(c_A);
+		checkNotNull(b);
+		checkArgument(c_A.getGroup().hasSameOrderAs(b.getGroup()),
 				"The commitments and the product must have the same order q.");
 
-		this.commitments = commitments;
-		this.product = product;
-		this.m = commitments.size();
-		this.group = commitments.getGroup();
+		this.c_A = c_A;
+		this.b = b;
+		this.m = c_A.size();
+		this.group = c_A.getGroup();
 	}
 
-	GroupVector<GqElement, GqGroup> getCommitments() {
-		return commitments;
+	GroupVector<GqElement, GqGroup> get_c_A() {
+		return c_A;
 	}
 
-	ZqElement getProduct() {
-		return product;
+	ZqElement get_b() {
+		return b;
 	}
 
-	int getM() {
+	int get_m() {
 		return this.m;
 	}
 
@@ -80,11 +81,11 @@ class ProductStatement {
 			return false;
 		}
 		final ProductStatement that = (ProductStatement) o;
-		return commitments.equals(that.commitments) && product.equals(that.product);
+		return c_A.equals(that.c_A) && b.equals(that.b);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(commitments, product);
+		return Objects.hash(c_A, b);
 	}
 }

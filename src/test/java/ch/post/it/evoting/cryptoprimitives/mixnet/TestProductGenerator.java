@@ -34,11 +34,11 @@ class TestProductGenerator {
 	}
 
 	static ProductStatement getProductStatement(final ProductWitness witness, final CommitmentKey commitmentKey) {
-		GroupMatrix<ZqElement, ZqGroup> matrixA = witness.getMatrix();
-		GroupVector<ZqElement, ZqGroup> exponentsR = witness.getExponents();
+		GroupMatrix<ZqElement, ZqGroup> matrixA = witness.get_A();
+		GroupVector<ZqElement, ZqGroup> exponentsR = witness.get_r();
 		GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
 		ZqElement one = ZqElement.create(BigInteger.ONE, matrixA.getGroup());
-		ZqElement productB = matrixA.stream().reduce(one, ZqElement::multiply);
+		ZqElement productB = matrixA.flatStream().reduce(one, ZqElement::multiply);
 		return new ProductStatement(commitmentsA, productB);
 	}
 }

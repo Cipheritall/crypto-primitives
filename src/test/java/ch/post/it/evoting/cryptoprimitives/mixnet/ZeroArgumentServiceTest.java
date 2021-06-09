@@ -511,14 +511,14 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with Ca commitments not equal to commitment matrix of A throws IllegalArgumentException")
 		void getZeroArgDiffCaCommitments() {
-			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();
+			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.get_c_A();
 
 			// Generate a different commitment.
 			final GroupVector<GqElement, GqGroup> otherCommitments = Generators
 					.genWhile(() -> gqGroupGenerator.genRandomGqElementVector(m), commitments -> commitments.equals(commitmentsA));
 
-			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
-			final ZeroStatement otherStatement = new ZeroStatement(otherCommitments, commitmentsB, zeroStatement.getY());
+			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.get_c_B();
+			final ZeroStatement otherStatement = new ZeroStatement(otherCommitments, commitmentsB, zeroStatement.get_y());
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.getZeroArgument(otherStatement, zeroWitness));
@@ -528,14 +528,14 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with Cb commitments not equal to commitment matrix of B throws IllegalArgumentException")
 		void getZeroArgDiffCbCommitments() {
-			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.getCommitmentsB();
+			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.get_c_B();
 
 			// Generate a different commitment.
 			GroupVector<GqElement, GqGroup> otherCommitments = Generators
 					.genWhile(() -> gqGroupGenerator.genRandomGqElementVector(m), commitments -> commitments.equals(commitmentsB));
 
-			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.getCommitmentsA();
-			final ZeroStatement otherStatement = new ZeroStatement(commitmentsA, otherCommitments, zeroStatement.getY());
+			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.get_c_A();
+			final ZeroStatement otherStatement = new ZeroStatement(commitmentsA, otherCommitments, zeroStatement.get_y());
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.getZeroArgument(otherStatement, zeroWitness));
@@ -615,14 +615,14 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			final ZeroArgument.Builder zeroArgumentBuilder = new ZeroArgument.Builder();
 			zeroArgumentBuilder
-					.withCA0(cA0)
-					.withCBm(cBm)
-					.withCd(cd)
-					.withAPrime(aPrime)
-					.withBPrime(bPrime)
-					.withRPrime(rPrime)
-					.withSPrime(sPrime)
-					.withTPrime(tPrime);
+					.with_c_A_0(cA0)
+					.with_c_B_m(cBm)
+					.with_c_d(cd)
+					.with_a_prime(aPrime)
+					.with_b_prime(bPrime)
+					.with_r_prime(rPrime)
+					.with_s_prime(sPrime)
+					.with_t_prime(tPrime);
 			final ZeroArgument simpleZeroArgument = zeroArgumentBuilder.build();
 
 			// PublicKey and commitmentKey.
@@ -685,11 +685,11 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
-			when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
-			when(zeroStatement.getCommitmentsA().getGroup()).thenReturn(gqGroup);
+			when(zeroArgument.get_c_d().getGroup()).thenReturn(gqGroup);
+			when(zeroStatement.get_c_A().getGroup()).thenReturn(gqGroup);
 
-			when(zeroArgument.getCd().size()).thenReturn(1);
-			when(zeroStatement.getCommitmentsA().size()).thenReturn(2);
+			when(zeroArgument.get_c_d().size()).thenReturn(1);
+			when(zeroStatement.get_c_A().size()).thenReturn(2);
 
 			IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument));
@@ -702,8 +702,8 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
-			when(zeroArgument.getCd().getGroup()).thenReturn(gqGroup);
-			when(otherGroupStatement.getCommitmentsA().getGroup()).thenReturn(GroupTestData.getDifferentGqGroup(gqGroup));
+			when(zeroArgument.get_c_d().getGroup()).thenReturn(gqGroup);
+			when(otherGroupStatement.get_c_A().getGroup()).thenReturn(GroupTestData.getDifferentGqGroup(gqGroup));
 
 			IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));

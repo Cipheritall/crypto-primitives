@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
@@ -40,6 +41,8 @@ public interface HashableList extends Hashable {
 
 		// The copy has to be done outside of the lambda, otherwise it will be made only when #toHashableForm is called.
 		final ImmutableList<? extends Hashable> immutableList = ImmutableList.copyOf(list);
+		checkArgument(!immutableList.isEmpty(), "The list must not be empty.");
+
 		return () -> immutableList;
 	}
 }

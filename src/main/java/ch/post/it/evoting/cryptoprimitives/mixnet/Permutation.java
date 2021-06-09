@@ -64,7 +64,7 @@ class Permutation {
 	/**
 	 * @return the size of this permutation, i.e. the upperbound of values represented in this permutation.
 	 */
-	int getSize() {
+	int size() {
 		return this.size;
 	}
 

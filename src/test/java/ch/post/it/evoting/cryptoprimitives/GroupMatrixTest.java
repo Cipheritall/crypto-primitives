@@ -281,9 +281,9 @@ class GroupMatrixTest {
 		final GroupMatrix<TestGroupElement, TestGroup> matrix = GroupMatrix.fromRows(matrixElements);
 
 		final int totalElements = numRows * numColumns;
-		assertEquals(totalElements, matrix.stream().count());
+		assertEquals(totalElements, matrix.flatStream().count());
 
-		final List<TestGroupElement> flatMatrix = matrix.stream().collect(Collectors.toList());
+		final List<TestGroupElement> flatMatrix = matrix.flatStream().collect(Collectors.toList());
 		final int i = numRows - 1;
 		final int j = numColumns - 1;
 		// Index in new list is: i * numColumns + j

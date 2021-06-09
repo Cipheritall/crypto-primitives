@@ -16,8 +16,10 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,15 @@ class HashableListTest {
 				.collect(Collectors.toList());
 
 		assertEquals(expected, toHashableFormListAddedElement);
+	}
+
+	@Test
+	@DisplayName("cannot be created from an empty list")
+	void hashableListFromEmptyListThrows() {
+		final List<HashableString> emptyList = Collections.emptyList();
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> HashableList.from(emptyList));
+		assertEquals("The list must not be empty.", exception.getMessage());
 	}
 
 }

@@ -39,16 +39,26 @@ class PermutationService {
 	 * @return a Permutation object representing an individual permutation.
 	 */
 	Permutation genPermutation(final int size) {
-		checkArgument(size > 0);
+		final int N = size;
+		checkArgument(N > 0);
 
-		final int[] psi = IntStream.range(0, size).toArray();
-		for (int i = 0; i < size; i++) {
-			int offset = this.randomService.genRandomInteger(BigInteger.valueOf((long) size - i)).intValueExact();
-			int tmp = psi[i];
-			psi[i] = psi[i + offset];
-			psi[i + offset] = tmp;
+		final int[] pi = IntStream.range(0, N).toArray();
+		for (int i = 0; i < N; i++) {
+			int offset = genRandomInteger(N - i);
+			int tmp = pi[i];
+			pi[i] = pi[i + offset];
+			pi[i + offset] = tmp;
 		}
 
-		return new Permutation(psi);
+		return new Permutation(pi);
+	}
+
+	/*
+	* Generates a random integer with an int bound.
+	* */
+	private int genRandomInteger(final int bound) {
+		final BigInteger boundAsBigInteger = BigInteger.valueOf(bound);
+		final BigInteger randomValue = this.randomService.genRandomInteger(boundAsBigInteger);
+		return randomValue.intValueExact(); //It is guaranteed to be in the int range as the bound is an int
 	}
 }

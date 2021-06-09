@@ -145,15 +145,15 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		void setup() {
 			witness = generateHadamardWitness(n, m, zqGroup);
 
-			matrix = witness.getMatrixA();
-			vector = witness.getVectorB();
-			exponents = witness.getExponentsR();
-			randomness = witness.getExponentS();
+			matrix = witness.get_A();
+			vector = witness.get_b();
+			exponents = witness.get_r();
+			randomness = witness.get_s();
 
 			statement = generateHadamardStatement(witness, commitmentKey);
 
-			commitmentsA = statement.getCommitmentsA();
-			commitmentB = statement.getCommitmentB();
+			commitmentsA = statement.get_c_A();
+			commitmentB = statement.get_c_b();
 		}
 
 		@Test
@@ -334,14 +334,14 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 			// Create the expected ZeroArgument
 			ZeroArgument zeroArgument = new ZeroArgument.Builder()
-					.withCA0(gqFive)
-					.withCBm(gqOne)
-					.withCd(GroupVector.of(gqFour, gqFour, gqNine, gqNine, gqOne, gqThree, gqOne))
-					.withAPrime(GroupVector.of(zqTwo, zqZero))
-					.withBPrime(GroupVector.of(zqOne, zqOne))
-					.withRPrime(zqOne)
-					.withSPrime(zqFour)
-					.withTPrime(zqOne)
+					.with_c_A_0(gqFive)
+					.with_c_B_m(gqOne)
+					.with_c_d(GroupVector.of(gqFour, gqFour, gqNine, gqNine, gqOne, gqThree, gqOne))
+					.with_a_prime(GroupVector.of(zqTwo, zqZero))
+					.with_b_prime(GroupVector.of(zqOne, zqOne))
+					.with_r_prime(zqOne)
+					.with_s_prime(zqFour)
+					.with_t_prime(zqOne)
 					.build();
 
 			// Create the expected HadamardArgument
@@ -404,23 +404,23 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with bad values for cUpperB returns false")
 		void verifyHadamardArgumentWithBad_cUpperB() {
-			GroupVector<GqElement, GqGroup> cUpperB = argument.getCommitmentsB();
+			GroupVector<GqElement, GqGroup> cUpperB = argument.get_c_B();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
 			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
-			HadamardArgument badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
+			HadamardArgument badArgument = new HadamardArgument(badcUpperB, argument.get_zeroArgument());
 
 			final VerificationResult verificationResult = hadamardArgumentService.verifyHadamardArgument(statement, badArgument).verify();
 			assertFalse(verificationResult.isVerified());
 			String expectedError = String
-					.format("cUpperB.get(0) %s must equal cA.get(0) %s and cUpperB.get(m - 1) %s must equal cLowerB %s", badcUpperB0,
-							statement.getCommitmentsA().get(0), cUpperB.get(m - 1), statement.getCommitmentB());
+					.format("c_B_0 %s must equal c_A_0 %s and c_B_m_minus_1 %s must equal c_b %s", badcUpperB0,
+							statement.get_c_A().get(0), cUpperB.get(m - 1), statement.get_c_b());
 			assertEquals(expectedError, verificationResult.getErrorMessages().getFirst());
 
 			int m = cUpperB.size();
 			GqElement badcUpperBmMinusOne = cUpperB.get(m - 1).multiply(gqGroup.getGenerator());
 			badcUpperB = GroupVector.from(new ArrayList<>(cUpperB).subList(0, m - 1)).append(badcUpperBmMinusOne);
-			badArgument = new HadamardArgument(badcUpperB, argument.getZeroArgument());
+			badArgument = new HadamardArgument(badcUpperB, argument.get_zeroArgument());
 
 			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
 			HashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());
@@ -431,19 +431,19 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with bad values for ZeroArgument returns false")
 		void verifyHadamardArgumentWithBadZeroArgument() {
-			ZeroArgument zeroArgument = argument.getZeroArgument();
-			GqElement badcA0 = zeroArgument.getCA0().multiply(gqGroup.getGenerator());
+			ZeroArgument zeroArgument = argument.get_zeroArgument();
+			GqElement badcA0 = zeroArgument.get_c_A_0().multiply(gqGroup.getGenerator());
 			ZeroArgument badZeroArgument = new ZeroArgument.Builder()
-					.withCA0(badcA0)
-					.withCBm(zeroArgument.getCBm())
-					.withCd(zeroArgument.getCd())
-					.withAPrime(zeroArgument.getAPrime())
-					.withBPrime(zeroArgument.getBPrime())
-					.withRPrime(zeroArgument.getRPrime())
-					.withSPrime(zeroArgument.getSPrime())
-					.withTPrime(zeroArgument.getTPrime())
+					.with_c_A_0(badcA0)
+					.with_c_B_m(zeroArgument.get_c_B_m())
+					.with_c_d(zeroArgument.get_c_d())
+					.with_a_prime(zeroArgument.get_a_prime())
+					.with_b_prime(zeroArgument.get_b_prime())
+					.with_r_prime(zeroArgument.get_r_prime())
+					.with_s_prime(zeroArgument.get_s_prime())
+					.with_t_prime(zeroArgument.get_t_prime())
 					.build();
-			HadamardArgument badArgument = new HadamardArgument(argument.getCommitmentsB(), badZeroArgument);
+			HadamardArgument badArgument = new HadamardArgument(argument.get_c_B(), badZeroArgument);
 
 			//Need to remove 0 as this can lead to a valid proof even though we expect invalid
 			HashService hashService = TestHashService.create(BigInteger.ONE, gqGroup.getQ());

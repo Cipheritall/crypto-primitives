@@ -20,6 +20,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 /**
  * Creates commitment keys.
  */
+@SuppressWarnings("java:S117")
 public class CommitmentKeyService {
 
 	private static final String HASH_CONSTANT = "commitmentKey";
@@ -55,30 +56,36 @@ public class CommitmentKeyService {
 	 * @return the created commitment key.
 	 */
 	CommitmentKey getVerifiableCommitmentKey(final int numberOfElements, final GqGroup gqGroup) {
-
 		checkNotNull(gqGroup);
-		checkArgument(canGenerateKey(numberOfElements, gqGroup), "The desired number of commitment elements must be in the range (0, q - 3]");
+
+		final int nu = numberOfElements;
+		final BigInteger p = gqGroup.getP();
+		final BigInteger q = gqGroup.getQ();
+		final BigInteger g = gqGroup.getGenerator().getValue();
+
+		checkArgument(canGenerateKey(nu, gqGroup), "The desired number of commitment elements must be in the range (0, q - 3]");
 
 		int count = 0;
 		int i = 0;
 
 		// Using a Set to prevent duplicates.
-		final Set<BigInteger> v = new LinkedHashSet<>();
+		// A LinkedHashSet has predicable iteration order, which is the order of insertion
+		final LinkedHashSet<BigInteger> v = new LinkedHashSet<>();
 
 		final Predicate<BigInteger> validElement = w -> !w.equals(BigInteger.ZERO)
 				&& !w.equals(BigInteger.ONE)
-				&& !w.equals(gqGroup.getGenerator().getValue())
+				&& !w.equals(g)
 				&& !v.contains(w);
 
-		while (count <= numberOfElements) {
+		while (count <= nu) {
 
 			final BigInteger u = ConversionService.byteArrayToInteger(hashService.recursiveHash(
-					HashableBigInteger.from(gqGroup.getQ()),
+					HashableBigInteger.from(q),
 					HashableString.from(HASH_CONSTANT),
 					HashableBigInteger.from(BigInteger.valueOf(i)),
 					HashableBigInteger.from(BigInteger.valueOf(count))));
 
-			final BigInteger w = u.modPow(BigInteger.valueOf(2), gqGroup.getP());
+			final BigInteger w = u.modPow(BigInteger.valueOf(2), p);
 
 			if (validElement.test(w)) {
 				v.add(w);
@@ -88,8 +95,10 @@ public class CommitmentKeyService {
 
 		}
 
-		final List<GqElement> commitmentKeyElements = v.stream().map(e -> GqElement.create(e, gqGroup)).collect(Collectors.toList());
+		final List<GqElement> v_elements = v.stream().map(e -> GqElement.create(e, gqGroup)).collect(Collectors.toList());
 
-		return new CommitmentKey(commitmentKeyElements.get(0), commitmentKeyElements.subList(1, commitmentKeyElements.size()));
+		final GqElement h = v_elements.get(0);
+		final List<GqElement> g_vector = v_elements.subList(1, v_elements.size());
+		return new CommitmentKey(h, g_vector);
 	}
 }

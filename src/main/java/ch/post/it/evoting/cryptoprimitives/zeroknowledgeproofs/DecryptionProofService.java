@@ -22,12 +22,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
@@ -48,6 +49,7 @@ import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@SuppressWarnings("java:S117")
 public class DecryptionProofService {
 
 	private final ElGamalService elGamalService = new ElGamalService();
@@ -68,19 +70,22 @@ public class DecryptionProofService {
 	 * @param base     γ ∈ G<sub>q</sub>. Not null.
 	 * @return an image (y<sub>0</sub>, ..., y<sub>2l-1</sub>).
 	 */
-	public static GroupVector<GqElement, GqGroup> computePhiDecryption(final GroupVector<ZqElement, ZqGroup> preImage, final GqElement base) {
+	static GroupVector<GqElement, GqGroup> computePhiDecryption(final GroupVector<ZqElement, ZqGroup> preImage, final GqElement base) {
 		checkNotNull(preImage);
 		checkNotNull(base);
 		checkArgument(preImage.getGroup().hasSameOrderAs(base.getGroup()), "The preImage and base should have the same group order.");
 
+		final GroupVector<ZqElement, ZqGroup> x = preImage;
+		final GqElement gamma = base;
+
 		final GqElement g = base.getGroup().getGenerator();
 
-		final GroupVector<GqElement, GqGroup> image = Stream.concat(
-				preImage.stream().map(g::exponentiate),
-				preImage.stream().map(base::exponentiate))
+		final GroupVector<GqElement, GqGroup> y = Stream.concat(
+				x.stream().map(g::exponentiate),
+				x.stream().map(gamma::exponentiate))
 				.collect(toGroupVector());
 
-		return GroupVector.from(image);
+		return GroupVector.from(y);
 	}
 
 	/**
@@ -99,16 +104,15 @@ public class DecryptionProofService {
 	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null. Can be empty.
 	 * @return a decryption proof.
 	 */
-	public DecryptionProof genDecryptionProof(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientKeyPair keyPair,
+	DecryptionProof genDecryptionProof(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientKeyPair keyPair,
 			final ElGamalMultiRecipientMessage message, final List<String> auxiliaryInformation) {
-		@SuppressWarnings("squid:S00117")
 		final ElGamalMultiRecipientCiphertext C = checkNotNull(ciphertext);
 		checkNotNull(keyPair);
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
 		final ElGamalMultiRecipientPublicKey pk = keyPair.getPublicKey();
 		final ElGamalMultiRecipientMessage m = checkNotNull(message);
 		checkNotNull(auxiliaryInformation);
-		ImmutableList<Hashable> iAux = auxiliaryInformation.stream().map(HashableString::from).collect(ImmutableList.toImmutableList());
+		final List<String> i_aux = auxiliaryInformation;
 
 		// Context.
 		final GqGroup gqGroup = ciphertext.getGroup();
@@ -131,17 +135,21 @@ public class DecryptionProofService {
 		final GroupVector<ZqElement, ZqGroup> b = randomService.genRandomVector(q, l);
 		final GroupVector<GqElement, GqGroup> c = computePhiDecryption(b, gamma);
 		final ImmutableList<Hashable> f = ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
-		final ElGamalMultiRecipientPublicKey pkPrime = pk.compress(l);
-		final GroupVector<GqElement, GqGroup> phis = C.getPhis();
+		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
+		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-				pkPrime.stream(),
-				IntStream.range(0, l).mapToObj(i -> phis.get(i).multiply(m.get(i).inverse())))
+				pk_prime.stream(),
+				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).inverse())))
 				.collect(toGroupVector());
-		final HashableList hAux = getHashElementList("DecryptionProof", phis, m, iAux);
-		final BigInteger eValue = byteArrayToInteger(hashService.recursiveHash(HashableList.from(f), y, c, hAux));
-		final ZqElement e = ZqElement.create(eValue, ZqGroup.sameOrderAs(gqGroup));
-		final ElGamalMultiRecipientPrivateKey skPrime = sk.compress(l);
-		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(skPrime.stream().collect(toGroupVector()), e));
+		final HashableList h_aux = Streams.concat(Stream.of("DecryptionProof").map(HashableString::from),
+				Stream.of(phi),
+				Stream.of(m),
+				i_aux.stream().map(HashableString::from))
+				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final BigInteger e_value = byteArrayToInteger(hashService.recursiveHash(HashableList.from(f), y, c, h_aux));
+		final ZqElement e = ZqElement.create(e_value, ZqGroup.sameOrderAs(gqGroup));
+		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
+		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(sk_prime.stream().collect(toGroupVector()), e));
 
 		return new DecryptionProof(e, z);
 	}
@@ -171,7 +179,7 @@ public class DecryptionProofService {
 		final ElGamalMultiRecipientMessage m = checkNotNull(message);
 		final DecryptionProof ez = checkNotNull(decryptionProof);
 		checkNotNull(auxiliaryInformation);
-		final ImmutableList<Hashable> iAux = auxiliaryInformation.stream().map(HashableString::from).collect(ImmutableList.toImmutableList());
+		final List<String> i_aux = auxiliaryInformation;
 
 		// Cross-checks
 		checkArgument(allEqual(Stream.of((GroupVectorElement<GqGroup>) C, pk, m), GroupVectorElement::getGroup),
@@ -189,25 +197,29 @@ public class DecryptionProofService {
 		final ZqElement e = ez.getE();
 		final GroupVector<ZqElement, ZqGroup> z = ez.getZ();
 		final GqElement gamma = C.getGamma();
-		final GroupVector<GqElement, GqGroup> phis = C.getPhis();
+		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
 		final int l = C.size();
 
 		// Algorithm.
 		final GroupVector<GqElement, GqGroup> x = computePhiDecryption(z, gamma);
 		final ImmutableList<Hashable> f = ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
-		final ElGamalMultiRecipientPublicKey pkPrime = pk.compress(l);
+		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-				pkPrime.stream(),
-				IntStream.range(0, l).mapToObj(i -> phis.get(i).multiply(m.get(i).inverse())))
+				pk_prime.stream(),
+				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).inverse())))
 				.collect(toGroupVector());
-		final GroupVector<GqElement, GqGroup> cPrime = IntStream.range(0, 2 * l)
+		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, 2 * l)
 				.mapToObj(i -> x.get(i).multiply(y.get(i).exponentiate(e.negate())))
 				.collect(toGroupVector());
-		final HashableList hAux = getHashElementList("DecryptionProof", phis, m, iAux);
-		final byte[] h = hashService.recursiveHash(HashableList.from(f), y, cPrime, hAux);
-		final BigInteger ePrime = byteArrayToInteger(h);
+		final HashableList h_aux = Streams.concat(Stream.of("DecryptionProof").map(HashableString::from),
+				Stream.of(phi),
+				Stream.of(m),
+				i_aux.stream().map(HashableString::from))
+				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final byte[] h = hashService.recursiveHash(HashableList.from(f), y, c_prime, h_aux);
+		final BigInteger e_prime = byteArrayToInteger(h);
 
-		return (e.getValue().equals(ePrime));
+		return (e.getValue().equals(e_prime));
 	}
 
 	/**
@@ -242,18 +254,5 @@ public class DecryptionProofService {
 		checkArgument(vector.getGroup().equals(scalar.getGroup()), "The scalar must be of the same group than the vector.");
 
 		return vector.stream().map(scalar::multiply).collect(toGroupVector());
-	}
-
-	private HashableList getHashElementList(final String id, final GroupVector<GqElement, GqGroup> phis,
-			final ElGamalMultiRecipientMessage m,
-			final ImmutableList<Hashable> iAux) {
-		final ArrayList<Hashable> hAuxElements = new ArrayList<>();
-		hAuxElements.add(HashableString.from(id));
-		hAuxElements.add(phis);
-		hAuxElements.add(m);
-		if (!iAux.isEmpty()) {
-			hAuxElements.add(HashableList.from(iAux));
-		}
-		return HashableList.from(hAuxElements);
 	}
 }

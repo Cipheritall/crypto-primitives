@@ -28,10 +28,11 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  * Represents the statement for the shuffle argument, consisting of a ciphertexts vector <b>C</b> and a shuffled and re-encrypted ciphertexts vector
  * <b>C'</b>.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ShuffleStatement {
 
-	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
-	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
+	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C;
+	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime;
 
 	private final int N;
 	private final GqGroup group;
@@ -47,42 +48,42 @@ class ShuffleStatement {
 	 *     <li>both vectors must be part of the same group</li>
 	 * </ul>
 	 *
-	 * @param ciphertexts         <b>C</b>, the ciphertexts as a {@link GroupVector}. All ciphertexts must have the same size.
-	 * @param shuffledCiphertexts <b>C'</b>, the shuffled and re-encrypted ciphertexts as a {@link GroupVector}. All shuffled ciphertexts must
+	 * @param C         <b>C</b>, the ciphertexts as a {@link GroupVector}. All ciphertexts must have the same size.
+	 * @param C_prime <b>C'</b>, the shuffled and re-encrypted ciphertexts as a {@link GroupVector}. All shuffled ciphertexts must
 	 *                            have the same size.
 	 */
-	ShuffleStatement(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts) {
+	ShuffleStatement(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C,
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime) {
 
-		checkNotNull(ciphertexts);
-		checkNotNull(shuffledCiphertexts);
+		checkNotNull(C);
+		checkNotNull(C_prime);
 
 		// Dimensions checking.
-		checkArgument(!ciphertexts.isEmpty(), "The ciphertexts vector cannot be empty.");
-		checkArgument(!shuffledCiphertexts.isEmpty(), "The shuffled ciphertexts vector cannot be empty.");
-		checkArgument(ciphertexts.size() == shuffledCiphertexts.size(), "The ciphertexts and shuffled ciphertexts vectors must have the same size.");
-		checkArgument(ciphertexts.getElementSize() == shuffledCiphertexts.getElementSize(),
+		checkArgument(!C.isEmpty(), "The ciphertexts vector cannot be empty.");
+		checkArgument(!C_prime.isEmpty(), "The shuffled ciphertexts vector cannot be empty.");
+		checkArgument(C.size() == C_prime.size(), "The ciphertexts and shuffled ciphertexts vectors must have the same size.");
+		checkArgument(C.getElementSize() == C_prime.getElementSize(),
 				"The ciphertexts and shuffled ciphertexts must have the same size.");
 
 		// Cross group checking.
-		checkArgument(ciphertexts.getGroup().equals(shuffledCiphertexts.getGroup()),
+		checkArgument(C.getGroup().equals(C_prime.getGroup()),
 				"The ciphertexts and shuffled ciphertexts must be part of the same group.");
 
-		this.ciphertexts = ciphertexts;
-		this.shuffledCiphertexts = shuffledCiphertexts;
-		this.N = ciphertexts.size();
-		this.group = ciphertexts.getGroup();
+		this.C = C;
+		this.C_prime = C_prime;
+		this.N = C.size();
+		this.group = C.getGroup();
 	}
 
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getCiphertexts() {
-		return ciphertexts;
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_C() {
+		return C;
 	}
 
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getShuffledCiphertexts() {
-		return shuffledCiphertexts;
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_C_prime() {
+		return C_prime;
 	}
 
-	int getN() {
+	int get_N() {
 		return N;
 	}
 
@@ -99,11 +100,11 @@ class ShuffleStatement {
 			return false;
 		}
 		final ShuffleStatement that = (ShuffleStatement) o;
-		return ciphertexts.equals(that.ciphertexts) && shuffledCiphertexts.equals(that.shuffledCiphertexts);
+		return C.equals(that.C) && C_prime.equals(that.C_prime);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(ciphertexts, shuffledCiphertexts);
+		return Objects.hash(C, C_prime);
 	}
 }

@@ -33,10 +33,10 @@ class MatrixUtils {
 	 * @return an array [m, n] with m the number of rows, n the number of columns and m x n = N, where m <= n.
 	 */
 	static int[] getMatrixDimensions(final int vectorSize) {
-		checkArgument(vectorSize >= 2, "The size to decompose must be greater than or equal to 2.");
+		final int N = vectorSize;
+		checkArgument(N >= 2, "The size to decompose must be greater than or equal to 2.");
 
 		final LongFunction<Integer> floorSquareRoot = x -> (int) Math.floor(Math.sqrt(x));
-		final int N = vectorSize;
 
 		int m = 1;
 		int n = N;

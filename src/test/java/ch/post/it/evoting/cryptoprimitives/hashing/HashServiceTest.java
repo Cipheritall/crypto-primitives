@@ -239,13 +239,13 @@ class HashServiceTest {
 
 	@Test
 	void testRecursiveHashOfEmptyListThrows() {
-		HashableList list = hashableListOf();
+		HashableList list = ImmutableList::of;
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
 
 	@Test
 	void testRecursiveHashOfNestedEmptyListThrows() {
-		HashableList emptyList = hashableListOf();
+		HashableList emptyList = ImmutableList::of;
 		HashableList list = hashableListOf(HashableBigInteger.from(BigInteger.ONE), emptyList);
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}

@@ -15,17 +15,16 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -37,6 +36,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@SuppressWarnings("squid:S00117")
 public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 	private final DecryptionProofService decryptionProofService;
@@ -68,27 +68,28 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		checkNotNull(keyPair);
 		checkNotNull(auxiliaryInformation);
 
-		@SuppressWarnings("squid:S00117")
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
+		List<String> i_aux = auxiliaryInformation;
+		final int l = C.getElementSize();
+		final int k = sk.size();
 
 		// Cross-checks
 		checkArgument(!C.isEmpty(), "There must be at least one ciphertext.");
-		checkArgument(C.getElementSize() <= sk.size(), "The ciphertexts must be at most as long as the keys in the key pair.");
+		checkArgument(l <= k, "The ciphertexts must be at most as long as the keys in the key pair.");
 		checkArgument(C.getGroup().equals(keyPair.getGroup()), "The ciphertexts and the key pair must have the same group.");
 
-		@SuppressWarnings("squid:S00117")
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> CPrime = C.stream()
-				.map(c -> c.getPartialDecryption(sk))
-				.collect(GroupVector.toGroupVector());
-		final ImmutableList<ElGamalMultiRecipientMessage> M = CPrime.stream()
-				.map(c -> c.stream().skip(1).collect(Collectors.toList()))
-				.map(ElGamalMultiRecipientMessage::new)
-				.collect(ImmutableList.toImmutableList());
-		final GroupVector<DecryptionProof, ZqGroup> pi = IntStream.range(0, C.size())
-				.mapToObj(i -> decryptionProofService.genDecryptionProof(C.get(i), keyPair, M.get(i), auxiliaryInformation))
-				.collect(GroupVector.toGroupVector());
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = C.stream()
+				.map(c_i -> c_i.getPartialDecryption(sk))
+				.collect(toGroupVector());
+		final GroupVector<DecryptionProof, ZqGroup> pi_dec = IntStream.range(0, C.size())
+				.mapToObj(i -> {
+					final ElGamalMultiRecipientCiphertext c_i = C.get(i);
+					final ElGamalMultiRecipientMessage phi_prime = new ElGamalMultiRecipientMessage(C_prime.get(i).getPhi());
+					return decryptionProofService.genDecryptionProof(c_i, keyPair, phi_prime, i_aux);
+				})
+				.collect(toGroupVector());
 
-		return new VerifiableDecryption(CPrime, pi);
+		return new VerifiableDecryption(C_prime, pi_dec);
 	}
 }

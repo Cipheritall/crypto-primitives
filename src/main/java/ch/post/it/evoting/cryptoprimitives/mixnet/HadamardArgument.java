@@ -28,9 +28,10 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 public class HadamardArgument implements HashableList {
 
-	private final GroupVector<GqElement, GqGroup> commitmentsB;
+	private final GroupVector<GqElement, GqGroup> c_b;
 	private final ZeroArgument zeroArgument;
 
 	private final int m;
@@ -46,38 +47,38 @@ public class HadamardArgument implements HashableList {
 	 *     <li>the commitments and zero argument must belong to the same group</li>
 	 * </ul>
 	 *
-	 * @param commitmentsB a {@link GroupVector} of {@link GqElement}s. Non-null.
+	 * @param c_b a {@link GroupVector} of {@link GqElement}s. Non-null.
 	 * @param zeroArgument a {@link ZeroArgument}. Non-null.
 	 */
-	public HadamardArgument(final GroupVector<GqElement, GqGroup> commitmentsB, final ZeroArgument zeroArgument) {
-		checkNotNull(commitmentsB);
+	public HadamardArgument(final GroupVector<GqElement, GqGroup> c_b, final ZeroArgument zeroArgument) {
+		checkNotNull(c_b);
 		checkNotNull(zeroArgument);
 
-		checkArgument(commitmentsB.size() == zeroArgument.getM(),
+		checkArgument(c_b.size() == zeroArgument.get_m(),
 				"The commitments B must be of the same size as the m of the zero argument.");
-		checkArgument(commitmentsB.getGroup().equals(zeroArgument.getGroup()),
+		checkArgument(c_b.getGroup().equals(zeroArgument.getGroup()),
 				"The commitments B must have the same group order as the zero argument.");
 
-		this.commitmentsB = commitmentsB;
+		this.c_b = c_b;
 		this.zeroArgument = zeroArgument;
-		this.m = commitmentsB.size();
-		this.n = zeroArgument.getN();
-		this.group = commitmentsB.getGroup();
+		this.m = c_b.size();
+		this.n = zeroArgument.get_n();
+		this.group = c_b.getGroup();
 	}
 
-	GroupVector<GqElement, GqGroup> getCommitmentsB() {
-		return commitmentsB;
+	GroupVector<GqElement, GqGroup> get_c_B() {
+		return c_b;
 	}
 
-	ZeroArgument getZeroArgument() {
+	ZeroArgument get_zeroArgument() {
 		return zeroArgument;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
 	}
 
@@ -94,16 +95,16 @@ public class HadamardArgument implements HashableList {
 			return false;
 		}
 		final HadamardArgument that = (HadamardArgument) o;
-		return commitmentsB.equals(that.commitmentsB) && zeroArgument.equals(that.zeroArgument);
+		return c_b.equals(that.c_b) && zeroArgument.equals(that.zeroArgument);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(commitmentsB, zeroArgument);
+		return Objects.hash(c_b, zeroArgument);
 	}
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(commitmentsB, zeroArgument);
+		return ImmutableList.of(c_b, zeroArgument);
 	}
 }

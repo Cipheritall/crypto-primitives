@@ -142,10 +142,10 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
 
 			witness = genProductWitness(n, m, zqGroupGenerator);
-			exponentsR = witness.getExponents();
+			exponentsR = witness.get_r();
 			statement = getProductStatement(witness, commitmentKey);
-			commitmentsA = statement.getCommitments();
-			productB = statement.getProduct();
+			commitmentsA = statement.get_c_A();
+			productB = statement.get_b();
 
 			productArgumentService = new ProductArgumentService(randomService, hashService, publicKey, commitmentKey);
 		}
@@ -226,11 +226,11 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductArgument argument = assertDoesNotThrow(() -> productArgumentService.getProductArgument(smallStatement, smallWitness));
 
 			// Check that the output is the same as with getSingleValueProductArgument
-			assertFalse(argument.getCommitmentB().isPresent());
+			assertFalse(argument.get_c_b().isPresent());
 			assertFalse(argument.getHadamardArgument().isPresent());
 
-			SingleValueProductStatement sStatement = new SingleValueProductStatement(smallStatement.getCommitments().get(0),
-					smallStatement.getProduct());
+			SingleValueProductStatement sStatement = new SingleValueProductStatement(smallStatement.get_c_A().get(0),
+					smallStatement.get_b());
 			assertTrue(new SingleValueProductArgumentService(randomService, hashService, publicKey, commitmentKey)
 					.verifySingleValueProductArgument(sStatement, argument.getSingleValueProductArgument()).verify().isVerified());
 		}
@@ -327,19 +327,19 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 			// Calculate c_A and b
 			GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrix, exponents, productCommitmentKey);
-			ZqElement product = matrix.stream().reduce(zqOne, ZqElement::multiply);
+			ZqElement product = matrix.flatStream().reduce(zqOne, ZqElement::multiply);
 
 			ProductStatement productStatement = new ProductStatement(commitmentsA, product);
 
 			// Create the expected zeroArgument
-			ZeroArgument expectedZeroArgument = new ZeroArgument.Builder().withCA0(gqFive)
-					.withCBm(gqOne)
-					.withCd(GroupVector.of(gqNine, gqFive, gqThree, gqThree, gqOne, gqFour, gqFour))
-					.withAPrime(GroupVector.of(zqTwo, zqTwo))
-					.withBPrime(GroupVector.of(zqOne, zqTwo))
-					.withRPrime(zqZero)
-					.withSPrime(zqOne)
-					.withTPrime(zqOne)
+			ZeroArgument expectedZeroArgument = new ZeroArgument.Builder().with_c_A_0(gqFive)
+					.with_c_B_m(gqOne)
+					.with_c_d(GroupVector.of(gqNine, gqFive, gqThree, gqThree, gqOne, gqFour, gqFour))
+					.with_a_prime(GroupVector.of(zqTwo, zqTwo))
+					.with_b_prime(GroupVector.of(zqOne, zqTwo))
+					.with_r_prime(zqZero)
+					.with_s_prime(zqOne)
+					.with_t_prime(zqOne)
 					.build();
 
 			// Create the Hadamard product argument's expected c_(B_0), c_(B_1), c_(B_2)
@@ -349,13 +349,13 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 			// Create the expected SingleValueProductArgument
 			SingleValueProductArgument expectedSingleValueProductArgument = new SingleValueProductArgument.Builder()
-					.withCd(gqFive)
-					.withCLowerDelta(gqThree)
-					.withCUpperDelta(gqNine)
-					.withATilde(GroupVector.of(zqFour, zqZero))
-					.withBTilde(GroupVector.of(zqFour, zqZero))
-					.withRTilde(zqThree)
-					.withSTilde(zqZero)
+					.with_c_d(gqFive)
+					.with_c_delta(gqThree)
+					.with_c_Delta(gqNine)
+					.with_a_tilde(GroupVector.of(zqFour, zqZero))
+					.with_b_tilde(GroupVector.of(zqFour, zqZero))
+					.with_r_tilde(zqThree)
+					.with_s_tilde(zqZero)
 					.build();
 
 			// Create the expected ProductArgument
@@ -417,7 +417,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
 
 			ProductArgument argumentWithNullCb = spy(longArgument);
-			when(argumentWithNullCb.getCommitmentB()).thenReturn(Optional.empty());
+			when(argumentWithNullCb.get_c_b()).thenReturn(Optional.empty());
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.verifyProductArgument(longStatement, argumentWithNullCb));
 			assertEquals("The product argument must contain a commitment b for m > 1.", exception.getMessage());
@@ -442,7 +442,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@MethodSource("statementArgumentProvider")
 		@DisplayName("with statement and argument having different groups throws an IllegalArgumentException")
 		void verifyProductArgumentWithStatementAndArgumentFromDifferentGroups(final ProductStatement statement, final ProductArgument argument) {
-			final int m = argument.getM();
+			final int m = argument.get_m();
 			ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
 			CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(mu);
 			ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
@@ -456,7 +456,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@MethodSource("statementArgumentProvider")
 		@DisplayName("with statement and argument having different sizes throws an IllegalArgumentException")
 		void verifyProductArgumentWithStatementAndArgumentOfDifferentSizes(final ProductStatement statement, final ProductArgument argument) {
-			final int m = argument.getM();
+			final int m = argument.get_m();
 			ProductWitness otherWitness = genProductWitness(n, m + 1, zqGroupGenerator);
 			ProductStatement otherStatement = getProductStatement(otherWitness, commitmentKey);
 
@@ -481,7 +481,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			ProductStatement longStatement = getProductStatement(longWitness, commitmentKey);
 			ProductArgument longArgument = productArgumentService.getProductArgument(longStatement, longWitness);
 
-			GqElement badCommitment = longArgument.getCommitmentB().orElseThrow(() -> new IllegalArgumentException("Missing commitmentB"));
+			GqElement badCommitment = longArgument.get_c_b().orElseThrow(() -> new IllegalArgumentException("Missing commitmentB"));
 			badCommitment = badCommitment.multiply(gqGroup.getGenerator());
 			ProductArgument badArgument = new ProductArgument(badCommitment,
 					longArgument.getHadamardArgument().orElseThrow(() -> new IllegalArgumentException("Missing HadamardArgument")),
@@ -502,13 +502,13 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 			HadamardArgument hadamardArgument = longArgument.getHadamardArgument()
 					.orElseThrow(() -> new IllegalArgumentException("Missing HadamardArgument"));
-			GroupVector<GqElement, GqGroup> cUpperB = hadamardArgument.getCommitmentsB();
+			GroupVector<GqElement, GqGroup> cUpperB = hadamardArgument.get_c_B();
 
 			GqElement badcUpperB0 = cUpperB.get(0).multiply(gqGroup.getGenerator());
 			GroupVector<GqElement, GqGroup> badcUpperB = cUpperB.stream().skip(1).collect(toGroupVector()).prepend(badcUpperB0);
-			HadamardArgument badHadamardArgument = new HadamardArgument(badcUpperB, hadamardArgument.getZeroArgument());
+			HadamardArgument badHadamardArgument = new HadamardArgument(badcUpperB, hadamardArgument.get_zeroArgument());
 			ProductArgument badArgument = new ProductArgument(
-					longArgument.getCommitmentB().orElseThrow(() -> new IllegalArgumentException("Missing commitmentB")),
+					longArgument.get_c_b().orElseThrow(() -> new IllegalArgumentException("Missing commitmentB")),
 					badHadamardArgument, longArgument.getSingleValueProductArgument());
 
 			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(longStatement, badArgument).verify();
@@ -521,21 +521,21 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with an incorrect SingleValueProductArgument returns false")
 		void verifyProductArgumentWithBadSingleValueProductArgument(final ProductStatement statement, final ProductArgument argument) {
 			SingleValueProductArgument sArgument = argument.getSingleValueProductArgument();
-			ZqElement rTilde = sArgument.getRTilde();
+			ZqElement rTilde = sArgument.get_r_tilde();
 
 			ZqElement badRTilde = rTilde.add(ZqElement.create(BigInteger.ONE, zqGroup));
 			SingleValueProductArgument badSArgument = new SingleValueProductArgument.Builder()
-					.withCd(sArgument.getCd())
-					.withCLowerDelta(sArgument.getCLowerDelta())
-					.withCUpperDelta(sArgument.getCUpperDelta())
-					.withATilde(sArgument.getATilde())
-					.withBTilde(sArgument.getBTilde())
-					.withRTilde(badRTilde)
-					.withSTilde(sArgument.getSTilde())
+					.with_c_d(sArgument.get_c_d())
+					.with_c_delta(sArgument.get_c_delta())
+					.with_c_Delta(sArgument.get_c_Delta())
+					.with_a_tilde(sArgument.get_a_tilde())
+					.with_b_tilde(sArgument.get_b_tilde())
+					.with_r_tilde(badRTilde)
+					.with_s_tilde(sArgument.get_s_tilde())
 					.build();
 			ProductArgument badArgument;
-			if (argument.getCommitmentB().isPresent() && argument.getHadamardArgument().isPresent()) {
-				badArgument = new ProductArgument(argument.getCommitmentB().get(), argument.getHadamardArgument().get(), badSArgument);
+			if (argument.get_c_b().isPresent() && argument.getHadamardArgument().isPresent()) {
+				badArgument = new ProductArgument(argument.get_c_b().get(), argument.getHadamardArgument().get(), badSArgument);
 			} else {
 				badArgument = new ProductArgument(badSArgument);
 			}

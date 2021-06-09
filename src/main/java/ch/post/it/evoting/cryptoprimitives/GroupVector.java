@@ -46,8 +46,7 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  * @param <G> the group type the elements of the list belong to.
  */
 public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> extends ForwardingList<E>
-		implements HashableList,
-		RandomAccess, GroupVectorElement<G> {
+		implements HashableList, RandomAccess, GroupVectorElement<G> {
 
 	private final ImmutableList<E> elements;
 	private final G group;
@@ -187,13 +186,17 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 		checkArgument(numRows > 0, "The number of rows must be positive.");
 		checkArgument(numColumns > 0, "The number of columns must be positive.");
 
+		final GroupVector<E, G> v = this;
+		final int m = numRows;
+		final int n = numColumns;
+
 		// Ensure N = nm
-		checkArgument(this.size() == (numRows * numColumns), "The vector of ciphertexts must be decomposable into m rows and n columns.");
+		checkArgument(this.size() == (m * n), "The vector of ciphertexts must be decomposable into m rows and n columns.");
 
 		// Create the matrix
-		return IntStream.range(0, numRows)
-				.mapToObj(i -> IntStream.range(0, numColumns)
-						.mapToObj(j -> this.get(numColumns * i + j))
+		return IntStream.range(0, m)
+				.mapToObj(i -> IntStream.range(0, n)
+						.mapToObj(j -> v.get(n * i + j))
 						.collect(Collectors.toList()))
 				.collect(Collectors.collectingAndThen(Collectors.toList(), GroupMatrix::fromRows));
 	}
@@ -206,6 +209,13 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 	 */
 	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> Collector<E, ?, GroupVector<E, G>> toGroupVector() {
 		return Collectors.collectingAndThen(toImmutableList(), GroupVector::from);
+	}
+
+	/*
+		Equivalent to java.util.List.subList
+	 */
+	public GroupVector<E, G> subVector(final int fromIndex, final int toIndex) {
+		return GroupVector.from(this.elements.subList(fromIndex, toIndex));
 	}
 
 	@Override

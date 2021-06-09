@@ -27,10 +27,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Represents the witness for a single value product argument, consisting of a list of elements and a randomness.
  */
+@SuppressWarnings("java:S100")
 class SingleValueProductWitness {
 
-	private final GroupVector<ZqElement, ZqGroup> elements;
-	private final ZqElement randomness;
+	private final GroupVector<ZqElement, ZqGroup> a;
+	private final ZqElement r;
 
 	/**
 	 * Instantiates a single value product witness object.
@@ -38,23 +39,23 @@ class SingleValueProductWitness {
 	 * <p>The elements and randomness passed as arguments must be non null and have the same {@link ZqGroup}.
 	 * The list of elements must not contain null elements.</p>
 	 *
-	 * @param elements   (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
-	 * @param randomness r, the randomness
+	 * @param a   (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
+	 * @param r r, the randomness
 	 */
-	SingleValueProductWitness(final GroupVector<ZqElement, ZqGroup> elements, final ZqElement randomness) {
-		this.elements = checkNotNull(elements);
-		this.randomness = checkNotNull(randomness);
+	SingleValueProductWitness(final GroupVector<ZqElement, ZqGroup> a, final ZqElement r) {
+		this.a = checkNotNull(a);
+		this.r = checkNotNull(r);
 
-		checkArgument(this.elements.getGroup().equals(this.randomness.getGroup()),
+		checkArgument(this.a.getGroup().equals(this.r.getGroup()),
 				"All elements must belong to the same group as the randomness");
 	}
 
-	GroupVector<ZqElement, ZqGroup> getElements() {
-		return elements;
+	GroupVector<ZqElement, ZqGroup> get_a() {
+		return a;
 	}
 
-	ZqElement getRandomness() {
-		return randomness;
+	ZqElement get_r() {
+		return r;
 	}
 
 	@Override
@@ -66,12 +67,12 @@ class SingleValueProductWitness {
 			return false;
 		}
 		final SingleValueProductWitness that = (SingleValueProductWitness) o;
-		return elements.equals(that.elements) &&
-				randomness.equals(that.randomness);
+		return a.equals(that.a) &&
+				r.equals(that.r);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(elements, randomness);
+		return Objects.hash(a, r);
 	}
 }

@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -59,20 +60,23 @@ public class ElGamalMultiRecipientKeyPair {
 		checkNotNull(randomService);
 		checkNotNull(group);
 		checkArgument(numElements > 0, "Cannot generate a ElGamalMultiRecipient key pair with %s elements.", numElements);
+		final int N = numElements;
 
-		final GqElement generator = group.getGenerator();
+		final GqElement g = group.getGenerator();
 		final ZqGroup privateKeyGroup = ZqGroup.sameOrderAs(group);
+		final BigInteger q = group.getQ();
 
 		// Generate the private key as a list of random exponents
 		final List<ZqElement> privateKeyElements =
-				Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(privateKeyGroup.getQ()), privateKeyGroup))
-						.limit(numElements)
+				Stream.generate(() -> randomService.genRandomInteger(q))
+						.map(value -> ZqElement.create(value, privateKeyGroup))
+						.limit(N)
 						.collect(Collectors.toList());
 
-		final ElGamalMultiRecipientPrivateKey privateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
-		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
+		final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
+		final ElGamalMultiRecipientPublicKey pk = sk.derivePublicKey(g);
 
-		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
+		return new ElGamalMultiRecipientKeyPair(sk, pk);
 	}
 
 	public ElGamalMultiRecipientPublicKey getPublicKey() {

@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -39,6 +40,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Re-encrypting shuffle service.
  */
+@SuppressWarnings("java:S117")
 public class ShuffleService {
 
 	private final RandomService randomService;
@@ -57,44 +59,53 @@ public class ShuffleService {
 	 * @return a {@link Shuffle} with the result of the re-encrypting shuffle.
 	 */
 	Shuffle genShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey) {
-		//Verify ciphertext input
 		checkNotNull(ciphertexts);
-		checkArgument(ciphertexts.stream().allMatch(Objects::nonNull));
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextsCopy = GroupVector.from(ciphertexts);
-
-		if (ciphertextsCopy.isEmpty()) {
-			return Shuffle.EMPTY;
-		}
-		checkArgument(ciphertextsCopy.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same size.");
-
-		final int N = ciphertextsCopy.size();
-		final int n = ciphertextsCopy.get(0).size();
-
-		//Verify public key input
 		checkNotNull(publicKey);
+
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
+		final ElGamalMultiRecipientPublicKey pk = publicKey;
+		final int N = C.size();
+		final int l = C.getElementSize();
 		final int k = publicKey.size();
 
+		checkArgument(C.stream().allMatch(Objects::nonNull));
+		if (C.isEmpty()) {
+			return Shuffle.EMPTY;
+		}
+		checkArgument(C.allEqual(ElGamalMultiRecipientCiphertext::size), "All ciphertexts must have the same size.");
+
 		//Verify combination of ciphertext and public key inputs
-		checkArgument(0 < n);
-		checkArgument(n <= k);
-		checkArgument(ciphertextsCopy.getGroup().equals(publicKey.getGroup()));
-		final GqGroup group = ciphertextsCopy.getGroup();
+		checkArgument(0 < l);
+		checkArgument(l <= k);
+		checkArgument(C.getGroup().equals(publicKey.getGroup()));
+
+		final GqGroup group = C.getGroup();
+		final ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
+		final BigInteger q = exponentGroup.getQ();
 
 		//Generate shuffle
-		final Permutation psi = this.permutationService.genPermutation(N);
-		final ZqGroup exponentGroup = ZqGroup.sameOrderAs(group);
-		final ElGamalMultiRecipientMessage onesMessage = ElGamalMultiRecipientMessage.ones(group, n);
+		final Permutation pi = this.permutationService.genPermutation(N);
+		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessage.ones(group, l);
 
-		final ImmutableList<ZqElement> exponents =
-				Stream.generate(() -> ZqElement.create(randomService.genRandomInteger(exponentGroup.getQ()), exponentGroup))
+		final ImmutableList<ZqElement> r =
+				Stream.generate(() -> randomService.genRandomInteger(q))
+						.map(value -> ZqElement.create(value, exponentGroup))
 						.limit(N)
 						.collect(toImmutableList());
 
-		final ImmutableList<ElGamalMultiRecipientCiphertext> shuffledCiphertexts =
+		final ImmutableList<ElGamalMultiRecipientCiphertext> C_prime =
 				IntStream.range(0, N)
-						.mapToObj(i -> getCiphertext(onesMessage, exponents.get(i), publicKey).multiply(ciphertextsCopy.get(psi.get(i))))
-						.collect(toImmutableList());
+						.boxed()
+						.flatMap(i -> Stream.of(i)
+								.map(__ -> r.get(i))
+								.map(r_i -> getCiphertext(one, r_i, pk))
+								.map(e -> {
+									final int pi_i = pi.get(i);
+									final ElGamalMultiRecipientCiphertext C_pi_i = C.get(pi_i);
+									return e.multiply(C_pi_i);
+								})
+						).collect(toImmutableList());
 
-		return new Shuffle(shuffledCiphertexts, psi, exponents);
+		return new Shuffle(C_prime, pi, r);
 	}
 }

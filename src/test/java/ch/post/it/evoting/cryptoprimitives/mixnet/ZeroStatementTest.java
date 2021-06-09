@@ -74,12 +74,12 @@ class ZeroStatementTest {
 	void construct() {
 		final ZeroStatement zeroStatement = new ZeroStatement(commitmentsA, commitmentsB, y);
 
-		final GqGroup commitmentsAGroup = zeroStatement.getCommitmentsA().get(0).getGroup();
-		final GqGroup commitmentsBGroup = zeroStatement.getCommitmentsB().get(0).getGroup();
+		final GqGroup commitmentsAGroup = zeroStatement.get_c_A().get(0).getGroup();
+		final GqGroup commitmentsBGroup = zeroStatement.get_c_B().get(0).getGroup();
 
 		assertEquals(gqGroup, commitmentsAGroup);
 		assertEquals(gqGroup, commitmentsBGroup);
-		assertEquals(gqGroup.getQ(), zeroStatement.getY().getGroup().getQ());
+		assertEquals(gqGroup.getQ(), zeroStatement.get_y().getGroup().getQ());
 	}
 
 	@Test

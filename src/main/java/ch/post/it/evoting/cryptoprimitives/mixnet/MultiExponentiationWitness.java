@@ -30,6 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>
  * Instances of this class are immutable.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 final class MultiExponentiationWitness {
 
 	private final GroupMatrix<ZqElement, ZqGroup> A;
@@ -37,8 +38,8 @@ final class MultiExponentiationWitness {
 	private final ZqElement rho;
 
 	private final ZqGroup group;
-	private final int dimensionM;
-	private final int dimensionN;
+	private final int m;
+	private final int n;
 
 	/**
 	 * <p>Creates a multi-exponentiation witness.</p>
@@ -49,45 +50,44 @@ final class MultiExponentiationWitness {
 	 *     <li>must belong to the same ZqGroup</li>
 	 * </ul>
 	 *
-	 * @param matrixA     A, the exponents matrix, of size n x m
-	 * @param exponentsR  r, a vector of exponents of size m
-	 * @param exponentRho ρ, the re-encrypting exponent
+	 * @param A     A, the exponents matrix, of size n x m
+	 * @param r  r, a vector of exponents of size m
+	 * @param rho ρ, the re-encrypting exponent
 	 */
-	MultiExponentiationWitness(final GroupMatrix<ZqElement, ZqGroup> matrixA, final GroupVector<ZqElement, ZqGroup> exponentsR,
-			final ZqElement exponentRho) {
+	MultiExponentiationWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupVector<ZqElement, ZqGroup> r, final ZqElement rho) {
 
 		//Null checking
-		checkNotNull(matrixA);
-		checkNotNull(exponentsR);
-		checkNotNull(exponentRho);
+		checkNotNull(A);
+		checkNotNull(r);
+		checkNotNull(rho);
 
 		//Dimension checking
-		checkArgument(matrixA.numColumns() == exponentsR.size(), "The matrix A number of columns must equals the number of exponents.");
+		checkArgument(A.numColumns() == r.size(), "The matrix A number of columns must equals the number of exponents.");
 
 		//Group checking
-		if (!matrixA.isEmpty()) {
-			checkArgument(matrixA.getGroup().equals(exponentsR.getGroup()), "The matrix A and the exponents r must belong to the same group.");
-			checkArgument(matrixA.getGroup().equals(exponentRho.getGroup()), "The matrix A and the exponent ρ must belong to the same group");
+		if (!A.isEmpty()) {
+			checkArgument(A.getGroup().equals(r.getGroup()), "The matrix A and the exponents r must belong to the same group.");
+			checkArgument(A.getGroup().equals(rho.getGroup()), "The matrix A and the exponent ρ must belong to the same group");
 		}
 
-		this.A = matrixA;
-		this.r = exponentsR;
-		this.rho = exponentRho;
+		this.A = A;
+		this.r = r;
+		this.rho = rho;
 
-		this.group = matrixA.getGroup();
-		this.dimensionM = matrixA.numColumns();
-		this.dimensionN = matrixA.numRows();
+		this.group = A.getGroup();
+		this.m = A.numColumns();
+		this.n = A.numRows();
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> getA() {
+	GroupMatrix<ZqElement, ZqGroup> get_A() {
 		return A;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getR() {
+	GroupVector<ZqElement, ZqGroup> get_r() {
 		return r;
 	}
 
-	ZqElement getRho() {
+	ZqElement get_rho() {
 		return rho;
 	}
 
@@ -95,12 +95,12 @@ final class MultiExponentiationWitness {
 		return group;
 	}
 
-	int getDimensionM() {
-		return dimensionM;
+	int get_m() {
+		return m;
 	}
 
-	int getDimensionN() {
-		return dimensionN;
+	int get_n() {
+		return n;
 	}
 
 	@Override
