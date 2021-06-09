@@ -63,6 +63,8 @@ public final class JsonData {
 			return clazz.cast(getBigIntegerArrayArray(field));
 		} else if (clazz.equals(String.class)) {
 			return clazz.cast(jsonNode.get(field).asText());
+		} else if (clazz.equals(String[].class)) {
+			return clazz.cast(getStringArray(field));
 		} else if (clazz.equals(byte[].class)) {
 			return clazz.cast(Base64.getDecoder().decode(jsonNode.get(field).asText()));
 		} else if (clazz.equals(Boolean.class)) {
@@ -125,6 +127,14 @@ public final class JsonData {
 		}
 
 		return new BigInteger(s.substring(2), 16);
+	}
+
+	private String[] getStringArray(final String field) {
+		final ArrayNode arrayNode = jsonNode.withArray(field);
+
+		return StreamSupport.stream(arrayNode.spliterator(), false)
+				.map(JsonNode::asText)
+				.toArray(String[]::new);
 	}
 }
 

@@ -57,7 +57,7 @@ class ShuffleWitnessTest extends TestGroupSetup {
 	void construct() {
 		final ShuffleWitness shuffleWitness = new ShuffleWitness(permutation, randomness);
 
-		assertEquals(shuffleWitness.getPermutation().getSize(), shuffleWitness.getRandomness().size());
+		assertEquals(shuffleWitness.get_pi().size(), shuffleWitness.get_rho().size());
 	}
 
 	@Test

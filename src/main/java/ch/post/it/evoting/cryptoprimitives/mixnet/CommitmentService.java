@@ -35,6 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@SuppressWarnings("java:S117")
 public class CommitmentService {
 
 	private CommitmentService() {
@@ -54,35 +55,39 @@ public class CommitmentService {
 	 * 		</ul>
 	 * </p>
 	 *
-	 * @param values        a, the {@link ZqElement}s to be committed (a<sub>0</sub>, ..., a<sub>l</sub>)
+	 * @param elements        a, the {@link ZqElement}s to be committed (a<sub>0</sub>, ..., a<sub>l</sub>)
 	 * @param randomElement r, the random {@link ZqElement}
 	 * @param commitmentKey <b>ck</b>, a {@link CommitmentKey} (h, g<sub>1</sub>, ..., g<sub>ν</sub>)
 	 * @return the commitment to the provided elements as a {@link GqElement}
 	 */
-	static GqElement getCommitment(final GroupVector<ZqElement, ZqGroup> values, final ZqElement randomElement, final CommitmentKey commitmentKey) {
+	static GqElement getCommitment(final GroupVector<ZqElement, ZqGroup> elements, final ZqElement randomElement, final CommitmentKey commitmentKey) {
 		// Null checks.
-		checkNotNull(values);
+		checkNotNull(elements);
 		checkNotNull(randomElement);
 		checkNotNull(commitmentKey);
 
+		final GroupVector<ZqElement, ZqGroup> a = elements;
+		final ZqElement r = randomElement;
+		final CommitmentKey ck = commitmentKey;
+		final int l = a.size();
+		final int nu = ck.size();
+
 		// By construction, commitmentKey.size() > 1.
-		checkArgument(values.isEmpty() || values.getGroup().equals(randomElement.getGroup()),
+		checkArgument(a.isEmpty() || a.getGroup().equals(r.getGroup()),
 				"The random value must belong to the same group as the values to be committed to");
-		checkArgument(randomElement.getGroup().hasSameOrderAs(commitmentKey.getGroup()),
+		checkArgument(r.getGroup().hasSameOrderAs(ck.getGroup()),
 				"The commitment key must have the same order (q) as the elements to be committed to and the random value");
-		final int l = values.size();
-		final int nu = commitmentKey.size();
 		checkArgument(nu >= l, "The commitment key must be equal to or longer than the list of elements to commit to");
 
 		final List<BigInteger> commitmentKeyValues =
-				commitmentKey.stream()
+				ck.stream()
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList());
-		final GqGroup group = commitmentKey.getGroup();
+		final GqGroup group = ck.getGroup();
 		final BigInteger p = group.getP();
 
 		final List<BigInteger> commitmentValues =
-				Stream.concat(Stream.of(randomElement), values.stream())
+				Stream.concat(Stream.of(r), a.stream())
 						.map(GroupElement::getValue)
 						.collect(Collectors.toList());
 
@@ -108,41 +113,47 @@ public class CommitmentService {
 	 * 		</ul>
 	 * </p>
 	 *
-	 * @param elementsMatrix A, the non empty matrix of {@link ZqElement}s to be committed of <i>n</i> rows and <i>m</i> columns.
+	 * @param elements A, the non empty matrix of {@link ZqElement}s to be committed of <i>n</i> rows and <i>m</i> columns.
 	 * @param randomElements <b>r</b>, the non empty vector of <i>m</i> randomly chosen {@link ZqElement}s to be used for the commitment.
 	 * @param commitmentKey  <b>ck</b>, the commitment key of the form (h, g<sub>1</sub>, ..., g<sub>ν</sub>), ν >= n.
 	 * @return the commitments (c<sub>0</sub>, ..., c<sub>m-1</sub>)
 	 */
-	static GroupVector<GqElement, GqGroup> getCommitmentMatrix(final GroupMatrix<ZqElement, ZqGroup> elementsMatrix,
+	static GroupVector<GqElement, GqGroup> getCommitmentMatrix(final GroupMatrix<ZqElement, ZqGroup> elements,
 			final GroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
 
-		// Check nullity.
-		checkNotNull(elementsMatrix);
+		checkNotNull(elements);
 		checkNotNull(randomElements);
 		checkNotNull(commitmentKey);
 
+		final GroupMatrix<ZqElement, ZqGroup> A = elements;
+		final GroupVector<ZqElement, ZqGroup> r = randomElements;
+		final CommitmentKey ck = commitmentKey;
+		final int n = A.numRows();
+		final int m = A.numColumns();
+		final int nu = ck.size();
+
 		// Handle empty matrix.
-		if (elementsMatrix.isEmpty()) {
+		if (A.isEmpty()) {
 			return GroupVector.of();
 		}
 
 		// Cross arguments dimension checking.
-		final int n = elementsMatrix.numRows();
-		final int m = elementsMatrix.numColumns();
-		final int nu = commitmentKey.size();
-
-		checkArgument(randomElements.size() == m, "There must be as many random elements as there are columns in the element matrix");
+		checkArgument(r.size() == m, "There must be as many random elements as there are columns in the element matrix");
 		checkArgument(nu >= n, "The commitment key must be longer than the number of rows of the elements matrix");
 
 		// Cross arguments group checking.
-		checkArgument(elementsMatrix.getGroup().equals(randomElements.getGroup()),
+		checkArgument(A.getGroup().equals(r.getGroup()),
 				"The elements to be committed to and the random elements must be in the same group.");
-		checkArgument(elementsMatrix.getGroup().hasSameOrderAs(commitmentKey.getGroup()),
+		checkArgument(A.getGroup().hasSameOrderAs(ck.getGroup()),
 				"The commitment key must have the same order (q) than the elements to be committed to and the random values");
 
 		// Algorithm.
 		return IntStream.range(0, m)
-				.mapToObj(i -> getCommitment(elementsMatrix.getColumn(i), randomElements.get(i), commitmentKey))
+				.mapToObj(i -> {
+					final GroupVector<ZqElement, ZqGroup> a_i = A.getColumn(i);
+					final ZqElement r_i = r.get(i);
+					return getCommitment(a_i, r_i, ck);
+				})
 				.collect(toGroupVector());
 	}
 
@@ -158,33 +169,36 @@ public class CommitmentService {
 	 * 		</ul>
 	 * </p>
 	 *
-	 * @param elementsVector <b>d</b>, the vector of <i>2m+1</i> {@link ZqElement}s to be committed to.
+	 * @param elements <b>d</b>, the vector of <i>2m+1</i> {@link ZqElement}s to be committed to.
 	 * @param randomElements <b>t</b>, the non empty vector of <i>2m+1</i> randomly chosen {@link ZqElement}s to be used for the commitment.
 	 * @param commitmentKey  <b>ck</b>, the {@link CommitmentKey} of size ν &ge; 1.
 	 * @return the commitment c = (c<sub>0</sub>, ..., c<sub>2m</sub>)
 	 */
-	static GroupVector<GqElement, GqGroup> getCommitmentVector(final GroupVector<ZqElement, ZqGroup> elementsVector,
+	static GroupVector<GqElement, GqGroup> getCommitmentVector(final GroupVector<ZqElement, ZqGroup> elements,
 			final GroupVector<ZqElement, ZqGroup> randomElements, final CommitmentKey commitmentKey) {
 
-		checkNotNull(elementsVector);
+		checkNotNull(elements);
 		checkNotNull(randomElements);
 		checkNotNull(commitmentKey);
 
-		final List<List<ZqElement>> rows = Collections.singletonList(elementsVector.stream().collect(Collectors.toList()));
-		final GroupMatrix<ZqElement, ZqGroup> elementsMatrix = GroupMatrix.fromRows(rows);
+		final GroupVector<ZqElement, ZqGroup> d = elements;
+		final GroupVector<ZqElement, ZqGroup> t = randomElements;
+		final CommitmentKey ck = commitmentKey;
+
+		final GroupMatrix<ZqElement, ZqGroup> d_matrix = GroupMatrix.fromRows(Collections.singletonList(d));
 
 		// Cross dimension checking.
-		checkArgument(elementsMatrix.numColumns() == randomElements.size(),
+		checkArgument(d_matrix.numColumns() == t.size(),
 				"The elements vector and the random elements must be of equal length");
 
-		checkArgument(!elementsMatrix.isEmpty(), "getCommitmentVector is not defined on an empty matrix.");
+		checkArgument(!d_matrix.isEmpty(), "getCommitmentVector is not defined on an empty matrix.");
 
 		// Cross group checking.
-		checkArgument(elementsMatrix.getGroup().equals(randomElements.getGroup()),
+		checkArgument(d_matrix.getGroup().equals(t.getGroup()),
 				"The elements to be committed to and the random elements must be in the same group.");
-		checkArgument(elementsMatrix.getGroup().hasSameOrderAs(commitmentKey.getGroup()),
+		checkArgument(d_matrix.getGroup().hasSameOrderAs(ck.getGroup()),
 				"The commitment key must have the same order (q) than the elements to be committed to and the random values");
 
-		return getCommitmentMatrix(elementsMatrix, randomElements, commitmentKey);
+		return getCommitmentMatrix(d_matrix, t, ck);
 	}
 }

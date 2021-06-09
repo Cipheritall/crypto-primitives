@@ -73,10 +73,10 @@ class ZeroWitnessTest {
 	void construct() {
 		final ZeroWitness zeroWitness = new ZeroWitness(matrixA, matrixB, exponentsR, exponentsS);
 
-		assertEquals(zqGroup, zeroWitness.getMatrixA().getGroup());
-		assertEquals(zqGroup, zeroWitness.getMatrixB().getGroup());
-		assertEquals(zqGroup, zeroWitness.getExponentsR().getGroup());
-		assertEquals(zqGroup, zeroWitness.getExponentsS().getGroup());
+		assertEquals(zqGroup, zeroWitness.get_A().getGroup());
+		assertEquals(zqGroup, zeroWitness.get_B().getGroup());
+		assertEquals(zqGroup, zeroWitness.get_r().getGroup());
+		assertEquals(zqGroup, zeroWitness.get_s().getGroup());
 	}
 
 	@Test

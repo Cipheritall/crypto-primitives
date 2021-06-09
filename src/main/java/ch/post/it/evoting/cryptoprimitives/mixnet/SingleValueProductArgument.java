@@ -37,15 +37,16 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Collection of the values contained in a single value product argument.
  */
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117", "java:S1845" })
 public class SingleValueProductArgument implements HashableList {
 
-	private GqElement cd;
-	private GqElement cLowerDelta;
-	private GqElement cUpperDelta;
-	private GroupVector<ZqElement, ZqGroup> aTilde;
-	private GroupVector<ZqElement, ZqGroup> bTilde;
-	private ZqElement rTilde;
-	private ZqElement sTilde;
+	private GqElement c_d;
+	private GqElement c_delta;
+	private GqElement c_Delta;
+	private GroupVector<ZqElement, ZqGroup> a_tilde;
+	private GroupVector<ZqElement, ZqGroup> b_tilde;
+	private ZqElement r_tilde;
+	private ZqElement s_tilde;
 
 	private int n;
 	private GqGroup group;
@@ -54,35 +55,35 @@ public class SingleValueProductArgument implements HashableList {
 		// Intentionally left blank.
 	}
 
-	GqElement getCd() {
-		return cd;
+	GqElement get_c_d() {
+		return c_d;
 	}
 
-	GqElement getCLowerDelta() {
-		return cLowerDelta;
+	GqElement get_c_delta() {
+		return c_delta;
 	}
 
-	GqElement getCUpperDelta() {
-		return cUpperDelta;
+	GqElement get_c_Delta() {
+		return c_Delta;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getATilde() {
-		return aTilde;
+	GroupVector<ZqElement, ZqGroup> get_a_tilde() {
+		return a_tilde;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getBTilde() {
-		return bTilde;
+	GroupVector<ZqElement, ZqGroup> get_b_tilde() {
+		return b_tilde;
 	}
 
-	ZqElement getRTilde() {
-		return rTilde;
+	ZqElement get_r_tilde() {
+		return r_tilde;
 	}
 
-	ZqElement getSTilde() {
-		return sTilde;
+	ZqElement get_s_tilde() {
+		return s_tilde;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
 	}
 
@@ -99,67 +100,67 @@ public class SingleValueProductArgument implements HashableList {
 			return false;
 		}
 		final SingleValueProductArgument that = (SingleValueProductArgument) o;
-		return cd.equals(that.cd) &&
-				cLowerDelta.equals(that.cLowerDelta) &&
-				cUpperDelta.equals(that.cUpperDelta) &&
-				aTilde.equals(that.aTilde) &&
-				bTilde.equals(that.bTilde) &&
-				rTilde.equals(that.rTilde) &&
-				sTilde.equals(that.sTilde);
+		return c_d.equals(that.c_d) &&
+				c_delta.equals(that.c_delta) &&
+				c_Delta.equals(that.c_Delta) &&
+				a_tilde.equals(that.a_tilde) &&
+				b_tilde.equals(that.b_tilde) &&
+				r_tilde.equals(that.r_tilde) &&
+				s_tilde.equals(that.s_tilde);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
+		return Objects.hash(c_d, c_delta, c_Delta, a_tilde, b_tilde, r_tilde, s_tilde);
 	}
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(cd, cLowerDelta, cUpperDelta, aTilde, bTilde, rTilde, sTilde);
+		return ImmutableList.of(c_d, c_delta, c_Delta, a_tilde, b_tilde, r_tilde, s_tilde);
 	}
 
 	public static class Builder {
 
-		private GqElement cd;
-		private GqElement cLowerDelta;
-		private GqElement cUpperDelta;
-		private GroupVector<ZqElement, ZqGroup> aTilde;
-		private GroupVector<ZqElement, ZqGroup> bTilde;
-		private ZqElement rTilde;
-		private ZqElement sTilde;
+		private GqElement c_d;
+		private GqElement c_delta;
+		private GqElement c_Delta;
+		private GroupVector<ZqElement, ZqGroup> a_tilde;
+		private GroupVector<ZqElement, ZqGroup> b_tilde;
+		private ZqElement r_tilde;
+		private ZqElement s_tilde;
 
-		public Builder withCd(final GqElement cd) {
-			this.cd = cd;
+		public Builder with_c_d(final GqElement c_d) {
+			this.c_d = c_d;
 			return this;
 		}
 
-		public Builder withCLowerDelta(final GqElement cLowerDelta) {
-			this.cLowerDelta = cLowerDelta;
+		public Builder with_c_delta(final GqElement c_delta) {
+			this.c_delta = c_delta;
 			return this;
 		}
 
-		public Builder withCUpperDelta(final GqElement cUpperDelta) {
-			this.cUpperDelta = cUpperDelta;
+		public Builder with_c_Delta(final GqElement c_Delta) {
+			this.c_Delta = c_Delta;
 			return this;
 		}
 
-		public Builder withATilde(final GroupVector<ZqElement, ZqGroup> aTilde) {
-			this.aTilde = aTilde;
+		public Builder with_a_tilde(final GroupVector<ZqElement, ZqGroup> a_tilde) {
+			this.a_tilde = a_tilde;
 			return this;
 		}
 
-		public Builder withBTilde(final GroupVector<ZqElement, ZqGroup> bTilde) {
-			this.bTilde = bTilde;
+		public Builder with_b_tilde(final GroupVector<ZqElement, ZqGroup> b_tilde) {
+			this.b_tilde = b_tilde;
 			return this;
 		}
 
-		public Builder withRTilde(final ZqElement rTilde) {
-			this.rTilde = rTilde;
+		public Builder with_r_tilde(final ZqElement r_tilde) {
+			this.r_tilde = r_tilde;
 			return this;
 		}
 
-		public Builder withSTilde(final ZqElement sTilde) {
-			this.sTilde = sTilde;
+		public Builder with_s_tilde(final ZqElement s_tilde) {
+			this.s_tilde = s_tilde;
 			return this;
 		}
 
@@ -178,41 +179,41 @@ public class SingleValueProductArgument implements HashableList {
 		 */
 		public SingleValueProductArgument build() {
 			// Null checking.
-			checkNotNull(this.cd);
-			checkNotNull(this.cLowerDelta);
-			checkNotNull(this.cUpperDelta);
-			checkNotNull(this.aTilde);
-			checkNotNull(this.bTilde);
-			checkNotNull(this.rTilde);
-			checkNotNull(this.sTilde);
+			checkNotNull(this.c_d);
+			checkNotNull(this.c_delta);
+			checkNotNull(this.c_Delta);
+			checkNotNull(this.a_tilde);
+			checkNotNull(this.b_tilde);
+			checkNotNull(this.r_tilde);
+			checkNotNull(this.s_tilde);
 
 			// Cross group checking.
-			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(cd, cLowerDelta, cUpperDelta);
-			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(aTilde, bTilde, rTilde, sTilde);
+			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(c_d, c_delta, c_Delta);
+			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(a_tilde, b_tilde, r_tilde, s_tilde);
 			checkArgument(allEqual(gqGroupMembers.stream(), GroupVectorElement::getGroup),
 					"cd, cLowerDelta, cUpperDelta must belong to the same group.");
 			checkArgument(allEqual(zqGroupMembers.stream(), GroupVectorElement::getGroup),
 					"aTilde, bTilde, rTilde, sTilde must belong to the same group.");
-			checkArgument(cd.getGroup().hasSameOrderAs(aTilde.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
+			checkArgument(c_d.getGroup().hasSameOrderAs(a_tilde.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
 
 			// Cross dimensions checking.
-			checkArgument(aTilde.size() == bTilde.size(), "The vectors aTilde and bTilde must have the same size.");
+			checkArgument(a_tilde.size() == b_tilde.size(), "The vectors aTilde and bTilde must have the same size.");
 
 			// Dimensions checking.
-			checkArgument(this.aTilde.size() >= 2, "The size of vectors aTilde and bTilde must be greater than or equal to 2.");
+			checkArgument(this.a_tilde.size() >= 2, "The size of vectors aTilde and bTilde must be greater than or equal to 2.");
 
 			// Build the argument.
 			final SingleValueProductArgument argument = new SingleValueProductArgument();
-			argument.cd = this.cd;
-			argument.cLowerDelta = this.cLowerDelta;
-			argument.cUpperDelta = this.cUpperDelta;
-			argument.aTilde = this.aTilde;
-			argument.bTilde = this.bTilde;
-			argument.rTilde = this.rTilde;
-			argument.sTilde = this.sTilde;
+			argument.c_d = this.c_d;
+			argument.c_delta = this.c_delta;
+			argument.c_Delta = this.c_Delta;
+			argument.a_tilde = this.a_tilde;
+			argument.b_tilde = this.b_tilde;
+			argument.r_tilde = this.r_tilde;
+			argument.s_tilde = this.s_tilde;
 
-			argument.n = argument.aTilde.size();
-			argument.group = argument.cd.getGroup();
+			argument.n = argument.a_tilde.size();
+			argument.group = argument.c_d.getGroup();
 
 			return argument;
 		}

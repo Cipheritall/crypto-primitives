@@ -35,6 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>
  * Instances of this class are immutable.
  */
+@SuppressWarnings("java:S117")
 public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup> {
 
 	private final GroupVector<ZqElement, ZqGroup> privateKeyElements;
@@ -62,19 +63,18 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	 * @return a new compressed private key with the first {@code length}-1 elements of the private key followed by the compressed computed element.
 	 */
 	public ElGamalMultiRecipientPrivateKey compress(final int length) {
-
-		final int k = this.size();
-
 		checkArgument(0 < length, "The requested length for key compression must be strictly positive.");
-		checkArgument(length <= k, "The requested length for key compression must be at most the secret key size.");
+		checkArgument(length <= this.size(), "The requested length for key compression must be at most the secret key size.");
+		final int l = length;
 
-		final ZqElement compressedKeyElement = this.stream()
-				.skip(length - 1L)
-				.reduce(this.getGroup().getIdentity(), ZqElement::add);
+		final ZqElement identity = this.getGroup().getIdentity();
+		final ZqElement sk_prime = this.stream()
+				.skip(l - 1L)
+				.reduce(identity, ZqElement::add);
 
-		final List<ZqElement> keyElements = new LinkedList<>(this.privateKeyElements.subList(0, length - 1));
+		final List<ZqElement> keyElements = new LinkedList<>(this.privateKeyElements.subList(0, l - 1));
 
-		keyElements.add(compressedKeyElement);
+		keyElements.add(sk_prime);
 
 		return new ElGamalMultiRecipientPrivateKey(keyElements);
 	}

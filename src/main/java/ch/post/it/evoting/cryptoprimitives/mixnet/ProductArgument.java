@@ -31,13 +31,14 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 public class ProductArgument implements HashableList {
 
 	private final SingleValueProductArgument singleValueProductArgument;
 	private final int m;
 	private final int n;
 	private final GqGroup group;
-	private GqElement commitmentB;
+	private GqElement c_b;
 	private HadamardArgument hadamardArgument;
 
 	/**
@@ -49,33 +50,33 @@ public class ProductArgument implements HashableList {
 	 *     <li>{@code hadamardArgument} and {@code singleValueProductArgument} must have the same dimension {@code n}</li>
 	 * </ul>
 	 *
-	 * @param commitmentB                the commitment to a vector b. Non-null.
+	 * @param c_b                the commitment to a vector b. Non-null.
 	 * @param hadamardArgument           the Hadamard argument. Non-null.
 	 * @param singleValueProductArgument the Single Value Product argument. Non-null.
 	 */
-	public ProductArgument(final GqElement commitmentB, final HadamardArgument hadamardArgument,
+	public ProductArgument(final GqElement c_b, final HadamardArgument hadamardArgument,
 			final SingleValueProductArgument singleValueProductArgument) {
 
 		// Null checking.
-		checkNotNull(commitmentB);
+		checkNotNull(c_b);
 		checkNotNull(hadamardArgument);
 		checkNotNull(singleValueProductArgument);
 
 		// Cross group checking.
-		final List<GqGroup> gqGroups = Arrays.asList(commitmentB.getGroup(), hadamardArgument.getGroup(), singleValueProductArgument.getGroup());
+		final List<GqGroup> gqGroups = Arrays.asList(c_b.getGroup(), hadamardArgument.getGroup(), singleValueProductArgument.getGroup());
 		checkArgument(allEqual(gqGroups.stream(), g -> g),
 				"The commitment b, Hadamard argument and single value product argument groups must have the same order.");
 
 		// Cross dimension checking.
-		checkArgument(hadamardArgument.getN() == singleValueProductArgument.getN(),
+		checkArgument(hadamardArgument.get_n() == singleValueProductArgument.get_n(),
 				"The Hadamard and single value product arguments must have the same dimension n.");
 
-		this.commitmentB = commitmentB;
+		this.c_b = c_b;
 		this.hadamardArgument = hadamardArgument;
 		this.singleValueProductArgument = singleValueProductArgument;
-		this.m = hadamardArgument.getM();
-		this.n = hadamardArgument.getN();
-		this.group = commitmentB.getGroup();
+		this.m = hadamardArgument.get_m();
+		this.n = hadamardArgument.get_n();
+		this.group = c_b.getGroup();
 	}
 
 	/**
@@ -87,12 +88,12 @@ public class ProductArgument implements HashableList {
 	public ProductArgument(final SingleValueProductArgument singleValueProductArgument) {
 		this.singleValueProductArgument = checkNotNull(singleValueProductArgument);
 		this.m = 1;
-		this.n = singleValueProductArgument.getN();
+		this.n = singleValueProductArgument.get_n();
 		this.group = singleValueProductArgument.getGroup();
 	}
 
-	Optional<GqElement> getCommitmentB() {
-		return Optional.ofNullable(commitmentB);
+	Optional<GqElement> get_c_b() {
+		return Optional.ofNullable(c_b);
 	}
 
 	Optional<HadamardArgument> getHadamardArgument() {
@@ -103,11 +104,11 @@ public class ProductArgument implements HashableList {
 		return singleValueProductArgument;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
 	}
 
@@ -124,20 +125,20 @@ public class ProductArgument implements HashableList {
 			return false;
 		}
 		final ProductArgument that = (ProductArgument) o;
-		return Objects.equals(commitmentB, that.commitmentB) && Objects.equals(hadamardArgument, that.hadamardArgument)
+		return Objects.equals(c_b, that.c_b) && Objects.equals(hadamardArgument, that.hadamardArgument)
 				&& singleValueProductArgument.equals(that.singleValueProductArgument);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(commitmentB, hadamardArgument, singleValueProductArgument);
+		return Objects.hash(c_b, hadamardArgument, singleValueProductArgument);
 	}
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		if (commitmentB == null) {
+		if (c_b == null) {
 			return ImmutableList.of(singleValueProductArgument);
 		}
-		return ImmutableList.of(commitmentB, hadamardArgument, singleValueProductArgument);
+		return ImmutableList.of(c_b, hadamardArgument, singleValueProductArgument);
 	}
 }

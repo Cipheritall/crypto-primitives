@@ -134,10 +134,11 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		BigInteger TWO = BigInteger.valueOf(2);
 		BigInteger THREE = BigInteger.valueOf(3);
 		BigInteger FOUR = BigInteger.valueOf(4);
+		BigInteger FIVE = BigInteger.valueOf(5);
 		BigInteger SIX = BigInteger.valueOf(6);
-		BigInteger SEVEN = BigInteger.valueOf(7);
 		BigInteger EIGHT = BigInteger.valueOf(8);
 		BigInteger NINE = BigInteger.valueOf(9);
+		BigInteger TEN = BigInteger.valueOf(10);
 		BigInteger TWELVE = BigInteger.valueOf(12);
 		BigInteger THIRTEEN = BigInteger.valueOf(13);
 
@@ -146,9 +147,10 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		ZqElement zTwo = ZqElement.create(TWO, zqGroup);
 		ZqElement zThree = ZqElement.create(THREE, zqGroup);
 		ZqElement zFour = ZqElement.create(FOUR, zqGroup);
+		ZqElement zFive = ZqElement.create(FIVE, zqGroup);
 		ZqElement zSix = ZqElement.create(SIX, zqGroup);
-		ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
 		ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
+		ZqElement zTen = ZqElement.create(TEN, zqGroup);
 
 		// GqElements
 		GqElement gOne = GqElement.create(BigInteger.ONE, gqGroup);
@@ -190,8 +192,8 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		);
 
 		GroupVector<DecryptionProof, ZqGroup> expectedPi = GroupVector.of(
-				new DecryptionProof(zSix, GroupVector.of(zFour, zFour)),
-				new DecryptionProof(zOne, GroupVector.of(zFour, zSeven))
+				new DecryptionProof(zFive, GroupVector.of(zTwo, zOne)),
+				new DecryptionProof(zTwo, GroupVector.of(zSix, zTen))
 		);
 		VerifiableDecryption expected = new VerifiableDecryption(expectedCPrime, expectedPi);
 

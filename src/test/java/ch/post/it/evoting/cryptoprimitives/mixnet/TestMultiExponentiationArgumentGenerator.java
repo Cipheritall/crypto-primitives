@@ -46,14 +46,14 @@ public class TestMultiExponentiationArgumentGenerator {
 		ZqElement s = zqGroupGenerator.genRandomZqElementMember();
 		ZqElement tau = zqGroupGenerator.genRandomZqElementMember();
 		return new MultiExponentiationArgument.Builder()
-				.withcA0(cA0)
-				.withcBVector(cB)
-				.withEVector(E)
-				.withaVector(a)
-				.withr(r)
-				.withb(b)
-				.withs(s)
-				.withtau(tau)
+				.with_c_A_0(cA0)
+				.with_c_B(cB)
+				.with_E(E)
+				.with_a(a)
+				.with_r(r)
+				.with_b(b)
+				.with_s(s)
+				.with_tau(tau)
 				.build();
 	}
 }

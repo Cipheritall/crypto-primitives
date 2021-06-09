@@ -259,7 +259,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("ciphertexts and randomness having a different group order throws IllegalArgumentException")
 		void getShuffleArgumentCiphertextsRandomnessDiffOrder() {
 			final GroupVector<ZqElement, ZqGroup> differentRandomness = otherZqGroupGenerator.genRandomZqElementVector(N);
-			final ShuffleWitness differentShuffleWitness = new ShuffleWitness(this.shuffleWitness.getPermutation(), differentRandomness);
+			final ShuffleWitness differentShuffleWitness = new ShuffleWitness(this.shuffleWitness.get_pi(), differentRandomness);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> shuffleArgumentService.getShuffleArgument(shuffleStatement, differentShuffleWitness, m, n));
@@ -276,8 +276,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, biggerL);
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
-					.mapToObj(i -> getCiphertext(ones, shuffleWitness.getRandomness().get(i), longerPublicKey)
-							.multiply(longerCiphertexts.get(shuffleWitness.getPermutation().get(i))))
+					.mapToObj(i -> getCiphertext(ones, shuffleWitness.get_rho().get(i), longerPublicKey)
+							.multiply(longerCiphertexts.get(shuffleWitness.get_pi().get(i))))
 					.collect(collectingAndThen(toList(), GroupVector::from));
 
 			final ShuffleStatement longerCiphertextsStatement = new ShuffleStatement(longerCiphertexts, shuffledCiphertexts);
@@ -291,7 +291,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("re-encrypted and shuffled ciphertexts C different C' throws IllegalArgumentException")
 		void getShuffleArgumentCiphertextsShuffledCiphertextsDiff() {
 			// Modify the shuffled ciphertexts by replacing its first element by a different ciphertext.
-			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = new ArrayList<>(shuffleStatement.getShuffledCiphertexts());
+			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts = new ArrayList<>(shuffleStatement.get_C_prime());
 			final ElGamalMultiRecipientCiphertext first = shuffledCiphertexts.get(0);
 			final ElGamalMultiRecipientCiphertext otherFirst = Generators.genWhile(() -> elGamalGenerator.genRandomCiphertext(l), first::equals);
 			shuffledCiphertexts.set(0, otherFirst);
@@ -299,7 +299,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			// Recreate shuffled ciphertexts and statement.
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffledCiphertexts = GroupVector.from(
 					shuffledCiphertexts);
-			final ShuffleStatement differentShuffleStatement = new ShuffleStatement(this.shuffleStatement.getCiphertexts(),
+			final ShuffleStatement differentShuffleStatement = new ShuffleStatement(this.shuffleStatement.get_C(),
 					differentShuffledCiphertexts);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -424,14 +424,14 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Create the expected ZeroArgument
 			ZeroArgument zeroArgument = new ZeroArgument.Builder()
-					.withCA0(gTwelve)
-					.withCBm(gEighteen)
-					.withCd(GroupVector.of(gSixteen, gNine, gTwelve, gOne, gSix))
-					.withAPrime(GroupVector.of(zEight, zFive))
-					.withBPrime(GroupVector.of(zTen, zTwo))
-					.withRPrime(zOne)
-					.withSPrime(zEight)
-					.withTPrime(zTwo)
+					.with_c_A_0(gTwelve)
+					.with_c_B_m(gEighteen)
+					.with_c_d(GroupVector.of(gSixteen, gNine, gTwelve, gOne, gSix))
+					.with_a_prime(GroupVector.of(zEight, zFive))
+					.with_b_prime(GroupVector.of(zTen, zTwo))
+					.with_r_prime(zOne)
+					.with_s_prime(zEight)
+					.with_t_prime(zTwo)
 					.build();
 
 			// Create the expected HadamardArgument
@@ -440,13 +440,13 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Create the expected SingleValueProductArgument
 			SingleValueProductArgument singleValueProductArgument = new SingleValueProductArgument.Builder()
-					.withCd(gOne)
-					.withCLowerDelta(gEight)
-					.withCUpperDelta(gSixteen)
-					.withATilde(GroupVector.of(zEight, zTen))
-					.withBTilde(GroupVector.of(zEight, zFour))
-					.withRTilde(zTen)
-					.withSTilde(zEight)
+					.with_c_d(gOne)
+					.with_c_delta(gEight)
+					.with_c_Delta(gSixteen)
+					.with_a_tilde(GroupVector.of(zEight, zTen))
+					.with_b_tilde(GroupVector.of(zEight, zFour))
+					.with_r_tilde(zTen)
+					.with_s_tilde(zEight)
 					.build();
 
 			// Create the expected ProductArgument:
@@ -467,14 +467,14 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			// cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {9, (18, 18, 6)}, {9, (4, 13, 1)}, {6, (8, 3, 6)})
 			// a = (2, 4), r = 7, b = 1, s = 5, tau = 5
 			MultiExponentiationArgument multiExponentiationArgument = new MultiExponentiationArgument.Builder()
-					.withcA0(gOne)
-					.withcBVector(cBmulti)
-					.withEVector(eVector)
-					.withaVector(GroupVector.of(zEight, zNine))
-					.withr(zNine)
-					.withb(zSeven)
-					.withs(zSix)
-					.withtau(zOne)
+					.with_c_A_0(gOne)
+					.with_c_B(cBmulti)
+					.with_E(eVector)
+					.with_a(GroupVector.of(zEight, zNine))
+					.with_r(zNine)
+					.with_b(zSeven)
+					.with_s(zSix)
+					.with_tau(zOne)
 					.build();
 
 			// Create the expected output:
@@ -483,10 +483,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			GroupVector<GqElement, GqGroup> cBshuffle = GroupVector.of(gEight, gEighteen);
 
 			ShuffleArgument expected = new ShuffleArgument.Builder()
-					.withCA(cAshuffle)
-					.withCB(cBshuffle)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument)
+					.with_c_A(cAshuffle)
+					.with_c_B(cBshuffle)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument)
 					.build();
 
 			assertEquals(expected, actual);
@@ -582,7 +582,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("m different from commitment vectors size throws IllegalArgumentException")
 		void verifyShuffleArgumentMDiffSizeCommitments() {
-			final int tooBigM = shuffleArgument.getcA().size() + 1;
+			final int tooBigM = shuffleArgument.get_c_A().size() + 1;
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, tooBigM, n));
@@ -611,13 +611,13 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect ciphertexts C throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectC() {
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = shuffleStatement.getCiphertexts();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = shuffleStatement.get_C();
 			final int randomIndex = secureRandom.nextInt(ciphertexts.size());
 			final ElGamalMultiRecipientCiphertext ciphertext = ciphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(ciphertext);
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = with(ciphertexts, randomIndex, otherCiphertext);
 
-			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.getShuffledCiphertexts());
+			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.get_C_prime());
 
 			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n);
 			assertFalse(verificationResult.isVerified());
@@ -627,14 +627,14 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect shuffled ciphertexts C' throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectShuffledCPrime() {
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = shuffleStatement.getShuffledCiphertexts();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = shuffleStatement.get_C_prime();
 			final int randomIndex = secureRandom.nextInt(shuffledCiphertexts.size());
 			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(shuffledCiphertext);
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts =
 					with(shuffledCiphertexts, randomIndex, otherCiphertext);
 
-			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.getShuffledCiphertexts(), badShuffledCiphertexts);
+			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.get_C_prime(), badShuffledCiphertexts);
 
 			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n);
 			assertFalse(verificationResult.isVerified());
@@ -644,15 +644,15 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect commitment vector c_A does not verify")
 		void verifyShuffleArgumentIncorrectCA() {
-			final GroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.getcA();
+			final GroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.get_c_A();
 
 			final GqElement badCA0 = commitmentA.get(0).multiply(gqGroup.getGenerator());
 			final GroupVector<GqElement, GqGroup> badCommitmentA = with(commitmentA, 0, badCA0);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
-					.withCA(badCommitmentA)
-					.withCB(shuffleArgument.getcB())
-					.withProductArgument(shuffleArgument.getProductArgument())
-					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
+					.with_c_A(badCommitmentA)
+					.with_c_B(shuffleArgument.get_c_N())
+					.with_productArgument(shuffleArgument.getProductArgument())
+					.with_multiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
 
 			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
@@ -663,15 +663,15 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect commitment vector c_B does not verify")
 		void verifyShuffleArgumentIncorrectCB() {
-			final GroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.getcB();
+			final GroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.get_c_N();
 
 			final GqElement badCBm = commitmentB.get(0).multiply(gqGroup.getGenerator());
 			final GroupVector<GqElement, GqGroup> badCommitmentB = with(commitmentB, 0, badCBm);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
-					.withCA(shuffleArgument.getcA())
-					.withCB(badCommitmentB)
-					.withProductArgument(shuffleArgument.getProductArgument())
-					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
+					.with_c_A(shuffleArgument.get_c_A())
+					.with_c_B(badCommitmentB)
+					.with_productArgument(shuffleArgument.getProductArgument())
+					.with_multiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
 
 			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
@@ -685,30 +685,30 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final ProductArgument productArgument = shuffleArgument.getProductArgument();
 
 			final SingleValueProductArgument singleValueProductArgument = productArgument.getSingleValueProductArgument();
-			final ZqElement badRTilde = zqGroupGenerator.otherElement(singleValueProductArgument.getRTilde());
+			final ZqElement badRTilde = zqGroupGenerator.otherElement(singleValueProductArgument.get_r_tilde());
 			final SingleValueProductArgument badSingleValueProductArgument = new SingleValueProductArgument.Builder()
-					.withCd(singleValueProductArgument.getCd())
-					.withCLowerDelta(singleValueProductArgument.getCLowerDelta())
-					.withCUpperDelta(singleValueProductArgument.getCUpperDelta())
-					.withATilde(singleValueProductArgument.getATilde())
-					.withBTilde(singleValueProductArgument.getBTilde())
-					.withRTilde(badRTilde)
-					.withSTilde(singleValueProductArgument.getSTilde())
+					.with_c_d(singleValueProductArgument.get_c_d())
+					.with_c_delta(singleValueProductArgument.get_c_delta())
+					.with_c_Delta(singleValueProductArgument.get_c_Delta())
+					.with_a_tilde(singleValueProductArgument.get_a_tilde())
+					.with_b_tilde(singleValueProductArgument.get_b_tilde())
+					.with_r_tilde(badRTilde)
+					.with_s_tilde(singleValueProductArgument.get_s_tilde())
 					.build();
 
 			ProductArgument badProductArgument;
-			if (productArgument.getCommitmentB().isPresent() && productArgument.getHadamardArgument().isPresent()) {
-				badProductArgument = new ProductArgument(productArgument.getCommitmentB().get(), productArgument.getHadamardArgument().get(),
+			if (productArgument.get_c_b().isPresent() && productArgument.getHadamardArgument().isPresent()) {
+				badProductArgument = new ProductArgument(productArgument.get_c_b().get(), productArgument.getHadamardArgument().get(),
 						badSingleValueProductArgument);
 			} else {
 				badProductArgument = new ProductArgument(badSingleValueProductArgument);
 			}
 
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
-					.withCA(shuffleArgument.getcA())
-					.withCB(shuffleArgument.getcB())
-					.withProductArgument(badProductArgument)
-					.withMultiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
+					.with_c_A(shuffleArgument.get_c_A())
+					.with_c_B(shuffleArgument.get_c_N())
+					.with_productArgument(badProductArgument)
+					.with_multiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
 
 			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
@@ -721,23 +721,23 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		void verifyShuffleArgumentFailedMultiExpVerif() {
 			final MultiExponentiationArgument multiExponentiationArgument = shuffleArgument.getMultiExponentiationArgument();
 
-			final GqElement badCA0 = multiExponentiationArgument.getcA0().multiply(gqGroup.getGenerator());
+			final GqElement badCA0 = multiExponentiationArgument.getc_A_0().multiply(gqGroup.getGenerator());
 			final MultiExponentiationArgument badMultiExponentiationArgument = new MultiExponentiationArgument.Builder()
-					.withcA0(badCA0)
-					.withcBVector(multiExponentiationArgument.getcBVector())
-					.withEVector(multiExponentiationArgument.getEVector())
-					.withaVector(multiExponentiationArgument.getaVector())
-					.withr(multiExponentiationArgument.getR())
-					.withb(multiExponentiationArgument.getB())
-					.withs(multiExponentiationArgument.getS())
-					.withtau(multiExponentiationArgument.getTau())
+					.with_c_A_0(badCA0)
+					.with_c_B(multiExponentiationArgument.get_c_B())
+					.with_E(multiExponentiationArgument.get_E())
+					.with_a(multiExponentiationArgument.get_a())
+					.with_r(multiExponentiationArgument.get_r())
+					.with_b(multiExponentiationArgument.get_b())
+					.with_s(multiExponentiationArgument.get_s())
+					.with_tau(multiExponentiationArgument.get_tau())
 					.build();
 
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
-					.withCA(shuffleArgument.getcA())
-					.withCB(shuffleArgument.getcB())
-					.withProductArgument(shuffleArgument.getProductArgument())
-					.withMultiExponentiationArgument(badMultiExponentiationArgument)
+					.with_c_A(shuffleArgument.get_c_A())
+					.with_c_B(shuffleArgument.get_c_N())
+					.with_productArgument(shuffleArgument.getProductArgument())
+					.with_multiExponentiationArgument(badMultiExponentiationArgument)
 					.build();
 
 			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(shuffleStatement, badShuffleArgument, m, n);
@@ -778,10 +778,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 				MultiExponentiationArgument multiExponentiationArgument = argumentParser.parseMultiExponentiationArgument(multiExpArgumentData);
 
 				ShuffleArgument argument = new ShuffleArgument.Builder()
-						.withCA(cA)
-						.withCB(cB)
-						.withProductArgument(productArgument)
-						.withMultiExponentiationArgument(multiExponentiationArgument)
+						.with_c_A(cA)
+						.with_c_B(cB)
+						.with_productArgument(productArgument)
+						.with_multiExponentiationArgument(multiExponentiationArgument)
 						.build();
 
 				//m and n

@@ -38,12 +38,13 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Value class representing the result of a multi exponentiation proof.
  */
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class MultiExponentiationArgument implements HashableList {
 
-	private GqElement cA0;
-	private GroupVector<GqElement, GqGroup> cBVector;
-	private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
-	private GroupVector<ZqElement, ZqGroup> aVector;
+	private GqElement c_A_0;
+	private GroupVector<GqElement, GqGroup> c_B;
+	private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E;
+	private GroupVector<ZqElement, ZqGroup> a;
 	private ZqElement r;
 	private ZqElement b;
 	private ZqElement s;
@@ -58,47 +59,47 @@ public class MultiExponentiationArgument implements HashableList {
 		// Intentionally left blank.
 	}
 
-	GqElement getcA0() {
-		return cA0;
+	GqElement getc_A_0() {
+		return c_A_0;
 	}
 
-	GroupVector<GqElement, GqGroup> getcBVector() {
-		return cBVector;
+	GroupVector<GqElement, GqGroup> get_c_B() {
+		return c_B;
 	}
 
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getEVector() {
-		return EVector;
+	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_E() {
+		return E;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getaVector() {
-		return aVector;
+	GroupVector<ZqElement, ZqGroup> get_a() {
+		return a;
 	}
 
-	ZqElement getR() {
+	ZqElement get_r() {
 		return r;
 	}
 
-	ZqElement getB() {
+	ZqElement get_b() {
 		return b;
 	}
 
-	ZqElement getS() {
+	ZqElement get_s() {
 		return s;
 	}
 
-	ZqElement getTau() {
+	ZqElement get_tau() {
 		return tau;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
 	}
 
-	int getL() {
+	int get_l() {
 		return l;
 	}
 
@@ -116,26 +117,26 @@ public class MultiExponentiationArgument implements HashableList {
 		}
 
 		final MultiExponentiationArgument that = (MultiExponentiationArgument) o;
-		return cA0.equals(that.cA0) && cBVector.equals(that.cBVector) && EVector.equals(that.EVector) && aVector.equals(that.aVector)
+		return c_A_0.equals(that.c_A_0) && c_B.equals(that.c_B) && E.equals(that.E) && a.equals(that.a)
 				&& r.equals(that.r) && b.equals(that.b) && s.equals(that.s) && tau.equals(that.tau);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cA0, cBVector, EVector, aVector, r, b, s, tau);
+		return Objects.hash(c_A_0, c_B, E, a, r, b, s, tau);
 	}
 
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(cA0, cBVector, EVector, aVector, r, b, s, tau);
+		return ImmutableList.of(c_A_0, c_B, E, a, r, b, s, tau);
 	}
 
 	public static class Builder {
 
-		private GqElement cA0;
-		private GroupVector<GqElement, GqGroup> cBVector;
-		private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector;
-		private GroupVector<ZqElement, ZqGroup> aVector;
+		private GqElement c_A_0;
+		private GroupVector<GqElement, GqGroup> c_B;
+		private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E;
+		private GroupVector<ZqElement, ZqGroup> a;
 		private ZqElement r;
 		private ZqElement b;
 		private ZqElement s;
@@ -145,42 +146,42 @@ public class MultiExponentiationArgument implements HashableList {
 			//Intentionally left blank
 		}
 
-		public Builder withcA0(final GqElement cA0) {
-			this.cA0 = cA0;
+		public Builder with_c_A_0(final GqElement c_A_0) {
+			this.c_A_0 = c_A_0;
 			return this;
 		}
 
-		public Builder withcBVector(final GroupVector<GqElement, GqGroup> cBVector) {
-			this.cBVector = cBVector;
+		public Builder with_c_B(final GroupVector<GqElement, GqGroup> c_B) {
+			this.c_B = c_B;
 			return this;
 		}
 
-		public Builder withEVector(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector) {
-			this.EVector = EVector;
+		public Builder with_E(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E) {
+			this.E = E;
 			return this;
 		}
 
-		public Builder withaVector(final GroupVector<ZqElement, ZqGroup> aVector) {
-			this.aVector = aVector;
+		public Builder with_a(final GroupVector<ZqElement, ZqGroup> a) {
+			this.a = a;
 			return this;
 		}
 
-		public Builder withr(final ZqElement r) {
+		public Builder with_r(final ZqElement r) {
 			this.r = r;
 			return this;
 		}
 
-		public Builder withb(final ZqElement b) {
+		public Builder with_b(final ZqElement b) {
 			this.b = b;
 			return this;
 		}
 
-		public Builder withs(final ZqElement s) {
+		public Builder with_s(final ZqElement s) {
 			this.s = s;
 			return this;
 		}
 
-		public Builder withtau(final ZqElement tau) {
+		public Builder with_tau(final ZqElement tau) {
 			this.tau = tau;
 			return this;
 		}
@@ -200,44 +201,44 @@ public class MultiExponentiationArgument implements HashableList {
 		 */
 		public MultiExponentiationArgument build() {
 			// Null checking.
-			checkNotNull(this.cA0);
-			checkNotNull(this.cBVector);
-			checkNotNull(this.EVector);
-			checkNotNull(this.aVector);
+			checkNotNull(this.c_A_0);
+			checkNotNull(this.c_B);
+			checkNotNull(this.E);
+			checkNotNull(this.a);
 			checkNotNull(this.r);
 			checkNotNull(this.b);
 			checkNotNull(this.s);
 			checkNotNull(this.tau);
 
 			// Cross group checking.
-			final List<GroupVectorElement<GqGroup>> gqGroups = Arrays.asList(cA0, cBVector, EVector);
-			final List<GroupVectorElement<ZqGroup>> zqGroups = Arrays.asList(aVector, r, b, s, tau);
+			final List<GroupVectorElement<GqGroup>> gqGroups = Arrays.asList(c_A_0, c_B, E);
+			final List<GroupVectorElement<ZqGroup>> zqGroups = Arrays.asList(a, r, b, s, tau);
 			checkArgument(allEqual(gqGroups.stream(), GroupVectorElement::getGroup),
 					"cA0, cBVector, EVector must belong to the same group.");
 			checkArgument(allEqual(zqGroups.stream(), GroupVectorElement::getGroup), "aVector, r, b, s, tau, must belong to the same group.");
-			checkArgument(cA0.getGroup().hasSameOrderAs(aVector.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
+			checkArgument(c_A_0.getGroup().hasSameOrderAs(a.getGroup()), "GqGroup and ZqGroup of argument inputs are not compatible.");
 
 			// Cross dimensions checking.
-			checkArgument(cBVector.size() == EVector.size(), "The vectors cB and E must have the same size.");
+			checkArgument(c_B.size() == E.size(), "The vectors cB and E must have the same size.");
 
 			// Dimensions checking.
-			checkArgument(this.cBVector.size() % 2 == 0, "cB and E must be of size 2 * m.");
+			checkArgument(this.c_B.size() % 2 == 0, "cB and E must be of size 2 * m.");
 
 			// Build the argument.
 			final MultiExponentiationArgument argument = new MultiExponentiationArgument();
-			argument.cA0 = this.cA0;
-			argument.cBVector = this.cBVector;
-			argument.EVector = this.EVector;
-			argument.aVector = this.aVector;
+			argument.c_A_0 = this.c_A_0;
+			argument.c_B = this.c_B;
+			argument.E = this.E;
+			argument.a = this.a;
 			argument.r = this.r;
 			argument.b = this.b;
 			argument.s = this.s;
 			argument.tau = this.tau;
 
-			argument.m = this.cBVector.size() / 2;
-			argument.n = this.aVector.size();
-			argument.l = this.EVector.getElementSize();
-			argument.group = cA0.getGroup();
+			argument.m = this.c_B.size() / 2;
+			argument.n = this.a.size();
+			argument.l = this.E.getElementSize();
+			argument.group = c_A_0.getGroup();
 
 			return argument;
 		}

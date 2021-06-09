@@ -48,16 +48,17 @@ public class RandomService {
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
 		checkNotNull(upperBound);
 		checkArgument(upperBound.compareTo(BigInteger.ZERO) > 0, "The upper bound must a be a positive integer greater than 0.");
+		final BigInteger m = upperBound;
 
-		final int bitLength = upperBound.bitLength();
+		final int bitLength = m.bitLength();
 
-		BigInteger randomBigInteger;
+		BigInteger r;
 		do {
 			// This constructor internally masks the excess generated bits.
-			randomBigInteger = new BigInteger(bitLength, secureRandom);
-		} while (randomBigInteger.compareTo(upperBound) >= 0);
+			r = new BigInteger(bitLength, secureRandom);
+		} while (r.compareTo(m) >= 0);
 
-		return randomBigInteger;
+		return r;
 	}
 
 	/**
@@ -65,18 +66,19 @@ public class RandomService {
 	 */
 	public String genRandomBase16String(final int length) {
 		checkArgument(length > 0);
+		final int l = length;
 
 		// One char can be represented by 4 bits in Base16 encoding.
-		final int lengthInBytes = (int) Math.ceil(4.0 * length / Byte.SIZE);
+		final int l_bytes = (int) Math.ceil(4.0 * l / Byte.SIZE);
 
 		// Generate the random bytes, b.
-		final byte[] randomBytes = randomBytes(lengthInBytes);
+		final byte[] b = randomBytes(l_bytes);
 
 		// Encode to a Base16 String.
-		final String encodedString = BaseEncoding.base16().encode(randomBytes);
+		final String S = BaseEncoding.base16().encode(b);
 
 		// Truncate to desired length.
-		return encodedString.substring(0, length);
+		return S.substring(0, l);
 	}
 
 	/**
@@ -84,18 +86,19 @@ public class RandomService {
 	 */
 	public String genRandomBase32String(final int length) {
 		checkArgument(length > 0);
+		final int l = length;
 
 		// One char can be represented by 5 bits in Base32 encoding.
-		final int lengthInBytes = (int) Math.ceil(5.0 * length / Byte.SIZE);
+		final int l_bytes = (int) Math.ceil(5.0 * l / Byte.SIZE);
 
 		// Generate the random bytes, b.
-		final byte[] randomBytes = randomBytes(lengthInBytes);
+		final byte[] b = randomBytes(l_bytes);
 
 		// Encode to a Base32 String.
-		final String encodedString = BaseEncoding.base32().encode(randomBytes);
+		final String S = BaseEncoding.base32().encode(b);
 
 		// Truncate to desired length.
-		return encodedString.substring(0, length);
+		return S.substring(0, l);
 	}
 
 	/**
@@ -103,18 +106,19 @@ public class RandomService {
 	 */
 	public String genRandomBase64String(final int length) {
 		checkArgument(length > 0);
+		final int l = length;
 
-		// One char can be represented by 6 bits in Base64 encoding.
-		final int lengthInBytes = (int) Math.ceil(6.0 * length / Byte.SIZE);
+		// One char can be represented by 6 bits in Base64 encoding
+		final int l_bytes = (int) Math.ceil(6.0 * l / Byte.SIZE);
 
-		// Generate the random bytes, b.
-		final byte[] randomBytes = randomBytes(lengthInBytes);
+		// Generate the random bytes
+		final byte[] b = randomBytes(l_bytes);
 
-		// Encode to a Base64 String.
-		final String encodedString = Base64.getEncoder().encodeToString(randomBytes);
+		// Encode to a Base64 String
+		final String S = Base64.getEncoder().encodeToString(b);
 
-		// Truncate to desired length.
-		return encodedString.substring(0, length);
+		// Truncate to desired length
+		return S.substring(0, l);
 	}
 
 	/**
@@ -129,10 +133,13 @@ public class RandomService {
 		checkArgument(upperBound.compareTo(BigInteger.ZERO) > 0, "The upper bound should be greater than zero");
 		checkArgument(length > 0, "The length should be greater than zero");
 
-		final ZqGroup zqGroup = new ZqGroup(upperBound);
+		final BigInteger q = upperBound;
+		final int n = length;
 
-		return Stream.generate(() -> ZqElement.create(genRandomInteger(upperBound), zqGroup))
-				.limit(length)
+		final ZqGroup zqGroup = new ZqGroup(q);
+
+		return Stream.generate(() -> ZqElement.create(genRandomInteger(q), zqGroup))
+				.limit(n)
 				.collect(toGroupVector());
 	}
 

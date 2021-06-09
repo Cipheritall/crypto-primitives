@@ -172,9 +172,9 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with incorrect commitment throws IllegalArgumentException")
 		void getSingleValueProductArgumentWithWrongCommitmentThrows() {
-			final GqElement commitment = statement.getCommitment();
+			final GqElement commitment = statement.get_c_a();
 			GqElement wrongCommitment = commitment.multiply(commitment.getGroup().getGenerator());
-			SingleValueProductStatement wrongStatement = new SingleValueProductStatement(wrongCommitment, statement.getProduct());
+			SingleValueProductStatement wrongStatement = new SingleValueProductStatement(wrongCommitment, statement.get_b());
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> argumentService.getSingleValueProductArgument(wrongStatement, witness));
 			assertEquals("The provided commitment does not correspond to the elements, randomness and commitment key provided.",
@@ -184,9 +184,9 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with incorrect product throws IllegalArgumentException")
 		void getSingleValueProductArgumentWithWrongProductThrows() {
-			final ZqElement product = statement.getProduct();
+			final ZqElement product = statement.get_b();
 			ZqElement wrongProduct = product.add(ZqElement.create(BigInteger.ONE, product.getGroup()));
-			SingleValueProductStatement wrongStatement = new SingleValueProductStatement(statement.getCommitment(), wrongProduct);
+			SingleValueProductStatement wrongStatement = new SingleValueProductStatement(statement.get_c_a(), wrongProduct);
 			Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> argumentService.getSingleValueProductArgument(wrongStatement, witness));
 			assertEquals("The product of the provided elements does not give the provided product.", exception.getMessage());
@@ -231,13 +231,13 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			ZqElement rTilde = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			ZqElement sTilde = ZqElement.create(BigInteger.valueOf(7), specificZqGroup);
 			SingleValueProductArgument expected = new SingleValueProductArgument.Builder()
-					.withCd(cd)
-					.withCLowerDelta(cdelta)
-					.withCUpperDelta(cDelta)
-					.withATilde(GroupVector.from(aTilde))
-					.withBTilde(GroupVector.from(bTilde))
-					.withRTilde(rTilde)
-					.withSTilde(sTilde)
+					.with_c_d(cd)
+					.with_c_delta(cdelta)
+					.with_c_Delta(cDelta)
+					.with_a_tilde(GroupVector.from(aTilde))
+					.with_b_tilde(GroupVector.from(bTilde))
+					.with_r_tilde(rTilde)
+					.with_s_tilde(sTilde)
 					.build();
 
 			//Mock random integers
@@ -298,9 +298,9 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with an incorrect statement returns false")
 		void verifySingleValueProductArgumentWithIncorrectStatement() {
-			GqElement commitment = statement.getCommitment();
+			GqElement commitment = statement.get_c_a();
 			commitment = commitment.multiply(gqGroup.getGenerator());
-			ZqElement product = statement.getProduct();
+			ZqElement product = statement.get_b();
 			statement = new SingleValueProductStatement(commitment, product);
 
 			final VerificationResult verificationResult = argumentService.verifySingleValueProductArgument(statement, argument).verify();

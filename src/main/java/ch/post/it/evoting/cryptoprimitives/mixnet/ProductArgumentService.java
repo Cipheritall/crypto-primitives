@@ -34,10 +34,11 @@ import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@SuppressWarnings("java:S117")
 final class ProductArgumentService {
 
 	private final RandomService randomService;
-	private final CommitmentKey commitmentKey;
+	private final CommitmentKey ck;
 	private final HadamardArgumentService hadamardArgumentService;
 	private final SingleValueProductArgumentService singleValueProductArgumentService;
 
@@ -66,10 +67,10 @@ final class ProductArgumentService {
 				"The hash service's bit length must be smaller than the bit length of q.");
 
 		this.randomService = randomService;
-		this.commitmentKey = commitmentKey;
-		this.hadamardArgumentService = new HadamardArgumentService(this.randomService, hashService, publicKey, this.commitmentKey);
+		this.ck = commitmentKey;
+		this.hadamardArgumentService = new HadamardArgumentService(this.randomService, hashService, publicKey, this.ck);
 		this.singleValueProductArgumentService = new SingleValueProductArgumentService(this.randomService, hashService, publicKey,
-				this.commitmentKey);
+				this.ck);
 	}
 
 	/**
@@ -95,32 +96,31 @@ final class ProductArgumentService {
 		checkNotNull(statement);
 		checkNotNull(witness);
 
-		final GroupVector<GqElement, GqGroup> cA = statement.getCommitments();
-		final ZqElement b = statement.getProduct();
-		@SuppressWarnings("squid:S00117")
-		final GroupMatrix<ZqElement, ZqGroup> A = witness.getMatrix();
-		final GroupVector<ZqElement, ZqGroup> r = witness.getExponents();
+		final GroupVector<GqElement, GqGroup> c_A = statement.get_c_A();
+		final ZqElement b = statement.get_b();
+		final GroupMatrix<ZqElement, ZqGroup> A = witness.get_A();
+		final GroupVector<ZqElement, ZqGroup> r = witness.get_r();
 
 		// Dimension check
-		checkArgument(cA.size() == r.size(), "The commitments A and the exponents r must have the same size.");
+		checkArgument(c_A.size() == r.size(), "The commitments A and the exponents r must have the same size.");
 		checkArgument(0 < A.numColumns(), "The number of columns m must be strictly positive.");
 		checkArgument(1 < A.numRows(), "The number of rows n must be greater than or equal to 2.");
-		checkArgument(A.numRows() <= commitmentKey.size(),
+		checkArgument(A.numRows() <= ck.size(),
 				"The matrix' number of rows cannot be greater than the commitment key size.");
 
 		// Group check
 		checkArgument(b.getGroup().equals(A.getGroup()), "The product b and the matrix A must belong to the same group.");
-		checkArgument(commitmentKey.getGroup().equals(cA.getGroup()), "The commitment key and the commitments must have the same group.");
+		checkArgument(ck.getGroup().equals(c_A.getGroup()), "The commitment key and the commitments must have the same group.");
 
 		// Ensure that the statement and the witness are compatible
 		final int n = A.numRows();
 		final int m = A.numColumns();
-		checkArgument(cA.equals(getCommitmentMatrix(A, r, commitmentKey)),
+		checkArgument(c_A.equals(getCommitmentMatrix(A, r, ck)),
 				"The commitment to matrix A with exponents r using the given commitment key must yield the commitments cA.");
 		final ZqGroup zqGroup = A.getGroup();
 		// Create the neutral element for the multiplication
 		final ZqElement one = ZqElement.create(1, zqGroup);
-		checkArgument(b.equals(A.stream().reduce(one, ZqElement::multiply)), "The product of all elements in matrix A must be equal to b.");
+		checkArgument(b.equals(A.flatStream().reduce(one, ZqElement::multiply)), "The product of all elements in matrix A must be equal to b.");
 
 		// Start of the operations
 		final BigInteger q = zqGroup.getQ();
@@ -130,36 +130,37 @@ final class ProductArgumentService {
 			// In that case, the Product Argument consists of a Hadamard Argument and a Single Value Product Argument.
 
 			final ZqElement s = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
-			final GroupVector<ZqElement, ZqGroup> biList = IntStream.range(0, n)
+			final GroupVector<ZqElement, ZqGroup> b_vector = IntStream.range(0, n)
 					.mapToObj(i -> IntStream.range(0, m)
 							.mapToObj(j -> A.get(i, j))
 							.reduce(one, ZqElement::multiply))
 					.collect(toGroupVector());
-			final GqElement cb = getCommitment(biList, s, commitmentKey);
+			final GqElement c_b = getCommitment(b_vector, s, ck);
 
 			// Get the Hadamard argument
-			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
-			final HadamardWitness hWitness = new HadamardWitness(A, biList, r, s);
-			final HadamardArgument hadamardArgument = hadamardArgumentService.getHadamardArgument(hStatement, hWitness);
+			final HadamardStatement hStatement = new HadamardStatement(c_A, c_b);
+			final HadamardWitness hWitness = new HadamardWitness(A, b_vector, r, s);
+			final HadamardArgument hadamardArg = hadamardArgumentService.getHadamardArgument(hStatement, hWitness);
 
 			// Get the single value product argument
-			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
-			final SingleValueProductWitness sWitness = new SingleValueProductWitness(biList, s);
-			final SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
-					.getSingleValueProductArgument(sStatement, sWitness);
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(c_b, b);
+			final SingleValueProductWitness sWitness = new SingleValueProductWitness(b_vector, s);
+			final SingleValueProductArgument singleValueProdArg =
+					singleValueProductArgumentService.getSingleValueProductArgument(sStatement, sWitness);
 
-			return new ProductArgument(cb, hadamardArgument, singleValueProdArgument);
+			return new ProductArgument(c_b, hadamardArg, singleValueProdArg);
 		} else {
 			// If m = 1, the number of ciphertexts is prime and they cannot be arranged into a multi-column matrix.
 			// In that case, we omit the Hadamard Argument and return a Single Value Product Argument only.
 
 			// Get the single value product argument
-			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
+			// Because of 0 indexing c_A_1 in the spec becomes c_A_0 here
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(c_A.get(0), b);
 			final SingleValueProductWitness sWitness = new SingleValueProductWitness(A.getColumn(0), r.get(0));
-			final SingleValueProductArgument singleValueProdArgument = singleValueProductArgumentService
-					.getSingleValueProductArgument(sStatement, sWitness);
+			final SingleValueProductArgument singleValueProdArg =
+					singleValueProductArgumentService.getSingleValueProductArgument(sStatement, sWitness);
 
-			return new ProductArgument(singleValueProdArgument);
+			return new ProductArgument(singleValueProdArg);
 		}
 	}
 
@@ -174,38 +175,40 @@ final class ProductArgumentService {
 		checkNotNull(statement, "The statement must be non-null.");
 		checkNotNull(argument, "The argument must be non-null.");
 
-		final GroupVector<GqElement, GqGroup> cA = statement.getCommitments();
-		final ZqElement b = statement.getProduct();
-		final int m = statement.getM();
-
-		final SingleValueProductArgument sArgument = argument.getSingleValueProductArgument();
+		final GroupVector<GqElement, GqGroup> c_A = statement.get_c_A();
+		final ZqElement b = statement.get_b();
+		final int m = statement.get_m();
+		final SingleValueProductArgument singleValueProductArg = argument.getSingleValueProductArgument();
 
 		// cross-check groups and dimensions
-		checkArgument(statement.getGroup().equals(sArgument.getGroup()),
+		checkArgument(statement.getGroup().equals(singleValueProductArg.getGroup()),
 				"The statement and the argument must have compatible groups.");
-		checkArgument(statement.getM() == argument.getM(),
+		checkArgument(statement.get_m() == argument.get_m(),
 				"The statement and the argument must have the same m.");
 
 		if (m > 1) {
-			final GqElement cb = argument.getCommitmentB()
+			final GqElement c_b = argument.get_c_b()
 					.orElseThrow(() -> new IllegalArgumentException("The product argument must contain a commitment b for m > 1."));
-			final HadamardArgument hArgument = argument.getHadamardArgument()
+			final HadamardArgument hadamardArg = argument.getHadamardArgument()
 					.orElseThrow(() -> new IllegalArgumentException("The product argument must contain a Hadamard argument for m > 1."));
 
-			final HadamardStatement hStatement = new HadamardStatement(cA, cb);
-			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cb, b);
+			final HadamardStatement hStatement = new HadamardStatement(c_A, c_b);
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(c_b, b);
 
-			final Verifiable verifHadamard = hadamardArgumentService.verifyHadamardArgument(hStatement, hArgument)
+			final Verifiable verifyHadamardArgument = hadamardArgumentService.verifyHadamardArgument(hStatement, hadamardArg)
 					.addErrorMessage("Failed to verify Hadamard Argument.");
 
-			final Verifiable verifSVP = singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
+			final Verifiable verifySingleValueProductArgument = singleValueProductArgumentService
+					.verifySingleValueProductArgument(sStatement, singleValueProductArg)
 					.addErrorMessage("Failed to verify Single Value Product Argument.");
 
-			return verifHadamard.and(verifSVP);
-		} else { // corresponds to the case m=1 (number of ciphertexts is prime), where we omit the Hadamard Argument.
-			final SingleValueProductStatement sStatement = new SingleValueProductStatement(cA.get(0), b);
+			return verifyHadamardArgument.and(verifySingleValueProductArgument);
+		} else {
+			// corresponds to the case m=1 (number of ciphertexts is prime), where we omit the Hadamard Argument.
+			// Because of 0 indexing c_A_1 in the spec becomes c_A_0 here
+			final SingleValueProductStatement sStatement = new SingleValueProductStatement(c_A.get(0), b);
 
-			return singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, sArgument)
+			return singleValueProductArgumentService.verifySingleValueProductArgument(sStatement, singleValueProductArg)
 					.addErrorMessage("Failed to verify Single Value Product Argument.");
 		}
 	}

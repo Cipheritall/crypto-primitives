@@ -58,9 +58,9 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 
 		TestMultiExponentiationStatementGenerator statementGenerator = new TestMultiExponentiationStatementGenerator(gqGroup);
 		MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
-		this.CMatrix = statement.getCMatrix();
-		this.C = statement.getC();
-		this.cA = statement.getcA();
+		this.CMatrix = statement.get_C_matrix();
+		this.C = statement.get_C();
+		this.cA = statement.get_c_A();
 	}
 
 	@Test

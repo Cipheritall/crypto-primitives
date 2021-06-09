@@ -31,11 +31,12 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  * <p>
  * Instances of this class are immutable.
  */
+@SuppressWarnings({"java:S100", "java:S116"})
 final class MultiExponentiationStatement {
 
-	private final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> CMatrix;
+	private final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> C_matrix;
 	private final ElGamalMultiRecipientCiphertext C;
-	private final GroupVector<GqElement, GqGroup> cA;
+	private final GroupVector<GqElement, GqGroup> c_A;
 
 	private final GqGroup group;
 	private final int m;
@@ -76,9 +77,9 @@ final class MultiExponentiationStatement {
 					"The ciphertext matrix and the commitment must be from the same group.");
 		}
 
-		this.CMatrix = ciphertextMatrix;
+		this.C_matrix = ciphertextMatrix;
 		this.C = ciphertextC;
-		this.cA = commitmentA;
+		this.c_A = commitmentA;
 
 		this.group = ciphertextMatrix.getGroup();
 		this.m = ciphertextMatrix.numRows();
@@ -86,28 +87,32 @@ final class MultiExponentiationStatement {
 		this.l = ciphertextMatrix.getElementSize();
 	}
 
-	GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> getCMatrix() {
-		return CMatrix;
+	GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> get_C_matrix() {
+		return C_matrix;
 	}
 
-	ElGamalMultiRecipientCiphertext getC() {
+	ElGamalMultiRecipientCiphertext get_C() {
 		return C;
 	}
 
-	GroupVector<GqElement, GqGroup> getcA() {
-		return cA;
+	GroupVector<GqElement, GqGroup> get_c_A() {
+		return c_A;
 	}
 
 	GqGroup getGroup() {
 		return group;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 
-	int getN() {
+	int get_n() {
 		return n;
+	}
+
+	int get_l() {
+		return l;
 	}
 
 	@Override
@@ -119,15 +124,12 @@ final class MultiExponentiationStatement {
 			return false;
 		}
 		final MultiExponentiationStatement that = (MultiExponentiationStatement) o;
-		return CMatrix.equals(that.CMatrix) && C.equals(that.C) && cA.equals(that.cA);
+		return C_matrix.equals(that.C_matrix) && C.equals(that.C) && c_A.equals(that.c_A);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(CMatrix, C, cA);
+		return Objects.hash(C_matrix, C, c_A);
 	}
 
-	public int getL() {
-		return l;
-	}
 }

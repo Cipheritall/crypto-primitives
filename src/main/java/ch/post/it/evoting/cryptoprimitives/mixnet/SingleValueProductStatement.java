@@ -26,34 +26,35 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 /**
  * Represents the statement for a single value product argument, consisting of a commitment and a product.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class SingleValueProductStatement {
 
-	private final GqElement commitment;
-	private final ZqElement product;
+	private final GqElement c_a;
+	private final ZqElement b;
 
 	/**
 	 * Instantiates a single value product statement object.
 	 *
 	 * <p>The commitment and product passed as arguments must both be non null and have the same group order.</p>
 	 *
-	 * @param commitment c<sub>a</sub>, a {@link GqElement}
-	 * @param product    b, a {@link ZqElement}
+	 * @param c_a c<sub>a</sub>, a {@link GqElement}
+	 * @param b    b, a {@link ZqElement}
 	 */
-	SingleValueProductStatement(final GqElement commitment, final ZqElement product) {
-		checkNotNull(commitment);
-		checkNotNull(product);
-		checkArgument(commitment.getGroup().hasSameOrderAs(product.getGroup()),
+	SingleValueProductStatement(final GqElement c_a, final ZqElement b) {
+		checkNotNull(c_a);
+		checkNotNull(b);
+		checkArgument(c_a.getGroup().hasSameOrderAs(b.getGroup()),
 				"The group of the commitment and the group of the product must have the same order");
-		this.commitment = commitment;
-		this.product = product;
+		this.c_a = c_a;
+		this.b = b;
 	}
 
-	GqElement getCommitment() {
-		return commitment;
+	GqElement get_c_a() {
+		return c_a;
 	}
 
-	ZqElement getProduct() {
-		return product;
+	ZqElement get_b() {
+		return b;
 	}
 
 	@Override
@@ -65,12 +66,12 @@ class SingleValueProductStatement {
 			return false;
 		}
 		final SingleValueProductStatement that = (SingleValueProductStatement) o;
-		return commitment.equals(that.commitment) &&
-				product.equals(that.product);
+		return c_a.equals(that.c_a) &&
+				b.equals(that.b);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(commitment, product);
+		return Objects.hash(c_a, b);
 	}
 }

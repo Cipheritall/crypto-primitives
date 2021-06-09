@@ -22,10 +22,11 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class HadamardStatement {
 
-	private final GroupVector<GqElement, GqGroup> commitmentsA;
-	private final GqElement commitmentB;
+	private final GroupVector<GqElement, GqGroup> c_A;
+	private final GqElement c_b;
 	private final GqGroup group;
 	private final int m;
 
@@ -38,35 +39,35 @@ class HadamardStatement {
 	 *     <li>belong to the same group</li>
 	 * </ul>
 	 *
-	 * @param commitmentsA c<sub>A</sub>, the vectors of commitments to a matrix A
-	 * @param commitmentB  c<sub>b</sub>, the commitment to a vector b.
+	 * @param c_A c<sub>A</sub>, the vectors of commitments to a matrix A
+	 * @param c_b  c<sub>b</sub>, the commitment to a vector b.
 	 */
-	HadamardStatement(final GroupVector<GqElement, GqGroup> commitmentsA, final GqElement commitmentB) {
-		checkNotNull(commitmentsA);
-		checkNotNull(commitmentB);
+	HadamardStatement(final GroupVector<GqElement, GqGroup> c_A, final GqElement c_b) {
+		checkNotNull(c_A);
+		checkNotNull(c_b);
 
-		this.commitmentsA = commitmentsA;
-		this.commitmentB = commitmentB;
-		this.group = commitmentsA.getGroup();
-		this.m = commitmentsA.size();
+		this.c_A = c_A;
+		this.c_b = c_b;
+		this.group = c_A.getGroup();
+		this.m = c_A.size();
 
-		checkArgument(this.commitmentsA.getGroup().equals(this.commitmentB.getGroup()),
+		checkArgument(this.c_A.getGroup().equals(this.c_b.getGroup()),
 				"The commitments A and commitment b must have the same group.");
 	}
 
-	GroupVector<GqElement, GqGroup> getCommitmentsA() {
-		return commitmentsA;
+	GroupVector<GqElement, GqGroup> get_c_A() {
+		return c_A;
 	}
 
-	GqElement getCommitmentB() {
-		return commitmentB;
+	GqElement get_c_b() {
+		return c_b;
 	}
 
 	GqGroup getGroup() {
 		return group;
 	}
 
-	int getM() {
+	int get_m() {
 		return m;
 	}
 }

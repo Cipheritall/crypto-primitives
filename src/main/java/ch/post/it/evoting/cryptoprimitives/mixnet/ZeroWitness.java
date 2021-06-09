@@ -28,12 +28,13 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Represents the witness for a zero argument, consisting of two matrices and two vectors of exponents.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ZeroWitness {
 
-	private final GroupMatrix<ZqElement, ZqGroup> matrixA;
-	private final GroupMatrix<ZqElement, ZqGroup> matrixB;
-	private final GroupVector<ZqElement, ZqGroup> exponentsR;
-	private final GroupVector<ZqElement, ZqGroup> exponentsS;
+	private final GroupMatrix<ZqElement, ZqGroup> A;
+	private final GroupMatrix<ZqElement, ZqGroup> B;
+	private final GroupVector<ZqElement, ZqGroup> r;
+	private final GroupVector<ZqElement, ZqGroup> s;
 
 	/**
 	 * Instantiates a zero witness. The matrices and exponents must comply with the following:
@@ -45,50 +46,50 @@ class ZeroWitness {
 	 *     <li>the size of exponents vector must be the number of columns of the matrices</li>
 	 * </ul>
 	 *
-	 * @param matrixA    A, a matrix of {@link ZqElement}s.
-	 * @param matrixB    B, a matrix of {@link ZqElement}s.
-	 * @param exponentsR r, a vector of {@link ZqElement}s.
-	 * @param exponentsS s, a vector of {@link ZqElement}s.
+	 * @param A    a matrix of {@link ZqElement}s.
+	 * @param B    a matrix of {@link ZqElement}s.
+	 * @param r    a vector of {@link ZqElement}s.
+	 * @param s    a vector of {@link ZqElement}s.
 	 */
-	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> matrixA, final GroupMatrix<ZqElement, ZqGroup> matrixB,
-			final GroupVector<ZqElement, ZqGroup> exponentsR, final GroupVector<ZqElement, ZqGroup> exponentsS) {
+	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupMatrix<ZqElement, ZqGroup> B,
+			final GroupVector<ZqElement, ZqGroup> r, final GroupVector<ZqElement, ZqGroup> s) {
 
 		// Null checking.
-		this.matrixA = checkNotNull(matrixA);
-		this.matrixB = checkNotNull(matrixB);
-		this.exponentsR = checkNotNull(exponentsR);
-		this.exponentsS = checkNotNull(exponentsS);
+		this.A = checkNotNull(A);
+		this.B = checkNotNull(B);
+		this.r = checkNotNull(r);
+		this.s = checkNotNull(s);
 
 		// Cross dimensions checking.
-		checkArgument(this.matrixA.numRows() == this.matrixB.numRows(), "The two matrices must have the same number of rows.");
-		checkArgument(this.matrixA.numColumns() == this.matrixB.numColumns(), "The two matrices must have the same number of columns.");
-		checkArgument(this.exponentsR.size() == this.exponentsS.size(), "The exponents vector must have the same size.");
-		checkArgument(this.exponentsR.size() == this.matrixA.numColumns(),
+		checkArgument(this.A.numRows() == this.B.numRows(), "The two matrices must have the same number of rows.");
+		checkArgument(this.A.numColumns() == this.B.numColumns(), "The two matrices must have the same number of columns.");
+		checkArgument(this.r.size() == this.s.size(), "The exponents vector must have the same size.");
+		checkArgument(this.r.size() == this.A.numColumns(),
 				"The exponents vectors size must be the number of columns of the matrices.");
 
 		// Cross group checking.
-		if (!this.matrixA.isEmpty()) {
-			final ZqGroup group = this.matrixA.getGroup();
-			checkArgument(this.matrixB.getGroup().equals(group), "The matrices are not from the same group.");
-			checkArgument(this.exponentsR.getGroup().equals(this.exponentsS.getGroup()), "The exponents are not from the same group.");
-			checkArgument(this.exponentsR.getGroup().equals(group), "The matrices and exponents are not from the same group.");
+		if (!this.A.isEmpty()) {
+			final ZqGroup group = this.A.getGroup();
+			checkArgument(this.B.getGroup().equals(group), "The matrices are not from the same group.");
+			checkArgument(this.r.getGroup().equals(this.s.getGroup()), "The exponents are not from the same group.");
+			checkArgument(this.r.getGroup().equals(group), "The matrices and exponents are not from the same group.");
 		}
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> getMatrixA() {
-		return matrixA;
+	GroupMatrix<ZqElement, ZqGroup> get_A() {
+		return A;
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> getMatrixB() {
-		return matrixB;
+	GroupMatrix<ZqElement, ZqGroup> get_B() {
+		return B;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getExponentsR() {
-		return exponentsR;
+	GroupVector<ZqElement, ZqGroup> get_r() {
+		return r;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getExponentsS() {
-		return exponentsS;
+	GroupVector<ZqElement, ZqGroup> get_s() {
+		return s;
 	}
 
 	@Override
@@ -100,12 +101,12 @@ class ZeroWitness {
 			return false;
 		}
 		final ZeroWitness that = (ZeroWitness) o;
-		return matrixA.equals(that.matrixA) && matrixB.equals(that.matrixB) && exponentsR.equals(that.exponentsR) && exponentsS
-				.equals(that.exponentsS);
+		return A.equals(that.A) && B.equals(that.B) && r.equals(that.r) && s
+				.equals(that.s);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(matrixA, matrixB, exponentsR, exponentsS);
+		return Objects.hash(A, B, r, s);
 	}
 }

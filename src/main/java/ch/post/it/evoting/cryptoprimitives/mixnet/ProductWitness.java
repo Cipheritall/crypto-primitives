@@ -28,10 +28,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Represents a witness for a product argument.
  */
+@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ProductWitness {
 
-	private final GroupMatrix<ZqElement, ZqGroup> matrix;
-	private final GroupVector<ZqElement, ZqGroup> exponents;
+	private final GroupMatrix<ZqElement, ZqGroup> A;
+	private final GroupVector<ZqElement, ZqGroup> r;
 
 	/**
 	 * Instantiates a {@link ProductWitness} with the given matrix and exponents.
@@ -43,27 +44,27 @@ class ProductWitness {
 	 *     <li>the number of columns in the matrix must be equal to the number of exponents</li>
 	 * </ul>
 	 *
-	 * @param matrix    A, a {@link GroupMatrix} of {@code ZqElements}
-	 * @param exponents <b><i>r</i></b>, a {@link GroupVector} of {@code ZqElements}
+	 * @param A    A, a {@link GroupMatrix} of {@code ZqElements}
+	 * @param r <b><i>r</i></b>, a {@link GroupVector} of {@code ZqElements}
 	 */
-	ProductWitness(final GroupMatrix<ZqElement, ZqGroup> matrix, final GroupVector<ZqElement, ZqGroup> exponents) {
-		checkNotNull(matrix);
-		checkNotNull(exponents);
-		checkArgument(matrix.numColumns() == exponents.size(),
+	ProductWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupVector<ZqElement, ZqGroup> r) {
+		checkNotNull(A);
+		checkNotNull(r);
+		checkArgument(A.numColumns() == r.size(),
 				"The number of columns in the matrix must be equal to the number of exponents.");
-		checkArgument(matrix.getGroup().equals(exponents.getGroup()),
+		checkArgument(A.getGroup().equals(r.getGroup()),
 				"The matrix and the exponents must belong to the same group.");
 
-		this.matrix = matrix;
-		this.exponents = exponents;
+		this.A = A;
+		this.r = r;
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> getMatrix() {
-		return matrix;
+	GroupMatrix<ZqElement, ZqGroup> get_A() {
+		return A;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getExponents() {
-		return exponents;
+	GroupVector<ZqElement, ZqGroup> get_r() {
+		return r;
 	}
 
 	@Override
@@ -75,11 +76,11 @@ class ProductWitness {
 			return false;
 		}
 		final ProductWitness that = (ProductWitness) o;
-		return matrix.equals(that.matrix) && exponents.equals(that.exponents);
+		return A.equals(that.A) && r.equals(that.r);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(matrix, exponents);
+		return Objects.hash(A, r);
 	}
 }

@@ -82,10 +82,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 	void hashWithRecursiveHash() throws NoSuchAlgorithmException {
 		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
 		final ShuffleArgument shuffleArgument = new ShuffleArgument.Builder()
-				.withCA(cA)
-				.withCB(cB)
-				.withProductArgument(productArgument)
-				.withMultiExponentiationArgument(multiExponentiationArgument)
+				.with_c_A(cA)
+				.with_c_B(cB)
+				.with_productArgument(productArgument)
+				.with_multiExponentiationArgument(multiExponentiationArgument)
 				.build();
 		assertDoesNotThrow(() -> hashService.recursiveHash(shuffleArgument));
 	}
@@ -99,10 +99,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		@DisplayName("all initialized fields does not throw")
 		void shuffleArgumentBuilderValidFields() {
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(cA)
-					.withCB(cB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument);
+					.with_c_A(cA)
+					.with_c_B(cB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument);
 
 			assertDoesNotThrow(builder::build);
 		}
@@ -123,10 +123,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 				final ProductArgument productArgument, final MultiExponentiationArgument multiExponentiationArgument) {
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(cA)
-					.withCB(cB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument);
+					.with_c_A(cA)
+					.with_c_B(cB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument);
 
 			assertThrows(NullPointerException.class, builder::build);
 		}
@@ -137,10 +137,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> otherGroupCA = otherGqGroupGenerator.genRandomGqElementVector(m);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(otherGroupCA)
-					.withCB(cB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument);
+					.with_c_A(otherGroupCA)
+					.with_c_B(cB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The commitments cA, cB, the product and the multi exponentiation arguments must belong to the same group.",
@@ -153,10 +153,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 			final ProductArgument otherGroupProductArgument = new TestArgumentGenerator(otherGqGroup).genProductArgument(m, n);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(cA)
-					.withCB(cB)
-					.withProductArgument(otherGroupProductArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument);
+					.with_c_A(cA)
+					.with_c_B(cB)
+					.with_productArgument(otherGroupProductArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The commitments cA, cB, the product and the multi exponentiation arguments must belong to the same group.",
@@ -170,10 +170,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 					.genMultiExponentiationArgument(m, n, l);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(cA)
-					.withCB(cB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(otherGroupMultiExponentiationArgument);
+					.with_c_A(cA)
+					.with_c_B(cB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(otherGroupMultiExponentiationArgument);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The commitments cA, cB, the product and the multi exponentiation arguments must belong to the same group.",
@@ -186,10 +186,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> longerCA = gqGroupGenerator.genRandomGqElementVector(m + 1);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(longerCA)
-					.withCB(cB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument);
+					.with_c_A(longerCA)
+					.with_c_B(cB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The commitments cA, cB and the product and multi exponentiation arguments must have the same dimension m.",
@@ -203,10 +203,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> longerCB = gqGroupGenerator.genRandomGqElementVector(m + 1);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(longerCA)
-					.withCB(longerCB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(multiExponentiationArgument);
+					.with_c_A(longerCA)
+					.with_c_B(longerCB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(multiExponentiationArgument);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The commitments cA, cB and the product and multi exponentiation arguments must have the same dimension m.",
@@ -219,10 +219,10 @@ class ShuffleArgumentTest extends TestGroupSetup {
 			final MultiExponentiationArgument longerNMultiExponentiationArgument = argumentGenerator.genMultiExponentiationArgument(m, n + 1, l);
 
 			final ShuffleArgument.Builder builder = new ShuffleArgument.Builder()
-					.withCA(cA)
-					.withCB(cB)
-					.withProductArgument(productArgument)
-					.withMultiExponentiationArgument(longerNMultiExponentiationArgument);
+					.with_c_A(cA)
+					.with_c_B(cB)
+					.with_productArgument(productArgument)
+					.with_multiExponentiationArgument(longerNMultiExponentiationArgument);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
 			assertEquals("The product and multi exponentiation arguments must have the same dimension n.",

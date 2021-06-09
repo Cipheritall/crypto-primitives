@@ -68,8 +68,8 @@ class ShuffleStatementTest extends TestGroupSetup {
 	void construct() {
 		final ShuffleStatement shuffleStatement = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
 
-		assertEquals(gqGroup, shuffleStatement.getCiphertexts().getGroup());
-		assertEquals(gqGroup, shuffleStatement.getShuffledCiphertexts().getGroup());
+		assertEquals(gqGroup, shuffleStatement.get_C().getGroup());
+		assertEquals(gqGroup, shuffleStatement.get_C_prime().getGroup());
 	}
 
 	@Test

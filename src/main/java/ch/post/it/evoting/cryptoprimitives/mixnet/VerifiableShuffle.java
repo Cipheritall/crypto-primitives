@@ -58,9 +58,9 @@ public class VerifiableShuffle implements HashableList {
 		checkNotNull(shuffledCiphertexts);
 		checkNotNull(shuffleArgument);
 
-		checkArgument(shuffledCiphertexts.size() == shuffleArgument.getN() * shuffleArgument.getM(),
+		checkArgument(shuffledCiphertexts.size() == shuffleArgument.get_n() * shuffleArgument.get_m(),
 				"Shuffle ciphertext vector's size must be N = n * m.");
-		checkArgument(shuffledCiphertexts.getElementSize() == shuffleArgument.getL(),
+		checkArgument(shuffledCiphertexts.getElementSize() == shuffleArgument.get_l(),
 				"Shuffled ciphertexts elements size must be dimension l of shuffle argument.");
 		checkArgument(shuffledCiphertexts.getGroup().equals(shuffleArgument.getGroup()),
 				"Shuffled ciphertext vector and shuffle argument must have the same group.");

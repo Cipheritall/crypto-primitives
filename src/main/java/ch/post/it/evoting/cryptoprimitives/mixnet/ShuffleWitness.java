@@ -27,10 +27,11 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Represents a shuffle argument witness, consisting of a permutation &#120587; and a randomness vector &#961;.
  */
+@SuppressWarnings("java:S100")
 class ShuffleWitness {
 
-	private final Permutation permutation;
-	private final GroupVector<ZqElement, ZqGroup> randomness;
+	private final Permutation pi;
+	private final GroupVector<ZqElement, ZqGroup> rho;
 
 	/**
 	 * Instantiates a shuffle witness with the given permutation and randomness vector which must comply with the following:
@@ -40,25 +41,25 @@ class ShuffleWitness {
 	 *     <li>have the same size</li>
 	 * </ul>
 	 *
-	 * @param permutation π, the permutation.
-	 * @param randomness  ρ, the randomness as a {@link GroupVector}.
+	 * @param pi π, the permutation.
+	 * @param rho  ρ, the randomness as a {@link GroupVector}.
 	 */
-	ShuffleWitness(final Permutation permutation, final GroupVector<ZqElement, ZqGroup> randomness) {
-		checkNotNull(permutation);
-		checkNotNull(randomness);
+	ShuffleWitness(final Permutation pi, final GroupVector<ZqElement, ZqGroup> rho) {
+		checkNotNull(pi);
+		checkNotNull(rho);
 
-		checkArgument(permutation.getSize() == randomness.size(), "The size of the permutation must be equal to the randomness vector size.");
+		checkArgument(pi.size() == rho.size(), "The size of the permutation must be equal to the randomness vector size.");
 
-		this.permutation = permutation;
-		this.randomness = randomness;
+		this.pi = pi;
+		this.rho = rho;
 	}
 
-	Permutation getPermutation() {
-		return permutation;
+	Permutation get_pi() {
+		return pi;
 	}
 
-	GroupVector<ZqElement, ZqGroup> getRandomness() {
-		return randomness;
+	GroupVector<ZqElement, ZqGroup> get_rho() {
+		return rho;
 	}
 
 	@Override
@@ -70,11 +71,11 @@ class ShuffleWitness {
 			return false;
 		}
 		final ShuffleWitness that = (ShuffleWitness) o;
-		return permutation.equals(that.permutation) && randomness.equals(that.randomness);
+		return pi.equals(that.pi) && rho.equals(that.rho);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(permutation, randomness);
+		return Objects.hash(pi, rho);
 	}
 }

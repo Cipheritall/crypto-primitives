@@ -35,13 +35,13 @@ import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Represents an ElGamal message containing multiple elements.
  * <p>
  * This class is immutable.
  */
+@SuppressWarnings({ "java:S117" })
 public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
 	private final GroupVector<GqElement, GqGroup> messageElements;
@@ -97,35 +97,21 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 		checkNotNull(ciphertext);
 		checkNotNull(secretKey);
 		checkArgument(ciphertext.getGroup().hasSameOrderAs(secretKey.getGroup()), "Ciphertext and secret key must be of the same order");
+		checkArgument(0 < ciphertext.size(), "A ciphertext must not be empty");
+		checkArgument(ciphertext.size() <= secretKey.size(), "There cannot be more message elements than private key elements.");
 
-		final int n = ciphertext.size();
-		final int k = secretKey.size();
-		// 0 < k is guaranteed by the checks performed during the construction of the ElGamalMultiRecipientCiphertext
-		checkArgument(n <= k, "There cannot be more message elements than private key elements.");
+		final ElGamalMultiRecipientCiphertext c = ciphertext;
+		final ElGamalMultiRecipientPrivateKey sk = secretKey;
 
-		final GqElement gamma = ciphertext.getGamma();
+		final int l = c.size();
+		final GqElement gamma = c.getGamma();
 
-		LinkedList<GqElement> messageElements = new LinkedList<>();
-		// no key compression
-		if (n == k) {
-			messageElements = IntStream.range(0, n)
-					.mapToObj(i -> ciphertext.get(i).multiply(gamma.exponentiate(secretKey.get(i).negate())))
-					.collect(Collectors.toCollection(LinkedList::new));
-		}
-		// key compression
-		else {
-			if (n >= 2) {
-				messageElements = IntStream.range(0, n - 1)
-						.mapToObj(i -> ciphertext.get(i).multiply(gamma.exponentiate(secretKey.get(i).negate())))
-						.collect(Collectors.toCollection(LinkedList::new));
-			}
-			ZqElement compressedKey = IntStream.range(n - 1, k)
-					.mapToObj(secretKey::get).reduce(ZqElement::add)
-					// Because of the precondition n <= k and the else condition n != k we are guaranteed to have at least two elements in the
-					// stream, hence the reduce operation is guaranteed to succeed.
-					.orElseThrow(() -> new RuntimeException("We should not reach this point."));
-			messageElements.add(ciphertext.get(n - 1).multiply(gamma.exponentiate(compressedKey.negate())));
-		}
+		// Algorithm.
+		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
+
+		final LinkedList<GqElement> messageElements = IntStream.range(0, l)
+				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk_prime.get(i).negate())))
+				.collect(Collectors.toCollection(LinkedList::new));
 
 		return new ElGamalMultiRecipientMessage(messageElements);
 	}
@@ -134,6 +120,13 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	public GqGroup getGroup() {
 		//A ElGamalMultiRecipientMessage is never empty
 		return this.messageElements.getGroup();
+	}
+
+	/**
+	 * Gets the elements composing this multi recipient message.
+	 */
+	public GroupVector<GqElement, GqGroup> getElements() {
+		return messageElements;
 	}
 
 	@Override

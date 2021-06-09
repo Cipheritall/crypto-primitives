@@ -25,7 +25,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -36,6 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+@SuppressWarnings("java:S117")
 public final class MixnetService implements Mixnet {
 
 	private final RandomService randomService;
@@ -87,46 +87,45 @@ public final class MixnetService implements Mixnet {
 		checkNotNull(publicKey);
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(inputCiphertexts);
+		final ElGamalMultiRecipientPublicKey pk = publicKey;
+		final int N = C.size();
+		final int l = C.getElementSize();
+		final int k = pk.size();
 
 		//Ensure
-		final int N = C.size();
 		checkArgument(2 <= N, "N must be >= 2");
-		checkArgument(0 <= C.getElementSize(), "Ciphertexts must contain at least one element.");
-		checkArgument(C.getElementSize() <= publicKey.size(), "Ciphertexts must not contain more elements than the publicKey");
-		checkArgument(canGenerateKey(C.size(), C.getGroup()), "N must be smaller or equal to q - 3");
+		checkArgument(0 < l, "Ciphertexts must contain at least one element.");
+		checkArgument(l <= k, "Ciphertexts must not contain more elements than the publicKey");
+		checkArgument(canGenerateKey(N, C.getGroup()), "N must be smaller or equal to q - 3");
 
 		final BigInteger q = C.getGroup().getQ();
 		checkArgument(shuffleHashService.getHashLength() * Byte.SIZE < q.bitLength(),
 				"The hash service's bit length must be smaller than the bit length of q.");
 
 		//Group checking
-		checkArgument(publicKey.getGroup().equals(C.getGroup()), "Ciphertexts must have the same group as the publicKey");
-		final GqGroup gqGroup = publicKey.getGroup();
+		checkArgument(pk.getGroup().equals(C.getGroup()), "Ciphertexts must have the same group as the publicKey");
+		final GqGroup gqGroup = pk.getGroup();
 
 		//Algorithm
-		final Shuffle shuffle = shuffleService.genShuffle(C, publicKey);
-
-		@SuppressWarnings("squid:S00117")
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> CPrime = GroupVector.from(shuffle.getCiphertexts());
-		final Permutation phi = shuffle.getPermutation();
-		final ImmutableList<ZqElement> reEncryptionExponents = shuffle.getReEncryptionExponents();
-		final GroupVector<ZqElement, ZqGroup> r = GroupVector.from(reEncryptionExponents);
+		final Shuffle shuffle = shuffleService.genShuffle(C, pk);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = GroupVector.from(shuffle.getCiphertexts());
+		final Permutation pi = shuffle.getPermutation();
+		final GroupVector<ZqElement, ZqGroup> r = GroupVector.from(shuffle.getReEncryptionExponents());
 
 		final int[] matrixDimensions = MatrixUtils.getMatrixDimensions(N);
 		final int m = matrixDimensions[0];
 		final int n = matrixDimensions[1];
 
 		final CommitmentKey ck = commitmentKeyService.getVerifiableCommitmentKey(n, gqGroup);
+		final ShuffleStatement shuffleStatement = new ShuffleStatement(C, C_prime);
 
-		final ShuffleStatement shuffleStatement = new ShuffleStatement(C, CPrime);
-
-		final ShuffleWitness shuffleWitness = new ShuffleWitness(phi, r);
+		final ShuffleWitness shuffleWitness = new ShuffleWitness(pi, r);
 
 		//shuffleArgument
-		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, ck, randomService, shuffleHashService);
+		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(pk, ck, randomService, shuffleHashService);
 		final ShuffleArgument shuffleArgument = shuffleArgumentService.getShuffleArgument(shuffleStatement, shuffleWitness, m, n);
 
-		return new VerifiableShuffle(GroupVector.from(shuffle.getCiphertexts()), shuffleArgument);
+		return new VerifiableShuffle(C_prime, shuffleArgument);
 	}
 
 	@Override
@@ -136,19 +135,20 @@ public final class MixnetService implements Mixnet {
 		checkNotNull(ciphertexts);
 		checkNotNull(shuffledCiphertexts);
 		checkNotNull(shuffleArgument);
-		final ElGamalMultiRecipientPublicKey pk = checkNotNull(publicKey);
+		checkNotNull(publicKey);
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = GroupVector.from(shuffledCiphertexts);
-
-		// Ensure
+		final ElGamalMultiRecipientPublicKey pk = publicKey;
 		final int k = pk.size();
 		final int l = C.getElementSize();
 		final int N = C.size();
+
+		// Ensure
 		checkArgument(2 <= N, "N must be >= 2");
 		checkArgument(0 <= l, "Ciphertexts must contain at least one element.");
 		checkArgument(l <= k, "Ciphertexts must not contain more elements than the publicKey");
-		checkArgument(canGenerateKey(C.size(), C.getGroup()), "N must be smaller or equal to q - 3");
+		checkArgument(canGenerateKey(N, C.getGroup()), "N must be smaller or equal to q - 3");
 
 		// Group checking
 		checkArgument(C.getGroup().equals(C_prime.getGroup()), "The shuffled and re-encrypted ciphertexts must have the same group than the un-shuffled ciphertexts.");

@@ -48,8 +48,8 @@ class TestHadamardGenerators {
 	static HadamardStatement generateHadamardStatement(HadamardWitness witness, CommitmentKey commitmentKey) {
 		// Generate the Hadamard statement
 		GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService
-				.getCommitmentMatrix(witness.getMatrixA(), witness.getExponentsR(), commitmentKey);
-		GqElement commitmentB = CommitmentService.getCommitment(witness.getVectorB(), witness.getExponentS(), commitmentKey);
+				.getCommitmentMatrix(witness.get_A(), witness.get_r(), commitmentKey);
+		GqElement commitmentB = CommitmentService.getCommitment(witness.get_b(), witness.get_s(), commitmentKey);
 		return new HadamardStatement(commitmentsA, commitmentB);
 	}
 }
