@@ -86,8 +86,8 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 *             	<li>all elements must be the same size</li>
 	 *             </ul>
 	 */
-	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupMatrix<E, G> fromRows(final List<L> rows) {
+	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupMatrix<E, G> fromRows(
+			final List<L> rows) {
 		//Null checks
 		checkNotNull(rows);
 		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
@@ -113,13 +113,13 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 *                	<li>all elements must be the same size</li>
 	 *                </ul>
 	 */
-	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupMatrix<E, G> fromColumns(final List<L> columns) {
+	public static <L extends List<E>, E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupMatrix<E, G> fromColumns(
+			final List<L> columns) {
 		return fromRows(columns).transpose();
 	}
 
-	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupMatrix<E, G> fromColumnVector(final ImmutableList<GroupVector<E, G>> columns) {
+	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupMatrix<E, G> fromColumnVector(
+			final ImmutableList<GroupVector<E, G>> columns) {
 		return new GroupMatrix<>(columns).transpose();
 	}
 
@@ -155,8 +155,8 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 		return this.numRows == 0 || this.numColumns == 0;
 	}
 
-	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	boolean isEmpty(final ImmutableList<GroupVector<E, G>> matrix) {
+	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> boolean isEmpty(
+			final ImmutableList<GroupVector<E, G>> matrix) {
 		return matrix.isEmpty() || matrix.get(0).isEmpty();
 	}
 
@@ -275,8 +275,8 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	/**
-	 * Returns a matrix with the columns of this matrix, between the fromIdx, inclusive, to toIdx, exclusive.
-	 * If fromIdx and toIdx are equal, returns an empty matrix.
+	 * Returns a matrix with the columns of this matrix, between the fromIdx, inclusive, to toIdx, exclusive. If fromIdx and toIdx are equal, returns
+	 * an empty matrix.
 	 */
 	public GroupMatrix<E, G> subColumns(final int fromIdx, final int toIdx) {
 		checkArgument(fromIdx >= 0);

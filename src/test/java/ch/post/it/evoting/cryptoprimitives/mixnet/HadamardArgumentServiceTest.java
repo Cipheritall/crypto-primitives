@@ -412,10 +412,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 			final VerificationResult verificationResult = hadamardArgumentService.verifyHadamardArgument(statement, badArgument).verify();
 			assertFalse(verificationResult.isVerified());
-			String expectedError = String
-					.format("c_B_0 %s must equal c_A_0 %s and c_B_m_minus_1 %s must equal c_b %s", badcUpperB0,
-							statement.get_c_A().get(0), cUpperB.get(m - 1), statement.get_c_b());
-			assertEquals(expectedError, verificationResult.getErrorMessages().getFirst());
+			assertEquals("c_B_0 must equal c_A_0.", verificationResult.getErrorMessages().getFirst());
 
 			int m = cUpperB.size();
 			GqElement badcUpperBmMinusOne = cUpperB.get(m - 1).multiply(gqGroup.getGenerator());

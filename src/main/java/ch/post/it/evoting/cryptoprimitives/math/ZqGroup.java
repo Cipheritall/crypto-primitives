@@ -32,7 +32,7 @@ public class ZqGroup implements MathematicalGroup<ZqGroup> {
 
 	public ZqGroup(final BigInteger q) {
 		checkNotNull(q);
-		checkArgument(q.compareTo(BigInteger.ONE) >= 0);
+		checkArgument(q.compareTo(BigInteger.valueOf(2)) >= 0);
 
 		this.q = q;
 		this.identity = ZqElement.create(BigInteger.ZERO, this);
