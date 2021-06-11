@@ -18,16 +18,13 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;

@@ -26,7 +26,7 @@ The CoC will be adapted to changes in the e-voting regulation and continuously i
 
 - You respect the privacy of others, and do not destroy data or disrupt systems.
 - Participants observe the Coordinated vulnerability disclosure policy.
-- You report your findings using the provided [templates](https://evoting-community.post.ch/en/contribute).
+- You report your findings using the provided [templates](https://evoting-community.post.ch/en/contributions).
 
 # Organization
 
@@ -34,13 +34,13 @@ The ECP starts on 19.01.2021. It will remain accessible for as long as the Swiss
 
 No registration is necessary for participating in the ECP. Your participation in the ECP is anonymous. It is your choice to provide us with contact information.
 
-The SPOC serves as single point of contact for all participants. The [SPOC](https://evoting-community.post.ch/en/help-and-contact/support) is mainly responsible for issue management and any issues related to our voting solution you would like to discuss.
+The SPOC serves as single point of contact for all participants. The [SPOC](https://evoting-community.post.ch/en/help-and-contact/support#contact) is mainly responsible for any issues related to our voting solution you would like to discuss.
 
 # In-scope
 
 In the scope of the ECP are the code and other materials that are available in the repositories under <https://gitlab.com/swisspost-evoting>
 
-In case of doubt, please check with the [SPOC](https://evoting-community.post.ch/en/help-and-contact/support) beforehand.
+In case of doubt, please check with the [SPOC](https://evoting-community.post.ch/en/help-and-contact/support#contact) beforehand.
 
 # Out of Scope
 
@@ -48,7 +48,7 @@ What is not defined as in-scope, is out-of-scope.
 
 # Reporting
 
-Reports on any findings should be filed using the provided [templates](https://evoting-community.post.ch/en/contribute).
+Reports on any findings should be filed using the provided [templates](https://evoting-community.post.ch/en/contributions).
 
 A report should include:
 
@@ -62,7 +62,7 @@ Please note, if the [severity](https://gitlab.com/swisspost-evoting/documentatio
 
 # Coordinated vulnerability disclosure policy
 
-Findings are published on the [Swiss Post website](https://evoting-community.post.ch/en/contribute) on a regular basis for purposes of transparency.
+Findings are published on [GitLab](https://gitlab.com/swisspost-evoting) for purposes of transparency.
 
 The reporter of the findings will be credited if the reporter agrees to its publication. The reporter may remain anonymous or use an alias.
 
@@ -76,7 +76,7 @@ You are allowed to make a copy. The license terms, copyright notices and attribu
 
 If you publish modifications, you must respect the coordinated vulnerability disclosure policy. Modifications must be highlighted.
 
-The ECP does not allow you to use any information gained for commercial purpose and productive use in particular to use any part of code in any other software and services. In case of interest, please contact the [SPOC](https://evoting-community.post.ch/en/help-and-contact/support).
+The ECP does not allow you to use any information gained for commercial purpose and productive use in particular to use any part of code in any other software and services. In case of interest, please contact the [SPOC](https://evoting-community.post.ch/en/help-and-contact/support#contact).
 
 # Legal safe harbour: consequences of complying with the Code of Conduct
 
