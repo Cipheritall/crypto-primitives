@@ -19,23 +19,25 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URL;
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.CryptoPrimitives;
 import ch.post.it.evoting.cryptoprimitives.CryptoPrimitivesService;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 @DisplayName("An EncryptionParameters object")
 class EncryptionParametersTest {
@@ -83,22 +85,44 @@ class EncryptionParametersTest {
 		assertDoesNotThrow(() -> encryptionParameters.getEncryptionParameters(randomSeed));
 	}
 
-	@Test
-	@DisplayName("calling getEncryptionParameters with fixed seed and 2048 bitlength gives expected parameters")
-	void getEncryptionParameters2048() throws IOException {
-		final URL url = EncryptionParametersTest.class.getResource("/elgamal/encryption-parameters-2048.json");
-		final ObjectMapper mapper = new ObjectMapper();
-		final JsonNode rootNode = mapper.readTree(url);
+	static Stream<Arguments> getEncryptionParametersProvider() {
+		final List<TestParameters> parametersList = TestParameters.fromResource("/elgamal/get-encryption-parameters.json");
 
-		final String seed = rootNode.get("seed").asText();
-		final BigInteger p = new BigInteger(rootNode.get("p").asText().substring(2), 16);
-		final BigInteger q = new BigInteger(rootNode.get("q").asText().substring(2), 16);
-		final BigInteger g = new BigInteger(rootNode.get("g").asText().substring(2), 16);
-		final GqGroup expectedParameters = new GqGroup(p, q, g);
+		return parametersList.stream().parallel().map(testParameters -> {
+			// Inputs.
+			final JsonData input = testParameters.getInput();
+			final int bitLength = input.get("bit_len", Integer.class);
+			final String seed = input.get("seed", String.class);
 
-		final GqGroup encryptionParameters = new EncryptionParameters(SecurityLevel.DEFAULT).getEncryptionParameters(seed);
+			// Outputs.
+			final JsonData output = testParameters.getOutput();
+			final BigInteger p = output.get("p", BigInteger.class);
+			final BigInteger q = output.get("q", BigInteger.class);
+			final BigInteger g = output.get("g", BigInteger.class);
+			final GqGroup expectedParameters = new GqGroup(p, q, g);
 
-		assertEquals(expectedParameters, encryptionParameters);
+			return Arguments.of(bitLength, seed, expectedParameters, testParameters.getDescription());
+		});
+	}
+
+	@ParameterizedTest(name = "bitLength = {0} and seed = {1}")
+	@MethodSource("getEncryptionParametersProvider")
+	@DisplayName("calling getEncryptionParameters with fixed seed gives expected parameters")
+	void getEncryptionParameters(final int bitLength, final String seed, final GqGroup expectedParameters,
+			final String description) {
+
+		final SecurityLevel securityLevel;
+		if (bitLength == 2048) {
+			securityLevel = SecurityLevel.DEFAULT;
+		} else if (bitLength == 3072) {
+			securityLevel = SecurityLevel.EXTENDED;
+		} else {
+			throw new IllegalArgumentException("Unexpected bit length.");
+		}
+
+		final GqGroup encryptionParameters = new EncryptionParameters(securityLevel).getEncryptionParameters(seed);
+
+		assertEquals(expectedParameters, encryptionParameters, String.format("assertion failed for: %s", description));
 	}
 
 }

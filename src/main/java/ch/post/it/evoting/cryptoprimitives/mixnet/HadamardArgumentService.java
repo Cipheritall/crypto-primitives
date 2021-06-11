@@ -211,9 +211,9 @@ public class HadamardArgumentService {
 				.mapToObj(j ->
 						//Scalar multiplication
 						IntStream.range(1, m)
-						.mapToObj(i -> xPowers.get(i).multiply(b_vectors.get(i).get(j)))
-						//Sum
-						.reduce(zqGroup.getIdentity(), ZqElement::add))
+								.mapToObj(i -> xPowers.get(i).multiply(b_vectors.get(i).get(j)))
+								//Sum
+								.reduce(zqGroup.getIdentity(), ZqElement::add))
 				.collect(toGroupVector());
 
 		// Calculate c_D
@@ -279,9 +279,6 @@ public class HadamardArgumentService {
 		final int n = a_prime.size();
 
 		// Algorithm
-		final Verifiable verifB = create(() -> c_B.get(0).equals(c_A.get(0)) && c_B.get(m - 1).equals(c_b),
-				String.format("c_B_0 %s must equal c_A_0 %s and c_B_m_minus_1 %s must equal c_b %s", c_B.get(0), c_A.get(0), c_B.get(m - 1), c_b));
-
 		// Calculate x
 		final byte[] x_bytes = hashService.recursiveHash(
 				HashableBigInteger.from(p),
@@ -332,10 +329,10 @@ public class HadamardArgumentService {
 		final GroupVector<GqElement, GqGroup> c_D_zero_argument = c_D_vector.append(c_D);
 		final ZeroStatement zeroStatement = new ZeroStatement(c_A_zero_argument, c_D_zero_argument, y);
 		final ZeroArgument zeroArgument = argument.get_zeroArgument();
-		final Verifiable verifZ = zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument)
-				.addErrorMessage("Failed to verify the ZeroArgument.");
 
-		return verifB.and(verifZ);
+		return create(() -> c_B.get(0).equals(c_A.get(0)), "c_B_0 must equal c_A_0.")
+				.and(create(() -> c_B.get(m - 1).equals(c_b), "c_B_m_minus_1 must equal c_b."))
+				.and(zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument).addErrorMessage("Failed to verify the ZeroArgument."));
 	}
 
 	/**
@@ -345,7 +342,7 @@ public class HadamardArgumentService {
 	 * wise product vw = (v<sub>0</sub> w<sub>0</sub>, ..., v<sub>n-1</sub> w<sub>n-1</sub>).
 	 *
 	 * @param matrix A = (a<sub>0</sub>, ..., a<sub>m-1</sub>), the matrix for which to calculate the Hadamard product
-	 * @param bound      the index &lt; m of the last column to include in the product
+	 * @param bound  the index &lt; m of the last column to include in the product
 	 * @return &prod;<sub>i=0</sub><sup>j</sup> a<sub>i</sub>
 	 */
 	@VisibleForTesting

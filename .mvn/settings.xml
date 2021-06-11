@@ -4,19 +4,6 @@
 					xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
 	<localRepository>${env.EVOTING_HOME}/.m2/repository</localRepository>
 
-	<servers>
-		<server>
-			<id>central</id>
-			<username>s-cicd-evoting</username>
-			<password>AP49Cs25CQV2HAfdyZSvLHvmf98</password>
-		</server>
-		<server>
-			<id>snapshots</id>
-			<username>s-cicd-evoting</username>
-			<password>AP49Cs25CQV2HAfdyZSvLHvmf98</password>
-		</server>
-	</servers>
-
 	<mirrors>
 		<mirror>
 			<mirrorOf>*</mirrorOf>
@@ -62,57 +49,8 @@
 			</pluginRepositories>
 			<id>artifactory</id>
 		</profile>
-		<profile>
-			<id>property-inject</id>
-			<properties>
-				<!-- nwjs -->
-				<nwjs.win64.name>nwjs-sdk-v0.51.0-win-x64</nwjs.win64.name>
-				<nwjs.win64.url>https://artifactory.tools.post.ch/artifactory/files-local/nwjs/0.51.0/nwjs-sdk-v0.51.0-win-x64.zip</nwjs.win64.url>
-				<nwjs.linux64.name>nwjs-sdk-v0.51.0-linux-x64</nwjs.linux64.name>
-				<nwjs.linux64.url>https://artifactory.tools.post.ch/artifactory/files-local/nwjs/0.51.0/nwjs-sdk-v0.51.0-linux-x64.tar.gz</nwjs.linux64.url>
-				<nwjs.osx64.name>nwjs-sdk-v0.51.0-osx-x64</nwjs.osx64.name>
-				<nwjs.osx64.url>https://artifactory.tools.post.ch/artifactory/files-local/nwjs/0.51.0/nwjs-sdk-v0.51.0-osx-x64.zip</nwjs.osx64.url>
-
-				<!-- org.apache.tomcat -->
-				<apache-tomcat.version>8.5.59</apache-tomcat.version>
-				<apache-tomcat.base.url>
-					https://artifactory.tools.pnet.ch/artifactory/apache-remote/tomcat/tomcat-8/v8.5.59/bin/apache-tomcat-8.5.59.zip
-				</apache-tomcat.base.url>
-				<apache-tomcat.base.sha512>
-					e1a099b76ae5db8ee92c44de8078312b8f6cc9fda53811682c776725255410fed31de6fe476933935cdac06793aef9c97d0c0e0d74ee4a1b4c4e1cc682b060af
-				</apache-tomcat.base.sha512>
-				<apache-tomcat.win64.url>
-					https://artifactory.tools.pnet.ch/artifactory/apache-remote/tomcat/tomcat-8/v8.5.59/bin/apache-tomcat-8.5.59-windows-x64.zip
-				</apache-tomcat.win64.url>
-				<apache-tomcat.win64.sha512>
-					9f621628c461fb60bd752c2469d593d7f2e84d567b88a6b3cd5d5ffd960f940d4592735af38ddef8fa16d0d2174f00ac83bdc3d5293329260ca1717dab96e210
-				</apache-tomcat.win64.sha512>
-
-				<!-- com.oracle.java.jre AdoptOpenJDK -->
-				<adopt-jre.version>jdk8u282-b08-jre</adopt-jre.version>
-				<adopt-jre.linux64.url>
-					https://artifactory.tools.pnet.ch/artifactory/ext-binaries-local/com/oracle/java/jre/OpenJDK8U-jre_x64_linux_hotspot_8u282b08.tar.gz
-				</adopt-jre.linux64.url>
-				<adopt-jre.linux64.sha256>
-					3b2e2c6ad3ee04a58ffb8d629e3e242b0ae87b38cfd06425e4446b1f9490f521
-				</adopt-jre.linux64.sha256>
-				<adopt-jre.win64.url>
-					https://artifactory.tools.pnet.ch/artifactory/ext-binaries-local/com/oracle/java/jre/OpenJDK8U-jre_x64_windows_hotspot_8u282b08.zip
-				</adopt-jre.win64.url>
-				<adopt-jre.win64.sha256>
-					58f2bbf0e5abc6dee7ee65431fd2fc95cdb2c3d10126045c5882f739dda79c3b
-				</adopt-jre.win64.sha256>
-				<adopt-jre.osx64.url>
-					https://artifactory.tools.pnet.ch/artifactory/ext-binaries-local/com/oracle/java/jre/OpenJDK8U-jre_x64_mac_hotspot_8u282b08.tar.gz
-				</adopt-jre.osx64.url>
-				<adopt-jre.osx64.sha256>
-					9e7a40d570d5151aae23a2fb017359248f5fb82c547c3ecd860c992770228afb
-				</adopt-jre.osx64.sha256>
-			</properties>
-		</profile>
 	</profiles>
 	<activeProfiles>
-		<activeProfile>property-inject</activeProfile>
 		<activeProfile>artifactory</activeProfile>
 	</activeProfiles>
 	<pluginGroups>
