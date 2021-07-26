@@ -98,4 +98,20 @@ public class BigIntegerOperations {
 				.mapToObj(i -> modExponentiate(basesCopy.get(i), exponentsCopy.get(i), modulus))
 				.reduce(BigInteger.ONE, (a, b) -> modMultiply(a, b, modulus));
 	}
+
+	/**
+	 * Inverts an element with respect to a modulus.
+	 *
+	 * @param n       the number to be inverted
+	 * @param modulus the modulus &gt; 1
+	 * @return n<sup>-1</sup> mod modulus
+	 */
+	public static BigInteger modInvert(final BigInteger n, final BigInteger modulus) {
+		checkNotNull(n);
+		checkNotNull(modulus);
+		checkArgument(modulus.compareTo(BigInteger.ONE) > 0, MODULUS_CHECK_MESSAGE);
+		checkArgument(n.gcd(modulus).equals(BigInteger.ONE), "The number to be inverted must be relatively prime to the modulus.");
+
+		return n.modInverse(modulus);
+	}
 }

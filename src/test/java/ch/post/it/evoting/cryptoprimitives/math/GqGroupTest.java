@@ -26,9 +26,12 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class GqGroupTest {
+	private static final SecurityLevel SECURITY_LEVEL_CONFIG = SecurityLevel.TESTING_ONLY;
+
 	private static BigInteger p;
 	private static BigInteger q;
 	private static BigInteger g;

@@ -136,7 +136,7 @@ final class MultiExponentiationArgumentService {
 		final ZqElement rho = witness.get_rho();
 		final int m = statement.get_m();
 		final int n = statement.get_n();
-		final int l = C_matrix.isEmpty() ? 0 : C_matrix.getElementSize();
+		final int l = C_matrix.getElementSize();
 		final int k_size = pk.size();
 		final int nu = ck.size();
 		final BigInteger q = this.gqGroup.getQ();
@@ -147,7 +147,6 @@ final class MultiExponentiationArgumentService {
 		checkArgument(witness.get_m() > 0, "The dimension m must be strictly positive.");
 		checkArgument(witness.get_n() > 0, "The dimension n must be strictly positive.");
 		checkArgument(witness.get_n() <= nu, "The number of rows of matrix A must be smaller or equal to the size of the commitment key.");
-		checkArgument(!C_matrix.isEmpty(), "The ciphertext matrix C must not be empty.");
 
 		//Group checking
 		checkArgument(this.gqGroup.equals(statement.getGroup()), "The statement must belong to the same group as the public key and commitment key.");
@@ -305,9 +304,6 @@ final class MultiExponentiationArgumentService {
 		// Null checking.
 		checkNotNull(ciphertexts);
 		checkNotNull(exponents);
-
-		// Empty matrices handling.
-		checkArgument(!ciphertexts.isEmpty() && !exponents.isEmpty(), "The ciphertexts and exponents matrices cannot be empty.");
 
 		// Dimensions checking.
 		checkArgument(ciphertexts.numColumns() == exponents.numRows(),

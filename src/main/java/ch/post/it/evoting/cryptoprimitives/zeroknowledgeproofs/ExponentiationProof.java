@@ -20,6 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -27,12 +31,12 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * An exponentiation proof (e, z) composed of a hash value e and a proof element z.
  */
 @SuppressWarnings("java:S100")
-public class ExponentiationProof {
+public class ExponentiationProof implements HashableList {
 
 	private final ZqElement e;
 	private final ZqElement z;
 
-	ExponentiationProof(final ZqElement e, final ZqElement z) {
+	public ExponentiationProof(final ZqElement e, final ZqElement z) {
 		checkNotNull(e);
 		checkNotNull(z);
 
@@ -69,5 +73,10 @@ public class ExponentiationProof {
 	@Override
 	public int hashCode() {
 		return Objects.hash(e, z);
+	}
+
+	@Override
+	public ImmutableList<Hashable> toHashableForm() {
+		return ImmutableList.of(e, z);
 	}
 }

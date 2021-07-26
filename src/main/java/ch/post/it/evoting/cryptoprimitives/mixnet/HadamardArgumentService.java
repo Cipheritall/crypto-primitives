@@ -127,6 +127,7 @@ public class HadamardArgumentService {
 		checkArgument(c_A.size() == m, "The commitments for A must have as many elements as matrix A has rows.");
 		checkArgument(c_A.getGroup().hasSameOrderAs(A.getGroup()), "The matrix A and its commitments must have the same group order q.");
 		checkArgument(n <= nu, "The number of rows in the matrix must be smaller or equal to the commitment key size.");
+		checkArgument(0 < n, "The hadamard argument is not defined for empty input.");
 
 		// Ensure statement corresponds to witness
 		checkArgument(m >= 2, "The matrix must have at least 2 columns.");

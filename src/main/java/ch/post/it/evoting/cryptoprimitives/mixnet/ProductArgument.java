@@ -31,7 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
-@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class ProductArgument implements HashableList {
 
 	private final SingleValueProductArgument singleValueProductArgument;
@@ -50,7 +50,7 @@ public class ProductArgument implements HashableList {
 	 *     <li>{@code hadamardArgument} and {@code singleValueProductArgument} must have the same dimension {@code n}</li>
 	 * </ul>
 	 *
-	 * @param c_b                the commitment to a vector b. Non-null.
+	 * @param c_b                        the commitment to a vector b. Non-null.
 	 * @param hadamardArgument           the Hadamard argument. Non-null.
 	 * @param singleValueProductArgument the Single Value Product argument. Non-null.
 	 */

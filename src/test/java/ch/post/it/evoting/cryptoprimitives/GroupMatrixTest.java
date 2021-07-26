@@ -112,21 +112,6 @@ class GroupMatrixTest {
 		assertEquals("All elements of the matrix must be in the same group.", exception.getMessage());
 	}
 
-	@Test
-	void createGroupMatrixWithNoRows() {
-		final List<List<TestGroupElement>> emptyMatrixElements = Collections.emptyList();
-		GroupMatrix<TestGroupElement, TestGroup> emptyMatrix = GroupMatrix.fromRows(emptyMatrixElements);
-		assertEquals(0, emptyMatrix.numRows());
-		assertEquals(0, emptyMatrix.numColumns());
-	}
-
-	@Test
-	void createGroupMatrixWithNoColumns() {
-		final List<List<TestGroupElement>> emptyMatrixElements = generateElementMatrix(numRows, 0, () -> new TestGroupElement(group));
-		GroupMatrix<TestGroupElement, TestGroup> emptyMatrix = GroupMatrix.fromRows(emptyMatrixElements);
-		assertEquals(0, emptyMatrix.numRows());
-		assertEquals(0, emptyMatrix.numColumns());
-	}
 
 	@Test
 	void createGroupMatrixWithDifferentSizes() {
@@ -146,20 +131,6 @@ class GroupMatrixTest {
 		GroupMatrix<TestGroupElement, TestGroup> matrix = GroupMatrix.fromRows(matrixElements);
 		assertEquals(numRows, matrix.numRows());
 		assertEquals(numColumns, matrix.numColumns());
-	}
-
-	@Test
-	void isEmptyReturnTrueForNoRows() {
-		List<List<TestGroupElement>> emptyMatrixElements = Collections.emptyList();
-		GroupMatrix<TestGroupElement, TestGroup> emptyMatrix = GroupMatrix.fromRows(emptyMatrixElements);
-		assertTrue(emptyMatrix.isEmpty());
-	}
-
-	@Test
-	void isEmptyReturnTrueForNoColumns() {
-		List<List<TestGroupElement>> emptyMatrixElements = Collections.singletonList(Collections.emptyList());
-		GroupMatrix<TestGroupElement, TestGroup> emptyMatrix = GroupMatrix.fromRows(emptyMatrixElements);
-		assertTrue(emptyMatrix.isEmpty());
 	}
 
 	@Test
@@ -213,8 +184,8 @@ class GroupMatrixTest {
 
 	@RepeatedTest(10)
 	void matrixFromColumnsIsMatrixFromRowsTransposed() {
-		int n = secureRandom.nextInt(BOUND_MATRIX_SIZE);
-		int m = secureRandom.nextInt(BOUND_MATRIX_SIZE);
+		int n = secureRandom.nextInt(BOUND_MATRIX_SIZE) + 1;
+		int m = secureRandom.nextInt(BOUND_MATRIX_SIZE) + 1;
 		List<List<TestGroupElement>> rows = generateElementMatrix(n, m, () -> new TestGroupElement(group));
 		GroupMatrix<TestGroupElement, TestGroup> expected = GroupMatrix.fromRows(rows);
 

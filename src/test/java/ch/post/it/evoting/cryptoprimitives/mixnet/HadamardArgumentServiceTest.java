@@ -266,6 +266,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			BigInteger p = BigInteger.valueOf(11);
 			BigInteger q = BigInteger.valueOf(5L);
 			BigInteger g = BigInteger.valueOf(3L);
+			
 			GqGroup gqGroup = new GqGroup(p, q, g);
 			ZqGroup zqGroup = new ZqGroup(q);
 

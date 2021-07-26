@@ -1,4 +1,8 @@
 #!/usr/bin/env groovy
+/*
+ * Copyright 2021 by Swiss Post, Information Technology Services
+ *
+ */
 
 // builds opc and executes JUnit-tests of tt.
 // param: boolean create dcf
@@ -59,12 +63,9 @@ node {
         }
 
         stage('Sending emails informations') {
-            commonPipelineLib.sendEmail(PROJECT_NAME, BRANCH_NAME, "jenkinsfortify", "Please check the latest build and fix the error.", false, "mathias.meier@post.ch", true)
+            commonPipelineLib.sendEmail(PROJECT_NAME, BRANCH_NAME, "jenkinsfortify", "Please check the latest build and fix the error.", false, "spoc-dev-evoting@post.ch", true)
         }
     
-        commit = sh(script: 'git rev-parse HEAD', returnStdout: true)
-    
-        step([$class: 'StashNotifier',
-              commitSha1: "${commit.trim()}"])
+        step([$class: 'StashNotifier'])
     }
 }

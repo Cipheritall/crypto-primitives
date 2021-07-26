@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
+import java.math.BigInteger;
+
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 
 public final class CryptoPrimitivesService implements CryptoPrimitives {
@@ -34,6 +36,11 @@ public final class CryptoPrimitivesService implements CryptoPrimitives {
 	@Override
 	public String genRandomBase64String(final int length) {
 		return randomService.genRandomBase64String(length);
+	}
+
+	@Override
+	public BigInteger genRandomInteger(final BigInteger upperBound) {
+		return randomService.genRandomInteger(upperBound);
 	}
 
 	public static CryptoPrimitives get() {

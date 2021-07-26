@@ -104,25 +104,12 @@ public final class GqElement extends GroupElement<GqGroup> {
 		return new GqElement(xhSquare, this.group);
 	}
 
-	/**
-	 * Returns a {@link GqElement} whose value is the inverse of {@code this}.
-	 * <p>
-	 * The inverse of an element x in G<sub>q</sub> is x<sup>q-1</sup>.
-	 *
-	 * @return this<sup>q-1</sup>
-	 */
-	public GqElement inverse() {
-		final BigInteger minusOne = group.getQ().subtract(BigInteger.ONE);
-		final ZqGroup zqGroup = ZqGroup.sameOrderAs(group);
-		return this.exponentiate(ZqElement.create(minusOne, zqGroup));
-	}
-
 	private boolean isOfSameOrderGroup(final ZqElement exponent) {
 		return this.group.hasSameOrderAs(exponent.getGroup());
 	}
 
-	GqElement invert() {
-		final BigInteger invertedValue = value.modInverse(this.group.getP());
+	public GqElement invert() {
+		final BigInteger invertedValue = BigIntegerOperations.modInvert(this.getValue(), this.group.getP());
 		return new GqElement(invertedValue, this.group);
 	}
 

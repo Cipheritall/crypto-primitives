@@ -32,7 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -209,31 +212,34 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 			final BigInteger q = context.get("q", BigInteger.class);
 			final BigInteger g = context.get("g", BigInteger.class);
 
-			final GqGroup gqGroup = new GqGroup(p, q, g);
-			final ZqGroup zqGroup = new ZqGroup(q);
+			try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
+				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
+				final GqGroup gqGroup = new GqGroup(p, q, g);
+				final ZqGroup zqGroup = new ZqGroup(q);
 
-			// Parse first message parameters.
-			final JsonData input = testParameters.getInput();
+				// Parse first message parameters.
+				final JsonData input = testParameters.getInput();
 
-			final BigInteger[] boldM = input.get("bold_m", BigInteger[].class);
-			final List<GqElement> message = Arrays.stream(boldM).map(m -> GqElement.create(m, gqGroup)).collect(Collectors.toList());
+				final BigInteger[] boldM = input.get("bold_m", BigInteger[].class);
+				final List<GqElement> message = Arrays.stream(boldM).map(m -> GqElement.create(m, gqGroup)).collect(Collectors.toList());
 
-			// Parse random exponent.
-			final BigInteger r = input.get("r", BigInteger.class);
-			ZqElement exponent = ZqElement.create(r, zqGroup);
+				// Parse random exponent.
+				final BigInteger r = input.get("r", BigInteger.class);
+				ZqElement exponent = ZqElement.create(r, zqGroup);
 
-			// Parse public key.
-			final BigInteger[] boldPk = input.get("bold_pk", BigInteger[].class);
-			final List<GqElement> publicKey = Arrays.stream(boldPk).map(pk -> GqElement.create(pk, gqGroup)).collect(Collectors.toList());
+				// Parse public key.
+				final BigInteger[] boldPk = input.get("bold_pk", BigInteger[].class);
+				final List<GqElement> publicKey = Arrays.stream(boldPk).map(pk -> GqElement.create(pk, gqGroup)).collect(Collectors.toList());
 
-			// Parse resulting ciphertext.
-			final JsonData outputJsonData = testParameters.getOutput();
+				// Parse resulting ciphertext.
+				final JsonData outputJsonData = testParameters.getOutput();
 
-			final GqElement gammaRes = GqElement.create(outputJsonData.get("gamma", BigInteger.class), gqGroup);
-			final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
-			final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElement.create(phi, gqGroup)).collect(Collectors.toList());
+				final GqElement gammaRes = GqElement.create(outputJsonData.get("gamma", BigInteger.class), gqGroup);
+				final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
+				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElement.create(phi, gqGroup)).collect(Collectors.toList());
 
-			return Arguments.of(message, exponent, publicKey, gammaRes, phisRes, testParameters.getDescription());
+				return Arguments.of(message, exponent, publicKey, gammaRes, phisRes, testParameters.getDescription());
+			}
 		});
 	}
 

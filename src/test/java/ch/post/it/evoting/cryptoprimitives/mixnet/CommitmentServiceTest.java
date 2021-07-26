@@ -156,6 +156,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with simple values returns expected result")
 		void getCommitmentWithSpecificValues() {
+			
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// a = (2, 10)
@@ -201,24 +202,6 @@ class CommitmentServiceTest {
 			assertThrows(NullPointerException.class, () -> CommitmentService.getCommitmentMatrix(null, validRandomValues, validCommitmentKey));
 			assertThrows(NullPointerException.class, () -> CommitmentService.getCommitmentMatrix(validMatrix, null, validCommitmentKey));
 			assertThrows(NullPointerException.class, () -> CommitmentService.getCommitmentMatrix(validMatrix, validRandomValues, null));
-		}
-
-		@Test
-		@DisplayName("with empty elements matrix returns empty list")
-		void getCommitmentMatrixWithEmptyElementsMatrix() {
-			GroupMatrix<ZqElement, ZqGroup> emptyMatrix = zqGroupGenerator.genRandomZqElementMatrix(0, 0);
-
-			assertEquals(GroupVector.of(),
-					CommitmentService.getCommitmentMatrix(emptyMatrix, validRandomValues, validCommitmentKey));
-		}
-
-		@Test
-		@DisplayName("with empty rows in elements matrix returns empty list")
-		void getCommitmentMatrixWithEmptyRowsInElementsMatrix() {
-			GroupMatrix<ZqElement, ZqGroup> emptyRowsMatrix = zqGroupGenerator.genRandomZqElementMatrix(0, m);
-			GroupVector<ZqElement, ZqGroup> emptyRandomElements = zqGroupGenerator.genRandomZqElementVector(0);
-			assertEquals(GroupVector.of(),
-					CommitmentService.getCommitmentMatrix(emptyRowsMatrix, emptyRandomElements, validCommitmentKey));
 		}
 
 		@Test
@@ -280,6 +263,7 @@ class CommitmentServiceTest {
 
 		@Test
 		void getCommitmentMatrixWithSpecificValues() {
+			
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// a0 = (2, 10)
@@ -386,6 +370,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with simple values returns expected result")
 		void getCommitmentVectorWithSpecificValues() {
+			
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// a = (2, 10)

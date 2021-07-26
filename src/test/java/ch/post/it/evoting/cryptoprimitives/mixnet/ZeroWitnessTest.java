@@ -80,21 +80,8 @@ class ZeroWitnessTest {
 	}
 
 	@Test
-	@DisplayName("constructed with empty matrices and vectors works as expected")
-	void constructEmptyParams() {
-		final GroupMatrix<ZqElement, ZqGroup> emptyMatrixA = GroupMatrix.fromRows(Collections.emptyList());
-		final GroupMatrix<ZqElement, ZqGroup> emptyMatrixB = GroupMatrix.fromRows(Collections.emptyList());
-		final GroupVector<ZqElement, ZqGroup> emptyExponentsR = GroupVector.of();
-		final GroupVector<ZqElement, ZqGroup> emptyExponentsS = GroupVector.of();
-
-		assertDoesNotThrow(() -> new ZeroWitness(emptyMatrixA, emptyMatrixB, emptyExponentsR, emptyExponentsS));
-	}
-
-	@Test
 	@DisplayName("constructed with any null parameter throws IllegalArgumentException")
 	void constructNullParams() {
-		final GroupMatrix<ZqElement, ZqGroup> emptyMatrixA = GroupMatrix.fromRows(Collections.emptyList());
-		final GroupMatrix<ZqElement, ZqGroup> emptyMatrixB = GroupMatrix.fromRows(Collections.emptyList());
 		final GroupVector<ZqElement, ZqGroup> emptyExponentsR = GroupVector.of();
 		final GroupVector<ZqElement, ZqGroup> emptyExponentsS = GroupVector.of();
 
@@ -102,11 +89,7 @@ class ZeroWitnessTest {
 				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(null, matrixB, exponentsR, exponentsS)),
 				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(matrixA, null, exponentsR, exponentsS)),
 				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(matrixA, matrixB, null, exponentsS)),
-				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(matrixA, matrixB, exponentsR, null)),
-				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(null, emptyMatrixB, emptyExponentsR, emptyExponentsS)),
-				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(emptyMatrixA, null, emptyExponentsR, emptyExponentsS)),
-				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(emptyMatrixA, emptyMatrixB, null, emptyExponentsS)),
-				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(emptyMatrixA, emptyMatrixB, emptyExponentsR, null))
+				() -> assertThrows(NullPointerException.class, () -> new ZeroWitness(matrixA, matrixB, exponentsR, null))
 		);
 	}
 

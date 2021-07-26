@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -111,6 +110,15 @@ class GqElementTest {
 	}
 
 	//Inversion
+
+	@Test
+	void givenAnElementWhenMultipliedWithItsInverseThenResultIsOne() {
+		for (int i = 1; i < group.getQ().intValueExact(); i++) {
+			ZqElement exponent = ZqElement.create(i, ZqGroup.sameOrderAs(group));
+			GqElement element = group.getGenerator().exponentiate(exponent);
+			assertEquals(group.getIdentity(), element.multiply(element.invert()));
+		}
+	}
 
 	@Test
 	void givenAnElementWhenInvertedThenSucceeds() {
@@ -228,21 +236,6 @@ class GqElementTest {
 		GqElement element = GqElement.create(BigInteger.ONE, group);
 
 		assertThrows(NullPointerException.class, () -> element.exponentiate(null));
-	}
-
-	@Test
-	void testInverseOfOneEqualsOne() {
-		GqElement one = group.getIdentity();
-		assertEquals(one, one.inverse());
-	}
-
-	@Test
-	void testInverse() {
-		for (int i = 1; i < group.getQ().intValueExact(); i++) {
-			ZqElement exponent = ZqElement.create(i, ZqGroup.sameOrderAs(group));
-			GqElement element = group.getGenerator().exponentiate(exponent);
-			assertEquals(group.getIdentity(), element.multiply(element.inverse()));
-		}
 	}
 
 	//Equals

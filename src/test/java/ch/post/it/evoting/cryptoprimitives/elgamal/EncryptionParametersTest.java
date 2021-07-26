@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -31,10 +32,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 
 import ch.post.it.evoting.cryptoprimitives.CryptoPrimitives;
 import ch.post.it.evoting.cryptoprimitives.CryptoPrimitivesService;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
@@ -52,13 +55,10 @@ class EncryptionParametersTest {
 
 	@BeforeAll
 	static void setUpAll() {
-		encryptionParameters = new EncryptionParameters(SecurityLevel.TESTING_ONLY);
-	}
-
-	@Test
-	@DisplayName("constructed with a null SecurityLevel throws NullPointerException")
-	void constructNullParam() {
-		assertThrows(NullPointerException.class, () -> new EncryptionParameters(null));
+		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
+			encryptionParameters = new EncryptionParameters();
+		}
 	}
 
 	@Test
@@ -91,7 +91,6 @@ class EncryptionParametersTest {
 		return parametersList.stream().parallel().map(testParameters -> {
 			// Inputs.
 			final JsonData input = testParameters.getInput();
-			final int bitLength = input.get("bit_len", Integer.class);
 			final String seed = input.get("seed", String.class);
 
 			// Outputs.
@@ -99,30 +98,30 @@ class EncryptionParametersTest {
 			final BigInteger p = output.get("p", BigInteger.class);
 			final BigInteger q = output.get("q", BigInteger.class);
 			final BigInteger g = output.get("g", BigInteger.class);
-			final GqGroup expectedParameters = new GqGroup(p, q, g);
 
-			return Arguments.of(bitLength, seed, expectedParameters, testParameters.getDescription());
+			try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
+
+				final GqGroup expectedParameters = new GqGroup(p, q, g);
+
+				return Arguments.of(seed, expectedParameters, testParameters.getDescription(), testParameters.getSecurityLevel());
+			}
 		});
 	}
 
 	@ParameterizedTest(name = "bitLength = {0} and seed = {1}")
 	@MethodSource("getEncryptionParametersProvider")
 	@DisplayName("calling getEncryptionParameters with fixed seed gives expected parameters")
-	void getEncryptionParameters(final int bitLength, final String seed, final GqGroup expectedParameters,
-			final String description) {
+	void getEncryptionParameters(final String seed, final GqGroup expectedParameters,
+			final String description, final SecurityLevel securityLevel) {
 
-		final SecurityLevel securityLevel;
-		if (bitLength == 2048) {
-			securityLevel = SecurityLevel.DEFAULT;
-		} else if (bitLength == 3072) {
-			securityLevel = SecurityLevel.EXTENDED;
-		} else {
-			throw new IllegalArgumentException("Unexpected bit length.");
+		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(securityLevel);
+
+			final GqGroup encryptionParameters = new EncryptionParameters().getEncryptionParameters(seed);
+
+			assertEquals(expectedParameters, encryptionParameters, String.format("assertion failed for: %s", description));
 		}
-
-		final GqGroup encryptionParameters = new EncryptionParameters(securityLevel).getEncryptionParameters(seed);
-
-		assertEquals(expectedParameters, encryptionParameters, String.format("assertion failed for: %s", description));
 	}
 
 }
