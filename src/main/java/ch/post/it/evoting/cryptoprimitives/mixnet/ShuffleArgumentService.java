@@ -131,7 +131,8 @@ class ShuffleArgumentService {
 		checkArgument(C_vector.size() == pi.size(), "The statement ciphertexts must have the same size as the permutation.");
 
 		// Cross group checking.
-		checkArgument(C_vector.getGroup().hasSameOrderAs(rho_vector.getGroup()), "The randomness group must have the order of the ciphertexts group.");
+		checkArgument(C_vector.getGroup().hasSameOrderAs(rho_vector.getGroup()),
+				"The randomness group must have the order of the ciphertexts group.");
 
 		// Ensure the statement corresponds to the witness.
 		final GqGroup gqGroup = C_vector.getGroup();

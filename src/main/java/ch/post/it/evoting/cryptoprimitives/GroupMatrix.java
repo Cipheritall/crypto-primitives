@@ -35,6 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**
  * Represents a matrix of {@link GroupVectorElement} elements belonging to the same {@link MathematicalGroup} and having the same size.
+ * This implementation does not support empty matrices.
  *
  * <p>Instances of this class are immutable. </p>
  *
@@ -59,23 +60,20 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 		// Size checking.
 		checkArgument(allEqual(rows.stream(), GroupVector::size), "All rows of the matrix must have the same number of columns.");
 		checkArgument(allEqual(rows.stream().flatMap(GroupVector::stream), GroupVectorElement::size), "All matrix elements must have the same size.");
+		checkArgument(!rows.isEmpty() && !rows.get(0).isEmpty(), "Empty matrices are not supported.");
 
 		// Group checking.
-		if (!isEmpty(rows) && !rows.get(0).isEmpty()) {
-			checkArgument(allEqual(rows.stream(), GroupVector::getGroup), "All elements of the matrix must be in the same group.");
-		}
+		checkArgument(allEqual(rows.stream(), GroupVector::getGroup), "All elements of the matrix must be in the same group.");
 
-		this.rows = isEmpty(rows) ? ImmutableList.of() : rows;
-		this.numRows = isEmpty(rows) ? 0 : rows.size();
-		this.numColumns = isEmpty(rows) ? 0 : rows.get(0).size();
-		this.group = isEmpty(rows) ? null : rows.get(0).get(0).getGroup();
-		this.elementSize = isEmpty(rows) ? 0 : rows.get(0).get(0).size();
+		this.rows = rows;
+		this.numRows = rows.size();
+		this.numColumns = rows.get(0).size();
+		this.group = rows.get(0).get(0).getGroup();
+		this.elementSize = rows.get(0).get(0).size();
 	}
 
 	/**
 	 * Creates a GroupMatrix from rows of elements.
-	 *
-	 * <p>If no rows are provided or if the rows are empty, the matrix is considered empty and has dimensions 0x0. </p>
 	 *
 	 * @param rows the rows of the matrix, which must respect the following:
 	 *             <ul>
@@ -101,8 +99,6 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 
 	/**
 	 * Creates a GroupMatrix from columns of elements.
-	 *
-	 * <p>If no columns are provided or if the columns are empty, the matrix is considered empty and has dimensions 0x0. </p>
 	 *
 	 * @param columns the columns of the matrix, which must respect the following:
 	 *                <ul>
@@ -146,18 +142,6 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 
 	public int numColumns() {
 		return this.numColumns;
-	}
-
-	/**
-	 * @return true if either matrix dimension is 0.
-	 */
-	public boolean isEmpty() {
-		return this.numRows == 0 || this.numColumns == 0;
-	}
-
-	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> boolean isEmpty(
-			final ImmutableList<GroupVector<E, G>> matrix) {
-		return matrix.isEmpty() || matrix.get(0).isEmpty();
 	}
 
 	/**

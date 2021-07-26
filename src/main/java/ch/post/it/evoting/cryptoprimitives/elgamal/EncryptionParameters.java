@@ -27,6 +27,7 @@ import org.bouncycastle.crypto.digests.SHAKEDigest;
 import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
@@ -43,13 +44,9 @@ class EncryptionParameters {
 
 	/**
 	 * Constructs an instance with a {@link SecurityLevel}.
-	 *
-	 * @param securityLevel the security level from which the certainty level for primality test will be derived. Must be non-null.
 	 */
-	EncryptionParameters(final SecurityLevel securityLevel) {
-		checkNotNull(securityLevel);
-
-		this.lambda = securityLevel;
+	EncryptionParameters() {
+		this.lambda = SecurityLevelConfig.getSystemSecurityLevel();
 	}
 
 	/**

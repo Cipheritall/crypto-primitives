@@ -107,7 +107,7 @@ class ShuffleServiceTest {
 		final BigInteger p = BigInteger.valueOf(23);
 		final BigInteger q = BigInteger.valueOf(11);
 		final BigInteger g = BigInteger.valueOf(2);
-
+		
 		GqGroup localGroup = new GqGroup(p, q, g);
 
 		//Define N

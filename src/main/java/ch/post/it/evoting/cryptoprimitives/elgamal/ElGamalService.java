@@ -15,7 +15,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 public class ElGamalService implements ElGamal {
@@ -28,6 +27,6 @@ public class ElGamalService implements ElGamal {
 
 	@Override
 	public GqGroup getEncryptionParameters(final String seed) {
-		return new EncryptionParameters(SecurityLevel.DEFAULT).getEncryptionParameters(seed);
+		return new EncryptionParameters().getEncryptionParameters(seed);
 	}
 }

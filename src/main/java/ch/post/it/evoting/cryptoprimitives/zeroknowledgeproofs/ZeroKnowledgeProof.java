@@ -17,8 +17,12 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import java.util.List;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
+import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Provides methods for generating zero-knowledge proofs.
@@ -41,4 +45,24 @@ public interface ZeroKnowledgeProof {
 	 */
 	VerifiableDecryption genVerifiableDecryptions(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientKeyPair keyPair,
 			final List<String> auxiliaryInformation);
+
+	/**
+	 * Generates a proof of validity for the provided exponentiations.
+	 *
+	 * @param bases                <b>g</b> ∈ G<sub>q</sub><sup>n</sup>. Not null and not empty.
+	 * @param exponent             x ∈ Z<sub>q</sub>, a secret exponent. Not null.
+	 * @param exponentiations      <b>y</b> ∈ G<sub>q</sub><sup>n</sup>. Not null and not empty.
+	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null and not contain nulls. Can be
+	 *                             empty.
+	 * @return an exponentiation proof
+	 * @throws NullPointerException     if any of the parameters are null.
+	 * @throws IllegalArgumentException if
+	 *                                  <ul>
+	 *                                  	 <li>the bases and the exponentiations do not have the same group</li>
+	 *                                  	 <li>the bases and the exponentiations do not have the same size</li>
+	 *                                  	 <li>the exponent does not have the same group order as the exponentiations</li>
+	 *                                  </ul>
+	 */
+	ExponentiationProof genExponentiationProof(final GroupVector<GqElement, GqGroup> bases, final ZqElement exponent,
+			final GroupVector<GqElement, GqGroup> exponentiations, final List<String> auxiliaryInformation);
 }

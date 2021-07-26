@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -47,11 +48,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
@@ -88,7 +90,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 	}
 
-	static class TestValues {
+	private static class TestValues {
 		// Create groups
 		private final BigInteger p = BigInteger.valueOf(23);
 		private final BigInteger q = BigInteger.valueOf(11);
@@ -285,6 +287,15 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		}
 
 		@Test
+		@DisplayName("with hash service with too long hash length throws IllegalArgumentException")
+		void genDecryptionProofWithBadHashService() {
+			final DecryptionProofService badService = new DecryptionProofService(randomService, new HashService());
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> badService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
+			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
+		}
+
+		@Test
 		@DisplayName("with a hashService that has a too long hash length throws an IllegalArgumentException")
 		void genDecryptionProofWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
 			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
@@ -389,6 +400,15 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		@DisplayName("with valid input and non empty auxiliary information returns true")
 		void verifyDecryptionWithValidInput() {
 			assertTrue(decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
+		}
+
+		@Test
+		@DisplayName("with hash service with too long hash length throws IllegalArgumentException")
+		void verifyDecryptionWithBadHashService() {
+			final DecryptionProofService badService = new DecryptionProofService(randomService, new HashService());
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> badService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
+			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
 		}
 
 		@Test
@@ -573,50 +593,54 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 				final BigInteger q = context.get("q", BigInteger.class);
 				final BigInteger g = context.get("g", BigInteger.class);
 
-				final GqGroup gqGroup = new GqGroup(p, q, g);
-				final ZqGroup zqGroup = new ZqGroup(q);
+				try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+					mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
+					final GqGroup gqGroup = new GqGroup(p, q, g);
+					final ZqGroup zqGroup = new ZqGroup(q);
 
-				final JsonData input = testParameters.getInput();
+					final JsonData input = testParameters.getInput();
 
-				// Parse ciphertext parameters.
-				final JsonData ciphertextData = input.getJsonData("ciphertext");
+					// Parse ciphertext parameters.
+					final JsonData ciphertextData = input.getJsonData("ciphertext");
 
-				final GqElement gamma = GqElement.create(ciphertextData.get("gamma", BigInteger.class), gqGroup);
-				final BigInteger[] phisAArray = ciphertextData.get("phis", BigInteger[].class);
-				final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElement.create(phiA, gqGroup)).collect(toList());
-				final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gamma, phi);
+					final GqElement gamma = GqElement.create(ciphertextData.get("gamma", BigInteger.class), gqGroup);
+					final BigInteger[] phisAArray = ciphertextData.get("phis", BigInteger[].class);
+					final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElement.create(phiA, gqGroup)).collect(toList());
+					final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gamma, phi);
 
-				// Parse key pair parameters
-				final BigInteger[] pkArray = input.get("public_key", BigInteger[].class);
-				final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElement.create(skA, gqGroup)).collect(toList());
-				final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
+					// Parse key pair parameters
+					final BigInteger[] pkArray = input.get("public_key", BigInteger[].class);
+					final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElement.create(skA, gqGroup)).collect(toList());
+					final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
-				// Parse message parameters
-				final BigInteger[] messageArray = input.get("message", BigInteger[].class);
-				final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElement.create(mA, gqGroup)).collect(toList());
-				final ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(messageElements);
+					// Parse message parameters
+					final BigInteger[] messageArray = input.get("message", BigInteger[].class);
+					final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElement.create(mA, gqGroup)).collect(toList());
+					final ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(messageElements);
 
-				// Parse decryption proof parameters
-				final JsonData proof = input.getJsonData("proof");
+					// Parse decryption proof parameters
+					final JsonData proof = input.getJsonData("proof");
 
-				final ZqElement e = ZqElement.create(proof.get("e", BigInteger.class), zqGroup);
+					final ZqElement e = ZqElement.create(proof.get("e", BigInteger.class), zqGroup);
 
-				final BigInteger[] zArray = proof.get("z", BigInteger[].class);
-				final GroupVector<ZqElement, ZqGroup> z = Arrays.stream(zArray)
-						.map(zA -> ZqElement.create(zA, zqGroup))
-						.collect(toGroupVector());
-				final DecryptionProof decryptionProof = new DecryptionProof(e, z);
+					final BigInteger[] zArray = proof.get("z", BigInteger[].class);
+					final GroupVector<ZqElement, ZqGroup> z = Arrays.stream(zArray)
+							.map(zA -> ZqElement.create(zA, zqGroup))
+							.collect(toGroupVector());
+					final DecryptionProof decryptionProof = new DecryptionProof(e, z);
 
-				// Parse auxiliary information parameters
-				final String[] auxInformation = input.get("additional_information", String[].class);
-				final List<String> auxiliaryInformation = Arrays.asList(auxInformation);
+					// Parse auxiliary information parameters
+					final String[] auxInformation = input.get("additional_information", String[].class);
+					final List<String> auxiliaryInformation = Arrays.asList(auxInformation);
 
-				// Parse output parameters
-				final JsonData output = testParameters.getOutput();
+					// Parse output parameters
+					final JsonData output = testParameters.getOutput();
 
-				final Boolean result = output.get("verif_result", Boolean.class);
+					final Boolean result = output.get("verif_result", Boolean.class);
 
-				return Arguments.of(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation, result, testParameters.getDescription());
+					return Arguments
+							.of(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation, result, testParameters.getDescription());
+				}
 			});
 		}
 

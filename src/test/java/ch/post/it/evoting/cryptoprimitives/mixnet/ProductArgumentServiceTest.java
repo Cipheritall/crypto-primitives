@@ -269,6 +269,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			BigInteger p = BigInteger.valueOf(11);
 			BigInteger q = BigInteger.valueOf(5);
 			BigInteger g = BigInteger.valueOf(3);
+			
 			GqGroup gqGroup = new GqGroup(p, q, g);
 			ZqGroup zqGroup = new ZqGroup(q);
 

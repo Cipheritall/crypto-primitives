@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.9.0.0</version>
+	<version>0.10.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -196,6 +196,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${maven-surefire-plugin.version}</version>
+					<configuration>
+						<environmentVariables>
+							<security.level>TESTING_ONLY</security.level>
+						</environmentVariables>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

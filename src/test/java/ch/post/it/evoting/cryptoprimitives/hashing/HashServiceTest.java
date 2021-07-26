@@ -197,7 +197,7 @@ class HashServiceTest {
 		HashableByteArray hashableBytes1 = HashableByteArray.from(bytes1);
 		HashableByteArray hashableBytes2 = HashableByteArray.from(bytes2);
 
-		HashableList list = hashableListOf(hashableBytes1, hashableBytes2);
+		HashableList list = HashableList.of(hashableBytes1, hashableBytes2);
 
 		byte[] hash = hashService.recursiveHash(list);
 
@@ -220,8 +220,8 @@ class HashServiceTest {
 		HashableByteArray hashableBytes1 = HashableByteArray.from(bytes1);
 		HashableByteArray hashableBytes2 = HashableByteArray.from(bytes2);
 		HashableByteArray hashableBytes3 = HashableByteArray.from(bytes3);
-		HashableList list = hashableListOf(hashableBytes2, hashableBytes3);
-		HashableList input = hashableListOf(hashableBytes1, list);
+		HashableList list = HashableList.of(hashableBytes2, hashableBytes3);
+		HashableList input = HashableList.of(hashableBytes1, list);
 
 		byte[] hash = hashService.recursiveHash(input);
 
@@ -246,7 +246,7 @@ class HashServiceTest {
 	@Test
 	void testRecursiveHashOfNestedEmptyListThrows() {
 		HashableList emptyList = ImmutableList::of;
-		HashableList list = hashableListOf(HashableBigInteger.from(BigInteger.ONE), emptyList);
+		HashableList list = HashableList.of(HashableBigInteger.from(BigInteger.ONE), emptyList);
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
 
@@ -255,8 +255,8 @@ class HashServiceTest {
 		HashableBigInteger first = genRandomHashableBigInteger();
 		HashableString second = genRandomHashableString();
 		HashableByteArray third = genRandomHashableByteArray();
-		HashableList list = hashableListOf(third);
-		HashableList input = hashableListOf(list, first, second);
+		HashableList list = HashableList.of(third);
+		HashableList input = HashableList.of(list, first, second);
 		byte[] varargsHash = hashService.recursiveHash(list, first, second);
 		byte[] listHash = hashService.recursiveHash(input);
 		assertArrayEquals(listHash, varargsHash);
@@ -271,8 +271,8 @@ class HashServiceTest {
 		subSubList.add(first);
 		subSubList.add(second);
 		HashableList hashableSubSubList = HashableList.from(ImmutableList.copyOf(subSubList));
-		HashableList subList = hashableListOf(third, hashableSubSubList);
-		HashableList input = hashableListOf(first, second, subList);
+		HashableList subList = HashableList.of(third, hashableSubSubList);
+		HashableList input = HashableList.of(first, second, subList);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(messageDigest.digest(ConversionService.integerToByteArray(first.toHashableForm())));
@@ -357,10 +357,6 @@ class HashServiceTest {
 	}
 
 	//Utilities
-	static HashableList hashableListOf(Hashable... items) {
-		return HashableList.from(ImmutableList.copyOf(items));
-	}
-
 	private static class Split {
 		final HashableByteArray start;
 		final HashableByteArray end;

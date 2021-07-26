@@ -187,4 +187,31 @@ class BigIntegerOperationsTest {
 		assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.multiModExp(arguments, exponents, SEVEN));
 		assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.multiModExp(bases, arguments, SEVEN));
 	}
+
+	@Test
+	void checkModInvert() {
+		assertEquals(ONE, BigIntegerOperations.modInvert(ONE, SEVEN));
+		assertEquals(FIVE, BigIntegerOperations.modInvert(THREE, SEVEN));
+	}
+
+	@Test
+	void modInvertNullArguments() {
+		assertThrows(NullPointerException.class, () -> BigIntegerOperations.modInvert(null, SEVEN));
+		assertThrows(NullPointerException.class, () -> BigIntegerOperations.modInvert(ONE, null));
+	}
+
+	@Test
+	void modInvertInvalidModulus() {
+		assertAll(
+				() -> assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modInvert(TWO, ONE)),
+				() -> assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modInvert(TWO, ZERO)),
+				() -> assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modInvert(TWO, MINUS_ONE))
+		);
+	}
+
+	@Test
+	void modInvertNonInvertibleElement() {
+		assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modInvert(TWO, SIX));
+		assertThrows(IllegalArgumentException.class, () -> BigIntegerOperations.modInvert(THREE, SIX));
+	}
 }

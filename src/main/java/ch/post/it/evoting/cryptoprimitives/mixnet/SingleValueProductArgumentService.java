@@ -185,19 +185,18 @@ class SingleValueProductArgumentService {
 
 	/**
 	 * Verifies the correctness of a {@link SingleValueProductArgument} with respect to a given {@link SingleValueProductStatement}.
-	 * <p>
-	 * The statement and the argument must be non null and have compatible groups.
 	 *
-	 * @param statement the statement for which the argument is to be verified.
-	 * @param argument  the argument to be verified.
+	 * @param statement the statement for which the argument is to be verified. Must be non null.
+	 * @param argument  the argument to be verified. Must be non null.
 	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
+	 * @throws NullPointerException     if the statement or argument is null.
+	 * @throws IllegalArgumentException if the statement and argument do not have compatible groups.
 	 */
 	Verifiable verifySingleValueProductArgument(final SingleValueProductStatement statement, final SingleValueProductArgument argument) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
-		checkArgument(statement.get_c_a().getGroup().equals(argument.get_c_d().getGroup()),
-				"The statement and the argument must have compatible groups.");
+		checkArgument(statement.getGroup().equals(argument.getGroup()), "The statement and the argument must have compatible groups.");
 
 		// Retrieve elements for verification
 		final GqElement c_a = statement.get_c_a();

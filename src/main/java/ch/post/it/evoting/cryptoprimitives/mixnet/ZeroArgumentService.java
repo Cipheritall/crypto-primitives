@@ -109,10 +109,10 @@ final class ZeroArgumentService {
 		final ZqElement y = statement.get_y();
 
 		// Cross dimensions checking between statement and witness.
-		checkArgument(c_A.size() == r.size(), "The statement commitments must have the same size as the witness exponents.");
+		checkArgument(statement.get_m() == witness.get_m(), "The statement and witness must have the same dimension m.");
 
 		// Cross group checking.
-		checkArgument(y.getGroup().equals(r.getGroup()), "The statement y and witness exponents must be part of the same group.");
+		checkArgument(statement.getGroup().hasSameOrderAs(witness.getGroup()), "The statement and witness must have compatible groups.");
 
 		// Ensure the statement and witness are corresponding.
 		final GroupVector<GqElement, GqGroup> c_A_computed = getCommitmentMatrix(A, r, ck);
@@ -244,10 +244,6 @@ final class ZeroArgumentService {
 		checkArgument(firstMatrix.numRows() == secondMatrix.numRows(), "The two matrices must have the same number of rows.");
 		checkArgument(firstMatrix.numColumns() == secondMatrix.numColumns(), "The two matrices must have the same number of columns.");
 
-		if (firstMatrix.isEmpty()) {
-			return GroupVector.of();
-		}
-
 		// Cross matrix group checking.
 		checkArgument(firstMatrix.getGroup().equals(secondMatrix.getGroup()), "The elements of both matrices must be in the same group.");
 		checkArgument(y.getGroup().equals(firstMatrix.getGroup()), "The value y must be in the same group as the elements of the matrices.");
@@ -328,11 +324,14 @@ final class ZeroArgumentService {
 	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
 	Verifiable verifyZeroArgument(final ZeroStatement statement, final ZeroArgument argument) {
-
 		checkNotNull(statement);
 		checkNotNull(argument);
-		checkArgument(statement.get_c_A().getGroup().equals(argument.get_c_d().getGroup()),
-				"Statement and argument do not share the same group");
+
+		// Cross dimension checking.
+		checkArgument(statement.get_m() == argument.get_m(), "The statement and argument must have the same dimension m.");
+
+		// Cross group checking.
+		checkArgument(statement.getGroup().equals(argument.getGroup()), "Statement and argument must belong to the same group.");
 
 		final GroupVector<GqElement, GqGroup> c_A = statement.get_c_A();
 		final GroupVector<GqElement, GqGroup> c_B = statement.get_c_B();
@@ -341,10 +340,8 @@ final class ZeroArgumentService {
 		final GroupVector<GqElement, GqGroup> c_d = argument.get_c_d();
 		final ZqElement t_prime = argument.get_t_prime();
 
-		final int m = c_A.size();
-		checkArgument((c_d.size() - 2 * m) == 1, "The m of the statement should be equal to the m of the argument (2m+1)");
-
-		final GqGroup group = c_A.getGroup();
+		final int m = statement.get_m();
+		final GqGroup group = statement.getGroup();
 		final BigInteger p = group.getP();
 		final BigInteger q = group.getQ();
 

@@ -61,4 +61,16 @@ class HashableListTest {
 		assertEquals("The list must not be empty.", exception.getMessage());
 	}
 
+	@Test
+	@DisplayName("correctly creates a list containing the elements")
+	void hashableListOfMakesCopy() {
+		final List<String> expected = new ArrayList<>();
+		expected.add("a");
+		expected.add("b");
+
+		final HashableList hashableList = HashableList.of(HashableString.from("a"), HashableString.from("b"));
+		final List<Object> toHashableFormList = hashableList.toHashableForm().stream().map(Hashable::toHashableForm).collect(Collectors.toList());
+
+		assertEquals(expected, toHashableFormList);
+	}
 }

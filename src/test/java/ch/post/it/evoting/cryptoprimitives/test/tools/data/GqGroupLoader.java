@@ -15,12 +15,18 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.data;
 
+import static org.mockito.Mockito.mockStatic;
+
 import java.io.IOException;
 import java.math.BigInteger;
+
+import org.mockito.MockedStatic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 public class GqGroupLoader {
@@ -31,8 +37,14 @@ public class GqGroupLoader {
 		ObjectMapper mapper = new ObjectMapper();
 		final JsonNode jsonNode = mapper.readTree(GqGroupLoader.class.getResource(fileName));
 
-		this.group = new GqGroup(new BigInteger(jsonNode.get("p").asText(), 10), new BigInteger(jsonNode.get("q").asText(), 10),
-				new BigInteger(jsonNode.get("g").asText(), 10));
+		final BigInteger p = new BigInteger(jsonNode.get("p").asText(), 10);
+		final BigInteger q = new BigInteger(jsonNode.get("q").asText(), 10);
+		final BigInteger g = new BigInteger(jsonNode.get("g").asText(), 10);
+
+		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.DEFAULT);
+			this.group = new GqGroup(p, q, g);
+		}
 	}
 
 	GqGroup getGroup() {
