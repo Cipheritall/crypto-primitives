@@ -35,6 +35,9 @@ class ZeroWitness {
 	private final GroupMatrix<ZqElement, ZqGroup> B;
 	private final GroupVector<ZqElement, ZqGroup> r;
 	private final GroupVector<ZqElement, ZqGroup> s;
+	private final int n;
+	private final int m;
+	private final ZqGroup group;
 
 	/**
 	 * Instantiates a zero witness. The matrices and exponents must comply with the following:
@@ -48,8 +51,8 @@ class ZeroWitness {
 	 *
 	 * @param A    a matrix of {@link ZqElement}s.
 	 * @param B    a matrix of {@link ZqElement}s.
-	 * @param r    a vector of {@link ZqElement}s.
-	 * @param s    a vector of {@link ZqElement}s.
+	 * @param r    a non-empty vector of {@link ZqElement}s.
+	 * @param s    a non-empty vector of {@link ZqElement}s.
 	 */
 	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupMatrix<ZqElement, ZqGroup> B,
 			final GroupVector<ZqElement, ZqGroup> r, final GroupVector<ZqElement, ZqGroup> s) {
@@ -64,16 +67,15 @@ class ZeroWitness {
 		checkArgument(this.A.numRows() == this.B.numRows(), "The two matrices must have the same number of rows.");
 		checkArgument(this.A.numColumns() == this.B.numColumns(), "The two matrices must have the same number of columns.");
 		checkArgument(this.r.size() == this.s.size(), "The exponents vector must have the same size.");
-		checkArgument(this.r.size() == this.A.numColumns(),
-				"The exponents vectors size must be the number of columns of the matrices.");
+		checkArgument(this.r.size() == this.A.numColumns(), "The exponents vectors size must be the number of columns of the matrices.");
+		this.n = this.A.numRows();
+		this.m = this.A.numColumns();
 
 		// Cross group checking.
-		if (!this.A.isEmpty()) {
-			final ZqGroup group = this.A.getGroup();
-			checkArgument(this.B.getGroup().equals(group), "The matrices are not from the same group.");
-			checkArgument(this.r.getGroup().equals(this.s.getGroup()), "The exponents are not from the same group.");
-			checkArgument(this.r.getGroup().equals(group), "The matrices and exponents are not from the same group.");
-		}
+		this.group = this.A.getGroup();
+		checkArgument(this.B.getGroup().equals(group), "The matrices are not from the same group.");
+		checkArgument(this.r.getGroup().equals(this.s.getGroup()), "The exponents are not from the same group.");
+		checkArgument(this.r.getGroup().equals(group), "The matrices and exponents are not from the same group.");
 	}
 
 	GroupMatrix<ZqElement, ZqGroup> get_A() {
@@ -90,6 +92,18 @@ class ZeroWitness {
 
 	GroupVector<ZqElement, ZqGroup> get_s() {
 		return s;
+	}
+
+	public int get_n() {
+		return n;
+	}
+
+	public int get_m() {
+		return m;
+	}
+
+	public ZqGroup getGroup() {
+		return group;
 	}
 
 	@Override

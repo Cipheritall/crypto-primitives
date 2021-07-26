@@ -98,21 +98,6 @@ class DiagonalProductsTest extends TestGroupSetup {
 	}
 
 	@Test
-	@DisplayName("with any empty matrix throws IllegalArgumentException")
-	void getDiagonalProductsEmptyParams() {
-		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> emptyCiphertexts = GroupMatrix.fromRows(Collections.emptyList());
-		final GroupMatrix<ZqElement, ZqGroup> emptyExponents = GroupMatrix.fromRows(Collections.emptyList());
-
-		final IllegalArgumentException emptyCiphertextsException = assertThrows(IllegalArgumentException.class,
-				() -> multiExponentiationArgumentService.getDiagonalProducts(emptyCiphertexts, exponents));
-		assertEquals("The ciphertexts and exponents matrices cannot be empty.", emptyCiphertextsException.getMessage());
-
-		final IllegalArgumentException emptyExponentsException = assertThrows(IllegalArgumentException.class,
-				() -> multiExponentiationArgumentService.getDiagonalProducts(ciphertexts, emptyExponents));
-		assertEquals("The ciphertexts and exponents matrices cannot be empty.", emptyExponentsException.getMessage());
-	}
-
-	@Test
 	@DisplayName("with exponents having different number of rows throws IllegalArgumentException")
 	void getDiagonalProductsExponentsTooManyRows() {
 		final GroupMatrix<ZqElement, ZqGroup> biggerExponents = zqGroupGenerator.genRandomZqElementMatrix(n + 1, m + 1);
@@ -187,6 +172,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 		BigInteger p = BigInteger.valueOf(23);
 		BigInteger q = BigInteger.valueOf(11);
 		BigInteger g = BigInteger.valueOf(2);
+		
 		GqGroup gqGroup = new GqGroup(p, q, g);
 		ZqGroup zqGroup = new ZqGroup(q);
 

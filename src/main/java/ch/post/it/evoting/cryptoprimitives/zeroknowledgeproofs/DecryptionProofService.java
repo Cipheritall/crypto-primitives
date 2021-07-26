@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -39,7 +40,6 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateK
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
@@ -106,13 +106,18 @@ public class DecryptionProofService {
 	 */
 	DecryptionProof genDecryptionProof(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientKeyPair keyPair,
 			final ElGamalMultiRecipientMessage message, final List<String> auxiliaryInformation) {
-		final ElGamalMultiRecipientCiphertext C = checkNotNull(ciphertext);
+		checkNotNull(ciphertext);
 		checkNotNull(keyPair);
+		checkNotNull(message);
+		checkNotNull(auxiliaryInformation);
+
+		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null elements.");
+
+		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final ElGamalMultiRecipientCiphertext C = ciphertext;
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
 		final ElGamalMultiRecipientPublicKey pk = keyPair.getPublicKey();
-		final ElGamalMultiRecipientMessage m = checkNotNull(message);
-		checkNotNull(auxiliaryInformation);
-		final List<String> i_aux = auxiliaryInformation;
+		final ElGamalMultiRecipientMessage m = message;
 
 		// Context.
 		final GqGroup gqGroup = ciphertext.getGroup();
@@ -134,19 +139,19 @@ public class DecryptionProofService {
 		// Algorithm.
 		final GroupVector<ZqElement, ZqGroup> b = randomService.genRandomVector(q, l);
 		final GroupVector<GqElement, GqGroup> c = computePhiDecryption(b, gamma);
-		final ImmutableList<Hashable> f = ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
+		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
 		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
 				pk_prime.stream(),
-				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).inverse())))
+				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
 				.collect(toGroupVector());
 		final HashableList h_aux = Streams.concat(Stream.of("DecryptionProof").map(HashableString::from),
 				Stream.of(phi),
 				Stream.of(m),
 				i_aux.stream().map(HashableString::from))
 				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
-		final BigInteger e_value = byteArrayToInteger(hashService.recursiveHash(HashableList.from(f), y, c, h_aux));
+		final BigInteger e_value = byteArrayToInteger(hashService.recursiveHash(f, y, c, h_aux));
 		final ZqElement e = ZqElement.create(e_value, ZqGroup.sameOrderAs(gqGroup));
 		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
 		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(sk_prime.stream().collect(toGroupVector()), e));
@@ -172,14 +177,35 @@ public class DecryptionProofService {
 	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information that was used during proof generation. Must be non null.
 	 * @return {@code true} if the decryption proof is valid, {@code false} otherwise.
 	 */
-	public boolean verifyDecryption(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPublicKey publicKey,
+	boolean verifyDecryption(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPublicKey publicKey,
 			final ElGamalMultiRecipientMessage message, final DecryptionProof decryptionProof, final List<String> auxiliaryInformation) {
-		final ElGamalMultiRecipientCiphertext C = checkNotNull(ciphertext);
-		final ElGamalMultiRecipientPublicKey pk = checkNotNull(publicKey);
-		final ElGamalMultiRecipientMessage m = checkNotNull(message);
-		final DecryptionProof ez = checkNotNull(decryptionProof);
+		checkNotNull(ciphertext);
+		checkNotNull(publicKey);
+		checkNotNull(message);
+		checkNotNull(decryptionProof);
 		checkNotNull(auxiliaryInformation);
-		final List<String> i_aux = auxiliaryInformation;
+		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null elements.");
+
+		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final ElGamalMultiRecipientCiphertext C = ciphertext;
+		final ElGamalMultiRecipientPublicKey pk = publicKey;
+		final ElGamalMultiRecipientMessage m = message;
+		final DecryptionProof ez = decryptionProof;
+
+		final GqGroup gqGroup = C.getGroup();
+		final ZqGroup zqGroup = ez.getGroup();
+		final BigInteger p = gqGroup.getP();
+		final BigInteger q = gqGroup.getQ();
+
+		final GqElement g = gqGroup.getGenerator();
+		final ZqElement e = ez.getE();
+		final GroupVector<ZqElement, ZqGroup> z = ez.getZ();
+		final GqElement gamma = C.getGamma();
+		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
+		final int l = C.size();
+
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		// Cross-checks
 		checkArgument(allEqual(Stream.of((GroupVectorElement<GqGroup>) C, pk, m), GroupVectorElement::getGroup),
@@ -190,23 +216,13 @@ public class DecryptionProofService {
 				"The ciphertext, the message and the decryption proof must have the same size.");
 		checkArgument(C.size() <= pk.size(), "The ciphertext, the message and the decryption proof must be smaller than or equal to the public key.");
 
-		final GqGroup gqGroup = C.getGroup();
-		final BigInteger p = gqGroup.getP();
-		final BigInteger q = gqGroup.getQ();
-		final GqElement g = gqGroup.getGenerator();
-		final ZqElement e = ez.getE();
-		final GroupVector<ZqElement, ZqGroup> z = ez.getZ();
-		final GqElement gamma = C.getGamma();
-		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
-		final int l = C.size();
-
 		// Algorithm.
 		final GroupVector<GqElement, GqGroup> x = computePhiDecryption(z, gamma);
-		final ImmutableList<Hashable> f = ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
+		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
 		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
 				pk_prime.stream(),
-				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).inverse())))
+				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
 				.collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, 2 * l)
 				.mapToObj(i -> x.get(i).multiply(y.get(i).exponentiate(e.negate())))
@@ -216,10 +232,11 @@ public class DecryptionProofService {
 				Stream.of(m),
 				i_aux.stream().map(HashableString::from))
 				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
-		final byte[] h = hashService.recursiveHash(HashableList.from(f), y, c_prime, h_aux);
-		final BigInteger e_prime = byteArrayToInteger(h);
+		final byte[] h = hashService.recursiveHash(f, y, c_prime, h_aux);
+		final BigInteger e_prime_value = byteArrayToInteger(h);
+		final ZqElement e_prime = ZqElement.create(e_prime_value, zqGroup);
 
-		return (e.getValue().equals(e_prime));
+		return (e.equals(e_prime));
 	}
 
 	/**

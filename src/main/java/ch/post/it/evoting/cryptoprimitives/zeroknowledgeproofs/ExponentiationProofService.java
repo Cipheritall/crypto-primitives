@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,13 +24,13 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
@@ -55,13 +56,13 @@ public class ExponentiationProofService {
 	 *
 	 * @param preimage x ∈ Z<sub>q</sub>. Not null.
 	 * @param bases    (g<sub>0</sub>, ..., g<sub>n-1</sub>) ∈ G<sub>q</sub><sup>n</sup>. Not null and not empty.
-	 * @throws NullPointerException if any of the parameters are null
-	 * @throws IllegalArgumentException if
-	 * <ul>
-	 *     <li>the bases are empty</li>
-	 *     <li>the preimage does not have the same group order as the bases</li>
-	 * </ul>
 	 * @return an image (y<sub>0</sub>, ..., y<sub>n-1</sub>) ∈ G<sub>q</sub><sup>n</sup>
+	 * @throws NullPointerException     if any of the parameters are null
+	 * @throws IllegalArgumentException if
+	 *                                  <ul>
+	 *                                      <li>the bases are empty</li>
+	 *                                      <li>the preimage does not have the same group order as the bases</li>
+	 *                                  </ul>
 	 */
 	static GroupVector<GqElement, GqGroup> computePhiExponentiation(final ZqElement preimage, final GroupVector<GqElement, GqGroup> bases) {
 		checkNotNull(preimage);
@@ -77,21 +78,8 @@ public class ExponentiationProofService {
 	}
 
 	/**
-	 * Generates a proof of validity for the provided exponentiations.
-	 *
-	 * @param bases                <b>g</b> ∈ G<sub>q</sub><sup>n</sup>. Not null and not empty.
-	 * @param exponent             x ∈ Z<sub>q</sub>, a secret exponent. Not null.
-	 * @param exponentiations      <b>y</b> ∈ G<sub>q</sub><sup>n</sup>. Not null and not empty.
-	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null and not contain nulls. Can be
-	 *                             empty.
-	 * @throws NullPointerException if any of the parameters are null.
-	 * @throws IllegalArgumentException if
-	 * <ul>
-	 * 	 <li>the bases and the exponentiations do not have the same group</li>
-	 * 	 <li>the bases and the exponentiations do not have the same size</li>
-	 * 	 <li>the exponent does not have the same group order as the exponentiations</li>
-	 * </ul>
-	 * @return an exponentiation proof
+	 * @see ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.ZeroKnowledgeProof#genExponentiationProof(GroupVector, ZqElement, GroupVector,
+	 * List)
 	 */
 	ExponentiationProof genExponentiationProof(final GroupVector<GqElement, GqGroup> bases, final ZqElement exponent,
 			final GroupVector<GqElement, GqGroup> exponentiations, final List<String> auxiliaryInformation) {
@@ -120,21 +108,91 @@ public class ExponentiationProofService {
 		checkArgument(y.equals(computePhiExponentiation(x, g)),
 				"The exponentiations must correspond to the exponent's and bases' phi exponentiation.");
 
+		// Context
 		final BigInteger p = g.getGroup().getP();
 		final BigInteger q = g.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
 
 		// Operations.
 		final BigInteger bValue = randomService.genRandomInteger(q);
 		final ZqElement b = ZqElement.create(bValue, zqGroup);
 		final GroupVector<GqElement, GqGroup> c = computePhiExponentiation(b, g);
-		final ImmutableList<Hashable> f = ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g);
+		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g);
 		final HashableList h_aux = Stream.concat(Stream.of("ExponentiationProof"), i_aux.stream())
 				.map(HashableString::from)
 				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
-		final BigInteger eValue = byteArrayToInteger(hashService.recursiveHash(HashableList.from(f), y, c, h_aux));
+		final BigInteger eValue = byteArrayToInteger(hashService.recursiveHash(f, y, c, h_aux));
 		final ZqElement e = ZqElement.create(eValue, zqGroup);
 		final ZqElement z = b.add(e.multiply(x));
 
 		return new ExponentiationProof(e, z);
+	}
+
+	/**
+	 * Verifies the validity of a given {@link ExponentiationProof}.
+	 *
+	 * @param bases                g, the bases that were used to generate the proof. Must be non null.
+	 * @param exponentiations      y, the exponentiations the were used to generate the proof. Must be non null.
+	 * @param proof                (e, z), the proof to be verified
+	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information that was used during proof generation. Must be non null and not contain
+	 *                             nulls.
+	 * @return {@code true} if the exponentiation proof is valid, {@code false} otherwise.
+	 * @throws NullPointerException     if any of the bases, exponentiations, or proof is null
+	 * @throws IllegalArgumentException if
+	 *                                  <ul>
+	 *                                      <li>the auxiliary information contains null elements</li>
+	 *                                      <li>the bases are empty</li>
+	 *                                      <li>the exponentations do not have the same size as the bases</li>
+	 *                                      <li>the bases and the exponentiations do not have the same group</li>
+	 *                                      <li>the exponentiation proof does not have the same group order as the bases and the exponentiations</li>
+	 *                                      <li>the group order q's bit length is smaller than the hash service's hash length</li>
+	 *                                  </ul>
+	 */
+	boolean verifyExponentiation(final GroupVector<GqElement, GqGroup> bases, final GroupVector<GqElement, GqGroup> exponentiations,
+			final ExponentiationProof proof, final List<String> auxiliaryInformation) {
+		checkNotNull(bases);
+		checkNotNull(exponentiations);
+		checkNotNull(proof);
+		checkNotNull(auxiliaryInformation);
+
+		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null elements.");
+
+		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final GroupVector<GqElement, GqGroup> g = bases;
+		final GroupVector<GqElement, GqGroup> y = exponentiations;
+		final ZqElement e = proof.get_e();
+		final ZqElement z = proof.get_z();
+		final int n = g.size();
+
+		// Cross-dimension checking
+		checkArgument(!g.isEmpty(), "The bases must contain at least 1 element.");
+		checkArgument(g.size() == y.size(), "Bases and exponentiations must have the same size.");
+
+		// Cross-group checking
+		checkArgument(g.getGroup().equals(y.getGroup()), "Bases and exponentiations must belong to the same group.");
+		checkArgument(proof.getGroup().hasSameOrderAs(bases.getGroup()), "The proof must have the same group order as the bases.");
+
+		// Context
+		final ZqGroup zqGroup = e.getGroup();
+		final BigInteger p = g.getGroup().getP();
+		final BigInteger q = g.getGroup().getQ();
+		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),
+				"The hash service's bit length must be smaller than the bit length of q.");
+
+		// Operations
+		final GroupVector<GqElement, GqGroup> x = computePhiExponentiation(z, g);
+		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g);
+		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, n)
+				.mapToObj(i -> x.get(i).multiply(y.get(i).exponentiate(e.negate())))
+				.collect(toGroupVector());
+		final HashableList h_aux = Stream.concat(Stream.of("ExponentiationProof"), i_aux.stream())
+				.map(HashableString::from)
+				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final byte[] h = hashService.recursiveHash(f, y, c_prime, h_aux);
+		final BigInteger e_prime_value = byteArrayToInteger(h);
+		final ZqElement e_prime = ZqElement.create(e_prime_value, zqGroup);
+
+		return e.equals(e_prime);
 	}
 }

@@ -38,7 +38,7 @@ public class GroupVectors {
 	 * @return a new GroupVector with the ith element replaced.
 	 */
 	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupVector<E, G> with(GroupVector<E, G> vector, int i, E element) {
+	GroupVector<E, G> set(GroupVector<E, G> vector, int i, E element) {
 		List<E> modifiedElements = new ArrayList<>(vector);
 		modifiedElements.set(i, element);
 		return GroupVector.from(modifiedElements);
@@ -56,7 +56,7 @@ public class GroupVectors {
 	 * @return a new matrix with all elements copied from the initial matrix except element (i,j) with the new value
 	 */
 	public static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>>
-	GroupMatrix<E, G> with(GroupMatrix<E, G> matrix, int i, int j, E element) {
+	GroupMatrix<E, G> set(GroupMatrix<E, G> matrix, int i, int j, E element) {
 		List<List<E>> modifiedElements = matrix.rowStream().map(ArrayList::new).collect(Collectors.toList());
 		modifiedElements.get(i).set(j, element);
 		return GroupMatrix.fromRows(modifiedElements);

@@ -27,6 +27,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+
 /**
  * General deserialization of json test files according to the schema defined in the specifications.
  */
@@ -61,6 +63,20 @@ public final class TestParameters {
 			return Arrays.asList(jsonMapper.readValue(url, TestParameters[].class));
 		} catch (final IOException e) {
 			throw new RuntimeException("Read values failed for file " + url.getPath() + ". " + e.getMessage());
+		}
+	}
+
+	public SecurityLevel getSecurityLevel() {
+		final String size = this.description.substring(0, 4);
+		final int bitlength = Integer.parseInt(size);
+
+		switch (bitlength) {
+		case 3072:
+			return SecurityLevel.EXTENDED;
+		case 2048:
+			return SecurityLevel.DEFAULT;
+		default:
+			throw new IllegalArgumentException("Unexpected bit length of p");
 		}
 	}
 

@@ -100,12 +100,4 @@ class MultiExponentiationStatementTest extends TestGroupSetup {
 				() -> new MultiExponentiationStatement(CMatrix, C, longerCommitmentVector));
 		assertEquals("The commitment must be the same size as the number of rows of the ciphertext matrix.", exception.getMessage());
 	}
-
-	@Test
-	void emptyMatrixDoesNotThrow() {
-		CMatrix = elGamalGenerator.genRandomCiphertextMatrix(0, 0, l);
-		C = elGamalGenerator.genRandomCiphertext(l);
-		cA = gqGroupGenerator.genRandomGqElementVector(0);
-		assertDoesNotThrow(() -> new MultiExponentiationStatement(CMatrix, C, cA));
-	}
 }

@@ -127,6 +127,7 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		BigInteger p = BigInteger.valueOf(23);
 		BigInteger q = BigInteger.valueOf(11);
 		BigInteger g = BigInteger.valueOf(2);
+		
 		GqGroup gqGroup = new GqGroup(p, q, g);
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 

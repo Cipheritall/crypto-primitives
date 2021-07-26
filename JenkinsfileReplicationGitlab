@@ -1,0 +1,31 @@
+#!groovy
+/*
+ * Copyright 2021 by Swiss Post, Information Technology Services
+ *
+ */
+@Library(['pipeline-library@master', 'evoting-pipeline@master']) _																  
+
+replicationConfig = [
+        [
+                sourceBranch: 'publication-master',
+                targetBranch: 'master',
+                remoteURL   : 'https://gitlab.com/swisspost-evoting/crypto-primitives.git'
+        ],
+        [
+                sourceBranch: 'pre-publication-master',
+                targetBranch: 'master',
+                remoteURL   : 'https://gitlab.com/swisspost-evoting-int/crypto-primitives.git'
+        ],
+        [
+                sourceBranch: 'publication-develop',
+                targetBranch: 'develop',
+                remoteURL   : 'https://gitlab.com/swisspost-evoting/crypto-primitives.git'
+        ],
+        [
+                sourceBranch: 'pre-publication-develop',
+                targetBranch: 'develop',
+                remoteURL   : 'https://gitlab.com/swisspost-evoting-int/crypto-primitives.git'
+        ]
+]
+
+pipelineReplication(replicationConfig, "JenkinsfileReplicationGitlab")

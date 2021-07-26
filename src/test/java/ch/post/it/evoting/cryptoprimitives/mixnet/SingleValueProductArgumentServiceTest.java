@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductGenerator.genSingleValueProductWitness;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductGenerator.getSingleValueProductStatement;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +33,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -195,6 +193,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with specific values gives expected result")
 		void getSingleValueProductArgumentWithSpecificValues() {
+
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// commitment = 3
@@ -329,28 +328,14 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 
 			return parametersList.stream().parallel().map(testParameters -> {
 				// Context.
-				final JsonData context = testParameters.getContext();
+				final JsonData contextData = testParameters.getContext();
+				final TestContextParser context = new TestContextParser(contextData);
 
-				final BigInteger p = context.get("p", BigInteger.class);
-				final BigInteger q = context.get("q", BigInteger.class);
-				final BigInteger g = context.get("g", BigInteger.class);
+				final GqGroup gqGroup = context.getGqGroup();
+				final ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 
-				final GqGroup gqGroup = new GqGroup(p, q, g);
-				final ZqGroup zqGroup = new ZqGroup(q);
-
-				final BigInteger[] pkValues = context.get("pk", BigInteger[].class);
-				final List<GqElement> keyElements = Arrays.stream(pkValues)
-						.map(bi -> GqElement.create(bi, gqGroup))
-						.collect(toList());
-				final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(keyElements);
-
-				final BigInteger hValue = context.getJsonData("ck").get("h", BigInteger.class);
-				final BigInteger[] gValues = context.getJsonData("ck").get("g", BigInteger[].class);
-				final GqElement h = GqElement.create(hValue, gqGroup);
-				final List<GqElement> gElements = Arrays.stream(gValues)
-						.map(bi -> GqElement.create(bi, gqGroup))
-						.collect(toList());
-				final CommitmentKey commitmentKey = new CommitmentKey(h, gElements);
+				final ElGamalMultiRecipientPublicKey publicKey = context.parsePublicKey();
+				final CommitmentKey commitmentKey = context.parseCommitmentKey();
 
 				// Inputs.
 				final JsonData input = testParameters.getInput();

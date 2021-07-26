@@ -34,6 +34,8 @@ class ZeroStatement {
 	private final GroupVector<GqElement, GqGroup> c_A;
 	private final GroupVector<GqElement, GqGroup> c_B;
 	private final ZqElement y;
+	private final int m;
+	private final GqGroup group;
 
 	/**
 	 * Instantiate a zero statement. The commitments and y must comply with the following:
@@ -45,8 +47,8 @@ class ZeroStatement {
 	 *     <li>value y must be part of the same group as the commitments</li>
 	 * </ul>
 	 *
-	 * @param c_A c<sub>A</sub>, a list of {@link GqElement}s.
-	 * @param c_B c<sub>B</sub>, a list of {@link GqElement}s.
+	 * @param c_A c<sub>A</sub>, a non-empty list of {@link GqElement}s.
+	 * @param c_B c<sub>B</sub>, a non-empty list of {@link GqElement}s.
 	 * @param y            The value defining the bilinear mapping.
 	 */
 	ZeroStatement(final GroupVector<GqElement, GqGroup> c_A, final GroupVector<GqElement, GqGroup> c_B, final ZqElement y) {
@@ -57,14 +59,13 @@ class ZeroStatement {
 
 		// Cross dimension checking.
 		checkArgument(this.c_A.size() == this.c_B.size(), "The two commitments vectors must have the same size.");
+		this.m = this.c_A.size();
+		checkArgument(this.m > 0);
 
 		// Cross group checking.
-		if (!c_A.isEmpty()) {
-			final GqGroup group = this.c_A.getGroup();
-			checkArgument(group.equals(this.c_B.getGroup()), "The two commitments must be part of the same group.");
-			checkArgument(group.hasSameOrderAs(this.y.getGroup()), "The y value group must be of the same order as the group of the commitments.");
-		}
-
+		this.group = this.c_A.getGroup();
+		checkArgument(group.equals(this.c_B.getGroup()), "The two commitments must be part of the same group.");
+		checkArgument(group.hasSameOrderAs(this.y.getGroup()), "The y value group must be of the same order as the group of the commitments.");
 	}
 
 	GroupVector<GqElement, GqGroup> get_c_A() {
@@ -77,6 +78,14 @@ class ZeroStatement {
 
 	ZqElement get_y() {
 		return y;
+	}
+
+	int get_m() {
+		return m;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override

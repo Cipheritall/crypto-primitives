@@ -17,7 +17,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestMultiExponentiationStatementWitnessPairGenerator.StatementWitnessPair;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors.with;
+import static ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors.set;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,6 +58,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -339,15 +340,6 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		}
 
 		@Test
-		void testExponentsMatrixMSizeEqualsZeroThrows() {
-			int m = 0;
-			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
-			MultiExponentiationWitness witness = witnessGenerator.genRandomWitness(n, m);
-			assertThrowsIllegalArgumentExceptionWithMessage("The dimension m must be strictly positive.",
-					() -> argumentService.getMultiExponentiationArgument(statement, witness));
-		}
-
-		@Test
 		void testExponentsMatrixNSizeNotSmallerThanCommitmentKeySizeThrows() {
 			int n = COMMITMENT_KEY_SIZE + 1;
 			MultiExponentiationStatement statement = statementGenerator.genRandomStatement(n, m, l);
@@ -495,7 +487,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testStatementWithModified_C_ElementDoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.ciphertextMatrix = with(values.ciphertextMatrix, 0, 0, values.c2);
+			values.ciphertextMatrix = set(values.ciphertextMatrix, 0, 0, values.c2);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
@@ -516,7 +508,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testStatementWithModified_cA_ElementDoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.ca = with(values.ca, 1, values.gNine);
+			values.ca = GroupVectors.set(values.ca, 1, values.gNine);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
@@ -538,7 +530,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testArgumentWithModified_cB_ElementDoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.cB = with(values.cB, 0, values.gOne);
+			values.cB = GroupVectors.set(values.cB, 0, values.gOne);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
@@ -549,7 +541,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testArgumentWithModified_E_ElementDoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.eVector = with(values.eVector, 0, values.e1);
+			values.eVector = GroupVectors.set(values.eVector, 0, values.e1);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
@@ -559,7 +551,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testArgumentWithModified_a_ElementDoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.aVector = with(values.aVector, 0, values.zEight);
+			values.aVector = GroupVectors.set(values.aVector, 0, values.zEight);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();

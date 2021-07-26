@@ -15,11 +15,11 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCiphertexts;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestShuffleArgumentGenerator.ShuffleArgumentPair;
-import static ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors.with;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -29,9 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -40,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -68,6 +67,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -153,6 +153,181 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					() -> new ShuffleArgumentService(publicKey, shortCommitmentKey, randomService, hashService));
 			assertEquals("The commitment key must be at least of size 2.", exception.getMessage());
 		}
+	}
+
+	private static class SpecificValues {
+		int m = 2;
+		int n = 2;
+
+		// Create groups
+		BigInteger p = BigInteger.valueOf(23);
+		BigInteger q = BigInteger.valueOf(11);
+		BigInteger g = BigInteger.valueOf(2);
+
+		GqGroup gqGroup = new GqGroup(p, q, g);
+		ZqGroup zqGroup = new ZqGroup(q);
+
+		// Create BigIntegers
+		private final BigInteger ZERO = BigInteger.ZERO;
+		private final BigInteger ONE = BigInteger.ONE;
+		private final BigInteger TWO = BigInteger.valueOf(2);
+		private final BigInteger THREE = BigInteger.valueOf(3);
+		private final BigInteger FOUR = BigInteger.valueOf(4);
+		private final BigInteger FIVE = BigInteger.valueOf(5);
+		private final BigInteger SIX = BigInteger.valueOf(6);
+		private final BigInteger SEVEN = BigInteger.valueOf(7);
+		private final BigInteger EIGHT = BigInteger.valueOf(8);
+		private final BigInteger NINE = BigInteger.valueOf(9);
+		private final BigInteger TEN = BigInteger.TEN;
+
+		// Create GqElements
+		GqElement gOne = gqGroup.getIdentity();
+		GqElement gTwo = gqGroup.getGenerator();
+		GqElement gThree = GqElement.create(THREE, gqGroup);
+		GqElement gFour = GqElement.create(FOUR, gqGroup);
+		GqElement gSix = GqElement.create(SIX, gqGroup);
+		GqElement gEight = GqElement.create(EIGHT, gqGroup);
+		GqElement gNine = GqElement.create(NINE, gqGroup);
+		GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), gqGroup);
+		GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
+		GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), gqGroup);
+		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
+
+		// Create ZqElements
+		ZqElement zOne = ZqElement.create(ONE, zqGroup);
+		ZqElement zTwo = ZqElement.create(TWO, zqGroup);
+		ZqElement zThree = ZqElement.create(THREE, zqGroup);
+		ZqElement zFour = ZqElement.create(FOUR, zqGroup);
+		ZqElement zFive = ZqElement.create(FIVE, zqGroup);
+		ZqElement zSix = ZqElement.create(SIX, zqGroup);
+		ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
+		ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
+		ZqElement zNine = ZqElement.create(NINE, zqGroup);
+		ZqElement zTen = ZqElement.create(TEN, zqGroup);
+
+		// Create the public key: pk = (8, 13, 4)
+		ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gEight, gThirteen, gFour));
+
+		// Create the ciphertexts
+		ElGamalMultiRecipientMessage m0 = new ElGamalMultiRecipientMessage(ImmutableList.of(gFour, gEight, gThree));
+		ElGamalMultiRecipientMessage m1 = new ElGamalMultiRecipientMessage(ImmutableList.of(gSixteen, gTwo, gNine));
+		ElGamalMultiRecipientMessage m2 = new ElGamalMultiRecipientMessage(ImmutableList.of(gThree, gSix, gFour));
+		ElGamalMultiRecipientMessage m3 = new ElGamalMultiRecipientMessage(ImmutableList.of(gThirteen, gFour, gEighteen));
+
+		ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.getCiphertext(m0, zFive, publicKey);
+		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.getCiphertext(m1, zTen, publicKey);
+		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.getCiphertext(m2, zSeven, publicKey);
+		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.getCiphertext(m3, zTwo, publicKey);
+		// Create the vector of ciphertexts:
+		// C = ({9, (18, 9, 13)}, {12, (2, 9, 8)}, {13, (13, 8, 9)}, {4, (4, 9, 12)})
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> c = GroupVector.of(c0, c1, c2, c3);
+
+		// Create the permutation: pi = [1, 3, 2, 0]
+		Permutation permutation = new Permutation(new int[]{1, 3, 2, 0});
+		// Create the randomness: rho = (3, 9, 4, 2)
+		GroupVector<ZqElement, ZqGroup> rho = GroupVector.of(zThree, zNine, zFour, zTwo);
+
+		ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, 3);
+		// Create the vector of shuffled ciphertexts:
+		// C' = ({4, (12, 16, 6)}, {1, (13, 4, 18)}, {1, (3, 6, 4)}, {13, (2, 3, 1)})
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> cPrime = IntStream.range(0, 4)
+				.mapToObj(i -> ElGamalMultiRecipientCiphertext.getCiphertext(ones, rho.get(i), publicKey).multiply(c.get(permutation.get(i))))
+				.collect(toGroupVector());
+
+		// Create the ShuffleArgumentService
+		// Create the commitment key: ck = {3, (6, 13, 12)}
+		CommitmentKey commitmentKey = new CommitmentKey(gThree, ImmutableList.of(gSix, gThirteen, gTwelve));
+		// Shuffle: r = (9, 2), s = (10, 8)
+		// Product: s = 10
+		// Zero: a0 = (2, 5), bm = (1, 4), r0 = 7, sm = 3, t = (6, 2, 4, 5, 8)
+		// Single: d = (4, 9), rd = 0, s0 = 1, sx = 7
+		// Multi: a0 = (0, 1), r0 = 6, b = (2, 3, 7, 9), s = (10, 1, 3, 4), tau = (5, 6, 8, 7)
+		List<BigInteger> randomValues = Arrays.asList(NINE, TWO, TEN, EIGHT,
+				TEN,
+				TWO, FIVE, ONE, FOUR, SEVEN, THREE, SIX, TWO, FOUR, FIVE, EIGHT,
+				FOUR, NINE, ZERO, ONE, SEVEN,
+				ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN);
+		RandomService randomService = new RandomService() {
+			final Iterator<BigInteger> values = randomValues.iterator();
+
+			@Override
+			public BigInteger genRandomInteger(BigInteger upperBound) {
+				return values.next();
+			}
+		};
+		HashService shuffleHashService = TestHashService.create(gqGroup.getQ());
+		ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, shuffleHashService);
+
+		// Create the statement and the witness
+		ShuffleStatement statement = new ShuffleStatement(c, cPrime);
+		ShuffleWitness witness = new ShuffleWitness(permutation, rho);
+
+		// Create the expected ZeroArgument
+		ZeroArgument zeroArgument = new ZeroArgument.Builder()
+				.with_c_A_0(gTwelve)
+				.with_c_B_m(gEighteen)
+				.with_c_d(GroupVector.of(gSixteen, gNine, gTwelve, gOne, gSix))
+				.with_a_prime(GroupVector.of(zEight, zFive))
+				.with_b_prime(GroupVector.of(zTen, zTwo))
+				.with_r_prime(zOne)
+				.with_s_prime(zEight)
+				.with_t_prime(zTwo)
+				.build();
+
+		// Create the expected HadamardArgument
+		GroupVector<GqElement, GqGroup> cBhadamard = GroupVector.of(gThirteen, gFour);
+		HadamardArgument hadamardArgument = new HadamardArgument(cBhadamard, zeroArgument);
+
+		// Create the expected SingleValueProductArgument
+		SingleValueProductArgument singleValueProductArgument = new SingleValueProductArgument.Builder()
+				.with_c_d(gOne)
+				.with_c_delta(gEight)
+				.with_c_Delta(gSixteen)
+				.with_a_tilde(GroupVector.of(zEight, zTen))
+				.with_b_tilde(GroupVector.of(zEight, zFour))
+				.with_r_tilde(zTen)
+				.with_s_tilde(zEight)
+				.build();
+
+		// Create the expected ProductArgument:
+		// cb = 9
+		// Hadamard: cB = (16, 9), Zero: cA0 = 12, cBm = 18, cd = (18, 4, 13, 1, 4), a' = (8, 8), b' = (6, 3), r' = 7, s' = 0, t' = 5
+		// Single: cd = 1, cδ = 8, cΔ = 1, aTilde = (8, 5), bTilde = (8, 7), rTilde = 7, sTilde = 7
+		ProductArgument productArgument = new ProductArgument(gFour, hadamardArgument, singleValueProductArgument);
+
+		GroupVector<GqElement, GqGroup> cBmulti = GroupVector.of(gTwelve, gFour, gOne, gEight);
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = GroupVector.of(
+				ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gThirteen, gTwo, gTwo)),
+				ElGamalMultiRecipientCiphertext.create(gEight, Arrays.asList(gEight, gTwo, gThirteen)),
+				ElGamalMultiRecipientCiphertext.create(gTwelve, Arrays.asList(gThree, gThree, gFour)),
+				ElGamalMultiRecipientCiphertext.create(gEighteen, Arrays.asList(gTwelve, gEight, gThree))
+		);
+
+		// Create the expected MultiExponentiationArgument:
+		// cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {9, (18, 18, 6)}, {9, (4, 13, 1)}, {6, (8, 3, 6)})
+		// a = (2, 4), r = 7, b = 1, s = 5, tau = 5
+		MultiExponentiationArgument multiExponentiationArgument = new MultiExponentiationArgument.Builder()
+				.with_c_A_0(gOne)
+				.with_c_B(cBmulti)
+				.with_E(eVector)
+				.with_a(GroupVector.of(zEight, zNine))
+				.with_r(zNine)
+				.with_b(zSeven)
+				.with_s(zSix)
+				.with_tau(zOne)
+				.build();
+
+		// Create the expected output:
+		// cA = (8, 2), cB = (8, 18)
+		GroupVector<GqElement, GqGroup> cAshuffle = GroupVector.of(gEight, gTwo);
+		GroupVector<GqElement, GqGroup> cBshuffle = GroupVector.of(gEight, gEighteen);
+
+		ShuffleArgument argument = new ShuffleArgument.Builder()
+				.with_c_A(cAshuffle)
+				.with_c_B(cBshuffle)
+				.with_productArgument(productArgument)
+				.with_multiExponentiationArgument(multiExponentiationArgument)
+				.build();
 	}
 
 	@Nested
@@ -318,177 +493,14 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					exception.getMessage());
 		}
 
+
 		@Test
 		@DisplayName("specific values returns the expected result")
 		void getShuffleArgumentWithSpecificValues() {
-			// Create groups
-			BigInteger p = BigInteger.valueOf(23);
-			BigInteger q = BigInteger.valueOf(11);
-			BigInteger g = BigInteger.valueOf(2);
-			GqGroup gqGroup = new GqGroup(p, q, g);
-			ZqGroup zqGroup = new ZqGroup(q);
-
-			// Create BigIntegers
-			BigInteger ZERO = BigInteger.ZERO;
-			BigInteger ONE = BigInteger.ONE;
-			BigInteger TWO = BigInteger.valueOf(2);
-			BigInteger THREE = BigInteger.valueOf(3);
-			BigInteger FOUR = BigInteger.valueOf(4);
-			BigInteger FIVE = BigInteger.valueOf(5);
-			BigInteger SIX = BigInteger.valueOf(6);
-			BigInteger SEVEN = BigInteger.valueOf(7);
-			BigInteger EIGHT = BigInteger.valueOf(8);
-			BigInteger NINE = BigInteger.valueOf(9);
-			BigInteger TEN = BigInteger.TEN;
-
-			// Create GqElements
-			GqElement gOne = gqGroup.getIdentity();
-			GqElement gTwo = gqGroup.getGenerator();
-			GqElement gThree = GqElement.create(THREE, gqGroup);
-			GqElement gFour = GqElement.create(FOUR, gqGroup);
-			GqElement gSix = GqElement.create(SIX, gqGroup);
-			GqElement gEight = GqElement.create(EIGHT, gqGroup);
-			GqElement gNine = GqElement.create(NINE, gqGroup);
-			GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), gqGroup);
-			GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
-			GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), gqGroup);
-			GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
-
-			// Create ZqElements
-			ZqElement zOne = ZqElement.create(ONE, zqGroup);
-			ZqElement zTwo = ZqElement.create(TWO, zqGroup);
-			ZqElement zThree = ZqElement.create(THREE, zqGroup);
-			ZqElement zFour = ZqElement.create(FOUR, zqGroup);
-			ZqElement zFive = ZqElement.create(FIVE, zqGroup);
-			ZqElement zSix = ZqElement.create(SIX, zqGroup);
-			ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
-			ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
-			ZqElement zNine = ZqElement.create(NINE, zqGroup);
-			ZqElement zTen = ZqElement.create(TEN, zqGroup);
-
-			// Create the public key: pk = (8, 13, 4)
-			ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gEight, gThirteen, gFour));
-
-			// Create the ciphertexts
-			ElGamalMultiRecipientMessage m0 = new ElGamalMultiRecipientMessage(ImmutableList.of(gFour, gEight, gThree));
-			ElGamalMultiRecipientMessage m1 = new ElGamalMultiRecipientMessage(ImmutableList.of(gSixteen, gTwo, gNine));
-			ElGamalMultiRecipientMessage m2 = new ElGamalMultiRecipientMessage(ImmutableList.of(gThree, gSix, gFour));
-			ElGamalMultiRecipientMessage m3 = new ElGamalMultiRecipientMessage(ImmutableList.of(gThirteen, gFour, gEighteen));
-
-			ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.getCiphertext(m0, zFive, publicKey);
-			ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.getCiphertext(m1, zTen, publicKey);
-			ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.getCiphertext(m2, zSeven, publicKey);
-			ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.getCiphertext(m3, zTwo, publicKey);
-			// Create the vector of ciphertexts:
-			// C = ({9, (18, 9, 13)}, {12, (2, 9, 8)}, {13, (13, 8, 9)}, {4, (4, 9, 12)})
-			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> c = GroupVector.of(c0, c1, c2, c3);
-
-			RandomService permutationRandomService = mock(RandomService.class);
-			when(permutationRandomService.genRandomInteger(any()))
-					.thenReturn(BigInteger.ONE, BigInteger.valueOf(2), BigInteger.ZERO, BigInteger.ZERO);
-			// Create the permutation: pi = [1, 3, 2, 0]
-			Permutation permutation = new PermutationService(permutationRandomService).genPermutation(4);
-			// Create the randomness: rho = (3, 9, 4, 2)
-			GroupVector<ZqElement, ZqGroup> rho = GroupVector.of(zThree, zNine, zFour, zTwo);
-
-			ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, 3);
-			// Create the vector of shuffled ciphertexts:
-			// C' = ({4, (12, 16, 6)}, {1, (13, 4, 18)}, {1, (3, 6, 4)}, {13, (2, 3, 1)})
-			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> cPrime = IntStream.range(0, 4)
-					.mapToObj(i -> ElGamalMultiRecipientCiphertext.getCiphertext(ones, rho.get(i), publicKey).multiply(c.get(permutation.get(i))))
-					.collect(GroupVector.toGroupVector());
-
-			// Create the ShuffleArgumentService
-			// Create the commitment key: ck = {3, (6, 13, 12)}
-			CommitmentKey commitmentKey = new CommitmentKey(gThree, ImmutableList.of(gSix, gThirteen, gTwelve));
-			RandomService shuffleRandomService = spy(new RandomService());
-			// Shuffle: r = (9, 2), s = (10, 8)
-			// Product: s = 10
-			// Zero: a0 = (2, 5), bm = (1, 4), r0 = 7, sm = 3, t = (6, 2, 4, 5, 8)
-			// Single: d = (4, 9), rd = 0, s0 = 1, sx = 7
-			// Multi: a0 = (0, 1), r0 = 6, b = (2, 3, 7, 9), s = (10, 1, 3, 4), tau = (5, 6, 8, 7)
-			doReturn(NINE, TWO, TEN, EIGHT,
-					TEN,
-					TWO, FIVE, ONE, FOUR, SEVEN, THREE, SIX, TWO, FOUR, FIVE, EIGHT,
-					FOUR, NINE, ZERO, ONE, SEVEN,
-					ZERO, ONE, SIX, TWO, THREE, SEVEN, NINE, TEN, ONE, THREE, FOUR, FIVE, SIX, EIGHT, SEVEN)
-					.when(shuffleRandomService).genRandomInteger(q);
-			HashService shuffleHashService = TestHashService.create(gqGroup.getQ());
-			ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey,
-					shuffleRandomService, shuffleHashService);
-
-			// Create the statement and the witness
-			ShuffleStatement statement = new ShuffleStatement(c, cPrime);
-			ShuffleWitness witness = new ShuffleWitness(permutation, rho);
-			ShuffleArgument actual = shuffleArgumentService.getShuffleArgument(statement, witness, 2, 2);
-
-			// Create the expected ZeroArgument
-			ZeroArgument zeroArgument = new ZeroArgument.Builder()
-					.with_c_A_0(gTwelve)
-					.with_c_B_m(gEighteen)
-					.with_c_d(GroupVector.of(gSixteen, gNine, gTwelve, gOne, gSix))
-					.with_a_prime(GroupVector.of(zEight, zFive))
-					.with_b_prime(GroupVector.of(zTen, zTwo))
-					.with_r_prime(zOne)
-					.with_s_prime(zEight)
-					.with_t_prime(zTwo)
-					.build();
-
-			// Create the expected HadamardArgument
-			GroupVector<GqElement, GqGroup> cBhadamard = GroupVector.of(gThirteen, gFour);
-			HadamardArgument hadamardArgument = new HadamardArgument(cBhadamard, zeroArgument);
-
-			// Create the expected SingleValueProductArgument
-			SingleValueProductArgument singleValueProductArgument = new SingleValueProductArgument.Builder()
-					.with_c_d(gOne)
-					.with_c_delta(gEight)
-					.with_c_Delta(gSixteen)
-					.with_a_tilde(GroupVector.of(zEight, zTen))
-					.with_b_tilde(GroupVector.of(zEight, zFour))
-					.with_r_tilde(zTen)
-					.with_s_tilde(zEight)
-					.build();
-
-			// Create the expected ProductArgument:
-			// cb = 9
-			// Hadamard: cB = (16, 9), Zero: cA0 = 12, cBm = 18, cd = (18, 4, 13, 1, 4), a' = (8, 8), b' = (6, 3), r' = 7, s' = 0, t' = 5
-			// Single: cd = 1, cδ = 8, cΔ = 1, aTilde = (8, 5), bTilde = (8, 7), rTilde = 7, sTilde = 7
-			ProductArgument productArgument = new ProductArgument(gFour, hadamardArgument, singleValueProductArgument);
-
-			GroupVector<GqElement, GqGroup> cBmulti = GroupVector.of(gTwelve, gFour, gOne, gEight);
-			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = GroupVector.of(
-					ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gThirteen, gTwo, gTwo)),
-					ElGamalMultiRecipientCiphertext.create(gEight, Arrays.asList(gEight, gTwo, gThirteen)),
-					ElGamalMultiRecipientCiphertext.create(gTwelve, Arrays.asList(gThree, gThree, gFour)),
-					ElGamalMultiRecipientCiphertext.create(gEighteen, Arrays.asList(gTwelve, gEight, gThree))
-			);
-
-			// Create the expected MultiExponentiationArgument:
-			// cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {9, (18, 18, 6)}, {9, (4, 13, 1)}, {6, (8, 3, 6)})
-			// a = (2, 4), r = 7, b = 1, s = 5, tau = 5
-			MultiExponentiationArgument multiExponentiationArgument = new MultiExponentiationArgument.Builder()
-					.with_c_A_0(gOne)
-					.with_c_B(cBmulti)
-					.with_E(eVector)
-					.with_a(GroupVector.of(zEight, zNine))
-					.with_r(zNine)
-					.with_b(zSeven)
-					.with_s(zSix)
-					.with_tau(zOne)
-					.build();
-
-			// Create the expected output:
-			// cA = (8, 2), cB = (8, 18)
-			GroupVector<GqElement, GqGroup> cAshuffle = GroupVector.of(gEight, gTwo);
-			GroupVector<GqElement, GqGroup> cBshuffle = GroupVector.of(gEight, gEighteen);
-
-			ShuffleArgument expected = new ShuffleArgument.Builder()
-					.with_c_A(cAshuffle)
-					.with_c_B(cBshuffle)
-					.with_productArgument(productArgument)
-					.with_multiExponentiationArgument(multiExponentiationArgument)
-					.build();
-
+			SpecificValues specificValues = new SpecificValues();
+			ShuffleArgument expected = specificValues.argument;
+			ShuffleArgument actual = specificValues.shuffleArgumentService
+					.getShuffleArgument(specificValues.statement, specificValues.witness, specificValues.m, specificValues.n);
 			assertEquals(expected, actual);
 		}
 	}
@@ -519,7 +531,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			// Necessary to return a constant value, otherwise some assertFalse tests can return true because of changes compensating each other (due
 			// to small test groups).
-			final HashService hashServiceMock = mock(HashService.class);
+			HashService hashServiceMock = mock(HashService.class);
 			when(hashServiceMock.recursiveHash(any())).thenReturn(new byte[] { 0b10 });
 
 			shuffleArgumentService = new ShuffleArgumentService(publicKey, commitmentKey, randomService, hashServiceMock);
@@ -615,7 +627,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final int randomIndex = secureRandom.nextInt(ciphertexts.size());
 			final ElGamalMultiRecipientCiphertext ciphertext = ciphertexts.get(randomIndex);
 			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(ciphertext);
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = with(ciphertexts, randomIndex, otherCiphertext);
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badCiphertexts = GroupVectors.set(ciphertexts, randomIndex, otherCiphertext);
 
 			final ShuffleStatement badShuffleStatement = new ShuffleStatement(badCiphertexts, shuffleStatement.get_C_prime());
 
@@ -627,18 +639,22 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect shuffled ciphertexts C' throws IllegalArgumentException")
 		void verifyShuffleArgumentIncorrectShuffledCPrime() {
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = shuffleStatement.get_C_prime();
-			final int randomIndex = secureRandom.nextInt(shuffledCiphertexts.size());
-			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(randomIndex);
-			final ElGamalMultiRecipientCiphertext otherCiphertext = elGamalGenerator.otherCiphertext(shuffledCiphertext);
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> badShuffledCiphertexts =
-					with(shuffledCiphertexts, randomIndex, otherCiphertext);
+			SpecificValues specificValues = new SpecificValues();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = specificValues.statement.get_C_prime();
+			final int ciphertextToChangeIdx = 1;
+			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(ciphertextToChangeIdx);
+			GroupVector<GqElement, GqGroup> phis = shuffledCiphertext.getPhi();
+			int ciphertextElementToChangeIdx = 1;
+			GroupVector<GqElement, GqGroup> differentPhis = GroupVectors.set(phis, ciphertextElementToChangeIdx, specificValues.gThirteen); //Was 4 originally
+			final ElGamalMultiRecipientCiphertext differentCiphertext = ElGamalMultiRecipientCiphertext.create(shuffledCiphertext.getGamma(), differentPhis);
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffleCiphertexts =
+					GroupVectors.set(shuffledCiphertexts, ciphertextToChangeIdx, differentCiphertext);
 
-			final ShuffleStatement badShuffleStatement = new ShuffleStatement(shuffleStatement.get_C_prime(), badShuffledCiphertexts);
+			ShuffleStatement invalidStatement = new ShuffleStatement(specificValues.c, differentShuffleCiphertexts);
 
-			final VerificationResult verificationResult = shuffleArgumentService.verifyShuffleArgument(badShuffleStatement, shuffleArgument, m, n);
+			final VerificationResult verificationResult = specificValues.shuffleArgumentService
+					.verifyShuffleArgument(invalidStatement, specificValues.argument, specificValues.m, specificValues.n);
 			assertFalse(verificationResult.isVerified());
-			assertEquals("Failed to verify MultiExponentiation Argument.", verificationResult.getErrorMessages().element());
 		}
 
 		@Test
@@ -647,7 +663,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> commitmentA = shuffleArgument.get_c_A();
 
 			final GqElement badCA0 = commitmentA.get(0).multiply(gqGroup.getGenerator());
-			final GroupVector<GqElement, GqGroup> badCommitmentA = with(commitmentA, 0, badCA0);
+			final GroupVector<GqElement, GqGroup> badCommitmentA = GroupVectors.set(commitmentA, 0, badCA0);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.with_c_A(badCommitmentA)
 					.with_c_B(shuffleArgument.get_c_N())
@@ -666,7 +682,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.get_c_N();
 
 			final GqElement badCBm = commitmentB.get(0).multiply(gqGroup.getGenerator());
-			final GroupVector<GqElement, GqGroup> badCommitmentB = with(commitmentB, 0, badCBm);
+			final GroupVector<GqElement, GqGroup> badCommitmentB = GroupVectors.set(commitmentB, 0, badCBm);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.with_c_A(shuffleArgument.get_c_A())
 					.with_c_B(badCommitmentB)
