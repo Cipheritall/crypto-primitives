@@ -19,19 +19,13 @@ import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.math.BigInteger;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -55,7 +49,7 @@ public class CommitmentService {
 	 * 		</ul>
 	 * </p>
 	 *
-	 * @param elements        a, the {@link ZqElement}s to be committed (a<sub>0</sub>, ..., a<sub>l</sub>)
+	 * @param elements      a, the {@link ZqElement}s to be committed (a<sub>0</sub>, ..., a<sub>l</sub>)
 	 * @param randomElement r, the random {@link ZqElement}
 	 * @param commitmentKey <b>ck</b>, a {@link CommitmentKey} (h, g<sub>1</sub>, ..., g<sub>ν</sub>)
 	 * @return the commitment to the provided elements as a {@link GqElement}
@@ -79,26 +73,11 @@ public class CommitmentService {
 				"The commitment key must have the same order (q) as the elements to be committed to and the random value");
 		checkArgument(nu >= l, "The commitment key must be equal to or longer than the list of elements to commit to");
 
-		final List<BigInteger> commitmentKeyValues =
-				ck.stream()
-						.map(GroupElement::getValue)
-						.collect(Collectors.toList());
-		final GqGroup group = ck.getGroup();
-		final BigInteger p = group.getP();
-
-		final List<BigInteger> commitmentValues =
-				Stream.concat(Stream.of(r), a.stream())
-						.map(GroupElement::getValue)
-						.collect(Collectors.toList());
-
-		final BigInteger c;
-		if (l == nu) {
-			c = BigIntegerOperations.multiModExp(commitmentKeyValues, commitmentValues, p);
-		} else {
-			commitmentValues.addAll(Collections.nCopies(nu - l, BigInteger.ZERO));
-			c = BigIntegerOperations.multiModExp(commitmentKeyValues, commitmentValues, p);
-		}
-		return GqElement.create(c, group);
+		final GqElement h = ck.getH();
+		final GroupVector<GqElement, GqGroup> g = ck.getG();
+		// Due to 0 indexing of the gs, the indexes used deviate from the spec
+		return h.exponentiate(r).multiply(IntStream.range(0, l).mapToObj(i -> g.get(i).exponentiate(a.get(i)))
+				.reduce(ck.getGroup().getIdentity(), GqElement::multiply));
 	}
 
 	/**
@@ -113,7 +92,7 @@ public class CommitmentService {
 	 * 		</ul>
 	 * </p>
 	 *
-	 * @param elements A, the non empty matrix of {@link ZqElement}s to be committed of <i>n</i> rows and <i>m</i> columns.
+	 * @param elements       A, the non empty matrix of {@link ZqElement}s to be committed of <i>n</i> rows and <i>m</i> columns.
 	 * @param randomElements <b>r</b>, the non empty vector of <i>m</i> randomly chosen {@link ZqElement}s to be used for the commitment.
 	 * @param commitmentKey  <b>ck</b>, the commitment key of the form (h, g<sub>1</sub>, ..., g<sub>ν</sub>), ν >= n.
 	 * @return the commitments (c<sub>0</sub>, ..., c<sub>m-1</sub>)
@@ -131,11 +110,6 @@ public class CommitmentService {
 		final int n = A.numRows();
 		final int m = A.numColumns();
 		final int nu = ck.size();
-
-		// Handle empty matrix.
-		if (A.isEmpty()) {
-			return GroupVector.of();
-		}
 
 		// Cross arguments dimension checking.
 		checkArgument(r.size() == m, "There must be as many random elements as there are columns in the element matrix");
@@ -169,7 +143,7 @@ public class CommitmentService {
 	 * 		</ul>
 	 * </p>
 	 *
-	 * @param elements <b>d</b>, the vector of <i>2m+1</i> {@link ZqElement}s to be committed to.
+	 * @param elements       <b>d</b>, the vector of <i>2m+1</i> {@link ZqElement}s to be committed to.
 	 * @param randomElements <b>t</b>, the non empty vector of <i>2m+1</i> randomly chosen {@link ZqElement}s to be used for the commitment.
 	 * @param commitmentKey  <b>ck</b>, the {@link CommitmentKey} of size ν &ge; 1.
 	 * @return the commitment c = (c<sub>0</sub>, ..., c<sub>2m</sub>)
@@ -190,8 +164,6 @@ public class CommitmentService {
 		// Cross dimension checking.
 		checkArgument(d_matrix.numColumns() == t.size(),
 				"The elements vector and the random elements must be of equal length");
-
-		checkArgument(!d_matrix.isEmpty(), "getCommitmentVector is not defined on an empty matrix.");
 
 		// Cross group checking.
 		checkArgument(d_matrix.getGroup().equals(t.getGroup()),

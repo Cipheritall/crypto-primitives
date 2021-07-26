@@ -88,7 +88,7 @@ class ZeroStatementTest {
 		final GroupVector<GqElement, GqGroup> emptyCommitmentsA = GroupVector.of();
 		final GroupVector<GqElement, GqGroup> emptyCommitmentsB = GroupVector.of();
 
-		assertDoesNotThrow(() -> new ZeroStatement(emptyCommitmentsA, emptyCommitmentsB, y));
+		assertThrows(IllegalArgumentException.class, () -> new ZeroStatement(emptyCommitmentsA, emptyCommitmentsB, y));
 	}
 
 	@Test

@@ -61,13 +61,6 @@ class MultiExponentiationWitnessTest extends TestGroupSetup {
 	}
 
 	@Test
-	void testThatEmptyMatrixDoesNotThrow() {
-		GroupMatrix<ZqElement, ZqGroup> emptyMatrix = zqGroupGenerator.genRandomZqElementMatrix(0, 0);
-		GroupVector<ZqElement, ZqGroup> emptyExponents = zqGroupGenerator.genRandomZqElementVector(0);
-		assertDoesNotThrow(() -> new MultiExponentiationWitness(emptyMatrix, emptyExponents, exponentsRho));
-	}
-
-	@Test
 	void testThatExponentsOfDifferentSizeThanMatrixColumnsThrows() {
 		GroupVector<ZqElement, ZqGroup> differentSizeExponents = zqGroupGenerator.genRandomZqElementVector(m + 1);
 		Exception exception =

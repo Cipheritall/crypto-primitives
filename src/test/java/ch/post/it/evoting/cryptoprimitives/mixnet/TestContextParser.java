@@ -21,6 +21,11 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -32,12 +37,25 @@ class TestContextParser {
 	private final GqGroup gqGroup;
 
 	TestContextParser(final JsonData contextData) {
-		final BigInteger p = contextData.get("p", BigInteger.class);
-		final BigInteger q = contextData.get("q", BigInteger.class);
-		final BigInteger g = contextData.get("g", BigInteger.class);
+		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
+			final BigInteger p = contextData.get("p", BigInteger.class);
+			final BigInteger q = contextData.get("q", BigInteger.class);
+			final BigInteger g = contextData.get("g", BigInteger.class);
 
-		this.gqGroup = new GqGroup(p, q, g);
-		this.context = contextData;
+			switch (p.bitLength()) {
+			case 3072:
+				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.EXTENDED);
+				break;
+			case 2048:
+				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.DEFAULT);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected bit length of p");
+			}
+
+			this.gqGroup = new GqGroup(p, q, g);
+			this.context = contextData;
+		}
 	}
 
 	GqGroup getGqGroup() {

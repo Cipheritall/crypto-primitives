@@ -23,6 +23,8 @@ import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -66,12 +68,30 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 		checkNotNull(q, "Group Gq parameter q should not be null");
 		checkNotNull(g, "Group Gq parameter g should not be null");
 
+		final SecurityLevel securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
+		final String securityLevelCheckMessage = "The given p does not correspond to the given security level.";
+
+		switch (securityLevel) {
+		case EXTENDED:
+			checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+			break;
+		case DEFAULT:
+			checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+			checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+			break;
+		case TESTING_ONLY:
+			checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+			break;
+		default:
+			throw new IllegalArgumentException("Unsupported security level!");
+		}
+
 		//Validate p
-		checkArgument(p.isProbablePrime(CertaintyLevel.getCertaintyLevel(p.bitLength())), "Group Gq parameter p must be prime");
+		checkArgument(p.isProbablePrime(securityLevel.getStrength()), "Group Gq parameter p must be prime");
 		this.p = p;
 
 		//Validate q
-		checkArgument(q.isProbablePrime(CertaintyLevel.getCertaintyLevel(p.bitLength())), "Group Gq parameter q must be prime");
+		checkArgument(q.isProbablePrime(securityLevel.getStrength()), "Group Gq parameter q must be prime");
 		checkArgument(q.compareTo(BigInteger.ZERO) > 0);
 		checkArgument(q.compareTo(p) < 0);
 		BigInteger computedP = q.multiply(BigInteger.valueOf(2)).add(BigInteger.ONE);

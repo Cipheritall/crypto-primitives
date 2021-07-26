@@ -34,6 +34,7 @@ We strive for excellent code quality and to minimize the risk of bugs and vulner
 We base our below analysis on the reports from March 2021.
 
 ### SonarQube Analysis
+
 We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells. You can find the details in the [following report](./SonarQubeDetail.pdf).
 
 ![SonarQube](SonarQube.jpg)
@@ -46,7 +47,7 @@ Moreover, a high test coverage illustrates the fact that we extensively test the
 
 ### Fortify Analysis
 
-The Fortify analysis showed 0 critical, 0 high, 0 medium, and 59 low criticality issues. We manually reviewed all 59 low-criticality issues and assessed them as false positives.
+The Fortify analysis showed 0 critical, 0 high, 0 medium, and 57 low criticality issues. We manually reviewed all 57 low-criticality issues and assessed them as false positives.
 
 ### JFrog X-Ray Analysis
 
@@ -76,23 +77,34 @@ We aim for a mathematical naming convention that aligns with the following goals
 | 9) Getter, setter and build methods for mathematical variables must use the get_, set_, with_ prefix followed by the variable name.                                          | This rule guarantees consistency with the naming of variables.                                                                                                   |
 | 10) Method parameters' names should follow Java best practices. Subsequently, the algorithm implementation converts the parameters' names to the mathematical convention.    | Keep methods readable and self-documented while keeping the specification and implementation aligned.                                                            |
 | 11) Keep numeric symbols in mathematical variables, except if the full variable name consists of a numeric symbol, in which case we use the fully spelled out equivalent.    |                                                                                                                                                                  |
-| 12) Spell out symbols in the mathematical variable names.   
+| 12) Spell out symbols in the mathematical variable names.
 
 ### Naming Convention Examples
 
 ![Mathematical Naming Convention Examples](naming_convention_examples.jpg)
 
+## Change Log Release 0.10
+
+The following functionalities and improvements are included in release 0.10:
+
+* Specified a VerifyDecryptions method that verifies a vector of decryptions.
+* Implemented exponentiation proof verification.
+* Integrated the certainty into the SecurityLevel class.
+* Added some minor precondition and robustness checks.
+
 ## Change Log Release 0.9
+
 The following functionalities and improvements are included in release 0.9:
 
 * Implemented exponentiation proof generation.
-* Added a method for verifiable parameter generation in the ElGamal encryption scheme.
+* Added the method GetVerifiableEncryptionParameters in the ElGamalEncryption scheme.
 * Documented a clear naming convention for the translation of mathematical notations to code and applied it consistently across the codebase.
 * Outsourced the concatenation of byte arrays in the recursive hash function to a utility function.
-* Added certain additional ensure statements in the mix net algorithms to increase robustness.
+* Completed some additional « Ensure » statements in the mix net algorithms description to increase robustness.
 * Fixed some minor alignment issues in a few algorithms.
 
 ## Change Log Release 0.8
+
 The following functionalities and improvements are included in release 0.8:
 
 * Provided decryption proof generation and verification.
@@ -109,11 +121,28 @@ The following functionalities and improvements are included in release 0.8:
 ## Future work
 
 We plan for the following improvements to the crypto-primitives library:
-* Implementing exponentiation proof verification.
-* Implementing plaintext-equality proofs.
+
 * Optimizing mathematical operations using native libraries and specialized algorithms.
 * Investigating potential improvements in parametrizing the Bayer-Groth mix net. We parametrize the Bayer-Groth with two parameters (m,n). If m and n have equal size, the Bayer-Groth mix net is memory-optimal. However, setting m=1 is the most efficient setting for computational performance. Moreover, setting m=1 allows for further simplifications since one can omit the Hadamard and the zero arguments in that case. We plan to conduct other performance tests to analyze the memory-performance trade-off.
 * Making the RecursiveHash function collision-resistant across different input domains (corresponds to Gitlab issue [#9](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/9)).
 * Enforcing abstractions in mathematical operations. Currently, we have some unnecessary conversions between abstract mathematical objects (such as GqElements) and plain values (such as BigIntegers). We should work more strictly with mathematically abstract classes.
 * Investigating the usage of a "context" object that encapsulates values that do not change between protocol executions (group parameters, security level, etc.).
 * Implementing the ByteArrayToString method. This method is currently not used; therefore, we did not implement it yet.
+
+## Open Issues
+
+The current release has the following open issues:
+
+* Implementing the VerifyDecryptions method.
+* Implementing plaintext-equality proofs.
+
+## Additional documentation
+
+You can find additional documents related to the crypto-primitives in the following locations:
+
+| Repositories | Content |
+| :------- | :---- |
+| [`System specification`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/System/System_Specification.pdf) | System Specification of the e-voting system.   |
+| [`Voting protocol`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/Protocol/Swiss_Post_Voting_Protocol_Computational_proof.pdf) | The cryptographic protocol that describes the Swiss Post e-voting system in a mathematical form. |
+| [`Voting System architecture`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/System/SwissPost_Voting_System_architecture_document.pdf) | Architecture documentation of the e-voting system. |
+| [`Documentation overview`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/Product/Overview.md) | Overview of all documentations. |

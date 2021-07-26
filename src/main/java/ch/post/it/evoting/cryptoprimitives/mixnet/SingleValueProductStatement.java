@@ -21,16 +21,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Represents the statement for a single value product argument, consisting of a commitment and a product.
  */
-@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 class SingleValueProductStatement {
 
 	private final GqElement c_a;
 	private final ZqElement b;
+
+	private final GqGroup group;
 
 	/**
 	 * Instantiates a single value product statement object.
@@ -38,7 +41,7 @@ class SingleValueProductStatement {
 	 * <p>The commitment and product passed as arguments must both be non null and have the same group order.</p>
 	 *
 	 * @param c_a c<sub>a</sub>, a {@link GqElement}
-	 * @param b    b, a {@link ZqElement}
+	 * @param b   b, a {@link ZqElement}
 	 */
 	SingleValueProductStatement(final GqElement c_a, final ZqElement b) {
 		checkNotNull(c_a);
@@ -47,6 +50,7 @@ class SingleValueProductStatement {
 				"The group of the commitment and the group of the product must have the same order");
 		this.c_a = c_a;
 		this.b = b;
+		this.group = c_a.getGroup();
 	}
 
 	GqElement get_c_a() {
@@ -55,6 +59,10 @@ class SingleValueProductStatement {
 
 	ZqElement get_b() {
 		return b;
+	}
+
+	GqGroup getGroup() {
+		return group;
 	}
 
 	@Override

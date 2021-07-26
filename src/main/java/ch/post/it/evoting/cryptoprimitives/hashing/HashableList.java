@@ -18,12 +18,14 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
 /**
- * Interface to be implemented by classes whose hashable form is a list of {@link Hashable} objects.
+ * Interface to be implemented by classes whose hashable form is an immutable list of {@link Hashable} objects.
  */
 public interface HashableList extends Hashable {
 
@@ -31,7 +33,7 @@ public interface HashableList extends Hashable {
 	ImmutableList<? extends Hashable> toHashableForm();
 
 	/**
-	 * Utility function which creates an immutable HashableList who's hashable form is the provided list.
+	 * Creates a HashableList who's hashable form is the provided list.
 	 *
 	 * @param list the hashable form. Non null.
 	 * @return A new HashableList who's hashable form is {@code list}
@@ -44,5 +46,20 @@ public interface HashableList extends Hashable {
 		checkArgument(!immutableList.isEmpty(), "The list must not be empty.");
 
 		return () -> immutableList;
+	}
+
+	/**
+	 * Creates a HashableList who's hashable form is an ImmutableList containing the provided elements.
+	 *
+	 * @param elements the hashable elements to construct a HashableList from. Non null and must not contain nulls.
+	 * @param <E> the type of the elements
+	 * @return a HashableList with the provided elements
+	 */
+	@SafeVarargs
+	static <E extends Hashable> HashableList of(final E... elements) {
+		checkNotNull(elements);
+		checkArgument(Arrays.stream(elements).allMatch(Objects::nonNull), "Elements must not contain nulls");
+
+		return from(Arrays.asList(elements));
 	}
 }

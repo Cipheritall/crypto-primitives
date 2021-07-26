@@ -95,6 +95,14 @@ class CommitmentKey implements HashableList {
 		return gElements.size();
 	}
 
+	public GqElement getH() {
+		return h;
+	}
+
+	public GroupVector<GqElement, GqGroup> getG() {
+		return gElements;
+	}
+
 	/**
 	 * Creates a stream of the elements of the commitment key.
 	 *

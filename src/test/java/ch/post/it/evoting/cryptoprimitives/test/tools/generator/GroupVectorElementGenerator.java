@@ -15,6 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -46,10 +49,11 @@ public class GroupVectorElementGenerator {
 	 * @param s the supplier of a single element
 	 * @param <E> the element type
 	 * @param <G> the element group type
-	 * @return a matrix of elements.
+	 * @return a matrix of elements, row by row.
 	 */
 	public static <E extends GroupVectorElement<G>, G extends MathematicalGroup<G>>
 	List<List<E>> generateElementMatrix(final int numRows, final int numColumns, Supplier<E> s) {
+		checkNotNull(s);
 		return Stream.generate(() -> generateElementList(numColumns, s)).limit(numRows).collect(Collectors.toList());
 	}
 }

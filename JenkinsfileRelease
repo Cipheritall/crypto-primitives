@@ -1,23 +1,15 @@
+#!groovy
 /*
- * Copyright 2014 by Swiss Post, Information Technology Services
+ * Copyright 2021 by Swiss Post, Information Technology Services
  *
  */
 
-@Library('pipeline-library@master') _
+@Library(['pipeline-library@master', 'evoting-pipeline@master']) _
 
 def BUILD_INFO = Artifactory.newBuildInfo()
 def PROJECT_NAME = 'crypto-primitives'
-def GIT_END_URL = 'gitit.post.ch/scm/evotingecosystem/crypto-primitives.git'
-def ARTIFACTORY_SERVER_ID = 'artifactory'
 def SCM_URL = "https://gitit.post.ch/scm/evotingecosystem/crypto-primitives.git"
-def MAVEN_RELEASE_REPO = 'libs-release-evoting-local'
-def MAVEN_SNAPSHOT_REPO = 'libs-snapshot-evoting-local'
-def MAVEN_RESOLVE_REPO = 'maven-evoting-virtual'
-
-// Tools
-def JDK = 'jdk-8u241'
-def NODEJS = 'node-8.16.2'
-def MAVEN = 'maven-3.6.3'
+def SCM_URL_ANON = "https://gitit.post.ch/scm/evoting-anonymized/crypto-primitives.git"
 
 ARTIFACTORY_SERVER = Artifactory.server 'artifactory'
 RTMAVEN = Artifactory.newMavenBuild()
@@ -31,9 +23,11 @@ pipeline {
 	}
 
 	parameters {
-		string(name: 'BRANCH_NAME', defaultValue: 'develop', description: 'GIT branch where the release is starting. Default is "develop". Change for testing purposes.')
+		string(name: 'BRANCH_NAME', defaultValue: 'release/name', description: 'GIT branch where the release is starting. Default is "release/name". Change for testing purposes.')
 		string(name: 'RELEASE_VERSION', defaultValue: '0.0.0.0', description: 'Set to the desired version to be released. Usually the Bugfix-Version number is bumped from the last RELEASE_VERSION eg 1.1.3.0 -> 1.1.4.0 You can get the last (tagged) RELEASE_VERSION with this cmd: git describe --abbrev=0 If you enter the value of an existing version, the Job will fail (due to duplicated tags)')
 		string(name: 'NEW_SNAPSHOT_VERSION', defaultValue: '0.0.0.0-SNAPSHOT', description: 'Set to a version higher than RELEASE_VERSION and add the suffix -SNAPSHOT eg. 1.2.0.0-SNAPSHOT')
+		string(name: 'RELEASE_MESSAGE', defaultValue: 'merge release evoting', description: 'Set the release commit message')
+		booleanParam(name: 'AUTO_MERGE', defaultValue: true, description: 'Auto merge given branch into master.')
 	}
 
 	options {
@@ -43,20 +37,17 @@ pipeline {
 		timestamps()
 	}
 
-	tools {
-		jdk "${JDK}"
-		nodejs "${NODEJS}"
-		maven "${MAVEN}"
-	}
-
 	stages {
 
 		stage('Prepare') {
 			steps {
-				cleanWs()
 				script {
 					currentBuild.displayName = "#${BUILD_INFO.number} : ${RELEASE_VERSION} - ${NEW_SNAPSHOT_VERSION}"
-					currentBuild.description = "Jenkins job to release the e-Voting"
+					currentBuild.description = "Jenkins job to release the crypto-primitives"
+                    clone(
+                            branch: BRANCH_NAME,
+                            url: SCM_URL,
+                            credentialsId: "s-cicd-evoting")		 										
 				}
 			}
 		}
@@ -64,22 +55,37 @@ pipeline {
 		stage('Release') {
 			steps {
 				script {
-					sh "wget -O ./jenkins-release-crypto-primitives.groovy https://artifactory.tools.pnet.ch/artifactory/libs-release-evoting-local/ch/post/it/evoting/jenkins/pipeline/jenkins-release-crypto-primitives.groovy"
 					def cryptoPrimitivesReleasePipelineLib = load 'jenkins-release-crypto-primitives.groovy'
-					sh "rm -rf jenkins-release-crypto-primitives.groovy"
-					sh "rm -rf jenkins-release-crypto-primitives.groovy"
-					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 's-cicd-evoting', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS']]) {
-						withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
-							cryptoPrimitivesReleasePipelineLib.performRelease(PROJECT_NAME, "https://\${GIT_USER}:\${GIT_PASS}@\${GIT_END_URL}", BRANCH_NAME, AUTO_MERGE, 'clean deploy', '-Pdoc -DskipTests --settings ${EVOTING_HOME}/.mvn/settings.xml', WORKSPACE, RELEASE_VERSION, NEW_SNAPSHOT_VERSION, "mathias.meier@post.ch")
-						}
+					
+					withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
+						cryptoPrimitivesReleasePipelineLib.performRelease(PROJECT_NAME, SCM_URL, BRANCH_NAME, AUTO_MERGE, 'clean deploy', '-Pdoc -DskipTests --settings ${EVOTING_HOME}/.mvn/settings.xml', WORKSPACE, RELEASE_VERSION, NEW_SNAPSHOT_VERSION, "spoc-dev-evoting@post.ch", false, PROJECT_NAME, RELEASE_MESSAGE)
 					}
 				}
 			}
 		}
+
+		stage('Anonymize') {
+			steps {
+				anonymization(
+						gitAnonymousUserName: "SwissPost-Bot",
+						gitAnonymousUserEmail: "evotingspoc@poste.ch",
+						fileToRemove: "Jenkinsfile,JenkinsfileRelease,JenkinsfileAnonymizeDevelop, JenkinsfileFortify,jenkins-release-crypto-primitives.groovy,.mvn");
+			}
+		}
+
+		stage('push target branch') {
+			steps {
+				forcePush(
+						branch: 'pre-publication-master',
+						url: SCM_URL_ANON,
+						credentialsId: "s-cicd-evoting");
+			}
+		}
+		
 	}
 	post {
 		failure {
-			sendBuildMail(projectName: PROJECT_NAME, message: 'Hi, You broke the RELEASE build! Please check the problem.', onError: true, toCommitters: true)
+			sendBuildMail(projectName: PROJECT_NAME, message: 'Hi, You broke the crypto-primitives RELEASE build! Please check the problem.', onError: true, toCommitters: true)
 		}
 	}
 }

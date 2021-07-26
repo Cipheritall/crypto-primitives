@@ -151,7 +151,8 @@ public final class MixnetService implements Mixnet {
 		checkArgument(canGenerateKey(N, C.getGroup()), "N must be smaller or equal to q - 3");
 
 		// Group checking
-		checkArgument(C.getGroup().equals(C_prime.getGroup()), "The shuffled and re-encrypted ciphertexts must have the same group than the un-shuffled ciphertexts.");
+		checkArgument(C.getGroup().equals(C_prime.getGroup()),
+				"The shuffled and re-encrypted ciphertexts must have the same group than the un-shuffled ciphertexts.");
 		checkArgument(C.getGroup().equals(shuffleArgument.getGroup()), "The ciphertexts and the shuffle argument must have the same group.");
 		checkArgument(C.getGroup().equals(pk.getGroup()), "The public key and the ciphertexts must have to the same group.");
 
@@ -159,7 +160,6 @@ public final class MixnetService implements Mixnet {
 		checkArgument(C.getElementSize() == C_prime.getElementSize(), "All ciphertexts must have the same number of elements.");
 		checkArgument(C.size() == C_prime.size(), "There must be as many shuffled and re-encrypted ciphertexts, as un-shuffled ciphertexts.");
 		final GqGroup gqGroup = C.getGroup();
-
 
 		// Operations
 		final int[] matrixDimensions = MatrixUtils.getMatrixDimensions(N);

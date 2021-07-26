@@ -1,6 +1,6 @@
 [
   {
-	"description": "Get Encryption Parameters - 2048",
+	"description": "2048 - Get Encryption Parameters",
 	"input": {
 	  "bit_len": 2048,
 	  "lambda": 112,
@@ -13,7 +13,7 @@
 	}
   },
   {
-	"description": "Get Encryption Parameters - 3072",
+	"description": "3072 - Get Encryption Parameters",
 	"input": {
 	  "bit_len": 3072,
 	  "lambda": 128,

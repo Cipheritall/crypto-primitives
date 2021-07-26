@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives;
 
+import java.math.BigInteger;
+
 /**
  * Interface exposing all methods that need to be accessed outside of crypto-primitives.
  */
@@ -43,5 +45,13 @@ public interface CryptoPrimitives {
 	 * @return a random Base64-encoded string of {@code length} characters. Must be greater than or equal to 1.
 	 */
 	String genRandomBase64String(final int length);
+
+	/**
+	 * Generates a random BigInteger between 0 (incl.) and {@code upperBound} (excl.).
+	 *
+	 * @param upperBound m, the upper bound. Must be non null and strictly positive.
+	 * @return A random BigInteger <code>r s.t. 0 &le; r &lt; m</code>.
+	 */
+	BigInteger genRandomInteger(final BigInteger upperBound);
 
 }

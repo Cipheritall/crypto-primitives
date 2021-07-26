@@ -66,16 +66,15 @@ final class MultiExponentiationStatement {
 		checkNotNull(commitmentA);
 
 		//Dimension checking
-		checkArgument(ciphertextMatrix.isEmpty() && commitmentA.isEmpty() || ciphertextMatrix.numRows() == commitmentA.size(),
+		checkArgument(ciphertextMatrix.numRows() == commitmentA.size(),
 				"The commitment must be the same size as the number of rows of the ciphertext matrix.");
 
 		//Group checking
-		if (!ciphertextMatrix.isEmpty()) {
-			checkArgument(ciphertextMatrix.getGroup().equals(ciphertextC.getGroup()),
-					"The ciphertext matrix and the ciphertext C must be from the same group.");
-			checkArgument(ciphertextMatrix.getGroup().equals(commitmentA.getGroup()),
-					"The ciphertext matrix and the commitment must be from the same group.");
-		}
+		checkArgument(ciphertextMatrix.getGroup().equals(ciphertextC.getGroup()),
+				"The ciphertext matrix and the ciphertext C must be from the same group.");
+		checkArgument(ciphertextMatrix.getGroup().equals(commitmentA.getGroup()),
+				"The ciphertext matrix and the commitment must be from the same group.");
+
 
 		this.C_matrix = ciphertextMatrix;
 		this.C = ciphertextC;

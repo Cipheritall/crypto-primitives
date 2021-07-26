@@ -17,6 +17,7 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import java.math.BigInteger;
 
@@ -69,11 +70,13 @@ public class ZqGroupGenerator {
 	/**
 	 * Generate a random {@link GroupMatrix} of {@link ZqElement} in this {@code group}.
 	 *
-	 * @param m the matrix' number of lines.
-	 * @param n the matrix' number of columns.
-	 * @return a m &times; n matrix of random {@link ZqElement}.
+	 * @param n the matrix' number of lines, greater than 0.
+	 * @param m the matrix' number of columns, greater than 0.
+	 * @return a n &times; m matrix of random {@link ZqElement}.
 	 */
 	public GroupMatrix<ZqElement, ZqGroup> genRandomZqElementMatrix(final int m, final int n) {
+		checkArgument(n > 0);
+		checkArgument(m > 0);
 		return GroupMatrix.fromRows(generateElementMatrix(m, n, this::genRandomZqElementMember));
 	}
 

@@ -40,10 +40,7 @@ public class RandomService {
 	}
 
 	/**
-	 * Generates a random BigInteger between 0 (incl.) and {@code upperBound} (excl.).
-	 *
-	 * @param upperBound m, the upper bound. Must be non null and strictly positive.
-	 * @return A random BigInteger <code>r s.t. 0 &le; r &lt; m</code>.
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomInteger(BigInteger)
 	 */
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
 		checkNotNull(upperBound);

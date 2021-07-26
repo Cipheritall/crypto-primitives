@@ -1,22 +1,20 @@
 #!groovy
 /*
-* Copyright 2014 by Swiss Post, Information Technology Services
+ * Copyright 2021 by Swiss Post, Information Technology Services
 *
 */
 
-@Library('pipeline-library@master')_
+@Library('pipeline-library@master') _
 
 def BUILD_INFO = Artifactory.newBuildInfo()
 def PROJECT_NAME = 'crypto-primitives'
-def GIT_END_URL = 'gitit.post.ch/scm/evotingecosystem/crypto-primitives.git'
+// Maven
 def MAVEN_RELEASE_REPO = 'libs-release-evoting-local'
 def MAVEN_SNAPSHOT_REPO = 'libs-snapshot-evoting-local'
 def MAVEN_RESOLVE_REPO = 'maven-evoting-virtual'
-def MAVEN_PARAMS = '-U --settings .mvn/settings.xml'
+def MAVEN_PARAMS = '-T 1.5C -U --settings .mvn/settings.xml --no-transfer-progress'
 
 // Tools
-def JDK = 'jdk-8u252'
-def NODEJS = 'node-8.16.2'
 def MAVEN = 'maven-3.6.3'
 
 pipeline {
@@ -27,16 +25,23 @@ pipeline {
 
 	options {
 		disableConcurrentBuilds()
-		buildDiscarder(logRotator(numToKeepStr:'10'))
+		buildDiscarder(logRotator(numToKeepStr: '10'))
 		ansiColor('xterm')
 		timestamps()
 	}
 
 	stages {
 
-		stage('Informations') {
+		stage('Prepare') {
 			steps {
 				step([$class: 'StashNotifier'])
+				cleanWs()
+				checkout scm
+			}
+		}
+
+		stage('Infos logs') {
+			steps {
 				echo "--------------------------------- Build Information : ---------------------------------"
 				echo "Build information : ${BUILD_INFO}"
 				echo "Build name : ${BUILD_INFO.name}"
@@ -52,7 +57,6 @@ pipeline {
 				echo "---------------------------------------------------------------------------------------"
 			}
 		}
-
 		stage('Build') {
 			when {
 				not {
@@ -74,7 +78,10 @@ pipeline {
 				BUILD_NAME = getDefaultBuildName(projectName: PROJECT_NAME)
 			}
 			when {
-				branch 'develop'
+				anyOf {
+					branch 'develop'
+					branch 'master'
+				}
 			}
 			steps {
 				withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
@@ -85,15 +92,27 @@ pipeline {
 		}
 
 		stage('Sonar') {
-            when {
-				not {
-					branch 'master'
-				}
-			}
 			steps {
 				withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
-					sh "mvn --settings ${EVOTING_HOME}/.mvn/settings.xml sonar:sonar"
+					sh "mvn --settings ${EVOTING_HOME}/.mvn/settings.xml sonar:sonar -Dsonar.branch.name=$BRANCH_NAME"
 				}
+			}
+		}
+
+
+		stage('Publish build info') {
+			when {
+				anyOf {
+					branch 'master'
+					branch 'develop'
+				}
+			}
+			environment {
+				BUILD_NAME = getDefaultBuildName(projectName: PROJECT_NAME)
+
+			}
+			steps {
+				publishBuildInformation(buildName: BUILD_NAME, buildInfo: BUILD_INFO)
 			}
 		}
 
@@ -114,9 +133,7 @@ pipeline {
 
 	post {
 		always {
-			script {
-				step([$class: 'StashNotifier'])
-			}
+			step([$class: 'StashNotifier'])
 		}
 		failure {
 			sendBuildMail(projectName: PROJECT_NAME, message: 'Hi, the crypto-primitives build has failed!!', onError: true, toCommitters: true)

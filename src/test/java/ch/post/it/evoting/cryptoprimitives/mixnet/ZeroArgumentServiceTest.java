@@ -168,15 +168,10 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with any null parameter throws NullPointerException")
 		void computeDVectorNullParams() {
-			final GroupMatrix<ZqElement, ZqGroup> emptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
-
 			assertAll(
 					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(null, secondMatrix, y)),
 					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(firstMatrix, null, y)),
-					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(firstMatrix, secondMatrix, null)),
-					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(null, emptyMatrix, y)),
-					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(emptyMatrix, null, y)),
-					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(emptyMatrix, emptyMatrix, null))
+					() -> assertThrows(NullPointerException.class, () -> zeroArgumentService.computeDVector(firstMatrix, secondMatrix, null))
 			);
 		}
 
@@ -189,16 +184,6 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.computeDVector(otherMatrix, secondMatrix, y));
 			assertEquals("The two matrices must have the same number of rows.", exception.getMessage());
-
-			// With empty matrices.
-			final GroupMatrix<ZqElement, ZqGroup> emptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
-			final IllegalArgumentException exceptionSecondEmpty = assertThrows(IllegalArgumentException.class,
-					() -> zeroArgumentService.computeDVector(otherMatrix, emptyMatrix, y));
-			assertEquals("The two matrices must have the same number of rows.", exceptionSecondEmpty.getMessage());
-
-			final IllegalArgumentException exceptionFirstEmpty = assertThrows(IllegalArgumentException.class,
-					() -> zeroArgumentService.computeDVector(emptyMatrix, secondMatrix, y));
-			assertEquals("The two matrices must have the same number of rows.", exceptionFirstEmpty.getMessage());
 		}
 
 		@Test
@@ -238,26 +223,6 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with random values gives expected d vector length")
 		void computeDVectorTest() {
 			assertEquals(2 * m + 1, zeroArgumentService.computeDVector(firstMatrix, secondMatrix, y).size());
-		}
-
-		@Test
-		@DisplayName("with empty matrices gives empty result vector")
-		void computeDVectorEmptyMatrices() {
-			final GroupVector<ZqElement, ZqGroup> emptyD = GroupVector.of();
-			final GroupMatrix<ZqElement, ZqGroup> firstEmptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
-			final GroupMatrix<ZqElement, ZqGroup> secondEmptyMatrix = GroupMatrix.fromRows(Collections.emptyList());
-
-			assertEquals(emptyD, zeroArgumentService.computeDVector(firstEmptyMatrix, secondEmptyMatrix, y));
-		}
-
-		@Test
-		@DisplayName("with matrices with empty columns gives empty result vector")
-		void computeDVectorEmptyColumns() {
-			final GroupVector<ZqElement, ZqGroup> emptyD = GroupVector.of();
-			final GroupMatrix<ZqElement, ZqGroup> firstEmptyMatrix = GroupMatrix.fromColumns(Collections.emptyList());
-			final GroupMatrix<ZqElement, ZqGroup> secondEmptyMatrix = GroupMatrix.fromColumns(Collections.emptyList());
-
-			assertEquals(emptyD, zeroArgumentService.computeDVector(firstEmptyMatrix, secondEmptyMatrix, y));
 		}
 
 		@Test
@@ -487,7 +452,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.getZeroArgument(zeroStatement, addElemZeroWitness));
-			assertEquals("The statement commitments must have the same size as the witness exponents.", exception.getMessage());
+			assertEquals("The statement and witness must have the same dimension m.", exception.getMessage());
 		}
 
 		@Test
@@ -504,7 +469,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.getZeroArgument(zeroStatement, otherZqGroupZeroWitness));
-			assertEquals("The statement y and witness exponents must be part of the same group.", exception.getMessage());
+			assertEquals("The statement and witness must have compatible groups.", exception.getMessage());
 
 		}
 
@@ -685,15 +650,15 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
 			ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
-			when(zeroArgument.get_c_d().getGroup()).thenReturn(gqGroup);
-			when(zeroStatement.get_c_A().getGroup()).thenReturn(gqGroup);
+			when(zeroArgument.getGroup()).thenReturn(gqGroup);
+			when(zeroStatement.getGroup()).thenReturn(gqGroup);
 
-			when(zeroArgument.get_c_d().size()).thenReturn(1);
-			when(zeroStatement.get_c_A().size()).thenReturn(2);
+			when(zeroArgument.get_m()).thenReturn(1);
+			when(zeroStatement.get_m()).thenReturn(2);
 
 			IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument));
-			assertEquals("The m of the statement should be equal to the m of the argument (2m+1)", invalidMException.getMessage());
+			assertEquals("The statement and argument must have the same dimension m.", invalidMException.getMessage());
 
 		}
 
@@ -707,7 +672,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));
-			assertEquals("Statement and argument do not share the same group", wrongGroupException.getMessage());
+			assertEquals("Statement and argument must belong to the same group.", wrongGroupException.getMessage());
 
 		}
 

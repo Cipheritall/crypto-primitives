@@ -32,14 +32,17 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 @SuppressWarnings("squid:S00117")
 public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 	private final DecryptionProofService decryptionProofService;
+	private final ExponentiationProofService exponentiationProofService;
 
 	/**
 	 * Instantiates a zero knowledge proof service which operates in a given group. A security provider must already be loaded that contains the
@@ -54,11 +57,13 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 			throw new IllegalStateException("Badly configured message digest instance.");
 		}
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
+		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
 	}
 
 	@VisibleForTesting
 	public ZeroKnowledgeProofService(final RandomService randomService, final HashService hashService) {
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
+		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
 	}
 
 	@Override
@@ -91,5 +96,12 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 				.collect(toGroupVector());
 
 		return new VerifiableDecryption(C_prime, pi_dec);
+	}
+
+	@Override
+	public ExponentiationProof genExponentiationProof(final GroupVector<GqElement, GqGroup> bases, final ZqElement exponent,
+			final GroupVector<GqElement, GqGroup> exponentiations, final List<String> auxiliaryInformation) {
+
+		return exponentiationProofService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation);
 	}
 }

@@ -65,10 +65,8 @@ final class MultiExponentiationWitness {
 		checkArgument(A.numColumns() == r.size(), "The matrix A number of columns must equals the number of exponents.");
 
 		//Group checking
-		if (!A.isEmpty()) {
-			checkArgument(A.getGroup().equals(r.getGroup()), "The matrix A and the exponents r must belong to the same group.");
-			checkArgument(A.getGroup().equals(rho.getGroup()), "The matrix A and the exponent ρ must belong to the same group");
-		}
+		checkArgument(A.getGroup().equals(r.getGroup()), "The matrix A and the exponents r must belong to the same group.");
+		checkArgument(A.getGroup().equals(rho.getGroup()), "The matrix A and the exponent ρ must belong to the same group");
 
 		this.A = A;
 		this.r = r;
