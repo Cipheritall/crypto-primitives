@@ -4,10 +4,11 @@
 *
 */
 
-@Library('pipeline-library@master') _
+@Library(['pipeline-library@master', 'evoting-pipeline@master']) _
 
 def BUILD_INFO = Artifactory.newBuildInfo()
 def PROJECT_NAME = 'crypto-primitives'
+def SCM_URL = "https://gitit.post.ch/scm/evotingecosystem/crypto-primitives.git"
 def SCM_URL_ANON = "https://gitit.post.ch/scm/evoting-anonymized/crypto-primitives.git"
 
 pipeline {
@@ -29,7 +30,10 @@ pipeline {
 			steps {
 				step([$class: 'StashNotifier'])
 				cleanWs()
-				checkout scm
+				clone(
+						branch: "develop",
+						url: SCM_URL,
+						credentialsId: "s-cicd-evoting")
 			}
 		}
 
@@ -44,7 +48,7 @@ pipeline {
 
 		stage('push target branch') {
 			steps {
-				forcePushWithCredentialsInUrl(
+				forcePush(
 						branch: 'pre-publication-develop',
 						url: SCM_URL_ANON,
 						credentialsId: "s-cicd-evoting");
