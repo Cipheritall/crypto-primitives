@@ -3,7 +3,7 @@
  * Copyright 2021 by Swiss Post, Information Technology Services
  *
  */
-@Library(['pipeline-library@master', 'evoting-pipeline@master']) _																  
+@Library(['pipeline-library@master', 'evoting-pipeline@master']) _
 
 replicationConfig = [
         [
