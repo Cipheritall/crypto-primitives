@@ -198,7 +198,7 @@
 					<version>${maven-surefire-plugin.version}</version>
 					<configuration>
 						<environmentVariables>
-							<security.level>TESTING_ONLY</security.level>
+							<SECURITY_LEVEL>TESTING_ONLY</SECURITY_LEVEL>
 						</environmentVariables>
 					</configuration>
 				</plugin>
