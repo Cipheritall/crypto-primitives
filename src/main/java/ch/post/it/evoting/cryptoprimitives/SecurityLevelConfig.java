@@ -25,13 +25,13 @@ public class SecurityLevelConfig {
 	}
 
 	/**
-	 * Gets the system security level provided by the environment variable "security.level".
-	 * If "security.level" is not set, DEFAULT is used.
+	 * Gets the system security level provided by the environment variable SECURITY_LEVEL.
+	 * If SECURITY_LEVEL is not set, DEFAULT is used.
 	 *
 	 * @return a {@link SecurityLevel}
 	 */
 	public static SecurityLevel getSystemSecurityLevel() {
-		final String securityLevelValue = System.getenv("security.level");
+		final String securityLevelValue = System.getenv("SECURITY_LEVEL");
 		if (securityLevelValue == null) {
 			return SecurityLevel.DEFAULT;
 		}
