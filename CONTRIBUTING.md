@@ -82,7 +82,7 @@ The ECP does not allow you to use any information gained for commercial purpose 
 
 As soon as an internet test is implemented as a new feature in the ECP, Swiss Post interprets activities by participants in such internet test that comply with the CoC as authorized access under the Swiss Penal Code and other anti-hacking and anti-circumvention laws. This includes Swiss Penal Code Articles 143, 143bis and 144bis.
 Swiss Post will only file a complaint for violation of the CoC if the code or the other materials or parts thereof are used commercially or productively.
-If legal action is initiated by a third party against a participant and the participant has complied with the CoC as outlined in this document, Swiss Post will take the necessary measures to make it known to the authorities that such participant's actions have been conducted in compliance with this policy.  
+If legal action is initiated by a third party against a participant and the participant has complied with the CoC as outlined in this document, Swiss Post will take the necessary measures to make it known to the authorities that such participant's actions have been conducted in compliance with this policy.
 
 Any non-compliance with the CoC may result in exclusion from the ECP.
 
