@@ -186,6 +186,11 @@ def resetPomVersion(projectName, workspace, gitUrl, branchName, releaseVersion, 
 	//Merge and push Release branche into develop (snapshot)
 	sh "git checkout develop || exit"
 	sh "git merge --squash -X theirs ${branchName} || git merge --squash -X theirs develop || exit"
+	sh "git add ."
+
+	//Commit
+	sh "git commit -m 'merge snapshot poms - ${projectName}-${releaseVersion}'"
+
 	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 's-cicd-evoting', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS']]) {
 		def url = gitUrl.replace('https://', '')
 		sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --all"
