@@ -9,22 +9,22 @@ replicationConfig = [
         [
                 sourceBranch: 'publication-master',
                 targetBranch: 'master',
-                remoteURL   : 'https://gitlab.com/swisspost-evoting/crypto-primitives.git'
+                remoteURL   : 'https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives.git'
         ],
         [
                 sourceBranch: 'pre-publication-master',
                 targetBranch: 'master',
-                remoteURL   : 'https://gitlab.com/swisspost-evoting-int/crypto-primitives.git'
+                remoteURL   : 'https://gitlab.com/swisspost-evoting-int/crypto-primitives/crypto-primitives.git'
         ],
         [
                 sourceBranch: 'publication-develop',
                 targetBranch: 'develop',
-                remoteURL   : 'https://gitlab.com/swisspost-evoting/crypto-primitives.git'
+                remoteURL   : 'https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives.git'
         ],
         [
                 sourceBranch: 'pre-publication-develop',
                 targetBranch: 'develop',
-                remoteURL   : 'https://gitlab.com/swisspost-evoting-int/crypto-primitives.git'
+                remoteURL   : 'https://gitlab.com/swisspost-evoting-int/crypto-primitives/crypto-primitives.git'
         ]
 ]
 
