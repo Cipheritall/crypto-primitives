@@ -5,22 +5,22 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.10.0.1</version>
+	<version>0.11.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
 
 	<properties>
 		<!-- Dependencies versions -->
-		<guava.version>30.1-jre</guava.version>
-		<bouncycastle.version>1.68</bouncycastle.version>
-		<jackson.version>2.12.2</jackson.version>
-		<jmh.version>1.28</jmh.version>
-		<junit-jupiter.version>5.7.1</junit-jupiter.version>
-		<mockito.version>3.8.0</mockito.version>
+		<guava.version>30.1.1-jre</guava.version>
+		<bouncycastle.version>1.69</bouncycastle.version>
+		<jackson.version>2.12.4</jackson.version>
+		<jmh.version>1.33</jmh.version>
+		<junit-jupiter.version>5.7.2</junit-jupiter.version>
+		<mockito.version>3.11.2</mockito.version>
 
 		<!-- Plugins versions -->
-		<jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
 		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
