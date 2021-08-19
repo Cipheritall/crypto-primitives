@@ -31,8 +31,6 @@ We strive for excellent code quality and to minimize the risk of bugs and vulner
 | [Fortify](https://www.microfocus.com/de-de/products/static-code-analysis-sast/overview)  | Static Application Security Testing    |
 | [JFrog X-Ray](https://jfrog.com/xray/) | Common vulnerabilities and exposures (CVE) analysis, Open-source software (OSS) license compliance | |
 
-We base our below analysis on the reports from March 2021.
-
 ### SonarQube Analysis
 
 We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells. You can find the details in the [following report](./SonarQubeDetail.pdf).
