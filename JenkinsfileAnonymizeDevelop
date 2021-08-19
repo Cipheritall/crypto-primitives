@@ -42,7 +42,7 @@ pipeline {
 				anonymization(
 						gitAnonymousUserName: "SwissPost-Bot",
 						gitAnonymousUserEmail: "evotingspoc@poste.ch",
-						fileToRemove: "Jenkinsfile,JenkinsfileRelease,JenkinsfileAnonymizeDevelop,JenkinsfileFortify,jenkins-release-crypto-primitives.groovy");
+						fileToRemove: "Jenkinsfile,JenkinsfileRelease,JenkinsfileAnonymizeDevelop, JenkinsfileFortify,jenkins-release-crypto-primitives.groovy,.mvn");
 			}
 		}
 
