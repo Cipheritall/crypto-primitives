@@ -15,7 +15,7 @@ def MAVEN_RESOLVE_REPO = 'maven-evoting-virtual'
 def MAVEN_PARAMS = '-T 1.5C -U --settings .mvn/settings.xml --no-transfer-progress'
 
 // Tools
-def MAVEN = 'maven-3.6.3'
+def MAVEN = 'maven-3.8.2'
 
 pipeline {
 
