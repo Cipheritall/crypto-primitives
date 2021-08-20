@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.mixnet;
+package ch.post.it.evoting.cryptoprimitives;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 /**
  * Represents a lazy and fail fast evaluation of a verification or a combination of verifications.
  */
-class Verifiable {
+public class Verifiable {
 
 	private final Supplier<VerificationResult> toVerify;
 
@@ -39,7 +39,7 @@ class Verifiable {
 	 * @param other the other Verifiable to combine with {@code this}. Not null.
 	 * @return the combination of {@code this} with {@code other} as a new Verifiable.
 	 */
-	Verifiable and(final Verifiable other) {
+	public Verifiable and(final Verifiable other) {
 		checkNotNull(other);
 		return new Verifiable(() -> {
 			VerificationResult thisResult = this.verify();
@@ -52,7 +52,7 @@ class Verifiable {
 	 *
 	 * @return the evaluated {@link VerificationResult}.
 	 */
-	VerificationResult verify() {
+	public VerificationResult verify() {
 		return toVerify.get();
 	}
 
@@ -64,7 +64,7 @@ class Verifiable {
 	 * @param errorMessage the error message when {@code toVerify} evaluates to {@code false}. Not null.
 	 * @return a Verifiable based on {@code toVerify} condition.
 	 */
-	static Verifiable create(final BooleanSupplier toVerify, final String errorMessage) {
+	public static Verifiable create(final BooleanSupplier toVerify, final String errorMessage) {
 		checkNotNull(toVerify);
 		checkNotNull(errorMessage);
 		return new Verifiable(() -> toVerify.getAsBoolean() ? VerificationSuccess.INSTANCE : new VerificationFailure(errorMessage));
@@ -75,7 +75,7 @@ class Verifiable {
 	 * @param errorMessage the errorMessage to add. Not null.
 	 * @return a new Verifiable.
 	 */
-	Verifiable addErrorMessage(final String errorMessage) {
+	public Verifiable addErrorMessage(final String errorMessage) {
 		checkNotNull(errorMessage);
 
 		return new Verifiable(() -> {

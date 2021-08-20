@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -33,7 +35,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 
-class VerifiableDecryptionTest extends TestGroupSetup {
+class VerifiableDecryptionsTest extends TestGroupSetup {
 
 	private static final SecureRandom random = new SecureRandom();
 	private static final int MAX_NUMBER_CIPHERTEXTS = 10;
@@ -60,39 +62,48 @@ class VerifiableDecryptionTest extends TestGroupSetup {
 	}
 
 	@Test
-	@DisplayName("Constructing a VerifiableDecryption with null arguments throws a NullPointerException")
-	void constructVerifiableDecryptionWithNullArguments() {
-		assertThrows(NullPointerException.class, () -> new VerifiableDecryption(ciphertexts, null));
-		assertThrows(NullPointerException.class, () -> new VerifiableDecryption(null, decryptionProofs));
+	@DisplayName("Constructing a VerifiableDecryptions with null arguments throws a NullPointerException")
+	void constructVerifiableDecryptionsWithNullArguments() {
+		assertThrows(NullPointerException.class, () -> new VerifiableDecryptions(ciphertexts, null));
+		assertThrows(NullPointerException.class, () -> new VerifiableDecryptions(null, decryptionProofs));
 	}
 
 	@Test
-	@DisplayName("Constructing a VerifiableDecryption with different number of DecryptionProofs throws an IllegalArgumentException")
-	void constructVerifiableDecryptionWithCiphertextVectorDifferentSizeThanDecryptionProofList() {
+	@DisplayName("Constructing a VerifiableDecryptions with an empty vector of ciphertexts throws an IllegalArgumentException")
+	void constructVerifiableDecryptionsWithEmptyCiphertextVector() {
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> emptyCiphertextsVector = GroupVector.of();
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> new VerifiableDecryptions(emptyCiphertextsVector, decryptionProofs));
+		assertEquals("There must be at least 1 ciphertext.", illegalArgumentException.getMessage());
+	}
+
+	@Test
+	@DisplayName("Constructing a VerifiableDecryptions with different number of DecryptionProofs throws an IllegalArgumentException")
+	void constructVerifiableDecryptionsWithCiphertextVectorDifferentSizeThanDecryptionProofList() {
 		ciphertexts = elGamalGenerator.genRandomCiphertextVector(numCiphertexts + 1, numPhis);
 
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+				() -> new VerifiableDecryptions(ciphertexts, decryptionProofs));
 		assertEquals("Each ciphertext must have exactly one decryption proof.", illegalArgumentException.getMessage());
 	}
 
 	@Test
-	@DisplayName("Constructing a VerifiableDecryption with different elements size throws an IllegalArgumentException")
-	void constructVerifiableDecryptionDifferentElementsSize() {
+	@DisplayName("Constructing a VerifiableDecryptions with different elements size throws an IllegalArgumentException")
+	void constructVerifiableDecryptionsDifferentElementsSize() {
 		ciphertexts = elGamalGenerator.genRandomCiphertextVector(numCiphertexts, numPhis + 1);
 
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+				() -> new VerifiableDecryptions(ciphertexts, decryptionProofs));
 		assertEquals("The ciphertexts and decryption proofs elements must have the same size.", illegalArgumentException.getMessage());
 	}
 
 	@Test
-	@DisplayName("Constructing a VerifiableDecryption with DecryptionProofs from group of different order throws an IllegalArgumentException")
-	void constructVerifiableDecryptionWithCiphertextVectorDifferentGroupOrderThanDecryptionProofList() {
+	@DisplayName("Constructing a VerifiableDecryptions with DecryptionProofs from group of different order throws an IllegalArgumentException")
+	void constructVerifiableDecryptionsWithCiphertextVectorDifferentGroupOrderThanDecryptionProofList() {
 		ciphertexts = new ElGamalGenerator(otherGqGroup).genRandomCiphertextVector(numCiphertexts, numPhis);
 
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> new VerifiableDecryption(ciphertexts, decryptionProofs));
+				() -> new VerifiableDecryptions(ciphertexts, decryptionProofs));
 		assertEquals("The ciphertexts and decryption proofs must have groups of the same order.", illegalArgumentException.getMessage());
 	}
 }

@@ -55,6 +55,8 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.Verifiable;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -399,7 +401,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with valid input and non empty auxiliary information returns true")
 		void verifyDecryptionWithValidInput() {
-			assertTrue(decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
+			assertTrue(decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation).verify()
+					.isVerified());
 		}
 
 		@Test
@@ -420,7 +423,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			message = new ElGamalMultiRecipientMessage(messageElements);
 			ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, zqGroupGenerator.genRandomZqElementMember(), keyPair.getPublicKey());
 			decryptionProof = decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, Collections.emptyList());
-			assertTrue(decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, Collections.emptyList()));
+			assertTrue(decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, Collections.emptyList()).verify()
+					.isVerified());
 		}
 
 		@Test
@@ -511,8 +515,14 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 			final ElGamalMultiRecipientCiphertext cPrime = ElGamalMultiRecipientCiphertext.create(values.gEight, c.getPhi());
 
-			assertFalse(service1.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof1, iAux));
-			assertFalse(service2.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof2, Collections.emptyList()));
+			final VerificationResult result1 = service1.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof1, iAux).verify();
+			final VerificationResult result2 = service1.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof2, Collections.emptyList()).verify();
+
+			assertFalse(result1.isVerified());
+			assertFalse(result2.isVerified());
+
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", cPrime), result1.getErrorMessages().getFirst());
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", cPrime), result2.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -534,8 +544,17 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			final ElGamalMultiRecipientPublicKey pkPrime = new ElGamalMultiRecipientPublicKey(
 					Arrays.asList(values.gEight, values.gEight, values.gFour));
 
-			assertFalse(service1.verifyDecryption(c, pkPrime, m, proof1, iAux));
-			assertFalse(service2.verifyDecryption(c, pkPrime, m, proof2, Collections.emptyList()));
+			assertFalse(service1.verifyDecryption(c, pkPrime, m, proof1, iAux).verify().isVerified());
+			assertFalse(service2.verifyDecryption(c, pkPrime, m, proof2, Collections.emptyList()).verify().isVerified());
+
+			final VerificationResult result1 = service1.verifyDecryption(c, pkPrime, m, proof1, iAux).verify();
+			final VerificationResult result2 = service1.verifyDecryption(c, pkPrime, m, proof2, Collections.emptyList()).verify();
+
+			assertFalse(result1.isVerified());
+			assertFalse(result2.isVerified());
+
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", c), result1.getErrorMessages().getFirst());
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", c), result2.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -556,8 +575,14 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 			final ElGamalMultiRecipientMessage mPrime = new ElGamalMultiRecipientMessage(Arrays.asList(values.gEight, values.gEight, values.gThree));
 
-			assertFalse(service1.verifyDecryption(c, keyPair.getPublicKey(), mPrime, proof1, iAux));
-			assertFalse(service2.verifyDecryption(c, keyPair.getPublicKey(), mPrime, proof2, Collections.emptyList()));
+			final VerificationResult result1 = service1.verifyDecryption(c, keyPair.getPublicKey(), mPrime, proof1, iAux).verify();
+			final VerificationResult result2 = service1.verifyDecryption(c, keyPair.getPublicKey(), mPrime, proof2, Collections.emptyList()).verify();
+
+			assertFalse(result1.isVerified());
+			assertFalse(result2.isVerified());
+
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", c), result1.getErrorMessages().getFirst());
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", c), result2.getErrorMessages().getFirst());
 		}
 
 		@Test
@@ -579,8 +604,14 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			final List<String> iAuxPrime = new ArrayList<>(iAux);
 			iAuxPrime.add("primes");
 
-			assertFalse(service1.verifyDecryption(c, keyPair.getPublicKey(), m, proof1, iAuxPrime));
-			assertFalse(service2.verifyDecryption(c, keyPair.getPublicKey(), m, proof2, iAuxPrime));
+			final VerificationResult result1 = service1.verifyDecryption(c, keyPair.getPublicKey(), m, proof1, iAuxPrime).verify();
+			final VerificationResult result2 = service1.verifyDecryption(c, keyPair.getPublicKey(), m, proof2, iAuxPrime).verify();
+
+			assertFalse(result1.isVerified());
+			assertFalse(result2.isVerified());
+
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", c), result1.getErrorMessages().getFirst());
+			assertEquals(String.format("Could not verify decryption proof of ciphertext %s.", c), result2.getErrorMessages().getFirst());
 		}
 
 		private Stream<Arguments> jsonFileArgumentProvider() {
@@ -652,7 +683,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 				final boolean expected, final String description) {
 			final DecryptionProofService decryptionProofService = new DecryptionProofService(randomService, new HashService());
 			final boolean actual = assertDoesNotThrow(
-					() -> decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
+					() -> decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation).verify()
+							.isVerified());
 			assertEquals(expected, actual, String.format("assertion failed for: %s", description));
 		}
 	}

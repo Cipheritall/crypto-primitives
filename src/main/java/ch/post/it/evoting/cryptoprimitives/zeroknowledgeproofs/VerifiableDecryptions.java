@@ -34,10 +34,14 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>
  * Instances of this class are immutable.
  */
-public class VerifiableDecryption implements HashableList {
+@SuppressWarnings({"java:S116", "java:S100"})
+public class VerifiableDecryptions implements HashableList {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
 	private final GroupVector<DecryptionProof, ZqGroup> decryptionProofs;
+	private final GqGroup group;
+	private final int N;
+	private final int l;
 
 	/**
 	 * Instantiates a verifiable decryption from the given ciphertexts and decryption proofs.
@@ -49,14 +53,15 @@ public class VerifiableDecryption implements HashableList {
 	 *     <li>their elements must have the same size</li>
 	 * </ul>
 	 *
-	 * @param ciphertexts      a vector of partially decrypted ciphertexts. Must be non null.
+	 * @param ciphertexts      a vector of partially decrypted ciphertexts. Must be non null and not empty.
 	 * @param decryptionProofs a vector of proofs showing that the ciphertexts have been correctly decrypted. Must be non null.
 	 */
-	public VerifiableDecryption(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+	public VerifiableDecryptions(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
 			final GroupVector<DecryptionProof, ZqGroup> decryptionProofs) {
 		checkNotNull(ciphertexts);
 		checkNotNull(decryptionProofs);
 
+		checkArgument(!ciphertexts.isEmpty(), "There must be at least 1 ciphertext.");
 		checkArgument(ciphertexts.size() == decryptionProofs.size(), "Each ciphertext must have exactly one decryption proof.");
 		checkArgument(ciphertexts.getElementSize() == decryptionProofs.getElementSize(),
 				"The ciphertexts and decryption proofs elements must have the same size.");
@@ -65,6 +70,9 @@ public class VerifiableDecryption implements HashableList {
 
 		this.ciphertexts = ciphertexts;
 		this.decryptionProofs = decryptionProofs;
+		this.group = ciphertexts.getGroup();
+		this.N = ciphertexts.size();
+		this.l = ciphertexts.getElementSize();
 	}
 
 	/**
@@ -80,6 +88,18 @@ public class VerifiableDecryption implements HashableList {
 		return decryptionProofs;
 	}
 
+	public GqGroup getGroup() {
+		return group;
+	}
+
+	public int get_N() {
+		return N;
+	}
+
+	public int get_l() {
+		return l;
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
@@ -88,7 +108,7 @@ public class VerifiableDecryption implements HashableList {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final VerifiableDecryption that = (VerifiableDecryption) o;
+		final VerifiableDecryptions that = (VerifiableDecryptions) o;
 		return ciphertexts.equals(that.ciphertexts) && decryptionProofs.equals(that.decryptionProofs);
 	}
 

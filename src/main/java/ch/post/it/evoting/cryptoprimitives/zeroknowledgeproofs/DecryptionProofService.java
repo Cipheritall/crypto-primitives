@@ -33,6 +33,7 @@ import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -177,7 +178,7 @@ public class DecryptionProofService {
 	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information that was used during proof generation. Must be non null.
 	 * @return {@code true} if the decryption proof is valid, {@code false} otherwise.
 	 */
-	boolean verifyDecryption(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPublicKey publicKey,
+	Verifiable verifyDecryption(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPublicKey publicKey,
 			final ElGamalMultiRecipientMessage message, final DecryptionProof decryptionProof, final List<String> auxiliaryInformation) {
 		checkNotNull(ciphertext);
 		checkNotNull(publicKey);
@@ -236,7 +237,7 @@ public class DecryptionProofService {
 		final BigInteger e_prime_value = byteArrayToInteger(h);
 		final ZqElement e_prime = ZqElement.create(e_prime_value, zqGroup);
 
-		return (e.equals(e_prime));
+		return Verifiable.create(() -> e.equals(e_prime), String.format("Could not verify decryption proof of ciphertext %s.", ciphertext));
 	}
 
 	/**

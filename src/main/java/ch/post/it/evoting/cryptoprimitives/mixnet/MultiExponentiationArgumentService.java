@@ -22,7 +22,7 @@ import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientC
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.constantMessage;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.CommitmentService.getCommitmentMatrix;
-import static ch.post.it.evoting.cryptoprimitives.mixnet.Verifiable.create;
+import static ch.post.it.evoting.cryptoprimitives.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -44,6 +44,8 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.Verifiable;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
