@@ -28,12 +28,12 @@ public class VerifiableDecryptionGenerator {
 		this.group = group;
 	}
 
-	public VerifiableDecryption genVerifiableDecryption(int numCiphertexts, int ciphertextSize) {
+	public VerifiableDecryptions genVerifiableDecryption(int numCiphertexts, int ciphertextSize) {
 		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(group);
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = elGamalGenerator
 				.genRandomCiphertextVector(numCiphertexts, ciphertextSize);
 		GroupVector<DecryptionProof, ZqGroup> decryptionProofs = new DecryptionProofGenerator(ZqGroup.sameOrderAs(group))
 				.genDecryptionProofVector(numCiphertexts, ciphertextSize);
-		return new VerifiableDecryption(ciphertexts, decryptionProofs);
+		return new VerifiableDecryptions(ciphertexts, decryptionProofs);
 	}
 }

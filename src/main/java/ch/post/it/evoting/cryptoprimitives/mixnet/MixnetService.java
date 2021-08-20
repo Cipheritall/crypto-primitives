@@ -27,6 +27,7 @@ import java.util.List;
 import com.google.common.annotations.VisibleForTesting;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
@@ -81,7 +82,7 @@ public final class MixnetService implements Mixnet {
 	}
 
 	@Override
-	public VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> inputCiphertexts,
+	public VerifiableShuffle genVerifiableShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> inputCiphertexts,
 			final ElGamalMultiRecipientPublicKey publicKey) {
 		checkNotNull(inputCiphertexts);
 		checkNotNull(publicKey);
@@ -129,7 +130,7 @@ public final class MixnetService implements Mixnet {
 	}
 
 	@Override
-	public VerificationResult verifyShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts,
+	public VerificationResult verifyShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
 			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts, final ShuffleArgument shuffleArgument,
 			final ElGamalMultiRecipientPublicKey publicKey) {
 		checkNotNull(ciphertexts);
