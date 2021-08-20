@@ -22,21 +22,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 
 @SuppressWarnings("squid:S00117")
 public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
@@ -67,13 +72,13 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	}
 
 	@Override
-	public VerifiableDecryption genVerifiableDecryptions(final List<ElGamalMultiRecipientCiphertext> ciphertexts,
+	public VerifiableDecryptions genVerifiableDecryptions(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
 			final ElGamalMultiRecipientKeyPair keyPair, List<String> auxiliaryInformation) {
 		checkNotNull(ciphertexts);
 		checkNotNull(keyPair);
 		checkNotNull(auxiliaryInformation);
 
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
 		List<String> i_aux = auxiliaryInformation;
 		final int l = C.getElementSize();
@@ -95,7 +100,50 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 				})
 				.collect(toGroupVector());
 
-		return new VerifiableDecryption(C_prime, pi_dec);
+		return new VerifiableDecryptions(C_prime, pi_dec);
+	}
+
+	@Override
+	public VerificationResult verifyDecryptions(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+			final ElGamalMultiRecipientPublicKey publicKey, final VerifiableDecryptions verifiableDecryptions,
+			final List<String> auxiliaryInformation) {
+		checkNotNull(ciphertexts);
+		checkNotNull(publicKey);
+		checkNotNull(verifiableDecryptions);
+		checkNotNull(auxiliaryInformation);
+
+		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "Auxiliary information cannot contain null elements.");
+
+		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
+		final ElGamalMultiRecipientPublicKey pk = publicKey;
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = verifiableDecryptions.getCiphertexts();
+		final GroupVector<DecryptionProof, ZqGroup> pi_dec = verifiableDecryptions.getDecryptionProofs();
+		final int N = C.size();
+		final int l = C.getElementSize();
+
+		checkArgument(1 <= N, "There must be at least one ciphertext.");
+		checkArgument(verifiableDecryptions.get_N() == N, "There must be as many verifiable decryptions as ciphertexts.");
+
+		checkArgument(0 < l, "The ciphertexts must have at least 1 element.");
+		checkArgument(verifiableDecryptions.get_l() == l, "The verifiable decryptions must have the same size l as the ciphertexts.");
+		checkArgument(l <= pk.size(), "The ciphertexts must have at most as many elements as the public key.");
+
+		final GqGroup gqGroup = C.getGroup();
+		checkArgument(verifiableDecryptions.getGroup().equals(gqGroup), "The verifiable decryptions must have the same group as the ciphertexts.");
+		checkArgument(pk.getGroup().equals(gqGroup), "The public key must have the same group as the ciphertexts.");
+
+		// Algorithm
+		final Verifiable result = IntStream.range(0, N).mapToObj(i -> {
+			final ElGamalMultiRecipientCiphertext c_i = C.get(i);
+			final DecryptionProof pi_dec_i = pi_dec.get(i);
+
+			final ElGamalMultiRecipientCiphertext c_i_prime = C_prime.get(i);
+			final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(c_i_prime.getPhi());
+			return decryptionProofService.verifyDecryption(c_i, pk, m, pi_dec_i, i_aux);
+		}).reduce(Verifiable.create(() -> true, "This state is impossible to reach and indicates a bug."), Verifiable::and);
+
+		return result.verify();
 	}
 
 	@Override

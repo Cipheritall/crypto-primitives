@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
 import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
@@ -69,7 +68,7 @@ public class VerifiableShuffle implements HashableList {
 		this.shuffleArgument = shuffleArgument;
 	}
 
-	public List<ElGamalMultiRecipientCiphertext> getShuffledCiphertexts() {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getShuffledCiphertexts() {
 		return shuffledCiphertexts;
 	}
 

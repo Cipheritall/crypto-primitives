@@ -17,8 +17,11 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import java.util.List;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 public interface Mixnet {
 
@@ -37,7 +40,7 @@ public interface Mixnet {
 	 * @param publicKey   pk, the {@link ElGamalMultiRecipientPublicKey} to be used for re-encrypting. Not null.
 	 * @return the Bayer-Groth shuffle proof and the shuffled ciphertexts as a {@link VerifiableShuffle}
 	 */
-	VerifiableShuffle genVerifiableShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey);
+	VerifiableShuffle genVerifiableShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey);
 
 	/**
 	 * Verifies the correctness of a shuffle argument for the given ciphertexts and their shuffled and re-encrypted counterparts.
@@ -57,7 +60,7 @@ public interface Mixnet {
 	 * @param publicKey           pk, the public key used for the re-encryption. Must be non null.
 	 * @return the result of the verification.
 	 */
-	VerificationResult verifyShuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts,
+	VerificationResult verifyShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
 			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts, ShuffleArgument shuffleArgument,
 			final ElGamalMultiRecipientPublicKey publicKey);
 }
