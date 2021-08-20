@@ -20,9 +20,11 @@ import java.util.List;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 
 /**
  * Provides methods for generating zero-knowledge proofs.
@@ -31,20 +33,33 @@ public interface ZeroKnowledgeProof {
 
 	/**
 	 * Decrypts a vector of ciphertexts in a verifiable way.
-	 * <p>
-	 * The input arguments must comply with the following:
-	 * <ul>
-	 *     <li>the ciphertexts and the keys in the key pair must have the same group</li>
-	 *     <li>the ciphertexts must be smaller or equal to the length of the key pair</li>
-	 * </ul>
 	 *
 	 * @param ciphertexts          C, a vector of ciphertexts to be decrypted. Non null and non empty.
 	 * @param keyPair              (pk, sk), a pair of a public key and a secret key. Non null.
 	 * @param auxiliaryInformation i<sub>Aux</sub>, a list of context specific strings. Non null. Can be empty.
-	 * @return a {@link VerifiableDecryption} containing the partially decrypted ciphertexts and a decryption proof for each message
+	 * @return a {@link VerifiableDecryptions} containing the partially decrypted ciphertexts and a decryption proof for each message
+	 * @throws NullPointerException     if {@code ciphertexts} or {@code keyPair} is null
+	 * @throws IllegalArgumentException if
+	 *                                  <ul>
+	 *                                  	 <li>the ciphertexts and the keys in the key pair do not have the same group</li>
+	 *                                  	 <li>the ciphertexts are longer than the length of the key pair</li>
+	 *                                  </ul>
 	 */
-	VerifiableDecryption genVerifiableDecryptions(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final ElGamalMultiRecipientKeyPair keyPair,
+	VerifiableDecryptions genVerifiableDecryptions(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final ElGamalMultiRecipientKeyPair keyPair,
 			final List<String> auxiliaryInformation);
+
+	/**
+	 * Verifies the validity of the given {@link DecryptionProof}s.
+	 *
+	 * @param ciphertexts          C, the ciphertexts. Must be non null.
+	 * @param publicKey            pk, the public key that was used to generate the proofs. Must be non null.
+	 * @param verifiableDecryptions (C', pi<sub>dec</sub>), the partially decrypted ciphertexts with their corresponding proofs. Must be non null.
+	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information that was used during proof generation. Must be non null and not contain null
+	 *                             elements.
+	 * @return the result of the verification.
+	 */
+	VerificationResult verifyDecryptions(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey,
+			final VerifiableDecryptions verifiableDecryptions, final List<String> auxiliaryInformation);
 
 	/**
 	 * Generates a proof of validity for the provided exponentiations.
