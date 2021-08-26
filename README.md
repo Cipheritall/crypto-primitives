@@ -146,7 +146,7 @@ You can find additional documents related to the crypto-primitives in the follow
 
 | Repositories | Content |
 | :------- | :---- |
-| [`System specification`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/System/System_Specification.pdf) | System Specification of the e-voting system.   |
-| [`Voting protocol`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/Protocol/Swiss_Post_Voting_Protocol_Computational_proof.pdf) | The cryptographic protocol that describes the Swiss Post e-voting system in a mathematical form. |
-| [`Voting System architecture`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/System/SwissPost_Voting_System_architecture_document.pdf) | Architecture documentation of the e-voting system. |
-| [`Documentation overview`](https://gitlab.com/swisspost-evoting/documentation/-/blob/master/Product/Overview.md) | Overview of all documentations. |
+| [`System specification`](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/blob/master/System/System_Specification.pdf) | System Specification of the e-voting system.   |
+| [`Voting protocol`](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/blob/master/Protocol/Swiss_Post_Voting_Protocol_Computational_proof.pdf) | The cryptographic protocol that describes the Swiss Post e-voting system in a mathematical form. |
+| [`Voting System architecture`](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/blob/master/System/SwissPost_Voting_System_architecture_document.pdf) | Architecture documentation of the e-voting system. |
+| [`Documentation overview`](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation) | Overview of all documentations. |
