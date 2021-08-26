@@ -119,8 +119,10 @@ def mergeBranch(fromBranch, toBranch) {
 	commonBuildPipeline.LOGGER('checkout', "branch - ${fromBranch} to ${toBranch}, autoMerge - true")
 
 	//Checkout and Merge
-	sh "git checkout ${toBranch} || git checkout master || exit"
-	sh "git merge --squash -X theirs ${fromBranch} || exit"
+	sh "git checkout ${fromBranch} || exit"
+	sh "git merge -s ours origin/${toBranch} || exit"
+	sh "git checkout ${toBranch} || exit"
+	sh "git merge --squash ${fromBranch} || exit"
 }
 
 // tag and commit into scm

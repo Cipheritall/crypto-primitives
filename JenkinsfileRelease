@@ -77,7 +77,7 @@ pipeline {
 
 		stage('push target branch') {
 			steps {
-				forcePushWithCredentialsInUrl(
+				forcePush(
 						branch: 'pre-publication-master',
 						url: SCM_URL_ANON,
 						credentialsId: "s-cicd-evoting");
