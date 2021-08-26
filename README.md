@@ -33,7 +33,7 @@ We strive for excellent code quality and to minimize the risk of bugs and vulner
 
 ### SonarQube Analysis
 
-We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells. You can find the details in the [following report](./SonarQubeDetail.pdf).
+We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells.
 
 ![SonarQube](SonarQube.jpg)
 
@@ -80,6 +80,13 @@ We aim for a mathematical naming convention that aligns with the following goals
 ### Naming Convention Examples
 
 ![Mathematical Naming Convention Examples](naming_convention_examples.jpg)
+
+## Change Log Release 0.11
+
+The following functionalities and improvements are included in release 0.11:
+
+* [Code] Implemented the VerifyDecryptions method.
+* [Specification] Simplified the *GetCommitmentVector* algorithm.
 
 ## Change Log Release 0.10
 
@@ -131,7 +138,6 @@ We plan for the following improvements to the crypto-primitives library:
 
 The current release has the following open issues:
 
-* Implementing the VerifyDecryptions method.
 * Implementing plaintext-equality proofs.
 
 ## Additional documentation
