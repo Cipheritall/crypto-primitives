@@ -87,6 +87,7 @@ The following functionalities and improvements are included in release 0.11:
 
 * [Code] Implemented the VerifyDecryptions method.
 * [Specification] Simplified the *GetCommitmentVector* algorithm.
+* [Specification] Added the *HashAndSquare* algorithm.
 
 ## Change Log Release 0.10
 
