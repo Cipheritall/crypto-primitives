@@ -87,6 +87,7 @@ The following functionalities and improvements are included in release 0.11:
 
 * [Code] Implemented the VerifyDecryptions method.
 * [Specification] Simplified the *GetCommitmentVector* algorithm.
+* [Specification] Added the *HashAndSquare* algorithm.
 
 ## Change Log Release 0.10
 
@@ -114,12 +115,12 @@ The following functionalities and improvements are included in release 0.8:
 
 * Provided decryption proof generation and verification.
 * Specified the exponentiation and plaintext equality proof.
-* Improved specification of handling errors in Base32/Base64 encoding (corresponds to Gitlab issue [#1](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/1)).
-* Fixed handling of empty byte arrays in the method ByteArrayToInteger (corresponds to Gitlab issue [#2](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/2)).
-* Improved specification of UCS decoding (corresponds to Gitlab issue [#3](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/3)).
-* Fixed the bounds' domain in GenRandomIntegerWithinBounds (corresponds to Gitlab issue [#6](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/6)).
-* Removed the exclusion of 0 and 1 when generating exponents (corresponds to Gitlab issue [#7](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/7)).
-* Clarified the purpose of GenRandomBaseXXString methods (corresponds to Gitlab issue [#8](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/8)).
+* Improved specification of handling errors in Base32/Base64 encoding (corresponds to Gitlab issue [#1](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/1)).
+* Fixed handling of empty byte arrays in the method ByteArrayToInteger (corresponds to Gitlab issue [#2](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/2)).
+* Improved specification of UCS decoding (corresponds to Gitlab issue [#3](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/3)).
+* Fixed the bounds' domain in GenRandomIntegerWithinBounds (corresponds to Gitlab issue [#6](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/6)).
+* Removed the exclusion of 0 and 1 when generating exponents (corresponds to Gitlab issue [#7](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/7)).
+* Clarified the purpose of GenRandomBaseXXString methods (corresponds to Gitlab issue [#8](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/8)).
 * Decoupled the size of the commitment key and the size of the public key in the mix net.
 * Fixed the problem with some randomized unit tests failing for exceptional edge cases.
 
@@ -129,7 +130,7 @@ We plan for the following improvements to the crypto-primitives library:
 
 * Optimizing mathematical operations using native libraries and specialized algorithms.
 * Investigating potential improvements in parametrizing the Bayer-Groth mix net. We parametrize the Bayer-Groth with two parameters (m,n). If m and n have equal size, the Bayer-Groth mix net is memory-optimal. However, setting m=1 is the most efficient setting for computational performance. Moreover, setting m=1 allows for further simplifications since one can omit the Hadamard and the zero arguments in that case. We plan to conduct other performance tests to analyze the memory-performance trade-off.
-* Making the RecursiveHash function collision-resistant across different input domains (corresponds to Gitlab issue [#9](https://gitlab.com/swisspost-evoting/crypto-primitives/-/issues/9)).
+* Making the RecursiveHash function collision-resistant across different input domains (corresponds to Gitlab issue [#9](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/9)).
 * Enforcing abstractions in mathematical operations. Currently, we have some unnecessary conversions between abstract mathematical objects (such as GqElements) and plain values (such as BigIntegers). We should work more strictly with mathematically abstract classes.
 * Investigating the usage of a "context" object that encapsulates values that do not change between protocol executions (group parameters, security level, etc.).
 * Implementing the ByteArrayToString method. This method is currently not used; therefore, we did not implement it yet.
