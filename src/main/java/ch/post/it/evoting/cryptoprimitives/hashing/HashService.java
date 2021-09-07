@@ -24,44 +24,27 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.UnaryOperator;
+import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 
 public class HashService {
 
-	private final UnaryOperator<byte[]> hashFunction;
-	private final int hashLength;
-
-	/**
-	 * Instantiates a recursive hash service.
-	 *
-	 * @param messageDigest with which to hash.
-	 */
-	public HashService(final MessageDigest messageDigest) {
-		checkNotNull(messageDigest);
-		this.hashFunction = messageDigest::digest;
-		this.hashLength = messageDigest.getDigestLength();
-	}
+	private final Supplier<MessageDigest> digestSupplier;
 
 	/**
 	 * Instantiates a recursive hash service with a default SHA-256 message digest.
-	 *
-	 * @throws IllegalStateException if the creation of the SHA-256 message digest failed.
 	 */
 	public HashService() {
-		final MessageDigest messageDigest;
-		try {
-			messageDigest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
-		}
-
-		this.hashFunction = messageDigest::digest;
-		this.hashLength = messageDigest.getDigestLength();
+		digestSupplier = () -> {
+			try {
+				return MessageDigest.getInstance("SHA-256");
+			} catch (NoSuchAlgorithmException e) {
+				throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
+			}
+		};
 	}
 
 	/**
@@ -78,6 +61,8 @@ public class HashService {
 	 * byte array, or the integer 1 and the byte array 0x1). It is the caller's responsibility to make sure to avoid these collisions by making sure
 	 * the domain of each input element is well defined. </li>
 	 * </ul>
+	 * @throws IllegalStateException if the creation of the
+	 *                               underlying message digest failed.
 	 */
 	public byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);
@@ -90,16 +75,17 @@ public class HashService {
 		} else {
 			final Hashable value = values[0];
 
+			final MessageDigest messageDigest = digestSupplier.get();
 			if (value instanceof HashableByteArray) {
 				final byte[] w = ((HashableByteArray) value).toHashableForm();
-				return this.hashFunction.apply(w);
+				return messageDigest.digest(w);
 			} else if (value instanceof HashableString) {
 				final String w = ((HashableString) value).toHashableForm();
-				return this.hashFunction.apply(ConversionService.stringToByteArray(w));
+				return messageDigest.digest(ConversionService.stringToByteArray(w));
 			} else if (value instanceof HashableBigInteger) {
 				final BigInteger w = ((HashableBigInteger) value).toHashableForm();
 				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
-				return this.hashFunction.apply(integerToByteArray(w));
+				return messageDigest.digest(integerToByteArray(w));
 			} else if (value instanceof HashableList) {
 				final ImmutableList<? extends Hashable> w = ((HashableList) value).toHashableForm();
 
@@ -109,12 +95,9 @@ public class HashService {
 					return recursiveHash(w.get(0));
 				}
 
-				final byte[][] subHashes = w.stream()
-						.map(this::recursiveHash)
-						.toArray(byte[][]::new);
-				final byte[] concatenatedSubHashes = Bytes.concat(subHashes);
+				w.stream().map(this::recursiveHash).forEachOrdered(messageDigest::update);
 
-				return this.hashFunction.apply(concatenatedSubHashes);
+				return messageDigest.digest();
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}
@@ -125,7 +108,7 @@ public class HashService {
 	 * @return this message digest length in bytes.
 	 */
 	public int getHashLength() {
-		return this.hashLength;
+		return digestSupplier.get().getDigestLength();
 	}
 
 }
