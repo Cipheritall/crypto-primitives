@@ -55,7 +55,7 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 	private static final SecureRandom random = new SecureRandom();
 	private static final RandomService randomService = new RandomService();
 
-	private ZeroKnowledgeProofService zeroKnowledgeProofservice;
+	private ZeroKnowledgeProof zeroKnowledgeProofservice;
 	private ElGamalGenerator elGamalGenerator;
 
 	private int numCiphertexts;
@@ -187,7 +187,7 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 					.when(randomService)
 					.genRandomVector(q, 2);
 			HashService hashService = TestHashService.create(q);
-			ZeroKnowledgeProofService service = new ZeroKnowledgeProofService(randomService, hashService);
+			ZeroKnowledgeProof service = new ZeroKnowledgeProofService(randomService, hashService);
 
 			// Create expected output
 			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> expectedCPrime = GroupVector.of(

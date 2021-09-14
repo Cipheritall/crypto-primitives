@@ -61,13 +61,13 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 	private static final int MAX_NUMBER_EXPONENTIATIONS = 10;
 	private static RandomService randomService;
 	private static HashService hashService;
-	private static ExponentiationProofService proofService;
+	private static ZeroKnowledgeProof proofService;
 
 	@BeforeAll
 	static void setupAll() {
 		randomService = new RandomService();
 		hashService = TestHashService.create(gqGroup.getQ());
-		proofService = new ExponentiationProofService(randomService, hashService);
+		proofService = new ZeroKnowledgeProofService(randomService, hashService);
 	}
 
 	@Test

@@ -145,4 +145,10 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 		return exponentiationProofService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation);
 	}
+
+	@Override
+	public boolean verifyExponentiation(GroupVector<GqElement, GqGroup> bases, GroupVector<GqElement, GqGroup> exponentiations,
+			ExponentiationProof proof, List<String> auxiliaryInformation) {
+		return exponentiationProofService.verifyExponentiation(bases, exponentiations, proof, auxiliaryInformation);
+	}
 }
