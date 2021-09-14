@@ -28,10 +28,10 @@ public interface HashableByteArray extends Hashable {
 	byte[] toHashableForm();
 
 	/**
-	 * Utility function which creates an immutable HashableByteArray who's hashable form is the provided byte array.
+	 * Utility function which creates an immutable HashableByteArray whose hashable form is the provided byte array.
 	 *
 	 * @param byteArray the hashable form. Non null.
-	 * @return A new HashableByteArray who's hashable form is {@code byteArray}
+	 * @return A new HashableByteArray whose hashable form is {@code byteArray}
 	 */
 	static HashableByteArray from(final byte[] byteArray) {
 		checkNotNull(byteArray);

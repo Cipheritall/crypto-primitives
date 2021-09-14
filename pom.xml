@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.11.3.0</version>
+	<version>11.3.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -16,8 +16,11 @@
 		<bouncycastle.version>1.69</bouncycastle.version>
 		<jackson.version>2.12.4</jackson.version>
 		<jmh.version>1.33</jmh.version>
-		<junit-jupiter.version>5.7.2</junit-jupiter.version>
+		<junit-jupiter.version>5.8.0</junit-jupiter.version>
+		<junit-platform-launcher.version>1.8.0</junit-platform-launcher.version>
+		<jnagmp.version>3.0.0</jnagmp.version>
 		<mockito.version>3.11.2</mockito.version>
+		<slf4j.version>1.7.32</slf4j.version>
 
 		<!-- Plugins versions -->
 		<jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
@@ -64,6 +67,16 @@
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
 				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.squareup.jnagmp</groupId>
+				<artifactId>jnagmp</artifactId>
+				<version>${jnagmp.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<!-- Test dependencies -->
@@ -112,7 +125,13 @@
 				<artifactId>jmh-generator-annprocess</artifactId>
 				<version>${jmh.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-launcher</artifactId>
+				<version>${junit-platform-launcher.version}</version>
+			</dependency>
 		</dependencies>
+
 	</dependencyManagement>
 
 	<dependencies>
@@ -123,6 +142,14 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.jnagmp</groupId>
+			<artifactId>jnagmp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -171,6 +198,12 @@
 			<artifactId>jmh-generator-annprocess</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -197,6 +230,9 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${maven-surefire-plugin.version}</version>
 					<configuration>
+						<systemPropertyVariables>
+							<jna.library.path>${env.JNA_LIBRARY_PATH}</jna.library.path>
+						</systemPropertyVariables>
 						<environmentVariables>
 							<SECURITY_LEVEL>TESTING_ONLY</SECURITY_LEVEL>
 						</environmentVariables>
@@ -260,6 +296,10 @@
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
