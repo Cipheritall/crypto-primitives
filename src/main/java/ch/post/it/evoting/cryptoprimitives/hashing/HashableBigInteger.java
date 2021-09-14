@@ -28,10 +28,10 @@ public interface HashableBigInteger extends Hashable {
 	BigInteger toHashableForm();
 
 	/**
-	 * Utility function which creates a HashableBigInteger who's hashable form is the provided BigInteger.
+	 * Utility function which creates a HashableBigInteger whose hashable form is the provided BigInteger.
 	 *
 	 * @param bigInteger the hashable form. Non null.
-	 * @return A new HashableBigInteger who's hashable form is {@code bigInteger}
+	 * @return A new HashableBigInteger whose hashable form is {@code bigInteger}
 	 */
 	static HashableBigInteger from(final BigInteger bigInteger) {
 		checkNotNull(bigInteger);

@@ -20,8 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -49,11 +47,7 @@ public final class MixnetService implements Mixnet {
 	 * Instantiates a mixnet service. A security provider must already be loaded containing the "SHA-256" algorithm.
 	 */
 	public MixnetService() {
-		try {
-			this.hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-		} catch (NoSuchAlgorithmException exception) {
-			throw new IllegalStateException("Badly configured message digest instance.");
-		}
+		this.hashService = new HashService();
 		this.commitmentKeyService = new CommitmentKeyService(hashService);
 		this.shuffleHashService = hashService; //Two separate hash services are needed for checking the hash length
 		this.randomService = new RandomService();
@@ -69,11 +63,7 @@ public final class MixnetService implements Mixnet {
 	@VisibleForTesting
 	public MixnetService(final HashService shuffleHashService) {
 		checkNotNull(shuffleHashService);
-		try {
-			this.hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-		} catch (NoSuchAlgorithmException exception) {
-			throw new IllegalStateException("Badly configured message digest instance.");
-		}
+		this.hashService = new HashService();
 		this.commitmentKeyService = new CommitmentKeyService(hashService);
 		this.shuffleHashService = shuffleHashService;
 		this.randomService = new RandomService();

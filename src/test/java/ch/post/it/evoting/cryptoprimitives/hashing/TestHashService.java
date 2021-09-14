@@ -21,6 +21,7 @@ import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByt
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.function.Supplier;
 
 /**
  * Custom hash service used for testing. The output value of this hash service can be bounded to cope with the small groups used in the tests.
@@ -32,11 +33,11 @@ public class TestHashService extends HashService {
 	private final BigInteger lowerBound;
 	private final BigInteger upperBound;
 
-	private TestHashService(final MessageDigest digest, final BigInteger lowerBound, final BigInteger upperBound) {
+	private TestHashService(final BigInteger lowerBound, final BigInteger upperBound) {
 		// Ensure the check regarding the output length is satisfied.
-		super(digest);
+		super();
 
-		hashService = new HashService(digest);
+		hashService = new HashService();
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}
@@ -49,13 +50,7 @@ public class TestHashService extends HashService {
 	 * @return a TestHashService.
 	 */
 	public static HashService create(final BigInteger lowerBound, final BigInteger upperBound) {
-		MessageDigest digest;
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("Failed to instantiate test hash service.");
-		}
-			return new TestHashService(digest, lowerBound, upperBound);
+		return new TestHashService(lowerBound, upperBound);
 	}
 
 	/**

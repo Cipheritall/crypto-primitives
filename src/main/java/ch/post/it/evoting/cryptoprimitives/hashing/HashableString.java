@@ -26,10 +26,10 @@ public interface HashableString extends Hashable {
 	String toHashableForm();
 
 	/**
-	 * Utility function which creates a HashableString who's hashable form is the provided string.
+	 * Utility function which creates a HashableString whose hashable form is the provided string.
 	 *
 	 * @param string the hashable form. Non null.
-	 * @return A new HashableString who's hashable form is {@code string}
+	 * @return A new HashableString whose hashable form is {@code string}
 	 */
 	static HashableString from(final String string) {
 		checkNotNull(string);

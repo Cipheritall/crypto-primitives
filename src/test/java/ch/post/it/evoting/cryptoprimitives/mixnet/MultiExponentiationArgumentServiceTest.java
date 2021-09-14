@@ -294,8 +294,8 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		}
 
 		@Test
-		void hashServiceWithTooLongHashLengthThrows() throws NoSuchAlgorithmException {
-			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		void hashServiceWithTooLongHashLengthThrows() {
+			HashService otherHashService = new HashService();
 			assertThrowsIllegalArgumentExceptionWithMessage("The hash service's bit length must be smaller than the bit length of q.",
 					() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 		}
@@ -609,9 +609,9 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with real values gives expected result")
 		void verifyRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 				final MultiExponentiationStatement statement, final MultiExponentiationArgument argument, final boolean expectedOutput,
-				final String description) throws NoSuchAlgorithmException {
+				final String description) {
 
-			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final HashService hashService = new HashService();
 
 			final MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService,
 					hashService);
