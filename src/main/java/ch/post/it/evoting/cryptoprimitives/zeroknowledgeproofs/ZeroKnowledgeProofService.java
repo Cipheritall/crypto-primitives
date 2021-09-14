@@ -19,8 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -30,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.Verifiable;
+import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -41,7 +40,6 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 
 @SuppressWarnings("squid:S00117")
 public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
@@ -55,12 +53,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	 */
 	public ZeroKnowledgeProofService() {
 		final RandomService randomService = new RandomService();
-		HashService hashService;
-		try {
-			hashService = new HashService(MessageDigest.getInstance("SHA-256"));
-		} catch (NoSuchAlgorithmException exception) {
-			throw new IllegalStateException("Badly configured message digest instance.");
-		}
+		HashService hashService = new HashService();
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
 	}
@@ -151,5 +144,11 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 			final GroupVector<GqElement, GqGroup> exponentiations, final List<String> auxiliaryInformation) {
 
 		return exponentiationProofService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation);
+	}
+
+	@Override
+	public boolean verifyExponentiation(GroupVector<GqElement, GqGroup> bases, GroupVector<GqElement, GqGroup> exponentiations,
+			ExponentiationProof proof, List<String> auxiliaryInformation) {
+		return exponentiationProofService.verifyExponentiation(bases, exponentiations, proof, auxiliaryInformation);
 	}
 }

@@ -79,8 +79,8 @@ class ShuffleArgumentTest extends TestGroupSetup {
 
 	@Test
 	@DisplayName("hashed with recursiveHash does not throw")
-	void hashWithRecursiveHash() throws NoSuchAlgorithmException {
-		final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+	void hashWithRecursiveHash() {
+		final HashService hashService = new HashService();
 		final ShuffleArgument shuffleArgument = new ShuffleArgument.Builder()
 				.with_c_A(cA)
 				.with_c_B(cB)

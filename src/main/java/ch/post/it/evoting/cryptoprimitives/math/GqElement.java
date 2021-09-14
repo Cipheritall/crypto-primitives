@@ -63,7 +63,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		checkNotNull(other);
 		checkArgument(this.group.equals(other.group));
 
-		final BigInteger resultValue = BigIntegerOperations.modMultiply(value, other.getValue(), group.getP());
+		final BigInteger resultValue = BigIntegerOperationsService.modMultiply(value, other.getValue(), group.getP());
 		return new GqElement(resultValue, this.group);
 	}
 
@@ -78,7 +78,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		checkNotNull(exponent);
 		checkArgument(isOfSameOrderGroup(exponent));
 
-		final BigInteger valueExponentiated = BigIntegerOperations.modExponentiate(value, exponent.getValue(), this.group.getP());
+		final BigInteger valueExponentiated = BigIntegerOperationsService.modExponentiate(value, exponent.getValue(), this.group.getP());
 		return new GqElement(valueExponentiated, this.group);
 	}
 
@@ -100,7 +100,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 
 		final BigInteger xh = byteArrayToInteger(xhB).add(BigInteger.ONE);
 
-		final BigInteger xhSquare = BigIntegerOperations.modExponentiate(xh, BigInteger.valueOf(2), this.group.getQ());
+		final BigInteger xhSquare = BigIntegerOperationsService.modExponentiate(xh, BigInteger.valueOf(2), this.group.getQ());
 		return new GqElement(xhSquare, this.group);
 	}
 
@@ -109,7 +109,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 	}
 
 	public GqElement invert() {
-		final BigInteger invertedValue = BigIntegerOperations.modInvert(this.getValue(), this.group.getP());
+		final BigInteger invertedValue = BigIntegerOperationsService.modInvert(this.getValue(), this.group.getP());
 		return new GqElement(invertedValue, this.group);
 	}
 
