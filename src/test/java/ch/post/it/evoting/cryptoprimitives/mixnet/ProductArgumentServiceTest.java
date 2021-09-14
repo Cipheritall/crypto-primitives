@@ -107,8 +107,8 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
-		void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
-			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		void constructWithHashServiceWithTooLongHashLength() {
+			HashService otherHashService = new HashService();
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> new ProductArgumentService(randomService, otherHashService, publicKey, commitmentKey));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -552,9 +552,9 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with real values gives expected result")
 		void verifyProductArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 				final ProductStatement productStatement, final ProductArgument productArgument, final boolean expectedOutput,
-				final String description) throws NoSuchAlgorithmException {
+				final String description) {
 
-			final HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			final HashService hashService = new HashService();
 
 			final ProductArgumentService productArgumentService = new ProductArgumentService(randomService, hashService, publicKey,
 					commitmentKey);

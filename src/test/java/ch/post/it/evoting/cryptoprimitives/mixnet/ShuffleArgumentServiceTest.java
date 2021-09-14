@@ -128,8 +128,8 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
-		void constructWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
-			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		void constructWithHashServiceWithTooLongHashLength() {
+			HashService otherHashService = new HashService();
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> new ShuffleArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -817,9 +817,9 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@MethodSource("jsonData")
 		@DisplayName("with real values gives expected result")
 		void testRealData(ElGamalMultiRecipientPublicKey pk, CommitmentKey ck, ShuffleStatement statement, ShuffleArgument argument, int m, int n,
-				Boolean output, String description) throws NoSuchAlgorithmException {
+				Boolean output, String description) {
 
-			HashService hashService = new HashService(MessageDigest.getInstance("SHA-256"));
+			HashService hashService = new HashService();
 			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, hashService);
 			assertEquals(output, service.verifyShuffleArgument(statement, argument, m, n).isVerified(),
 					String.format("assertion failed for: %s", description));

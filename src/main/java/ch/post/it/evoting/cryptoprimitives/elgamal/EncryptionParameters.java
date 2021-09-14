@@ -28,7 +28,7 @@ import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
-import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
+import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
@@ -91,7 +91,7 @@ class EncryptionParameters {
 	 * Checks if {@code value} is a member of the group defined by {@code p} and {@code q}.
 	 */
 	private boolean isGroupMember(final BigInteger p, final BigInteger q, final BigInteger value) {
-		return BigIntegerOperations.modExponentiate(value, q, p).compareTo(BigInteger.ONE) == 0;
+		return BigIntegerOperationsService.modExponentiate(value, q, p).compareTo(BigInteger.ONE) == 0;
 	}
 
 	private byte[] shake128(final byte[] message, final int outputLength) {
