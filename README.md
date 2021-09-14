@@ -51,6 +51,23 @@ The Fortify analysis showed 0 critical, 0 high, 0 medium, and 57 low criticality
 
 The X-Ray analysis indicates that none of the crypto-primitives' 3rd party dependencies contains known vulnerabilities or non-compliant open source software licenses. As a general principle, we try to minimize external dependencies in cryptographic libraries and only rely on well-tested and widely used 3rd party components.
 
+## Native Library Support
+
+We support the GNU Multi Precision Arithmetic Library (GMP) for arbitrary-precision integer operations (called BigInteger in the Java programming language). GMP speeds up certain mathematical operations such as modular exponentiation. We recommend the [article by Haenni, Locher, and Gailly](https://e-voting.bfh.ch/app/download/7833228661/HLG19.pdf?t=1601370067) for an overview of popular optimization techniques.
+
+_Linux:_
+
+* Assuming [GMP](https://gmplib.org/) is installed this change should be transparent. If not, install GMP with the relevant package manager.
+* No further action is required to benefit from native code optimisations.
+
+_Windows:_
+
+* Create GMP.dll: Build [GMP](https://gmplib.org/) for the relevant Windows architecture.
+* Crypto-primitives, building with Maven :
+  * Set the environment variable JNA_LIBRARY_PATH=\<location of gmp.dll>
+* Crypto-primitives, usage as a third-party dependency
+  * Add -Djna.library.path= \<location of gmp.dll> to the Java command line.
+
 ## Mathematical Variables Naming Convention
 
 We aim for a mathematical naming convention that aligns with the following goals:

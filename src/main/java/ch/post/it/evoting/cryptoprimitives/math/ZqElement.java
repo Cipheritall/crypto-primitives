@@ -107,7 +107,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 		checkNotNull(other);
 		checkArgument(this.group.equals(other.group));
 
-		final BigInteger result = BigIntegerOperations.modMultiply(value, other.getValue(), this.group.getQ());
+		final BigInteger result = BigIntegerOperationsService.modMultiply(value, other.getValue(), this.group.getQ());
 		return new ZqElement(result, this.group);
 	}
 
@@ -121,7 +121,7 @@ public class ZqElement extends GroupElement<ZqGroup> {
 		checkNotNull(exponent);
 		checkArgument(exponent.compareTo(BigInteger.ZERO) >= 0, "The exponent must be positive.");
 
-		final BigInteger result = BigIntegerOperations.modExponentiate(value, exponent, this.group.getQ());
+		final BigInteger result = BigIntegerOperationsService.modExponentiate(value, exponent, this.group.getQ());
 		return new ZqElement(result, this.group);
 	}
 
