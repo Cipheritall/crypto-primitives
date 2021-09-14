@@ -33,10 +33,10 @@ public interface HashableList extends Hashable {
 	ImmutableList<? extends Hashable> toHashableForm();
 
 	/**
-	 * Creates a HashableList who's hashable form is the provided list.
+	 * Creates a HashableList whose hashable form is the provided list.
 	 *
 	 * @param list the hashable form. Non null.
-	 * @return A new HashableList who's hashable form is {@code list}
+	 * @return A new HashableList whose hashable form is {@code list}
 	 */
 	static HashableList from(final List<? extends Hashable> list) {
 		checkNotNull(list);
@@ -49,7 +49,7 @@ public interface HashableList extends Hashable {
 	}
 
 	/**
-	 * Creates a HashableList who's hashable form is an ImmutableList containing the provided elements.
+	 * Creates a HashableList whose hashable form is an ImmutableList containing the provided elements.
 	 *
 	 * @param elements the hashable elements to construct a HashableList from. Non null and must not contain nulls.
 	 * @param <E> the type of the elements

@@ -55,7 +55,6 @@ import com.google.common.collect.ImmutableList;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
-import ch.post.it.evoting.cryptoprimitives.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
@@ -299,8 +298,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 		@Test
 		@DisplayName("with a hashService that has a too long hash length throws an IllegalArgumentException")
-		void genDecryptionProofWithHashServiceWithTooLongHashLength() throws NoSuchAlgorithmException {
-			HashService otherHashService = new HashService(MessageDigest.getInstance("SHA-256"));
+		void genDecryptionProofWithHashServiceWithTooLongHashLength() {
+			HashService otherHashService = new HashService();
 			DecryptionProofService otherProofService = new DecryptionProofService(randomService, otherHashService);
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> otherProofService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));

@@ -118,10 +118,12 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 	 */
 	@Override
 	public boolean isGroupMember(final BigInteger value) {
+
 		return value != null &&
 				value.compareTo(BigInteger.ZERO) > 0 &&
 				value.compareTo(p) < 0 &&
-				BigIntegerOperations.modExponentiate(value, q, p).compareTo(BigInteger.ONE) == 0;
+				BigIntegerOperationsService.getJacobi(value, this.p) == 1;
+
 	}
 
 	public BigInteger getP() {

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -65,7 +66,7 @@ class HashServiceTest {
 	static void setup() throws NoSuchAlgorithmException {
 		messageDigest = MessageDigest.getInstance("SHA-256");
 		hashLength = 32;
-		hashService = new HashService(messageDigest);
+		hashService = new HashService();
 		secureRandom = new SecureRandom();
 		randomService = new RandomService();
 	}
@@ -75,11 +76,6 @@ class HashServiceTest {
 		final HashService hashService = assertDoesNotThrow((ThrowingSupplier<HashService>) HashService::new);
 
 		assertEquals(32, hashService.getHashLength());
-	}
-
-	@Test
-	void testInstantiateWithNullHashFunctionThrows() {
-		assertThrows(NullPointerException.class, () -> new HashService(null));
 	}
 
 	static Stream<Arguments> jsonFileArgumentProvider() {
@@ -137,9 +133,11 @@ class HashServiceTest {
 	@ParameterizedTest
 	@MethodSource("jsonFileArgumentProvider")
 	@DisplayName("recursiveHash of specific input returns expected output")
-	void testRecursiveHashWithRealValues(final String messageDigest, final Hashable[] input, final byte[] output, final String description)
-			throws NoSuchAlgorithmException {
-		HashService testHashService = new HashService(MessageDigest.getInstance(messageDigest));
+	void testRecursiveHashWithRealValues(final String messageDigest, final Hashable[] input, final byte[] output, final String description) {
+		if (!messageDigest.equals("SHA-256")) {
+			throw new IllegalArgumentException("Only SHA-256 is currently supported as underlying hash");
+		}
+		HashService testHashService = new HashService();
 		byte[] actual = testHashService.recursiveHash(input);
 		assertArrayEquals(output, actual, String.format("assertion failed for: %s", description));
 	}

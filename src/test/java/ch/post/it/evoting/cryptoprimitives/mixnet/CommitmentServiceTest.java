@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperations;
+import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -101,7 +101,7 @@ class CommitmentServiceTest {
 			GroupVector<ZqElement, ZqGroup> values = GroupVector.of();
 			List<BigInteger> aPrime = Stream.generate(() -> BigInteger.ZERO).limit(KEY_LENGTH).collect(Collectors.toList());
 			aPrime.add(0, randomValue.getValue());
-			BigInteger expected = BigIntegerOperations.multiModExp(
+			BigInteger expected = BigIntegerOperationsService.multiModExp(
 					validCommitmentKey.stream().map(GqElement::getValue)
 							.collect(Collectors.toList()),
 					aPrime,
