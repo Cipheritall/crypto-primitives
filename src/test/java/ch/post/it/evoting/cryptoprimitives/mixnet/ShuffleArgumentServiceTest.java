@@ -667,7 +667,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> badCommitmentA = GroupVectors.set(commitmentA, 0, badCA0);
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.with_c_A(badCommitmentA)
-					.with_c_B(shuffleArgument.get_c_N())
+					.with_c_B(shuffleArgument.get_c_B())
 					.with_productArgument(shuffleArgument.getProductArgument())
 					.with_multiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
@@ -680,7 +680,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("incorrect commitment vector c_B does not verify")
 		void verifyShuffleArgumentIncorrectCB() {
-			final GroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.get_c_N();
+			final GroupVector<GqElement, GqGroup> commitmentB = shuffleArgument.get_c_B();
 
 			final GqElement badCBm = commitmentB.get(0).multiply(gqGroup.getGenerator());
 			final GroupVector<GqElement, GqGroup> badCommitmentB = GroupVectors.set(commitmentB, 0, badCBm);
@@ -723,7 +723,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.with_c_A(shuffleArgument.get_c_A())
-					.with_c_B(shuffleArgument.get_c_N())
+					.with_c_B(shuffleArgument.get_c_B())
 					.with_productArgument(badProductArgument)
 					.with_multiExponentiationArgument(shuffleArgument.getMultiExponentiationArgument())
 					.build();
@@ -752,7 +752,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 			final ShuffleArgument badShuffleArgument = new ShuffleArgument.Builder()
 					.with_c_A(shuffleArgument.get_c_A())
-					.with_c_B(shuffleArgument.get_c_N())
+					.with_c_B(shuffleArgument.get_c_B())
 					.with_productArgument(shuffleArgument.getProductArgument())
 					.with_multiExponentiationArgument(badMultiExponentiationArgument)
 					.build();
