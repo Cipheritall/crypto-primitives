@@ -94,14 +94,14 @@ public final class GqElement extends GroupElement<GqGroup> {
 		checkArgument(hashService.getHashLength() * Byte.SIZE < this.getGroup().getQ().bitLength(),
 				"The hash length must be smaller than the bit length of this GqGroup's q.");
 
-		final byte[] xB = integerToByteArray(this.value);
+		final byte[] x_B = integerToByteArray(this.value);
 
-		final byte[] xhB = hashService.recursiveHash(HashableByteArray.from(xB));
+		final byte[] x_h_B = hashService.recursiveHash(HashableByteArray.from(x_B));
 
-		final BigInteger xh = byteArrayToInteger(xhB).add(BigInteger.ONE);
+		final BigInteger x_h = byteArrayToInteger(x_h_B).add(BigInteger.ONE);
 
-		final BigInteger xhSquare = BigIntegerOperationsService.modExponentiate(xh, BigInteger.valueOf(2), this.group.getQ());
-		return new GqElement(xhSquare, this.group);
+		final BigInteger x_h_2 = BigIntegerOperationsService.modExponentiate(x_h, BigInteger.valueOf(2), this.group.getP());
+		return new GqElement(x_h_2, this.group);
 	}
 
 	private boolean isOfSameOrderGroup(final ZqElement exponent) {
