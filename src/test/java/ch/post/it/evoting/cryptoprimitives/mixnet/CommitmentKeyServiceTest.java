@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,14 +32,22 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
+import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
-class CommitmentKeyTest {
+class CommitmentKeyServiceTest {
 
 	private static GqGroupGenerator generator;
 	private static CommitmentKeyService commitmentKeyService;
@@ -157,6 +164,47 @@ class CommitmentKeyTest {
 		final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gqElements);
 
 		assertEquals(expectedCommitmentKey, verifiableCommitmentKey);
+	}
+
+	static Stream<Arguments> getVerifiableCommitmentKeyArgumentProvider() {
+		final List<TestParameters> parametersList = TestParameters.fromResource("/mixnet/get-verifiable-commitment-key.json");
+
+		return parametersList.stream().parallel().map(testParameters -> {
+			// Context.
+			final JsonData context = testParameters.getContext();
+			final BigInteger p = context.get("p", BigInteger.class);
+			final BigInteger q = context.get("q", BigInteger.class);
+			final BigInteger g = context.get("g", BigInteger.class);
+
+			try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
+				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
+				final GqGroup gqGroup = new GqGroup(p, q, g);
+
+				// Input.
+				final JsonData input = testParameters.getInput();
+				final int numberOfElements = input.get("k", Integer.class);
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final GqElement h = GqElement.create(output.get("h", BigInteger.class), gqGroup);
+				final List<GqElement> gVector = Arrays.stream(output.get("g", BigInteger[].class)).map(value -> GqElement.create(value, gqGroup))
+						.collect(Collectors.toList());
+				final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gVector);
+
+				return Arguments.of(numberOfElements, gqGroup, expectedCommitmentKey, testParameters.getDescription());
+			}
+		});
+	}
+
+	@ParameterizedTest(name = "{3}")
+	@MethodSource("getVerifiableCommitmentKeyArgumentProvider")
+	@DisplayName("with real values")
+	void getVerifiableCommitmentKeyRealValues(final int numberOfElements, final GqGroup gqGroup, final CommitmentKey expectedCommitmentKey,
+			final String description) {
+
+		final CommitmentKey verifiableCommitmentKey = commitmentKeyService.getVerifiableCommitmentKey(numberOfElements, gqGroup);
+
+		assertEquals(expectedCommitmentKey, verifiableCommitmentKey, String.format("assertion failed for: %s", description));
 	}
 
 	@Test
