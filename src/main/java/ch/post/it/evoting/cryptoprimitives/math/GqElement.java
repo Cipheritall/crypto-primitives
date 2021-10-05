@@ -30,6 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
  *
  * <p>Instances of this class are immutable.
  */
+@SuppressWarnings("java:S117")
 public final class GqElement extends GroupElement<GqGroup> {
 
 	// Private constructor without input validation. Used only for operations that provide a mathematical guarantee that the element is within the
