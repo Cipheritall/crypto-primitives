@@ -354,6 +354,40 @@ class HashServiceTest {
 		assertNotEquals(firstHash, secondHash);
 	}
 
+	/**
+	 * The test below ascertains that the underlying MessageDigest instance
+	 * respects the following equality:
+	 *
+	 * <pre>
+	 *   digest(a || b) == { update(a); update(b); digest() }
+	 * </pre>
+	 */
+	@RepeatedTest(100)
+	void testAssumptionOnUnderlyingDigest() {
+		byte[] a = new byte[secureRandom.nextInt(20) + 10];
+		byte[] b = new byte[secureRandom.nextInt(20) + 10];
+		byte[] c = new byte[secureRandom.nextInt(20) + 10];
+
+		secureRandom.nextBytes(a);
+		secureRandom.nextBytes(b);
+		secureRandom.nextBytes(c);
+
+		messageDigest.reset();
+		messageDigest.update(a);
+		messageDigest.update(b);
+		messageDigest.update(c);
+		final byte[] updateThenDigest = messageDigest.digest();
+
+		byte[] concat = new byte[a.length + b.length + c.length];
+		System.arraycopy(a, 0, concat, 0, a.length);
+		System.arraycopy(b, 0, concat, a.length, b.length);
+		System.arraycopy(c, 0, concat, a.length + b.length, c.length);
+
+		final byte[] digestConcat = messageDigest.digest(concat);
+
+		assertArrayEquals(updateThenDigest, digestConcat, "the underlying hash is expected to respect this assumption");
+	}
+
 	//Utilities
 	private static class Split {
 		final HashableByteArray start;

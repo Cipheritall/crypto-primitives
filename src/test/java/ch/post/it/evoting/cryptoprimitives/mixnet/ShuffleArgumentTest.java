@@ -90,6 +90,18 @@ class ShuffleArgumentTest extends TestGroupSetup {
 		assertDoesNotThrow(() -> hashService.recursiveHash(shuffleArgument));
 	}
 
+	@Test
+	@DisplayName("with valid input returns correct size")
+	void getCorrectSize() {
+		final ShuffleArgument shuffleArgument = new ShuffleArgument.Builder()
+				.with_c_A(cA)
+				.with_c_B(cB)
+				.with_productArgument(productArgument)
+				.with_multiExponentiationArgument(multiExponentiationArgument)
+				.build();
+		assertEquals(l, shuffleArgument.size());
+	}
+
 	@Nested
 	@DisplayName("built with")
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
