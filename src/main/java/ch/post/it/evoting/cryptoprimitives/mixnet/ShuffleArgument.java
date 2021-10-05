@@ -26,6 +26,7 @@ import java.util.Objects;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -35,7 +36,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  * Value class containing the result of a shuffle argument proof.
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
-public class ShuffleArgument implements HashableList {
+public class ShuffleArgument implements GroupVectorElement<GqGroup>, HashableList {
 
 	private GroupVector<GqElement, GqGroup> c_A;
 	private GroupVector<GqElement, GqGroup> c_B;
@@ -55,7 +56,7 @@ public class ShuffleArgument implements HashableList {
 		return c_A;
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_N() {
+	GroupVector<GqElement, GqGroup> get_c_B() {
 		return c_B;
 	}
 
@@ -79,8 +80,14 @@ public class ShuffleArgument implements HashableList {
 		return l;
 	}
 
-	GqGroup getGroup() {
+	@Override
+	public GqGroup getGroup() {
 		return group;
+	}
+
+	@Override
+	public int size() {
+		return l;
 	}
 
 	@Override
