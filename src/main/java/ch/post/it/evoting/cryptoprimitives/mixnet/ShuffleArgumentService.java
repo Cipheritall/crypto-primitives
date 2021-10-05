@@ -323,7 +323,7 @@ class ShuffleArgumentService {
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_vector = statement.get_C();
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = statement.get_C_prime();
 		final GroupVector<GqElement, GqGroup> c_A = argument.get_c_A();
-		final GroupVector<GqElement, GqGroup> c_B = argument.get_c_N();
+		final GroupVector<GqElement, GqGroup> c_B = argument.get_c_B();
 		final ProductArgument productArgument = argument.getProductArgument();
 		final MultiExponentiationArgument multiExponentiationArgument = argument.getMultiExponentiationArgument();
 
