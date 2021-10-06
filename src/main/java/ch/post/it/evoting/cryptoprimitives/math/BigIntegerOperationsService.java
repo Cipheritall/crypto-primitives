@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import com.squareup.jnagmp.Gmp;
 
+/**
+ * <p>This class is thread-safe.</p>
+ */
 public class BigIntegerOperationsService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BigIntegerOperationsService.class);

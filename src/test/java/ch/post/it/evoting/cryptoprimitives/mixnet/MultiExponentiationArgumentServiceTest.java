@@ -295,7 +295,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void hashServiceWithTooLongHashLengthThrows() {
-			HashService otherHashService = new HashService();
+			HashService otherHashService = HashService.getInstance();
 			assertThrowsIllegalArgumentExceptionWithMessage("The hash service's bit length must be smaller than the bit length of q.",
 					() -> new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 		}
@@ -611,7 +611,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 				final MultiExponentiationStatement statement, final MultiExponentiationArgument argument, final boolean expectedOutput,
 				final String description) {
 
-			final HashService hashService = new HashService();
+			final HashService hashService = HashService.getInstance();
 
 			final MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, randomService,
 					hashService);

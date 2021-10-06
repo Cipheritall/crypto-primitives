@@ -48,6 +48,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Class in charge of providing a Zero Argument used in the Zero Argument proof.
+ *
+ * <p>This class is thread safe.</p>
  */
 @SuppressWarnings("java:S117")
 final class ZeroArgumentService {

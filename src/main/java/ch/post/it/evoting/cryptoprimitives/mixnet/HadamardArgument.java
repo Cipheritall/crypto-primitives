@@ -28,6 +28,9 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
+/**
+ * <p>Instances of this class are immutable. </p>
+ */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 public class HadamardArgument implements HashableList {
 

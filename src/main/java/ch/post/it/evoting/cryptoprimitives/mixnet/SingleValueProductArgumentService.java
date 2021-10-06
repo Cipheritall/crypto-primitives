@@ -42,6 +42,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Provides methods for calculating a single value product argument.
+ *
+ * <p>This class is thread safe.</p>
  */
 @SuppressWarnings("java:S117")
 class SingleValueProductArgumentService {

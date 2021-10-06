@@ -66,14 +66,14 @@ class HashServiceTest {
 	static void setup() throws NoSuchAlgorithmException {
 		messageDigest = MessageDigest.getInstance("SHA-256");
 		hashLength = 32;
-		hashService = new HashService();
+		hashService = HashService.getInstance();
 		secureRandom = new SecureRandom();
 		randomService = new RandomService();
 	}
 
 	@Test
 	void testEmptySHA256Constructor() {
-		final HashService hashService = assertDoesNotThrow((ThrowingSupplier<HashService>) HashService::new);
+		final HashService hashService = assertDoesNotThrow(HashService::new);
 
 		assertEquals(32, hashService.getHashLength());
 	}
@@ -137,7 +137,7 @@ class HashServiceTest {
 		if (!messageDigest.equals("SHA-256")) {
 			throw new IllegalArgumentException("Only SHA-256 is currently supported as underlying hash");
 		}
-		HashService testHashService = new HashService();
+		HashService testHashService = HashService.getInstance();
 		byte[] actual = testHashService.recursiveHash(input);
 		assertArrayEquals(output, actual, String.format("assertion failed for: %s", description));
 	}

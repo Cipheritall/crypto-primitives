@@ -39,6 +39,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Re-encrypting shuffle service.
+ *
+ * <p>This class is thread safe.</p>
  */
 @SuppressWarnings("java:S117")
 public class ShuffleService {

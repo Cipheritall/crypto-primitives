@@ -33,8 +33,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,7 +127,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
 		void constructWithHashServiceWithTooLongHashLength() {
-			HashService otherHashService = new HashService();
+			HashService otherHashService = HashService.getInstance();
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> new ShuffleArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -224,7 +222,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> c = GroupVector.of(c0, c1, c2, c3);
 
 		// Create the permutation: pi = [1, 3, 2, 0]
-		Permutation permutation = new Permutation(new int[]{1, 3, 2, 0});
+		Permutation permutation = new Permutation(ImmutableList.of(1, 3, 2, 0));
 		// Create the randomness: rho = (3, 9, 4, 2)
 		GroupVector<ZqElement, ZqGroup> rho = GroupVector.of(zThree, zNine, zFour, zTwo);
 
@@ -819,7 +817,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		void testRealData(ElGamalMultiRecipientPublicKey pk, CommitmentKey ck, ShuffleStatement statement, ShuffleArgument argument, int m, int n,
 				Boolean output, String description) {
 
-			HashService hashService = new HashService();
+			HashService hashService = HashService.getInstance();
 			ShuffleArgumentService service = new ShuffleArgumentService(pk, ck, randomService, hashService);
 			assertEquals(output, service.verifyShuffleArgument(statement, argument, m, n).isVerified(),
 					String.format("assertion failed for: %s", description));

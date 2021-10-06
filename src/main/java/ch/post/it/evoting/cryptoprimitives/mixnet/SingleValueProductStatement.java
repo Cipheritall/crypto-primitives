@@ -26,6 +26,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Represents the statement for a single value product argument, consisting of a commitment and a product.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 class SingleValueProductStatement {

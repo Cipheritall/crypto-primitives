@@ -72,18 +72,18 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 		final String securityLevelCheckMessage = "The given p does not correspond to the given security level.";
 
 		switch (securityLevel) {
-		case EXTENDED:
-			checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-			break;
-		case DEFAULT:
-			checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-			checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-			break;
-		case TESTING_ONLY:
-			checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-			break;
-		default:
-			throw new IllegalArgumentException("Unsupported security level!");
+			case EXTENDED:
+				checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+				break;
+			case DEFAULT:
+				checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+				checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+				break;
+			case TESTING_ONLY:
+				checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported security level!");
 		}
 
 		//Validate p
@@ -108,22 +108,21 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 	}
 
 	/**
-	 * Checks if a value is a member of this group. A given value is a member of this group if:
-	 *
-	 * <ul>
-	 *     <li> the object is non null</li>
-	 *   <li>The given value is an integer in (0, p) (exclusive)}
-	 *   <li>{@code (value<sup>q</sup> mod p) = 1}
-	 * </ul>
+	 * Checks if a value is a member of this group.
 	 */
 	@Override
 	public boolean isGroupMember(final BigInteger value) {
+		return isGroupMember(value, this.p);
+	}
 
+	/**
+	 * Checks if a value is a member of a GqGroup defined by p.
+	 */
+	public static boolean isGroupMember(final BigInteger value, final BigInteger p) {
 		return value != null &&
 				value.compareTo(BigInteger.ZERO) > 0 &&
 				value.compareTo(p) < 0 &&
-				BigIntegerOperationsService.getJacobi(value, this.p) == 1;
-
+				BigIntegerOperationsService.getJacobi(value, p) == 1;
 	}
 
 	public BigInteger getP() {
