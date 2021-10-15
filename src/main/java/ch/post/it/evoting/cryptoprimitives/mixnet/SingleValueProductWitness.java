@@ -26,6 +26,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Represents the witness for a single value product argument, consisting of a list of elements and a randomness.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
 class SingleValueProductWitness {

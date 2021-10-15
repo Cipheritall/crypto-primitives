@@ -21,6 +21,9 @@ import static org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.jacobi;
 
 import java.math.BigInteger;
 
+/**
+ * <p>This class is thread-safe.</p>
+ */
 public class BigIntegerOperationsJava implements BigIntegerOperations {
 
 	@Override

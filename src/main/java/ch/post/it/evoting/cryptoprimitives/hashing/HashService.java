@@ -26,25 +26,34 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.ConversionService;
 
+/**
+ * Recursive hash service using a default SHA-256 message digest.
+ *
+ * <p>This class is thread safe.</p>
+ */
 public class HashService {
 
-	private final Supplier<MessageDigest> digestSupplier;
+	public static final int HASH_LENGTH_BYTES = 32;
+	private static final HashService Instance = new HashService();
 
-	/**
-	 * Instantiates a recursive hash service with a default SHA-256 message digest.
-	 */
-	public HashService() {
-		digestSupplier = () -> {
-			try {
-				return MessageDigest.getInstance("SHA-256");
-			} catch (NoSuchAlgorithmException e) {
-				throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
-			}
-		};
+	private static final Supplier<MessageDigest> digestSupplier = () -> {
+		try {
+			return MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
+		}
+	};
+
+	@VisibleForTesting
+	HashService() {}
+
+	public static HashService getInstance() {
+		return Instance;
 	}
 
 	/**
@@ -108,7 +117,7 @@ public class HashService {
 	 * @return this message digest length in bytes.
 	 */
 	public int getHashLength() {
-		return digestSupplier.get().getDigestLength();
+		return HASH_LENGTH_BYTES;
 	}
 
 }

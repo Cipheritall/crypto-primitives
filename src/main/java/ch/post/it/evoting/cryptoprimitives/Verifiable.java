@@ -22,6 +22,8 @@ import java.util.function.Supplier;
 
 /**
  * Represents a lazy and fail fast evaluation of a verification or a combination of verifications.
+ *
+ * <p>Instances of this class are immutable. </p>
  */
 public class Verifiable {
 

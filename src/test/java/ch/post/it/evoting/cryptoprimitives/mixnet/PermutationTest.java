@@ -15,11 +15,11 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -98,10 +98,11 @@ class PermutationTest {
 		int size = random.nextInt(MAX_PERMUTATION_TEST_SIZE) + 1;
 		Permutation permutation = permutationService.genPermutation(size);
 
-		final int[] expectedArray = IntStream.range(0, permutation.size())
+		final List<Integer> expectedMapping = IntStream.range(0, permutation.size())
 				.map(permutation::get)
-				.toArray();
+				.boxed()
+				.collect(Collectors.toList());
 
-		assertArrayEquals(expectedArray, permutation.stream().toArray());
+		assertEquals(expectedMapping, permutation.stream().collect(Collectors.toList()));
 	}
 }

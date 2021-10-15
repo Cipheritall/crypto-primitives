@@ -28,8 +28,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -290,7 +288,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with hash service with too long hash length throws IllegalArgumentException")
 		void genDecryptionProofWithBadHashService() {
-			final DecryptionProofService badService = new DecryptionProofService(randomService, new HashService());
+			final DecryptionProofService badService = new DecryptionProofService(randomService, HashService.getInstance());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> badService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -299,7 +297,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with a hashService that has a too long hash length throws an IllegalArgumentException")
 		void genDecryptionProofWithHashServiceWithTooLongHashLength() {
-			HashService otherHashService = new HashService();
+			HashService otherHashService = HashService.getInstance();
 			DecryptionProofService otherProofService = new DecryptionProofService(randomService, otherHashService);
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> otherProofService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
@@ -407,7 +405,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with hash service with too long hash length throws IllegalArgumentException")
 		void verifyDecryptionWithBadHashService() {
-			final DecryptionProofService badService = new DecryptionProofService(randomService, new HashService());
+			final DecryptionProofService badService = new DecryptionProofService(randomService, HashService.getInstance());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> badService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -680,7 +678,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		void verifyDecryptionProofWithRealValues(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPublicKey publicKey,
 				final ElGamalMultiRecipientMessage message, final DecryptionProof decryptionProof, final List<String> auxiliaryInformation,
 				final boolean expected, final String description) {
-			final DecryptionProofService decryptionProofService = new DecryptionProofService(randomService, new HashService());
+			final DecryptionProofService decryptionProofService = new DecryptionProofService(randomService, HashService.getInstance());
 			final boolean actual = assertDoesNotThrow(
 					() -> decryptionProofService.verifyDecryption(ciphertext, publicKey, message, decryptionProof, auxiliaryInformation).verify()
 							.isVerified());

@@ -313,7 +313,7 @@ class GqElementTest {
 	@Test
 	@DisplayName("calling hashAndSquare on a valid element with a hash service with a too big hash length throws an exception.")
 	void hashAndSquareWithIncompatibleHashService() {
-		final HashService hashService = new HashService();
+		final HashService hashService = HashService.getInstance();
 		final GqElement gqElement = GqElement.create(g, group);
 
 		assertThrows(IllegalArgumentException.class, () -> gqElement.hashAndSquare(hashService));

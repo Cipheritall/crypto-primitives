@@ -27,6 +27,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Represents a statement used for the calculation of a product argument.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ProductStatement {

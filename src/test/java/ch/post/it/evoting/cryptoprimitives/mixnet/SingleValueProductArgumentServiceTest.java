@@ -111,7 +111,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 	@Test
 	@DisplayName("Constructing a SingleValueProductArgumentService with a hashService that has a too long hash length throws an IllegalArgumentException")
 	void constructWithHashServiceWithTooLongHashLength() {
-		HashService otherHashService = new HashService();
+		HashService otherHashService = HashService.getInstance();
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new SingleValueProductArgumentService(randomService, otherHashService, publicKey, commitmentKey));
 		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -314,7 +314,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 				final SingleValueProductStatement singleValueProductStatement, final SingleValueProductArgument singleValueProductArgument,
 				final boolean expectedOutput, String description) {
 
-			final HashService hashService = new HashService();
+			final HashService hashService = HashService.getInstance();
 
 			final SingleValueProductArgumentService service = new SingleValueProductArgumentService(randomService, hashService, publicKey,
 					commitmentKey);

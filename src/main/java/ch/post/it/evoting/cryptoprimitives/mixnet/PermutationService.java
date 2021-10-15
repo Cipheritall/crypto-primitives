@@ -19,10 +19,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.stream.IntStream;
+
+import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 
+/**
+ * <p>This class is thread safe.</p>
+ */
 class PermutationService {
 
 	private final RandomService randomService;
@@ -42,15 +48,17 @@ class PermutationService {
 		final int N = size;
 		checkArgument(N > 0);
 
-		final int[] pi = IntStream.range(0, N).toArray();
+		final ArrayList<Integer> pi = IntStream.range(0, N)
+				.boxed()
+				.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
 		for (int i = 0; i < N; i++) {
 			int offset = genRandomInteger(N - i);
-			int tmp = pi[i];
-			pi[i] = pi[i + offset];
-			pi[i + offset] = tmp;
+			int tmp = pi.get(i);
+			pi.set(i, pi.get(i + offset));
+			pi.set(i + offset, tmp);
 		}
 
-		return new Permutation(pi);
+		return new Permutation(ImmutableList.copyOf(pi));
 	}
 
 	/*
