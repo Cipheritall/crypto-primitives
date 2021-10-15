@@ -27,6 +27,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Represents a witness for a product argument.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ProductWitness {

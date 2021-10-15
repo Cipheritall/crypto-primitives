@@ -27,6 +27,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Represents the witness for a zero argument, consisting of two matrices and two vectors of exponents.
+ *
+ * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ZeroWitness {

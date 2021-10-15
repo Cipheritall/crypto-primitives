@@ -42,6 +42,8 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  * <p>
  * This is effectively a decorator for the ImmutableList class.
  *
+ * <p>Instances of this class are immutable. </p>
+ *
  * @param <E> the type of elements this list contains.
  * @param <G> the group type the elements of the list belong to.
  */

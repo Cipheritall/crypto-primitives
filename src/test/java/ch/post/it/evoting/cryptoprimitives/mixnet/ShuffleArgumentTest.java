@@ -80,7 +80,7 @@ class ShuffleArgumentTest extends TestGroupSetup {
 	@Test
 	@DisplayName("hashed with recursiveHash does not throw")
 	void hashWithRecursiveHash() {
-		final HashService hashService = new HashService();
+		final HashService hashService = HashService.getInstance();
 		final ShuffleArgument shuffleArgument = new ShuffleArgument.Builder()
 				.with_c_A(cA)
 				.with_c_B(cB)

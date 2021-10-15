@@ -22,6 +22,8 @@ import java.util.LinkedList;
 
 /**
  * Represents the result of a verification. Contains a list of errors in case of failure.
+ *
+ * <p>Instances of this class are immutable. </p>
  */
 public interface VerificationResult {
 
@@ -70,10 +72,10 @@ class VerificationSuccess implements VerificationResult {
  */
 class VerificationFailure implements VerificationResult {
 
-	private Deque<String> errorMessages = new LinkedList<>();
+	private final Deque<String> errorMessages = new LinkedList<>();
 
 	private VerificationFailure(final LinkedList<String> errorMessages) {
-		this.errorMessages = errorMessages;
+		this.errorMessages.addAll(errorMessages);
 	}
 
 	/**
@@ -93,7 +95,7 @@ class VerificationFailure implements VerificationResult {
 
 	@Override
 	public Deque<String> getErrorMessages() {
-		return this.errorMessages;
+		return new LinkedList<>(this.errorMessages);
 	}
 
 	/**

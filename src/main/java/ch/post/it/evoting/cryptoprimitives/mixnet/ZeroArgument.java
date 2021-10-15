@@ -36,6 +36,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Collection of the values contained in a zero argument.
+ *
+ * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class ZeroArgument implements HashableList {
@@ -127,6 +129,8 @@ public class ZeroArgument implements HashableList {
 
 	/**
 	 * Builder to construct a {@link ZeroArgument}.
+	 *
+	 * <p>Instances of this class are NOT immutable. </p>
 	 */
 	public static class Builder {
 

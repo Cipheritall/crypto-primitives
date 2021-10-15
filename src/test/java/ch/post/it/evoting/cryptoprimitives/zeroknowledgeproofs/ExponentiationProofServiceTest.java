@@ -219,7 +219,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void hashLengthCheck() {
-			final ExponentiationProofService badService = new ExponentiationProofService(randomService, new HashService());
+			final ExponentiationProofService badService = new ExponentiationProofService(randomService, HashService.getInstance());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> badService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -323,7 +323,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void hashLengthCheck() {
-			final ExponentiationProofService badService = new ExponentiationProofService(randomService, new HashService());
+			final ExponentiationProofService badService = new ExponentiationProofService(randomService, HashService.getInstance());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> badService.verifyExponentiation(bases, exponentiations, proof, auxiliaryInformation));
 			assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -483,7 +483,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 				final GroupVector<GqElement, GqGroup> exponentiations, final ExponentiationProof exponentiationProof,
 				final List<String> auxiliaryInformation,
 				final boolean expected, final String description) {
-			final ExponentiationProofService exponentiationProofService = new ExponentiationProofService(randomService, new HashService());
+			final ExponentiationProofService exponentiationProofService = new ExponentiationProofService(randomService, HashService.getInstance());
 			final boolean actual = assertDoesNotThrow(
 					() -> exponentiationProofService.verifyExponentiation(bases, exponentiations, exponentiationProof, auxiliaryInformation));
 			assertEquals(expected, actual, String.format("assertion failed for: %s", description));

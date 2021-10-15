@@ -22,9 +22,14 @@ import java.math.BigInteger;
 
 import com.squareup.jnagmp.Gmp;
 
+/**
+ * Optimized BigIntegerOperations using GMP.
+ *
+ * <p>This class is thread-safe.</p>
+ */
 public class BigIntegerOperationsGMP implements BigIntegerOperations {
 
-	private BigIntegerOperations bigIntegerOperationsJava = new BigIntegerOperationsJava();
+	private final BigIntegerOperations bigIntegerOperationsJava = new BigIntegerOperationsJava();
 
 	@Override
 	public BigInteger modMultiply(final BigInteger n1, final BigInteger n2, final BigInteger modulus) {

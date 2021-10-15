@@ -29,6 +29,9 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+/**
+ * <p>This class is thread safe.</p>
+ */
 @SuppressWarnings("java:S117")
 public class CommitmentService {
 

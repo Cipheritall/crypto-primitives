@@ -34,22 +34,33 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Value class containing the result of a shuffle argument proof.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
-@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117", "java:S107" })
 public class ShuffleArgument implements GroupVectorElement<GqGroup>, HashableList {
 
-	private GroupVector<GqElement, GqGroup> c_A;
-	private GroupVector<GqElement, GqGroup> c_B;
-	private ProductArgument productArgument;
-	private MultiExponentiationArgument multiExponentiationArgument;
+	private final GroupVector<GqElement, GqGroup> c_A;
+	private final GroupVector<GqElement, GqGroup> c_B;
+	private final ProductArgument productArgument;
+	private final MultiExponentiationArgument multiExponentiationArgument;
 
-	private int m;
-	private int n;
-	private int l;
-	private GqGroup group;
+	private final int m;
+	private final int n;
+	private final int l;
+	private final GqGroup group;
 
-	private ShuffleArgument() {
-		// Intentionally left blank.
+	private ShuffleArgument(final GroupVector<GqElement, GqGroup> c_A, final GroupVector<GqElement, GqGroup> c_B,
+			final ProductArgument productArgument, final MultiExponentiationArgument multiExponentiationArgument, final int m, final int n,
+			final int l, final GqGroup group) {
+		this.c_A = c_A;
+		this.c_B = c_B;
+		this.productArgument =  productArgument;
+		this.multiExponentiationArgument = multiExponentiationArgument;
+		this.m = m;
+		this.n = n;
+		this.l = l;
+		this.group = group;
 	}
 
 	GroupVector<GqElement, GqGroup> get_c_A() {
@@ -175,18 +186,9 @@ public class ShuffleArgument implements GroupVectorElement<GqGroup>, HashableLis
 					"The product and multi exponentiation arguments must have the same dimension n.");
 
 			// Build the argument.
-			final ShuffleArgument shuffleArgument = new ShuffleArgument();
-			shuffleArgument.c_A = this.c_A;
-			shuffleArgument.c_B = this.c_B;
-			shuffleArgument.productArgument = this.productArgument;
-			shuffleArgument.multiExponentiationArgument = this.multiExponentiationArgument;
+			return new ShuffleArgument(this.c_A, this.c_B, this.productArgument, this.multiExponentiationArgument,
+					productArgument.get_m(), productArgument.get_n(), multiExponentiationArgument.get_l(), productArgument.getGroup());
 
-			shuffleArgument.m = productArgument.get_m();
-			shuffleArgument.n = productArgument.get_n();
-			shuffleArgument.l = multiExponentiationArgument.get_l();
-			shuffleArgument.group = productArgument.getGroup();
-
-			return shuffleArgument;
 		}
 	}
 }

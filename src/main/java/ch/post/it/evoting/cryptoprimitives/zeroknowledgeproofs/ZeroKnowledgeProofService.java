@@ -41,6 +41,9 @@ import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+/**
+ * <p>This class is thread safe.</p>
+ */
 @SuppressWarnings("squid:S00117")
 public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
@@ -53,7 +56,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	 */
 	public ZeroKnowledgeProofService() {
 		final RandomService randomService = new RandomService();
-		HashService hashService = new HashService();
+		HashService hashService = HashService.getInstance();
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
 	}

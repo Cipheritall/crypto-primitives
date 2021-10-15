@@ -21,6 +21,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * <p>This class is thread safe.</p>
+ */
 public final class ConversionService {
 
 	private ConversionService() {
