@@ -26,6 +26,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Represents a shuffle argument witness, consisting of a permutation &#120587; and a randomness vector &#961;.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
 class ShuffleWitness {

@@ -15,8 +15,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import java.util.List;
-
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -61,6 +59,6 @@ public interface Mixnet {
 	 * @return the result of the verification.
 	 */
 	VerificationResult verifyShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts, ShuffleArgument shuffleArgument,
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts, ShuffleArgument shuffleArgument,
 			final ElGamalMultiRecipientPublicKey publicKey);
 }

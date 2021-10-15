@@ -29,6 +29,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * An exponentiation proof (e, z) composed of a hash value e and a proof element z.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
 public class ExponentiationProof implements HashableList {

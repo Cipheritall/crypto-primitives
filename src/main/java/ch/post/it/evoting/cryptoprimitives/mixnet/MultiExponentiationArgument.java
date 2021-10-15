@@ -37,26 +37,41 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Value class representing the result of a multi exponentiation proof.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
-@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117", "java:S107" })
 public class MultiExponentiationArgument implements HashableList {
 
-	private GqElement c_A_0;
-	private GroupVector<GqElement, GqGroup> c_B;
-	private GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E;
-	private GroupVector<ZqElement, ZqGroup> a;
-	private ZqElement r;
-	private ZqElement b;
-	private ZqElement s;
-	private ZqElement tau;
+	private final GqElement c_A_0;
+	private final GroupVector<GqElement, GqGroup> c_B;
+	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E;
+	private final GroupVector<ZqElement, ZqGroup> a;
+	private final ZqElement r;
+	private final ZqElement b;
+	private final ZqElement s;
+	private final ZqElement tau;
 
-	private int m;
-	private int n;
-	private int l;
-	private GqGroup group;
+	private final int m;
+	private final int n;
+	private final int l;
+	private final GqGroup group;
 
-	private MultiExponentiationArgument() {
-		// Intentionally left blank.
+	private MultiExponentiationArgument(final GqElement c_A_0, final GroupVector<GqElement, GqGroup> c_B,
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E, final GroupVector<ZqElement, ZqGroup> a, final ZqElement r,
+			final ZqElement b, final ZqElement s, final ZqElement tau, final int m, final int n, final int l, final GqGroup group) {
+		this.c_A_0 = c_A_0;
+		this.c_B = c_B;
+		this.E = E;
+		this.a = a;
+		this.r = r;
+		this.b = b;
+		this.s = s;
+		this.tau = tau;
+		this.m = m;
+		this.n = n;
+		this.l = l;
+		this.group = group;
 	}
 
 	GqElement getc_A_0() {
@@ -225,22 +240,9 @@ public class MultiExponentiationArgument implements HashableList {
 			checkArgument(this.c_B.size() % 2 == 0, "cB and E must be of size 2 * m.");
 
 			// Build the argument.
-			final MultiExponentiationArgument argument = new MultiExponentiationArgument();
-			argument.c_A_0 = this.c_A_0;
-			argument.c_B = this.c_B;
-			argument.E = this.E;
-			argument.a = this.a;
-			argument.r = this.r;
-			argument.b = this.b;
-			argument.s = this.s;
-			argument.tau = this.tau;
+			return new MultiExponentiationArgument(this.c_A_0, this.c_B, this.E, this.a, this.r, this.b, this.s,
+					this.tau, this.c_B.size() / 2, this.a.size(), this.E.getElementSize(), c_A_0.getGroup());
 
-			argument.m = this.c_B.size() / 2;
-			argument.n = this.a.size();
-			argument.l = this.E.getElementSize();
-			argument.group = c_A_0.getGroup();
-
-			return argument;
 		}
 	}
 }

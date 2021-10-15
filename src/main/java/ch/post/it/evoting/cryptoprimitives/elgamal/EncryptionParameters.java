@@ -18,6 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.math.GqGroup.isGroupMember;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
@@ -28,17 +29,18 @@ import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
-import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Provides functionality to create verifiable encryption parameters as a {@link GqGroup}.
+ *
+ * <p> This class is immutable and thread safe. </p>
+ *
  */
 class EncryptionParameters {
 
 	private static final BigInteger ONE = BigInteger.ONE;
 	private static final BigInteger TWO = BigInteger.valueOf(2);
-	private static final SHAKEDigest shakeDigest = new SHAKEDigest(128);
 
 	private final SecurityLevel lambda;
 
@@ -78,7 +80,7 @@ class EncryptionParameters {
 
 		BigInteger g = null;
 		for (int j = 2; j <= 4; j++) {
-			if (isGroupMember(p, q, BigInteger.valueOf(j))) {
+			if (isGroupMember(BigInteger.valueOf(j), p)) {
 				g = BigInteger.valueOf(j);
 				break;
 			}
@@ -87,15 +89,9 @@ class EncryptionParameters {
 		return new GqGroup(p, q, g);
 	}
 
-	/**
-	 * Checks if {@code value} is a member of the group defined by {@code p} and {@code q}.
-	 */
-	private boolean isGroupMember(final BigInteger p, final BigInteger q, final BigInteger value) {
-		return BigIntegerOperationsService.modExponentiate(value, q, p).compareTo(BigInteger.ONE) == 0;
-	}
-
 	private byte[] shake128(final byte[] message, final int outputLength) {
 		final byte[] result = new byte[outputLength];
+		SHAKEDigest shakeDigest = new SHAKEDigest(128);
 
 		shakeDigest.update(message, 0, message.length);
 		shakeDigest.doFinal(result, 0, outputLength);

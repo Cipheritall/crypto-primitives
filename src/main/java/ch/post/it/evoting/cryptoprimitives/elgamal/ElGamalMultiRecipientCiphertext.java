@@ -45,6 +45,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * ElGamal encryption. Each phi is the encryption of a different message, using a different public key element and the same randomness.
  * <p>
  * An ElGamal multi-recipient ciphertext cannot be empty. It contains always a γ and at least one 𝜙.
+ *
+ * <p>Instances of this class are immutable.
  */
 @SuppressWarnings({ "java:S117", "java:S1117" })
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
@@ -265,11 +267,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		return new ElGamalMultiRecipientCiphertext(gamma, m);
 	}
 
-	public final GqElement getGamma() {
+	public GqElement getGamma() {
 		return this.gamma;
 	}
 
-	public final GroupVector<GqElement, GqGroup> getPhi() {
+	public GroupVector<GqElement, GqGroup> getPhi() {
 		return this.phis;
 	}
 

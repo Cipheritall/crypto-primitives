@@ -26,6 +26,7 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
@@ -141,5 +142,70 @@ class GqGroupTest {
 	void testEqualsTrue() {
 		String errorMessage = "Expected that objects would be equals";
 		assertEquals(new GqGroup(p, q, g), smallGroup, errorMessage);
+	}
+
+	@Test
+	void testIsPrimeTrue() {
+		assertTrue(GqGroup.isPrime(2));
+		assertTrue(GqGroup.isPrime(3));
+		assertTrue(GqGroup.isPrime(5));
+		assertTrue(GqGroup.isPrime(7));
+		assertTrue(GqGroup.isPrime(11));
+		assertTrue(GqGroup.isPrime(47));
+	}
+
+	@Test
+	void testIsPrimeFalse() {
+		assertFalse(GqGroup.isPrime(1));
+		assertFalse(GqGroup.isPrime(4));
+		assertFalse(GqGroup.isPrime(9));
+		assertFalse(GqGroup.isPrime(35));
+		assertFalse(GqGroup.isPrime(77));
+		assertFalse(GqGroup.isPrime(143));
+	}
+
+	@Test
+	void testIsPrimeTooSmallNThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> GqGroup.isPrime(0));
+		assertEquals("The number n must be strictly positive", exception.getMessage());
+	}
+
+	@Test
+	void testGetSmallGroupMembersOk() {
+		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
+		final GroupVector<GqElement, GqGroup> primes = gqGroup.getSmallPrimeGroupMembers(3);
+		assertEquals(3, primes.size());
+		assertEquals(BigInteger.valueOf(7), primes.get(0).getValue());
+		assertEquals(BigInteger.valueOf(17), primes.get(1).getValue());
+		assertEquals(BigInteger.valueOf(37), primes.get(2).getValue());
+	}
+
+	@Test
+	void testGetSmallGroupMembersTooSmallRThrows() {
+		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> gqGroup.getSmallPrimeGroupMembers(0));
+		assertEquals("The desired number of primes must be strictly positive", exception.getMessage());
+	}
+
+	@Test
+	void testGetSmallGroupMembersTooBigRThrows() {
+		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> gqGroup.getSmallPrimeGroupMembers(23));
+		assertEquals("The number of desired primes must be smaller than the number of elements in the GqGroup by at least 4", exception.getMessage());
+
+		final GqGroup bigGqGroup = new GqGroup(BigInteger.valueOf(20123), BigInteger.valueOf(10061), BigInteger.valueOf(3));
+		exception = assertThrows(IllegalArgumentException.class,
+				() -> bigGqGroup.getSmallPrimeGroupMembers(10000));
+		assertEquals("The number of desired primes must be smaller than 10000", exception.getMessage());
+	}
+
+	@Test
+	void testGetSmallGroupMembersNotEnoughPrimesThrows() {
+		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
+		IllegalStateException exception = assertThrows(IllegalStateException.class,
+				() -> gqGroup.getSmallPrimeGroupMembers(4));
+		assertEquals("The number of primes found does not correspond to the number of desired primes.", exception.getMessage());
 	}
 }

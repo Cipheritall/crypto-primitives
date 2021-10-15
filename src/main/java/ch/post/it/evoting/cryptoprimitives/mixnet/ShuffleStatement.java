@@ -27,6 +27,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 /**
  * Represents the statement for the shuffle argument, consisting of a ciphertexts vector <b>C</b> and a shuffled and re-encrypted ciphertexts vector
  * <b>C'</b>.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ShuffleStatement {

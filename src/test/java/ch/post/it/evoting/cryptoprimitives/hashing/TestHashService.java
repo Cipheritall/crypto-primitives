@@ -19,25 +19,18 @@ import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToI
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.function.Supplier;
 
 /**
  * Custom hash service used for testing. The output value of this hash service can be bounded to cope with the small groups used in the tests.
  */
 public class TestHashService extends HashService {
 
-	private static HashService hashService;
+	private final static HashService DELEGATE_HASH_SERVICE = HashService.getInstance();
 
 	private final BigInteger lowerBound;
 	private final BigInteger upperBound;
 
 	private TestHashService(final BigInteger lowerBound, final BigInteger upperBound) {
-		// Ensure the check regarding the output length is satisfied.
-		super();
-
-		hashService = new HashService();
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}
@@ -71,7 +64,7 @@ public class TestHashService extends HashService {
 	 */
 	@Override
 	public byte[] recursiveHash(final Hashable... values) {
-		final BigInteger hashValue = byteArrayToInteger(hashService.recursiveHash(values));
+		final BigInteger hashValue = byteArrayToInteger(DELEGATE_HASH_SERVICE.recursiveHash(values));
 		final BigInteger hashValueInBounds = hashValue.mod(upperBound.subtract(lowerBound)).add(lowerBound);
 
 		return integerToByteArray(hashValueInBounds);

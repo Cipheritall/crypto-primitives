@@ -18,34 +18,36 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Arrays;
-import java.util.stream.IntStream;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Represents a permutation of integers in the range [0, N).
- * <p>
- * Instances of this class are immutable.
+ *
+ * <p>Instances of this class are immutable.
  */
 class Permutation {
 
-	static final Permutation EMPTY = new Permutation(new int[] {});
+	static final Permutation EMPTY = new Permutation(ImmutableList.of());
 
 	//valueMapping[i] represents the permutation of value i
-	private final int[] valueMapping;
+	private final ImmutableList<Integer> valueMapping;
 	private final int size;
 
-	Permutation(final int[] valueMapping) {
+	Permutation(final ImmutableList<Integer> valueMapping) {
 		checkNotNull(valueMapping);
 
-		this.size = valueMapping.length;
-		this.valueMapping = Arrays.copyOf(valueMapping, this.size);
+		this.size = valueMapping.size();
+		this.valueMapping = valueMapping;
 	}
 
 	/**
-	 * @return An {@code IntStream} over elements of this permutation.
+	 * @return A stream of elements of this permutation.
 	 */
-	IntStream stream() {
-		return Arrays.stream(this.valueMapping);
+	Stream<Integer> stream() {
+		return this.valueMapping.stream();
 	}
 
 	/**
@@ -58,7 +60,7 @@ class Permutation {
 		checkArgument(i >= 0);
 		checkArgument(i < size);
 
-		return this.valueMapping[i];
+		return this.valueMapping.get(i);
 	}
 
 	/**
@@ -69,19 +71,19 @@ class Permutation {
 	}
 
 	@Override
-	public boolean equals(final Object o) {
+	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final Permutation that = (Permutation) o;
-		return Arrays.equals(valueMapping, that.valueMapping);
+		Permutation that = (Permutation) o;
+		return valueMapping.equals(that.valueMapping);
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(valueMapping);
+		return Objects.hash(valueMapping);
 	}
 }

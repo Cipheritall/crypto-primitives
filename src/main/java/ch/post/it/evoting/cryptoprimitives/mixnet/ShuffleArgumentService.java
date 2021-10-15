@@ -48,6 +48,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Service to compute a cryptographic argument for the validity of a shuffle.
+ *
+ * <p>This class is thread safe.</p>
  */
 @SuppressWarnings("java:S117")
 class ShuffleArgumentService {
@@ -147,7 +149,7 @@ class ShuffleArgumentService {
 				.map(rho_i -> getCiphertext(one, rho_i, pk))
 				.collect(toList());
 		final List<ElGamalMultiRecipientCiphertext> C_pi = pi.stream()
-				.mapToObj(C_vector::get)
+				.map(C_vector::get)
 				.collect(toList());
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computed_C_prime = IntStream.range(0, N)
 				.mapToObj(i -> encryptedOnes.get(i).multiply(C_pi.get(i)))
@@ -165,7 +167,7 @@ class ShuffleArgumentService {
 		// Compute vector r, matrix A and vector c_A
 		final GroupVector<ZqElement, ZqGroup> r = randomService.genRandomVector(q, m);
 		final GroupVector<ZqElement, ZqGroup> pi_vector = pi.stream()
-				.mapToObj(BigInteger::valueOf)
+				.map(BigInteger::valueOf)
 				.map(value -> ZqElement.create(value, zqGroup))
 				.collect(toGroupVector());
 		final GroupMatrix<ZqElement, ZqGroup> A = pi_vector.toMatrix(m, n).transpose();
@@ -186,7 +188,7 @@ class ShuffleArgumentService {
 		// Compute vector s, vector b, matrix B and vector c_B.
 		final GroupVector<ZqElement, ZqGroup> s = randomService.genRandomVector(q, m);
 		final GroupVector<ZqElement, ZqGroup> b_vector = pi.stream()
-				.mapToObj(BigInteger::valueOf)
+				.map(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toGroupVector());
 		final GroupMatrix<ZqElement, ZqGroup> B = b_vector.toMatrix(m, n).transpose();

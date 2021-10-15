@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -34,6 +33,9 @@ import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+/**
+ * This class is thread safe.
+ */
 @SuppressWarnings("java:S117")
 public final class MixnetService implements Mixnet {
 
@@ -47,7 +49,7 @@ public final class MixnetService implements Mixnet {
 	 * Instantiates a mixnet service. A security provider must already be loaded containing the "SHA-256" algorithm.
 	 */
 	public MixnetService() {
-		this.hashService = new HashService();
+		this.hashService = HashService.getInstance();
 		this.commitmentKeyService = new CommitmentKeyService(hashService);
 		this.shuffleHashService = hashService; //Two separate hash services are needed for checking the hash length
 		this.randomService = new RandomService();
@@ -63,7 +65,7 @@ public final class MixnetService implements Mixnet {
 	@VisibleForTesting
 	public MixnetService(final HashService shuffleHashService) {
 		checkNotNull(shuffleHashService);
-		this.hashService = new HashService();
+		this.hashService = HashService.getInstance();
 		this.commitmentKeyService = new CommitmentKeyService(hashService);
 		this.shuffleHashService = shuffleHashService;
 		this.randomService = new RandomService();
@@ -121,15 +123,15 @@ public final class MixnetService implements Mixnet {
 
 	@Override
 	public VerificationResult verifyShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final List<ElGamalMultiRecipientCiphertext> shuffledCiphertexts, final ShuffleArgument shuffleArgument,
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts, final ShuffleArgument shuffleArgument,
 			final ElGamalMultiRecipientPublicKey publicKey) {
 		checkNotNull(ciphertexts);
 		checkNotNull(shuffledCiphertexts);
 		checkNotNull(shuffleArgument);
 		checkNotNull(publicKey);
 
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = GroupVector.from(ciphertexts);
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = GroupVector.from(shuffledCiphertexts);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = shuffledCiphertexts;
 		final ElGamalMultiRecipientPublicKey pk = publicKey;
 		final int k = pk.size();
 		final int l = C.getElementSize();

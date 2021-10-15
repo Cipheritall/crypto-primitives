@@ -60,7 +60,7 @@ class CommitmentKeyServiceTest {
 	static void setUpAll() throws NoSuchAlgorithmException {
 		gqGroup = GroupTestData.getGqGroup();
 		generator = new GqGroupGenerator(gqGroup);
-		HashService hashService = new HashService();
+		HashService hashService = HashService.getInstance();
 		commitmentKeyService = new CommitmentKeyService(hashService);
 	}
 

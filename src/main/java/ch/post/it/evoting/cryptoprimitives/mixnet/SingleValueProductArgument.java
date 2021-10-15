@@ -19,8 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
@@ -36,23 +34,36 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Collection of the values contained in a single value product argument.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
-@SuppressWarnings({ "java:S100", "java:S116", "java:S117", "java:S1845" })
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117", "java:S1845", "java:S107" })
 public class SingleValueProductArgument implements HashableList {
 
-	private GqElement c_d;
-	private GqElement c_delta;
-	private GqElement c_Delta;
-	private GroupVector<ZqElement, ZqGroup> a_tilde;
-	private GroupVector<ZqElement, ZqGroup> b_tilde;
-	private ZqElement r_tilde;
-	private ZqElement s_tilde;
+	private final GqElement c_d;
+	private final GqElement c_delta;
+	private final GqElement c_Delta;
+	private final GroupVector<ZqElement, ZqGroup> a_tilde;
+	private final GroupVector<ZqElement, ZqGroup> b_tilde;
+	private final ZqElement r_tilde;
+	private final ZqElement s_tilde;
 
-	private int n;
-	private GqGroup group;
+	private final int n;
+	private final GqGroup group;
 
-	private SingleValueProductArgument() {
-		// Intentionally left blank.
+	private SingleValueProductArgument(final GqElement c_d, final GqElement c_delta, final GqElement c_Delta,
+			final GroupVector<ZqElement, ZqGroup> a_tilde, final GroupVector<ZqElement, ZqGroup> b_tilde, final ZqElement r_tilde,
+			final ZqElement s_tilde, final int n, final GqGroup group) {
+		this.c_d = c_d;
+		this.c_delta = c_delta;
+		this.c_Delta = c_Delta;
+		this.a_tilde = a_tilde;
+		this.b_tilde = b_tilde;
+		this.r_tilde = r_tilde;
+		this.s_tilde = s_tilde;
+
+		this.n = n;
+		this.group = group;
 	}
 
 	GqElement get_c_d() {
@@ -119,6 +130,9 @@ public class SingleValueProductArgument implements HashableList {
 		return ImmutableList.of(c_d, c_delta, c_Delta, a_tilde, b_tilde, r_tilde, s_tilde);
 	}
 
+	/**
+	 * <p>Instances of this class are NOT immutable.</p>
+	 */
 	public static class Builder {
 
 		private GqElement c_d;
@@ -188,8 +202,8 @@ public class SingleValueProductArgument implements HashableList {
 			checkNotNull(this.s_tilde);
 
 			// Cross group checking.
-			final List<GroupVectorElement<GqGroup>> gqGroupMembers = Arrays.asList(c_d, c_delta, c_Delta);
-			final List<GroupVectorElement<ZqGroup>> zqGroupMembers = Arrays.asList(a_tilde, b_tilde, r_tilde, s_tilde);
+			final ImmutableList<GqElement> gqGroupMembers = ImmutableList.of(c_d, c_delta, c_Delta);
+			final ImmutableList<GroupVectorElement<ZqGroup>> zqGroupMembers = ImmutableList.of(a_tilde, b_tilde, r_tilde, s_tilde);
 			checkArgument(allEqual(gqGroupMembers.stream(), GroupVectorElement::getGroup),
 					"cd, cLowerDelta, cUpperDelta must belong to the same group.");
 			checkArgument(allEqual(zqGroupMembers.stream(), GroupVectorElement::getGroup),
@@ -203,19 +217,8 @@ public class SingleValueProductArgument implements HashableList {
 			checkArgument(this.a_tilde.size() >= 2, "The size of vectors aTilde and bTilde must be greater than or equal to 2.");
 
 			// Build the argument.
-			final SingleValueProductArgument argument = new SingleValueProductArgument();
-			argument.c_d = this.c_d;
-			argument.c_delta = this.c_delta;
-			argument.c_Delta = this.c_Delta;
-			argument.a_tilde = this.a_tilde;
-			argument.b_tilde = this.b_tilde;
-			argument.r_tilde = this.r_tilde;
-			argument.s_tilde = this.s_tilde;
+			return new SingleValueProductArgument(c_d, c_delta, c_Delta, a_tilde, b_tilde, r_tilde, s_tilde, a_tilde.size(), c_d.getGroup());
 
-			argument.n = argument.a_tilde.size();
-			argument.group = argument.c_d.getGroup();
-
-			return argument;
 		}
 	}
 }

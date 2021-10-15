@@ -127,7 +127,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	@Test
 	@DisplayName("Constructing a ZeroArgumentService with a hashService that has a too long hash length throws an IllegalArgumentException")
 	void constructWithHashServiceWithTooLongHashLength() {
-		HashService otherHashService = new HashService();
+		HashService otherHashService = HashService.getInstance();
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -682,7 +682,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		void verifyZeroArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 				final ZeroStatement zeroStatement, final ZeroArgument zeroArgument, final boolean expectedOutput, String description) {
 
-			final HashService hashService = new HashService();
+			final HashService hashService = HashService.getInstance();
 
 			final ZeroArgumentService service = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
 
