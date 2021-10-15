@@ -38,8 +38,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Represents an ElGamal message containing multiple elements.
- * <p>
- * This class is immutable.
+ *
+ * <p>Instances of this class are immutable.
  */
 @SuppressWarnings({ "java:S117" })
 public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {

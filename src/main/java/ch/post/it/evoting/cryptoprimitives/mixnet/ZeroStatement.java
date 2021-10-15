@@ -27,6 +27,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Represents the statement for a zero argument, consisting of two commitments and a y value for bilinear mapping.
+ *
+ * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
 class ZeroStatement {

@@ -31,6 +31,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * A decryption proof (e, z) composed of a hash value e and a vector of proof elements z.
+ *
+ * <p>Instances of this class are immutable.</p>
  */
 public class DecryptionProof implements GroupVectorElement<ZqGroup>, HashableList {
 

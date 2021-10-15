@@ -31,8 +31,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -116,7 +114,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 	@Test
 	@DisplayName("a hashService that has a too long hash length throws an IllegalArgumentException")
 	void constructWithHashServiceWithTooLongHashLength() {
-		HashService otherHashService = new HashService();
+		HashService otherHashService = HashService.getInstance();
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new HadamardArgumentService(randomService, otherHashService, publicKey, commitmentKey));
 		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -534,7 +532,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		void verifyHadamardArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
 				final HadamardStatement hadamardStatement, final HadamardArgument hadamardArgument, final boolean expectedOutput, String description) {
 
-			final HashService hashService = new HashService();
+			final HashService hashService = HashService.getInstance();
 
 			final HadamardArgumentService service = new HadamardArgumentService(randomService, hashService, publicKey, commitmentKey);
 

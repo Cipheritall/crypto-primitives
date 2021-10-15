@@ -28,6 +28,9 @@ import com.google.common.io.BaseEncoding;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 
+/**
+ * This class is thread safe.
+ */
 public class RandomService {
 
 	private final SecureRandom secureRandom;

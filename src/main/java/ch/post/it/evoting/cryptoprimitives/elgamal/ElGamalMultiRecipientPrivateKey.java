@@ -15,17 +15,18 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
+import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -91,7 +92,7 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 		checkArgument(generator.getGroup().hasSameOrderAs(this.getGroup()),
 				"The private key and the generator must belong to groups of the same order.");
 
-		final List<GqElement> publicKeyElements = this.stream().map(generator::exponentiate).collect(Collectors.toList());
+		final GroupVector<GqElement, GqGroup> publicKeyElements = this.stream().map(generator::exponentiate).collect(toGroupVector());
 
 		return new ElGamalMultiRecipientPublicKey(publicKeyElements);
 	}

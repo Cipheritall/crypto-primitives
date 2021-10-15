@@ -19,10 +19,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Objects;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
@@ -72,18 +75,18 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 		final String securityLevelCheckMessage = "The given p does not correspond to the given security level.";
 
 		switch (securityLevel) {
-		case EXTENDED:
-			checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-			break;
-		case DEFAULT:
-			checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-			checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-			break;
-		case TESTING_ONLY:
-			checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-			break;
-		default:
-			throw new IllegalArgumentException("Unsupported security level!");
+			case EXTENDED:
+				checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+				break;
+			case DEFAULT:
+				checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+				checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+				break;
+			case TESTING_ONLY:
+				checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported security level!");
 		}
 
 		//Validate p
@@ -108,22 +111,21 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 	}
 
 	/**
-	 * Checks if a value is a member of this group. A given value is a member of this group if:
-	 *
-	 * <ul>
-	 *     <li> the object is non null</li>
-	 *   <li>The given value is an integer in (0, p) (exclusive)}
-	 *   <li>{@code (value<sup>q</sup> mod p) = 1}
-	 * </ul>
+	 * Checks if a value is a member of this group.
 	 */
 	@Override
 	public boolean isGroupMember(final BigInteger value) {
+		return isGroupMember(value, this.p);
+	}
 
+	/**
+	 * Checks if a value is a member of a GqGroup defined by p.
+	 */
+	public static boolean isGroupMember(final BigInteger value, final BigInteger p) {
 		return value != null &&
 				value.compareTo(BigInteger.ZERO) > 0 &&
 				value.compareTo(p) < 0 &&
-				BigIntegerOperationsService.getJacobi(value, this.p) == 1;
-
+				BigIntegerOperationsService.getJacobi(value, p) == 1;
 	}
 
 	public BigInteger getP() {
@@ -169,5 +171,65 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
 		return ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), generator);
+	}
+
+	/**
+	 * Collects the desired number of primes belonging to this group into a vector.
+	 *
+	 * @param desiredNumberOfPrimes r, the desired number of prime group members. Must be strictly positive.
+	 * @return a vector of prime group members of the desired length
+	 * @throws IllegalStateException if the group does not contain the desired number of prime group members
+	 */
+	@SuppressWarnings("java:S117")
+	public GroupVector<GqElement, GqGroup> getSmallPrimeGroupMembers(final int desiredNumberOfPrimes) {
+		final int r = desiredNumberOfPrimes;
+		final BigInteger g = generator.getValue();
+
+		checkArgument(r > 0, "The desired number of primes must be strictly positive");
+		checkArgument(BigInteger.valueOf(2).compareTo(g) <= 0 && g.compareTo(BigInteger.valueOf(4)) <= 0, "g must be 2, 3, or 4");
+		checkArgument(BigInteger.valueOf(r).compareTo(q.subtract(BigInteger.valueOf(4))) <= 0,
+				"The number of desired primes must be smaller than the number of elements in the GqGroup by at least 4");
+		checkArgument(r < 10000, "The number of desired primes must be smaller than 10000");
+
+		BigInteger current = BigInteger.valueOf(5);
+		ArrayList<GqElement> p_vector = new ArrayList<>(r);
+		int count = 0;
+		while (count < r && current.compareTo(p) < 0) {
+			if (isGroupMember(current) && isPrime(current.intValueExact())) {
+				p_vector.add(GqElement.create(current, this));
+				count++;
+			}
+			current = current.add(BigInteger.valueOf(2));
+		}
+		if (count != r) {
+			throw new IllegalStateException("The number of primes found does not correspond to the number of desired primes.");
+		}
+		return GroupVector.from(p_vector);
+	}
+
+	/**
+	 * Checks if a given number is a prime number. This is efficient for small primes only.
+	 *
+	 * @param number n, the number to be tested. Positive
+	 * @return true if n is prime, false otherwise
+	 */
+	@VisibleForTesting
+	static boolean isPrime(final int number) {
+		checkArgument(number > 0, "The number n must be strictly positive");
+		final int n = number;
+
+		if (n == 1) {
+			return false;
+		} else if (n == 2) {
+			return true;
+		} else {
+			for (int i = 2; i <= Math.ceil(Math.sqrt(n)); i++) {
+				if (n % i == 0) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }

@@ -23,6 +23,9 @@ import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
+/**
+ * <p>Instances of this class are immutable. </p>
+ */
 @SuppressWarnings({"java:S100", "java:S116"})
 class HadamardWitness {
 

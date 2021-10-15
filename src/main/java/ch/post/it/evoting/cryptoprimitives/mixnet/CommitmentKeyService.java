@@ -6,7 +6,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -19,6 +18,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Creates commitment keys.
+ *
+ * <p>This class is thread safe.</p>
  */
 @SuppressWarnings("java:S117")
 public class CommitmentKeyService {

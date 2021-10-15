@@ -31,6 +31,9 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
+/**
+ * <p>Instances of this class are immutable.</p>
+ */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class ProductArgument implements HashableList {
 
@@ -38,8 +41,8 @@ public class ProductArgument implements HashableList {
 	private final int m;
 	private final int n;
 	private final GqGroup group;
-	private GqElement c_b;
-	private HadamardArgument hadamardArgument;
+	private final GqElement c_b;
+	private final HadamardArgument hadamardArgument;
 
 	/**
 	 * Constructs a {@link ProductArgument}.
@@ -54,8 +57,7 @@ public class ProductArgument implements HashableList {
 	 * @param hadamardArgument           the Hadamard argument. Non-null.
 	 * @param singleValueProductArgument the Single Value Product argument. Non-null.
 	 */
-	public ProductArgument(final GqElement c_b, final HadamardArgument hadamardArgument,
-			final SingleValueProductArgument singleValueProductArgument) {
+	public ProductArgument(final GqElement c_b, final HadamardArgument hadamardArgument, final SingleValueProductArgument singleValueProductArgument){
 
 		// Null checking.
 		checkNotNull(c_b);
@@ -90,6 +92,8 @@ public class ProductArgument implements HashableList {
 		this.m = 1;
 		this.n = singleValueProductArgument.get_n();
 		this.group = singleValueProductArgument.getGroup();
+		this.c_b = null;
+		this.hadamardArgument = null;
 	}
 
 	Optional<GqElement> get_c_b() {

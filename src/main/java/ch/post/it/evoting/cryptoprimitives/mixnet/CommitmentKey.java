@@ -37,6 +37,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  * Represents a public key of {@link GqElement}s that is used for the calculation of a commitment. Instances of this class are immutable.
  *
  * <p>A commitment key is of the form (h, g<sub>1</sub>, ..., g<sub>ν</sub>)</p>
+ *
+ * <p>Instances of this class are immutable. </p>
  */
 class CommitmentKey implements HashableList {
 	

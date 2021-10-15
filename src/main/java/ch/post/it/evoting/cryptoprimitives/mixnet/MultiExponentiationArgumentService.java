@@ -59,6 +59,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * Service to generate multi exponentiation arguments.
+ *
+ * <p>This class is thread safe.</p>
  */
 @SuppressWarnings("java:S117")
 final class MultiExponentiationArgumentService {
@@ -478,7 +480,7 @@ final class MultiExponentiationArgumentService {
 	}
 
 	/**
-	 * Thread safe memoizer for a integer indexed computation.
+	 * Thread safe memoizer for an integer indexed computation.
 	 *
 	 * @param <R> the output type of the computation being memoized
 	 */
