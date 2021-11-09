@@ -33,19 +33,19 @@ We strive for excellent code quality and to minimize the risk of bugs and vulner
 
 ### SonarQube Analysis
 
-We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells.
+We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 4 code smells.
 
 ![SonarQube](SonarQube.jpg)
 
-Out of the 6 code smells:
+Out of the 4 code smells:
 
-* 6 code smells concern duplicated blocks in the argument classes. We left the code blocks as is since removing them reduces the code's readability.
+* 4 code smells concern duplicated blocks in the argument classes. We left the code blocks as is since removing them reduces the code's readability.
 
 Moreover, a high test coverage illustrates the fact that we extensively test the crypto-primitives library.
 
 ### Fortify Analysis
 
-The Fortify analysis showed 0 critical, 0 high, 0 medium, and 57 low criticality issues. We manually reviewed all 57 low-criticality issues and assessed them as false positives.
+The Fortify analysis showed 0 critical, 0 high, 0 medium, and 55 low criticality issues. We manually reviewed all 55 low-criticality issues and assessed them as false positives.
 
 ### JFrog X-Ray Analysis
 
@@ -98,6 +98,30 @@ We aim for a mathematical naming convention that aligns with the following goals
 
 ![Mathematical Naming Convention Examples](naming_convention_examples.jpg)
 
+## Change Log Release 0.12
+
+Release 0.12 includes some feedback from the Federal Chancellery's mandated experts. The experts' reports will be published at a later point.
+We want to thank the experts for their high-quality, constructive remarks:
+
+* Vanessa Teague (Thinking Cybersecurity), Olivier Pereira (Université catholique Louvain), Thomas Edmund Haines (Australian National University)
+* Aleksander Essex (Western University Canada)
+* Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis (Bern University of Applied Sciences)
+
+The following functionalities and improvements are included in release 0.12:
+
+* [Code] Implemented the GetSmallGroupPrimeMembers and isPrime methods.
+* [Code] Ensured thread safety across all services.
+* [Code] Various minor improvements.
+* [Code] Optimized mathematical operations with the GNU Multi Precision Arithmetic Library (GMP).
+* [Specification] Updated to the new version of the Federal Chancellery's Ordinance on Electronic Voting (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Added the GetSmallGroupPrimeMembers and isPrime algorithms. (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis, Vanessa Teague, Olivier Pereira, and Thomas Haines)
+* [Specification] Made the RecursiveHash function collision-resistant across different input domains (corresponds to Gitlab issue [#9](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/9)).
+* [Specification] Specified a RecursiveHashToZq method that outputs a collision resistant hash in the domain of the group Z_q. (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Specification] Masked out excess bits in the GenRandomInteger algorithm (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Specification] Clarified that the algorithm GenEncryptionParameters requires |p| to be a multiple of 8 (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Specification] Specified the Base32 and Base64 alphabet variant (corresponds to Gitlab issue [#17](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/17 )).
+* [Specification] Some minor fixes and alignments in various algorithms.
+
 ## Change Log Release 0.11
 
 The following functionalities and improvements are included in release 0.11:
@@ -145,7 +169,6 @@ The following functionalities and improvements are included in release 0.8:
 
 We plan for the following improvements to the crypto-primitives library:
 
-* Optimizing mathematical operations using native libraries and specialized algorithms.
 * Investigating potential improvements in parametrizing the Bayer-Groth mix net. We parametrize the Bayer-Groth with two parameters (m,n). If m and n have equal size, the Bayer-Groth mix net is memory-optimal. However, setting m=1 is the most efficient setting for computational performance. Moreover, setting m=1 allows for further simplifications since one can omit the Hadamard and the zero arguments in that case. We plan to conduct other performance tests to analyze the memory-performance trade-off.
 * Making the RecursiveHash function collision-resistant across different input domains (corresponds to Gitlab issue [#9](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/9)).
 * Enforcing abstractions in mathematical operations. Currently, we have some unnecessary conversions between abstract mathematical objects (such as GqElements) and plain values (such as BigIntegers). We should work more strictly with mathematically abstract classes.
@@ -157,6 +180,9 @@ We plan for the following improvements to the crypto-primitives library:
 The current release has the following open issues:
 
 * Implementing plaintext-equality proofs.
+* Implementing the collision-resistant RecursiveHash function.
+* Implementing the RecursiveHashToZq function.
+* Updating the unit tests with the test vectors from the collision-resistant RecursiveHash function.
 
 ## Additional documentation
 
