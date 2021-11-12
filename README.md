@@ -23,7 +23,7 @@ We re-implemented the Bayer-Groth mix net with the following objectives in mind:
 
 ## Code Quality
 
-We strive for excellent code quality and to minimize the risk of bugs and vulnerabilities. We rely on the following tools for code analysis.
+We strive for excellent code quality to minimize the risk of bugs and vulnerabilities. We rely on the following tools for code analysis.
 
 | Tool        | Focus                 |
 |-------------|-----------------------|
