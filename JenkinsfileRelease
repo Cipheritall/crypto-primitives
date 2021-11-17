@@ -26,7 +26,7 @@ pipeline {
 		string(name: 'BRANCH_NAME', defaultValue: 'release/crypto-primitives-x.x.x.x', description: 'GIT branch where the release is starting. Default is "release/crypto-primitives-x.x.x.x".')
 		string(name: 'RELEASE_VERSION', defaultValue: 'x.x.x.x', description: 'Set to the desired version to be released. Usually the Bugfix-Version number is bumped from the last RELEASE_VERSION eg 1.1.3.0 -> 1.1.4.0 You can get the last (tagged) RELEASE_VERSION with this cmd: git describe --abbrev=0 If you enter the value of an existing version, the Job will fail (due to duplicated tags)')
 		string(name: 'NEW_SNAPSHOT_VERSION', defaultValue: 'x.x.x.x-SNAPSHOT', description: 'Set to a version higher than RELEASE_VERSION and add the suffix -SNAPSHOT eg. 1.2.0.0-SNAPSHOT')
-		string(name: 'RELEASE_MESSAGE', defaultValue: 'merge release crypto-primitives', description: 'Set the release commit message')
+		string(name: 'RELEASE_MESSAGE', defaultValue: 'merge release crypto-primitives x.x.x.x', description: 'Set the release commit message')
 		booleanParam(name: 'AUTO_MERGE', defaultValue: true, description: 'Auto merge given branch into master.')
 	}
 
