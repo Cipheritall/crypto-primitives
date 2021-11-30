@@ -66,7 +66,7 @@ public class DecryptionProofService {
 	}
 
 	/**
-	 * Computes an image of a 𝜙-function for decryption given a preimage and a base γ.
+	 * Computes an image of a phi-function for decryption given a preimage and a base γ.
 	 * <p>
 	 * The pre-image and the base must have the same group order q.
 	 *

@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToInteger;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,10 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ConversionServiceTest {
 
@@ -109,5 +114,47 @@ class ConversionServiceTest {
 		BigInteger value = new BigInteger(size, random);
 		BigInteger cycledValue = byteArrayToInteger(ConversionService.integerToByteArray(value));
 		assertEquals(value, cycledValue);
+	}
+
+	@ParameterizedTest(name = "s = \"{0}\", expected = {1}")
+	@MethodSource("stringToIntegerWithValidInputIsOkProvider")
+	void stringToIntegerWithValidInputIsOk(final String s, final BigInteger expected) {
+		final BigInteger converted = ConversionService.stringToInteger(s);
+		assertEquals(expected, converted);
+	}
+
+	static Stream<Arguments> stringToIntegerWithValidInputIsOkProvider() {
+		return Stream.of(
+				Arguments.of("0", BigInteger.ZERO),
+				Arguments.of("1", BigInteger.ONE),
+				Arguments.of("1001", BigInteger.valueOf(1001L)),
+				Arguments.of("0021", BigInteger.valueOf(21L))
+		);
+	}
+
+	@ParameterizedTest(name = "s = \"{0}\", expectedExceptionMessage = \"{1}\"")
+	@MethodSource("stringToIntegerWithNonValidInputThrowsIllegalArgumentExceptionProvider")
+	void stringToIntegerWithNonValidInputThrowsIllegalArgumentException(final String s, final String expectedExceptionMessage) {
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> stringToInteger(s));
+
+		assertEquals(expectedExceptionMessage, illegalArgumentException.getMessage());
+	}
+
+	static Stream<Arguments> stringToIntegerWithNonValidInputThrowsIllegalArgumentExceptionProvider() {
+		return Stream.of(
+				Arguments.of("", "The string to convert cannot be empty."),
+				Arguments.of("A", "The string to convert \"A\" is not a valid decimal representation of a BigInteger."),
+				Arguments.of("1A", "The string to convert \"1A\" is not a valid decimal representation of a BigInteger."),
+				Arguments.of("A1", "The string to convert \"A1\" is not a valid decimal representation of a BigInteger."),
+				Arguments.of("+1", "The string to convert \"+1\" is not a valid decimal representation of a BigInteger."),
+				Arguments.of("1+", "The string to convert \"1+\" is not a valid decimal representation of a BigInteger."),
+				Arguments.of("-1", "The string to convert \"-1\" is not a valid decimal representation of a BigInteger."),
+				Arguments.of("1-", "The string to convert \"1-\" is not a valid decimal representation of a BigInteger.")
+		);
+	}
+
+	@Test
+	void stringToIntegerWithNullInputThrowsNullPointerException() {
+		assertThrows(NullPointerException.class, () -> stringToInteger(null));
 	}
 }

@@ -31,7 +31,7 @@ public final class ConversionService {
 	}
 
 	/**
-	 * Converts a string to a byte array representation. StringToByteArray algorithm implementation.
+	 * Converts a string to a byte array representation.
 	 *
 	 * @param s S, the string to convert.
 	 * @return the byte array representation of the string.
@@ -82,4 +82,27 @@ public final class ConversionService {
 		checkArgument(bytes.length > 0, "The byte array to convert must be non-empty.");
 		return new BigInteger(1, bytes);
 	}
+
+	/**
+	 * Converts a decimal {@link String} representation to a {@link BigInteger} representation.
+	 *
+	 * @param s S, the decimal {@link String} representation to convert. Not Null, not empty and all characters must be decimal characters.
+	 * @return x, the {@link BigInteger} representation of the string.
+	 * @throws NullPointerException     if the string s is null
+	 * @throws IllegalArgumentException if the string s is empty or not a valid decimal representation of a BigInteger.
+	 */
+	public static BigInteger stringToInteger(final String s) {
+		checkNotNull(s);
+		checkArgument(s.length() > 0, "The string to convert cannot be empty.");
+		checkArgument(Character.isDigit(s.charAt(0)),
+				String.format("The string to convert \"%s\" is not a valid decimal representation of a BigInteger.", s));
+
+		try {
+			return new BigInteger(s, 10);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException(
+					String.format("The string to convert \"%s\" is not a valid decimal representation of a BigInteger.", s));
+		}
+	}
+
 }
