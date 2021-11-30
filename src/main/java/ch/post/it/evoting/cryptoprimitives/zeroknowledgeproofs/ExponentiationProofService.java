@@ -55,7 +55,7 @@ public class ExponentiationProofService {
 	}
 
 	/**
-	 * Computes an image of a 𝜙-function for exponentiation given a preimage and bases g<sub>0</sub>, ..., g<sub>n-1</sub>.
+	 * Computes an image of a phi-function for exponentiation given a preimage and bases g<sub>0</sub>, ..., g<sub>n-1</sub>.
 	 *
 	 * @param preimage x ∈ Z<sub>q</sub>. Not null.
 	 * @param bases    (g<sub>0</sub>, ..., g<sub>n-1</sub>) ∈ G<sub>q</sub><sup>n</sup>. Not null and not empty.
