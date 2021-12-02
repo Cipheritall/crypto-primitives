@@ -16,23 +16,27 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.primitives.Bytes.concat;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.ConversionService;
-
 /**
- * Recursive hash service using a default SHA-256 message digest.
+ * Recursive hash service using a default SHA3-256 message digest.
  *
  * <p>This class is thread safe.</p>
  */
@@ -41,16 +45,22 @@ public class HashService {
 	public static final int HASH_LENGTH_BYTES = 32;
 	private static final HashService Instance = new HashService();
 
+	private static final byte[] BYTE_ARRAY_PREFIX = new byte[] { 0x00 };
+	private static final byte[] BIG_INTEGER_PREFIX = new byte[] { 0x01 };
+	private static final byte[] STRING_PREFIX = new byte[] { 0x02 };
+
 	private static final Supplier<MessageDigest> digestSupplier = () -> {
 		try {
-			return MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("Failed to create the SHA-256 message digest for the HashService instantiation.");
+			Security.addProvider(new BouncyCastleProvider());
+			return MessageDigest.getInstance("SHA3-256", BouncyCastleProvider.PROVIDER_NAME);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IllegalStateException("Failed to create the SHA3-256 message digest for the HashService instantiation.");
 		}
 	};
 
 	@VisibleForTesting
-	HashService() {}
+	HashService() {
+	}
 
 	public static HashService getInstance() {
 		return Instance;
@@ -66,12 +76,8 @@ public class HashService {
 	 * <ul>
 	 * 	<li>If the input object(s) are modified during the calculation of the hash, the output is undefined.</li>
 	 * 	<li>It is the caller's responsibility to make sure that the input is not infinite (for example if it contains self-references).</li>
-	 * 	<li>Inputs of different type that have the same byte representation can hash to the same value (for example the empty string and the empty
-	 * byte array, or the integer 1 and the byte array 0x1). It is the caller's responsibility to make sure to avoid these collisions by making sure
-	 * the domain of each input element is well defined. </li>
 	 * </ul>
-	 * @throws IllegalStateException if the creation of the
-	 *                               underlying message digest failed.
+	 * @throws IllegalStateException if the creation of the underlying message digest failed.
 	 */
 	public byte[] recursiveHash(final Hashable... values) {
 		checkNotNull(values);
@@ -87,14 +93,14 @@ public class HashService {
 			final MessageDigest messageDigest = digestSupplier.get();
 			if (value instanceof HashableByteArray) {
 				final byte[] w = ((HashableByteArray) value).toHashableForm();
-				return messageDigest.digest(w);
-			} else if (value instanceof HashableString) {
-				final String w = ((HashableString) value).toHashableForm();
-				return messageDigest.digest(ConversionService.stringToByteArray(w));
+				return messageDigest.digest(concat(BYTE_ARRAY_PREFIX, w));
 			} else if (value instanceof HashableBigInteger) {
 				final BigInteger w = ((HashableBigInteger) value).toHashableForm();
 				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
-				return messageDigest.digest(integerToByteArray(w));
+				return messageDigest.digest(concat(BIG_INTEGER_PREFIX, integerToByteArray(w)));
+			} else if (value instanceof HashableString) {
+				final String w = ((HashableString) value).toHashableForm();
+				return messageDigest.digest(concat(STRING_PREFIX, stringToByteArray(w)));
 			} else if (value instanceof HashableList) {
 				final ImmutableList<? extends Hashable> w = ((HashableList) value).toHashableForm();
 

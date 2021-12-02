@@ -29,7 +29,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
@@ -55,6 +54,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 @SuppressWarnings("java:S117")
 public class DecryptionProofService {
+
+	private static final String DECRYPTION_PROOF = "DecryptionProof";
 
 	private final ElGamalService elGamalService = new ElGamalService();
 	private final RandomService randomService;
@@ -85,8 +86,8 @@ public class DecryptionProofService {
 		final GqElement g = base.getGroup().getGenerator();
 
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-				x.stream().map(g::exponentiate),
-				x.stream().map(gamma::exponentiate))
+						x.stream().map(g::exponentiate),
+						x.stream().map(gamma::exponentiate))
 				.collect(toGroupVector());
 
 		return GroupVector.from(y);
@@ -147,14 +148,20 @@ public class DecryptionProofService {
 		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-				pk_prime.stream(),
-				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
+						pk_prime.stream(),
+						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
 				.collect(toGroupVector());
-		final HashableList h_aux = Streams.concat(Stream.of("DecryptionProof").map(HashableString::from),
-				Stream.of(phi),
-				Stream.of(m),
-				i_aux.stream().map(HashableString::from))
-				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final HashableList h_aux;
+		if (!i_aux.isEmpty()) {
+			h_aux = HashableList.of(HashableString.from(DECRYPTION_PROOF),
+					phi,
+					m,
+					HashableList.from(i_aux.stream()
+							.map(HashableString::from)
+							.collect(Collectors.toList())));
+		} else {
+			h_aux = HashableList.of(HashableString.from(DECRYPTION_PROOF), phi, m);
+		}
 		final BigInteger e_value = byteArrayToInteger(hashService.recursiveHash(f, y, c, h_aux));
 		final ZqElement e = ZqElement.create(e_value, ZqGroup.sameOrderAs(gqGroup));
 		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
@@ -225,17 +232,23 @@ public class DecryptionProofService {
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
 		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-				pk_prime.stream(),
-				IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
+						pk_prime.stream(),
+						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
 				.collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, 2 * l)
 				.mapToObj(i -> x.get(i).multiply(y.get(i).exponentiate(e.negate())))
 				.collect(toGroupVector());
-		final HashableList h_aux = Streams.concat(Stream.of("DecryptionProof").map(HashableString::from),
-				Stream.of(phi),
-				Stream.of(m),
-				i_aux.stream().map(HashableString::from))
-				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final HashableList h_aux;
+		if (!i_aux.isEmpty()) {
+			h_aux = HashableList.of(HashableString.from(DECRYPTION_PROOF),
+					phi,
+					m,
+					HashableList.from(i_aux.stream()
+							.map(HashableString::from)
+							.collect(Collectors.toList())));
+		} else {
+			h_aux = HashableList.of(HashableString.from(DECRYPTION_PROOF), phi, m);
+		}
 		final byte[] h = hashService.recursiveHash(f, y, c_prime, h_aux);
 		final BigInteger e_prime_value = byteArrayToInteger(h);
 		final ZqElement e_prime = ZqElement.create(e_prime_value, zqGroup);
