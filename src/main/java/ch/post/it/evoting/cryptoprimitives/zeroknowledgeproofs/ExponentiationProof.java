@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -33,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
-public class ExponentiationProof implements HashableList {
+public class ExponentiationProof implements GroupVectorElement<ZqGroup>, HashableList {
 
 	private final ZqElement e;
 	private final ZqElement z;
@@ -56,8 +57,14 @@ public class ExponentiationProof implements HashableList {
 		return z;
 	}
 
+	@Override
 	public ZqGroup getGroup() {
 		return e.getGroup();
+	}
+
+	@Override
+	public int size() {
+		return 1;
 	}
 
 	@Override
