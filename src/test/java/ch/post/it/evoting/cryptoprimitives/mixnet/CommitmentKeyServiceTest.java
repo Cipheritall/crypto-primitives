@@ -142,24 +142,24 @@ class CommitmentKeyServiceTest {
 
 		assertNotNull(verifiableCommitmentKey.getGroup());
 
-		final GqElement h = GqElement.create(BigInteger.valueOf(16), gqGroup);
+		final GqElement h = GqElement.create(BigInteger.valueOf(36), gqGroup);
 
 		final List<GqElement> gqElements = Arrays.asList(
-				GqElement.create(BigInteger.valueOf(4), gqGroup),
-				GqElement.create(BigInteger.valueOf(57), gqGroup),
-				GqElement.create(BigInteger.valueOf(20), gqGroup),
-				GqElement.create(BigInteger.valueOf(25), gqGroup),
-				GqElement.create(BigInteger.valueOf(46), gqGroup),
-				GqElement.create(BigInteger.valueOf(12), gqGroup),
+				GqElement.create(BigInteger.valueOf(28), gqGroup),
 				GqElement.create(BigInteger.valueOf(15), gqGroup),
-				GqElement.create(BigInteger.valueOf(27), gqGroup),
-				GqElement.create(BigInteger.valueOf(17), gqGroup),
-				GqElement.create(BigInteger.valueOf(41), gqGroup),
-				GqElement.create(BigInteger.valueOf(51), gqGroup),
-				GqElement.create(BigInteger.valueOf(22), gqGroup),
 				GqElement.create(BigInteger.valueOf(35), gqGroup),
 				GqElement.create(BigInteger.valueOf(45), gqGroup),
-				GqElement.create(BigInteger.valueOf(21), gqGroup));
+				GqElement.create(BigInteger.valueOf(26), gqGroup),
+				GqElement.create(BigInteger.valueOf(53), gqGroup),
+				GqElement.create(BigInteger.valueOf(22), gqGroup),
+				GqElement.create(BigInteger.valueOf(48), gqGroup),
+				GqElement.create(BigInteger.valueOf(25), gqGroup),
+				GqElement.create(BigInteger.valueOf(20), gqGroup),
+				GqElement.create(BigInteger.valueOf(9), gqGroup),
+				GqElement.create(BigInteger.valueOf(12), gqGroup),
+				GqElement.create(BigInteger.valueOf(29), gqGroup),
+				GqElement.create(BigInteger.valueOf(21), gqGroup),
+				GqElement.create(BigInteger.valueOf(4), gqGroup));
 
 		final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gqElements);
 

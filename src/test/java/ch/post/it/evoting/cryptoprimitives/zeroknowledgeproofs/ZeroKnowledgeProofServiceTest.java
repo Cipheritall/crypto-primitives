@@ -19,8 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -138,23 +140,20 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 			BigInteger TWO = BigInteger.valueOf(2);
 			BigInteger THREE = BigInteger.valueOf(3);
 			BigInteger FOUR = BigInteger.valueOf(4);
-			BigInteger FIVE = BigInteger.valueOf(5);
 			BigInteger SIX = BigInteger.valueOf(6);
 			BigInteger EIGHT = BigInteger.valueOf(8);
 			BigInteger NINE = BigInteger.valueOf(9);
-			BigInteger TEN = BigInteger.valueOf(10);
 			BigInteger TWELVE = BigInteger.valueOf(12);
 			BigInteger THIRTEEN = BigInteger.valueOf(13);
 
 			// ZqElements
-			ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
+			ZqElement zZero = ZqElement.create(BigInteger.ZERO, zqGroup);
 			ZqElement zTwo = ZqElement.create(TWO, zqGroup);
 			ZqElement zThree = ZqElement.create(THREE, zqGroup);
 			ZqElement zFour = ZqElement.create(FOUR, zqGroup);
-			ZqElement zFive = ZqElement.create(FIVE, zqGroup);
 			ZqElement zSix = ZqElement.create(SIX, zqGroup);
 			ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
-			ZqElement zTen = ZqElement.create(TEN, zqGroup);
+			ZqElement zNine = ZqElement.create(NINE, zqGroup);
 
 			// GqElements
 			GqElement gOne = GqElement.create(BigInteger.ONE, gqGroup);
@@ -196,8 +195,8 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 			);
 
 			GroupVector<DecryptionProof, ZqGroup> expectedPi = GroupVector.of(
-					new DecryptionProof(zFive, GroupVector.of(zTwo, zOne)),
-					new DecryptionProof(zTwo, GroupVector.of(zSix, zTen))
+					new DecryptionProof(zThree, GroupVector.of(zNine, zSix)),
+					new DecryptionProof(zZero, GroupVector.of(zTwo, zFour))
 			);
 			VerifiableDecryptions expected = new VerifiableDecryptions(expectedCPrime, expectedPi);
 

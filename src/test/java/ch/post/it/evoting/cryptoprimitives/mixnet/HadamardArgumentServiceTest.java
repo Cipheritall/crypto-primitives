@@ -560,7 +560,7 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
-				final boolean outputValue = output.get("verif_result", Boolean.class);
+				final boolean outputValue = Boolean.parseBoolean(output.toString());
 
 				return Arguments.of(publicKey, commitmentKey, hadamardStatement, hadamardArgument, outputValue, testParameters.getDescription());
 			});

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
@@ -45,6 +44,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 @SuppressWarnings("java:S117")
 public class ExponentiationProofService {
+
+	private static final String EXPONENTIATION_PROOF = "ExponentiationProof";
 
 	private final RandomService randomService;
 	private final HashService hashService;
@@ -122,9 +123,15 @@ public class ExponentiationProofService {
 		final ZqElement b = ZqElement.create(bValue, zqGroup);
 		final GroupVector<GqElement, GqGroup> c = computePhiExponentiation(b, g);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g);
-		final HashableList h_aux = Stream.concat(Stream.of("ExponentiationProof"), i_aux.stream())
-				.map(HashableString::from)
-				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final HashableList h_aux;
+		if (!i_aux.isEmpty()) {
+			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF),
+					HashableList.from(i_aux.stream()
+							.map(HashableString::from)
+							.collect(Collectors.toList())));
+		} else {
+			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF));
+		}
 		final BigInteger eValue = byteArrayToInteger(hashService.recursiveHash(f, y, c, h_aux));
 		final ZqElement e = ZqElement.create(eValue, zqGroup);
 		final ZqElement z = b.add(e.multiply(x));
@@ -189,9 +196,15 @@ public class ExponentiationProofService {
 		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, n)
 				.mapToObj(i -> x.get(i).multiply(y.get(i).exponentiate(e.negate())))
 				.collect(toGroupVector());
-		final HashableList h_aux = Stream.concat(Stream.of("ExponentiationProof"), i_aux.stream())
-				.map(HashableString::from)
-				.collect(Collectors.collectingAndThen(ImmutableList.toImmutableList(), HashableList::from));
+		final HashableList h_aux;
+		if (!i_aux.isEmpty()) {
+			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF),
+					HashableList.from(i_aux.stream()
+							.map(HashableString::from)
+							.collect(Collectors.toList())));
+		} else {
+			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF));
+		}
 		final byte[] h = hashService.recursiveHash(f, y, c_prime, h_aux);
 		final BigInteger e_prime_value = byteArrayToInteger(h);
 		final ZqElement e_prime = ZqElement.create(e_prime_value, zqGroup);
