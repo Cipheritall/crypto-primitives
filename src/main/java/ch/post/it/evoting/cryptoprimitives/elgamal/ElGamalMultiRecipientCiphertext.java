@@ -96,7 +96,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	/**
-	 * Implements the specification GetCiphertextExponentiation algorithm. It exponentiates each element of the multi-recipient ciphertext by an exponent a.
+	 * Implements the specification GetCiphertextExponentiation algorithm. It exponentiates each element of the multi-recipient ciphertext by an
+	 * exponent a.
 	 * <p>
 	 * The {@code exponent} parameter must comply with the following:
 	 * <ul>

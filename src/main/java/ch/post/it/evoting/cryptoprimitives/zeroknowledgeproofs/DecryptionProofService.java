@@ -18,6 +18,8 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
+import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorAddition;
+import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorScalarMultiplication;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -165,7 +167,7 @@ public class DecryptionProofService {
 		final BigInteger e_value = byteArrayToInteger(hashService.recursiveHash(f, y, c, h_aux));
 		final ZqElement e = ZqElement.create(e_value, ZqGroup.sameOrderAs(gqGroup));
 		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
-		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(sk_prime.stream().collect(toGroupVector()), e));
+		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(e, sk_prime.stream().collect(toGroupVector())));
 
 		return new DecryptionProof(e, z);
 	}
@@ -256,37 +258,4 @@ public class DecryptionProofService {
 		return Verifiable.create(() -> e.equals(e_prime), String.format("Could not verify decryption proof of ciphertext %s.", ciphertext));
 	}
 
-	/**
-	 * Adds the first vector to the second one element wise.
-	 *
-	 * @param first  the first vector
-	 * @param second the second vector
-	 * @return a new {@link GroupVector} which is the result of {@code first} + {@code second}
-	 */
-	private static GroupVector<ZqElement, ZqGroup> vectorAddition(final GroupVector<ZqElement, ZqGroup> first,
-			GroupVector<ZqElement, ZqGroup> second) {
-		checkNotNull(first);
-		checkNotNull(second);
-		checkArgument(first.size() == second.size(), "The vectors to be added must have the same size.");
-		checkArgument(first.getGroup().equals(second.getGroup()), "Both vectors must have the same group.");
-
-		final int l = first.size();
-
-		return IntStream.range(0, l).mapToObj(i -> first.get(i).add(second.get(i))).collect(toGroupVector());
-	}
-
-	/**
-	 * Multiplies a vector with a scalar.
-	 *
-	 * @param vector the vector to be multiplied with
-	 * @param scalar the scalar to be multiplied with
-	 * @return the vector resulting from the scalar product {@code scalar} * {@code product}
-	 */
-	private static GroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(GroupVector<ZqElement, ZqGroup> vector, ZqElement scalar) {
-		checkNotNull(vector);
-		checkNotNull(scalar);
-		checkArgument(vector.getGroup().equals(scalar.getGroup()), "The scalar must be of the same group than the vector.");
-
-		return vector.stream().map(scalar::multiply).collect(toGroupVector());
-	}
 }
