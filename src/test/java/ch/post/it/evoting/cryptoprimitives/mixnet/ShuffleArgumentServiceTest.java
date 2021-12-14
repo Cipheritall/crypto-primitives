@@ -193,6 +193,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
 
 		// Create ZqElements
+		ZqElement zZero = ZqElement.create(ZERO, zqGroup);
 		ZqElement zOne = ZqElement.create(ONE, zqGroup);
 		ZqElement zTwo = ZqElement.create(TWO, zqGroup);
 		ZqElement zThree = ZqElement.create(THREE, zqGroup);
@@ -265,61 +266,61 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		ZeroArgument zeroArgument = new ZeroArgument.Builder()
 				.with_c_A_0(gTwelve)
 				.with_c_B_m(gEighteen)
-				.with_c_d(GroupVector.of(gSixteen, gNine, gTwelve, gOne, gSix))
-				.with_a_prime(GroupVector.of(zEight, zFive))
-				.with_b_prime(GroupVector.of(zTen, zTwo))
-				.with_r_prime(zOne)
-				.with_s_prime(zEight)
-				.with_t_prime(zTwo)
+				.with_c_d(GroupVector.of(gThree, gSixteen, gNine, gOne, gEight))
+				.with_a_prime(GroupVector.of(zNine, zFive))
+				.with_b_prime(GroupVector.of(zEight, zNine))
+				.with_r_prime(zZero)
+				.with_s_prime(zZero)
+				.with_t_prime(zOne)
 				.build();
 
 		// Create the expected HadamardArgument
-		GroupVector<GqElement, GqGroup> cBhadamard = GroupVector.of(gThirteen, gFour);
+		GroupVector<GqElement, GqGroup> cBhadamard = GroupVector.of(gEighteen, gOne);
 		HadamardArgument hadamardArgument = new HadamardArgument(cBhadamard, zeroArgument);
 
 		// Create the expected SingleValueProductArgument
 		SingleValueProductArgument singleValueProductArgument = new SingleValueProductArgument.Builder()
 				.with_c_d(gOne)
 				.with_c_delta(gEight)
-				.with_c_Delta(gSixteen)
-				.with_a_tilde(GroupVector.of(zEight, zTen))
-				.with_b_tilde(GroupVector.of(zEight, zFour))
-				.with_r_tilde(zTen)
-				.with_s_tilde(zEight)
+				.with_c_Delta(gFour)
+				.with_a_tilde(GroupVector.of(zNine, zSeven))
+				.with_b_tilde(GroupVector.of(zNine, zSeven))
+				.with_r_tilde(zThree)
+				.with_s_tilde(zTwo)
 				.build();
 
 		// Create the expected ProductArgument:
 		// cb = 9
 		// Hadamard: cB = (16, 9), Zero: cA0 = 12, cBm = 18, cd = (18, 4, 13, 1, 4), a' = (8, 8), b' = (6, 3), r' = 7, s' = 0, t' = 5
 		// Single: cd = 1, cδ = 8, cΔ = 1, aTilde = (8, 5), bTilde = (8, 7), rTilde = 7, sTilde = 7
-		ProductArgument productArgument = new ProductArgument(gFour, hadamardArgument, singleValueProductArgument);
+		ProductArgument productArgument = new ProductArgument(gOne, hadamardArgument, singleValueProductArgument);
 
 		GroupVector<GqElement, GqGroup> cBmulti = GroupVector.of(gTwelve, gFour, gOne, gEight);
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = GroupVector.of(
 				ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gThirteen, gTwo, gTwo)),
-				ElGamalMultiRecipientCiphertext.create(gEight, Arrays.asList(gEight, gTwo, gThirteen)),
-				ElGamalMultiRecipientCiphertext.create(gTwelve, Arrays.asList(gThree, gThree, gFour)),
-				ElGamalMultiRecipientCiphertext.create(gEighteen, Arrays.asList(gTwelve, gEight, gThree))
+				ElGamalMultiRecipientCiphertext.create(gTwo, Arrays.asList(gEighteen, gEight, gSix)),
+				ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gThirteen, gSixteen, gOne)),
+				ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwo, gEighteen, gTwo))
 		);
 
 		// Create the expected MultiExponentiationArgument:
-		// cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {9, (18, 18, 6)}, {9, (4, 13, 1)}, {6, (8, 3, 6)})
+		// cA0 = 1, cB = (12, 4, 1, 8), E = ({2, (13, 2, 2)}, {2, (18, 8, 6)}, {13, (13, 16, 1)}, {4, (2, 18, 2)})
 		// a = (2, 4), r = 7, b = 1, s = 5, tau = 5
 		MultiExponentiationArgument multiExponentiationArgument = new MultiExponentiationArgument.Builder()
 				.with_c_A_0(gOne)
 				.with_c_B(cBmulti)
 				.with_E(eVector)
-				.with_a(GroupVector.of(zEight, zNine))
+				.with_a(GroupVector.of(zNine, zZero))
 				.with_r(zNine)
-				.with_b(zSeven)
-				.with_s(zSix)
+				.with_b(zOne)
+				.with_s(zZero)
 				.with_tau(zOne)
 				.build();
 
 		// Create the expected output:
 		// cA = (8, 2), cB = (8, 18)
 		GroupVector<GqElement, GqGroup> cAshuffle = GroupVector.of(gEight, gTwo);
-		GroupVector<GqElement, GqGroup> cBshuffle = GroupVector.of(gEight, gEighteen);
+		GroupVector<GqElement, GqGroup> cBshuffle = GroupVector.of(gTwelve, gTwelve);
 
 		ShuffleArgument argument = new ShuffleArgument.Builder()
 				.with_c_A(cAshuffle)
@@ -800,14 +801,16 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 						.build();
 
 				//m and n
-				Integer m = testParameters.getInput().get("m", Integer.class);
-				Integer n = testParameters.getInput().get("n", Integer.class);
+				final int N = ciphertexts.size();
+				final int[] dimensions = MatrixUtils.getMatrixDimensions(N);
+				final int m = dimensions[0];
+				final int n = dimensions[1];
 
 				//Output
-				final JsonData outputData = testParameters.getOutput();
-				boolean output = outputData.get("result", Boolean.class);
+				final JsonData output = testParameters.getOutput();
+				boolean outputValue = Boolean.parseBoolean(output.toString());
 
-				return Arguments.of(publicKey, commitmentKey, statement, argument, m, n, output, testParameters.getDescription());
+				return Arguments.of(publicKey, commitmentKey, statement, argument, m, n, outputValue, testParameters.getDescription());
 			});
 		}
 

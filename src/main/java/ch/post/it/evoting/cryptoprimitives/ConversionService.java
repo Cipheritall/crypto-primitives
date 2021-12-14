@@ -105,4 +105,18 @@ public final class ConversionService {
 		}
 	}
 
+	/**
+	 * Converts a {@link BigInteger} representation to a decimal {@link String} representation.
+	 *
+	 * @param x, the {@link BigInteger} representation to convert. Not Null, positive (including 0).
+	 * @return S, the decimal {@link String} representation of the bigInteger.
+	 * @throws NullPointerException     if the bigInteger is null
+	 * @throws IllegalArgumentException if the bigInteger is not positive
+	 */
+	public static String integerToString(final BigInteger x) {
+		checkNotNull(x);
+		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
+
+		return x.toString(10);
+	}
 }

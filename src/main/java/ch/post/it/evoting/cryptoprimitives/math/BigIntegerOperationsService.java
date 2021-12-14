@@ -39,7 +39,7 @@ public class BigIntegerOperationsService {
 			gmpInstalled = true;
 			LOG.info("GMP is installed and ready to use");
 		} catch (UnsatisfiedLinkError e) {
-			LOG.info("GMP is not installed, native code optimisations are not available, integer operations will now take longer");
+			LOG.warn("GMP is not installed, native code optimisations are not available, integer operations will now take longer");
 		}
 
 		if (gmpInstalled) {

@@ -154,6 +154,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), specificGqGroup);
 
 		// Create ZqElements
+		ZqElement zZero = ZqElement.create(ZERO, zqGroup);
 		ZqElement zOne = ZqElement.create(ONE, zqGroup);
 		ZqElement zTwo = ZqElement.create(TWO, zqGroup);
 		ZqElement zThree = ZqElement.create(THREE, zqGroup);
@@ -209,11 +210,11 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		ElGamalMultiRecipientCiphertext e3 = ElGamalMultiRecipientCiphertext.create(gSix, Arrays.asList(gEight, gThree, gSix));
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> eVector = GroupVector.of(e0, e1, e2, e3);
 
-		GroupVector<ZqElement, ZqGroup> aVector = GroupVector.of(zTwo, zFour);
-		ZqElement b = zOne;
-		ZqElement tau = zFive;
-		ZqElement s = zFive;
-		ZqElement r = zSeven;
+		GroupVector<ZqElement, ZqGroup> aVector = GroupVector.of(zFour, zOne);
+		ZqElement b = zThree;
+		ZqElement tau = zFour;
+		ZqElement s = zZero;
+		ZqElement r = zEight;
 
 		ElGamalMultiRecipientPublicKey getPublicKey() {
 			return new ElGamalMultiRecipientPublicKey(keyElements);
@@ -531,7 +532,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testArgumentWithModified_cB_ElementDoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.cB = GroupVectors.set(values.cB, 0, values.gOne);
+			values.cB = GroupVectors.set(values.cB, 0, values.gTwo);
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
@@ -596,7 +597,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testArgumentWithModified_tau_DoesNotVerify() {
 			SpecificValues values = new SpecificValues();
-			values.tau = values.zFour;
+			values.tau = values.zFive;
 			MultiExponentiationArgumentService service = values.createMultiExponentiationService();
 			final VerificationResult verificationResult = service
 					.verifyMultiExponentiationArgument(values.createStatement(), values.createArgument()).verify();
@@ -643,7 +644,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
-				final boolean outputValue = output.get("verif_result", Boolean.class);
+				final boolean outputValue = Boolean.parseBoolean(output.toString());
 
 				return Arguments.of(publicKey, commitmentKey, multiExpStatement, multiExpArgument, outputValue, testParameters.getDescription());
 			});

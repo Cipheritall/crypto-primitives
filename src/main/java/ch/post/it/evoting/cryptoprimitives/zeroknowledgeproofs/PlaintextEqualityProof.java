@@ -22,27 +22,23 @@ import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
-/**
- * An exponentiation proof (e, z) composed of a hash value e and a proof element z.
- *
- * <p>Instances of this class are immutable.</p>
- */
 @SuppressWarnings("java:S100")
-public class ExponentiationProof implements GroupVectorElement<ZqGroup>, HashableList {
+public class PlaintextEqualityProof implements HashableList {
 
 	private final ZqElement e;
-	private final ZqElement z;
+	private final GroupVector<ZqElement, ZqGroup> z;
 
-	public ExponentiationProof(final ZqElement e, final ZqElement z) {
+	public PlaintextEqualityProof(final ZqElement e, final GroupVector<ZqElement, ZqGroup> z) {
 		checkNotNull(e);
 		checkNotNull(z);
 
+		checkArgument(z.size() == 2, "z must have exactly two elements.");
 		checkArgument(e.getGroup().equals(z.getGroup()), "e and z must be from the same group.");
 
 		this.e = e;
@@ -53,29 +49,19 @@ public class ExponentiationProof implements GroupVectorElement<ZqGroup>, Hashabl
 		return e;
 	}
 
-	public ZqElement get_z() {
+	public GroupVector<ZqElement, ZqGroup> get_z() {
 		return z;
 	}
 
 	@Override
-	public ZqGroup getGroup() {
-		return e.getGroup();
-	}
-
-	@Override
-	public int size() {
-		return 1;
-	}
-
-	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ExponentiationProof that = (ExponentiationProof) o;
+		final PlaintextEqualityProof that = (PlaintextEqualityProof) o;
 		return e.equals(that.e) && z.equals(that.z);
 	}
 
@@ -85,7 +71,7 @@ public class ExponentiationProof implements GroupVectorElement<ZqGroup>, Hashabl
 	}
 
 	@Override
-	public ImmutableList<Hashable> toHashableForm() {
+	public ImmutableList<? extends Hashable> toHashableForm() {
 		return ImmutableList.of(e, z);
 	}
 }

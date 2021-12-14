@@ -89,6 +89,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		private final GqElement gNine = GqElement.create(BigInteger.valueOf(9), gqGroup);
 
 		private final ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
+		private final ZqElement zTwo = ZqElement.create(BigInteger.valueOf(2), zqGroup);
 		private final ZqElement zThree = ZqElement.create(BigInteger.valueOf(3), zqGroup);
 
 		// Input arguments:
@@ -102,10 +103,10 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		private final List<String> auxiliaryInformation = Arrays.asList("specific", "test", "values");
 
 		// Output:
-		// e = 3
-		// z = 1
-		private final ZqElement e = zThree;
-		private final ZqElement z = zOne;
+		// e = 2
+		// z = 3
+		private final ZqElement e = zTwo;
+		private final ZqElement z = zThree;
 
 		private final List<BigInteger> randomValues = Collections.singletonList(BigInteger.valueOf(2));
 
@@ -404,7 +405,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 			TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
 			final GroupVector<GqElement, GqGroup> exponentiations = testValues.exponentiations;
-			final GroupVector<GqElement, GqGroup> differentExponentiations = exponentiations.stream().map(y -> y.multiply(testValues.gFour))
+			final GroupVector<GqElement, GqGroup> differentExponentiations = exponentiations.stream().map(y -> y.multiply(testValues.gNine))
 					.collect(GroupVector.toGroupVector());
 			final List<String> auxiliaryInformation = testValues.auxiliaryInformation;
 			final ExponentiationProof proof = testValues.createExponentiationProof();
@@ -416,7 +417,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		void differentBasesReturnsFalse() {
 			TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
-			final GroupVector<GqElement, GqGroup> differentBases = bases.stream().map(g -> g.multiply(testValues.gFive))
+			final GroupVector<GqElement, GqGroup> differentBases = bases.stream().map(g -> g.multiply(testValues.gFour))
 					.collect(GroupVector.toGroupVector());
 			final GroupVector<GqElement, GqGroup> exponentiations = testValues.exponentiations;
 			final List<String> auxiliaryInformation = testValues.auxiliaryInformation;
