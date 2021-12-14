@@ -46,7 +46,7 @@ public final class MixnetService implements Mixnet {
 	private final CommitmentKeyService commitmentKeyService;
 
 	/**
-	 * Instantiates a mixnet service. A security provider must already be loaded containing the "SHA-256" algorithm.
+	 * Instantiates a mixnet service.
 	 */
 	public MixnetService() {
 		this.hashService = HashService.getInstance();

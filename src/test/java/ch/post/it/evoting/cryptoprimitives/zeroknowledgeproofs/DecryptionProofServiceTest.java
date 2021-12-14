@@ -114,6 +114,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		private final GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
 
 		// Create ZqElements
+		private final ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
 		private final ZqElement zTwo = ZqElement.create(TWO, zqGroup);
 		private final ZqElement zThree = ZqElement.create(THREE, zqGroup);
 		private final ZqElement zFive = ZqElement.create(FIVE, zqGroup);
@@ -137,8 +138,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		private final List<BigInteger> randomValues = Arrays.asList(FOUR, SEVEN, FIVE);
 
 		// Create output arguments
-		private final ZqElement e = zEight;
-		private final GroupVector<ZqElement, ZqGroup> z = GroupVector.of(zSix, zEight, zTen);
+		private final ZqElement e = zSeven;
+		private final GroupVector<ZqElement, ZqGroup> z = GroupVector.of(zThree, zOne, zEight);
 
 		private ElGamalMultiRecipientKeyPair createKeyPair() {
 			final ElGamalMultiRecipientKeyPair keyPair = mock(ElGamalMultiRecipientKeyPair.class);

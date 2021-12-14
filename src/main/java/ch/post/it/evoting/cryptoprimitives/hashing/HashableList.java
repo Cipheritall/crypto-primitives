@@ -17,10 +17,13 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
@@ -52,7 +55,7 @@ public interface HashableList extends Hashable {
 	 * Creates a HashableList whose hashable form is an ImmutableList containing the provided elements.
 	 *
 	 * @param elements the hashable elements to construct a HashableList from. Non null and must not contain nulls.
-	 * @param <E> the type of the elements
+	 * @param <E>      the type of the elements
 	 * @return a HashableList with the provided elements
 	 */
 	@SafeVarargs
@@ -61,5 +64,14 @@ public interface HashableList extends Hashable {
 		checkArgument(Arrays.stream(elements).allMatch(Objects::nonNull), "Elements must not contain nulls");
 
 		return from(Arrays.asList(elements));
+	}
+
+	/**
+	 * Returns a collector that accumulates the input elements into a HashableList.
+	 *
+	 * @return a {@link Collector} for accumulating the input elements into a HashableList
+	 */
+	static Collector<Hashable, ?, HashableList> toHashableList() {
+		return Collectors.collectingAndThen(toImmutableList(), HashableList::from);
 	}
 }

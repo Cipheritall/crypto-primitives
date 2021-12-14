@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives;
 
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToString;
 import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToInteger;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -156,5 +157,32 @@ class ConversionServiceTest {
 	@Test
 	void stringToIntegerWithNullInputThrowsNullPointerException() {
 		assertThrows(NullPointerException.class, () -> stringToInteger(null));
+	}
+
+	@Test
+	void testIntegerToStringWithNullInputThrowsNullPointerException() {
+		assertThrows(NullPointerException.class, () -> integerToString(null));
+	}
+
+	@Test
+	void testIntegerToStringWithNegativeInputThrowsIllegalArgumentException() {
+		BigInteger x = BigInteger.valueOf(-1L);
+		assertThrows(IllegalArgumentException.class, () -> integerToString(x));
+	}
+
+	@Test
+	void testZeroBigIntegerToStringAndBackIsOriginalValue() {
+		BigInteger value = BigInteger.ZERO;
+		BigInteger cycledValue = stringToInteger(ConversionService.integerToString(value));
+		assertEquals(value, cycledValue);
+	}
+
+	//Cyclic test BigInteger to String and back
+	@RepeatedTest(10)
+	void testRandomBigIntegerToStringAndBackIsOriginalValue() {
+		int size = random.nextInt(32);
+		BigInteger value = new BigInteger(size, random);
+		BigInteger cycledValue = stringToInteger(ConversionService.integerToString(value));
+		assertEquals(value, cycledValue);
 	}
 }

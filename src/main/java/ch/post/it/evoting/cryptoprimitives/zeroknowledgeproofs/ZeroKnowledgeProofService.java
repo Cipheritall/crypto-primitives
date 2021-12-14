@@ -51,8 +51,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	private final ExponentiationProofService exponentiationProofService;
 
 	/**
-	 * Instantiates a zero knowledge proof service which operates in a given group. A security provider must already be loaded that contains the
-	 * "SHA-256" algorithm.
+	 * Instantiates a zero knowledge proof service which operates in a given group.
 	 */
 	public ZeroKnowledgeProofService() {
 		final RandomService randomService = new RandomService();
