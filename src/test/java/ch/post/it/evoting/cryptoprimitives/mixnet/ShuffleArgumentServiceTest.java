@@ -17,6 +17,7 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCiphertexts;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestShuffleArgumentGenerator.ShuffleArgumentPair;
@@ -182,15 +183,15 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		// Create GqElements
 		GqElement gOne = gqGroup.getIdentity();
 		GqElement gTwo = gqGroup.getGenerator();
-		GqElement gThree = GqElement.create(THREE, gqGroup);
-		GqElement gFour = GqElement.create(FOUR, gqGroup);
-		GqElement gSix = GqElement.create(SIX, gqGroup);
-		GqElement gEight = GqElement.create(EIGHT, gqGroup);
-		GqElement gNine = GqElement.create(NINE, gqGroup);
-		GqElement gTwelve = GqElement.create(BigInteger.valueOf(12), gqGroup);
-		GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
-		GqElement gSixteen = GqElement.create(BigInteger.valueOf(16), gqGroup);
-		GqElement gEighteen = GqElement.create(BigInteger.valueOf(18), gqGroup);
+		GqElement gThree = GqElementFactory.fromValue(THREE, gqGroup);
+		GqElement gFour = GqElementFactory.fromValue(FOUR, gqGroup);
+		GqElement gSix = GqElementFactory.fromValue(SIX, gqGroup);
+		GqElement gEight = GqElementFactory.fromValue(EIGHT, gqGroup);
+		GqElement gNine = GqElementFactory.fromValue(NINE, gqGroup);
+		GqElement gTwelve = GqElementFactory.fromValue(BigInteger.valueOf(12), gqGroup);
+		GqElement gThirteen = GqElementFactory.fromValue(BigInteger.valueOf(13), gqGroup);
+		GqElement gSixteen = GqElementFactory.fromValue(BigInteger.valueOf(16), gqGroup);
+		GqElement gEighteen = GqElementFactory.fromValue(BigInteger.valueOf(18), gqGroup);
 
 		// Create ZqElements
 		ZqElement zZero = ZqElement.create(ZERO, zqGroup);

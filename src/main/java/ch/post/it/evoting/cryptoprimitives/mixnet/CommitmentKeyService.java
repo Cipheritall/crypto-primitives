@@ -1,5 +1,6 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,7 +37,7 @@ public class CommitmentKeyService {
 	 * Checks if it is possible to generate a commitment key of the requested size in the given group.
 	 *
 	 * @param numberOfElements the desired number of elements of the commitment key. Must be greater than zero.
-	 * @param group the group in which to generate the commitment key. Must be non null.
+	 * @param group            the group in which to generate the commitment key. Must be non null.
 	 * @return true if the group is large enough to generate a key of the desired size, false otherwise.
 	 */
 	static boolean canGenerateKey(int numberOfElements, GqGroup group) {
@@ -50,9 +51,8 @@ public class CommitmentKeyService {
 	/**
 	 * Creates a commitment key, with the {@code numberOfCommitmentElements} specifying the commitment key's desired number of elements.
 	 *
-	 *
 	 * @param numberOfElements ν, the desired number of elements of the commitment key. Must be strictly positive and smaller or equal to q - 3, where
-	 *                           q is the order of the {@code gqGroup}.
+	 *                         q is the order of the {@code gqGroup}.
 	 * @param gqGroup          the quadratic residue group to which the commitment key belongs. Must be non null.
 	 * @return the created commitment key.
 	 */
@@ -96,7 +96,7 @@ public class CommitmentKeyService {
 
 		}
 
-		final List<GqElement> v_elements = v.stream().map(e -> GqElement.create(e, gqGroup)).collect(Collectors.toList());
+		final List<GqElement> v_elements = v.stream().map(e -> GqElementFactory.fromValue(e, gqGroup)).collect(Collectors.toList());
 
 		final GqElement h = v_elements.get(0);
 		final List<GqElement> g_vector = v_elements.subList(1, v_elements.size());

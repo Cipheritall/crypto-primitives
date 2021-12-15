@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -144,7 +145,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	void testFewerMessagesThanKeysWithIdentityRandomnessAndIdentityMessageElementsThenCompression() {
 		int nMessages = NUM_RECIPIENTS / 2;
 		List<GqElement> oneElements =
-				Stream.generate(() -> GqElement.create(BigInteger.ONE, gqGroup)).limit(nMessages).collect(Collectors.toList());
+				Stream.generate(() -> GqElementFactory.fromValue(BigInteger.ONE, gqGroup)).limit(nMessages).collect(Collectors.toList());
 		ElGamalMultiRecipientMessage smallOneMessage = new ElGamalMultiRecipientMessage(oneElements);
 		ZqElement oneExponent = ZqElement.create(BigInteger.ONE, zqGroup);
 		ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(smallOneMessage, oneExponent, validPK);
@@ -176,24 +177,24 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 		ElGamalMultiRecipientMessage message =
 				new ElGamalMultiRecipientMessage(
 						Arrays.asList(
-								GqElement.create(BigInteger.valueOf(4), group),
-								GqElement.create(BigInteger.valueOf(5), group)
+								GqElementFactory.fromValue(BigInteger.valueOf(4), group),
+								GqElementFactory.fromValue(BigInteger.valueOf(5), group)
 						)
 				);
 		ZqElement exponent = ZqElement.create(BigInteger.valueOf(2), ZqGroup.sameOrderAs(group));
 		ElGamalMultiRecipientPublicKey publicKey =
 				new ElGamalMultiRecipientPublicKey(
 						Arrays.asList(
-								GqElement.create(BigInteger.valueOf(5), group),
-								GqElement.create(BigInteger.valueOf(9), group)
+								GqElementFactory.fromValue(BigInteger.valueOf(5), group),
+								GqElementFactory.fromValue(BigInteger.valueOf(9), group)
 						)
 				);
 		ElGamalMultiRecipientCiphertext ciphertext =
 				ElGamalMultiRecipientCiphertext.create(
-						GqElement.create(BigInteger.valueOf(9), group),
+						GqElementFactory.fromValue(BigInteger.valueOf(9), group),
 						Arrays.asList(
-								GqElement.create(BigInteger.ONE, group),
-								GqElement.create(BigInteger.valueOf(9), group)
+								GqElementFactory.fromValue(BigInteger.ONE, group),
+								GqElementFactory.fromValue(BigInteger.valueOf(9), group)
 						)
 				);
 
@@ -221,7 +222,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 				final JsonData input = testParameters.getInput();
 
 				final BigInteger[] boldM = input.get("bold_m", BigInteger[].class);
-				final List<GqElement> message = Arrays.stream(boldM).map(m -> GqElement.create(m, gqGroup)).collect(Collectors.toList());
+				final List<GqElement> message = Arrays.stream(boldM).map(m -> GqElementFactory.fromValue(m, gqGroup)).collect(Collectors.toList());
 
 				// Parse random exponent.
 				final BigInteger r = input.get("r", BigInteger.class);
@@ -229,14 +230,14 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 				// Parse public key.
 				final BigInteger[] boldPk = input.get("bold_pk", BigInteger[].class);
-				final List<GqElement> publicKey = Arrays.stream(boldPk).map(pk -> GqElement.create(pk, gqGroup)).collect(Collectors.toList());
+				final List<GqElement> publicKey = Arrays.stream(boldPk).map(pk -> GqElementFactory.fromValue(pk, gqGroup)).collect(Collectors.toList());
 
 				// Parse resulting ciphertext.
 				final JsonData outputJsonData = testParameters.getOutput();
 
-				final GqElement gammaRes = GqElement.create(outputJsonData.get("gamma", BigInteger.class), gqGroup);
+				final GqElement gammaRes = GqElementFactory.fromValue(outputJsonData.get("gamma", BigInteger.class), gqGroup);
 				final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
-				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElement.create(phi, gqGroup)).collect(Collectors.toList());
+				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElementFactory.fromValue(phi, gqGroup)).collect(Collectors.toList());
 
 				return Arguments.of(message, exponent, publicKey, gammaRes, phisRes, testParameters.getDescription());
 			}

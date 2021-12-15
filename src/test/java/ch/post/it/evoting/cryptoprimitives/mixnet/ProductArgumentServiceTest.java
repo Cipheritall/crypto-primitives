@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestProductGenerator.genProductWitness;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestProductGenerator.getProductStatement;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -31,8 +32,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -270,16 +269,16 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			BigInteger p = BigInteger.valueOf(11);
 			BigInteger q = BigInteger.valueOf(5);
 			BigInteger g = BigInteger.valueOf(3);
-			
+
 			GqGroup gqGroup = new GqGroup(p, q, g);
 			ZqGroup zqGroup = new ZqGroup(q);
 
 			// Instantiate group elements
-			GqElement gqOne = GqElement.create(BigInteger.ONE, gqGroup);
-			GqElement gqThree = GqElement.create(BigInteger.valueOf(3), gqGroup);
-			GqElement gqFour = GqElement.create(BigInteger.valueOf(4), gqGroup);
-			GqElement gqFive = GqElement.create(BigInteger.valueOf(5), gqGroup);
-			GqElement gqNine = GqElement.create(BigInteger.valueOf(9), gqGroup);
+			GqElement gqOne = GqElementFactory.fromValue(BigInteger.ONE, gqGroup);
+			GqElement gqThree = GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup);
+			GqElement gqFour = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
+			GqElement gqFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
+			GqElement gqNine = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
 
 			ZqElement zqZero = ZqElement.create(BigInteger.ZERO, zqGroup);
 			ZqElement zqOne = ZqElement.create(BigInteger.ONE, zqGroup);
@@ -598,7 +597,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			final BigInteger[] cAValues = statement.get("c_a", BigInteger[].class);
 			final BigInteger bValue = statement.get("b", BigInteger.class);
 			final GroupVector<GqElement, GqGroup> commitments = Arrays.stream(cAValues)
-					.map(bi -> GqElement.create(bi, realGqGroup))
+					.map(bi -> GqElementFactory.fromValue(bi, realGqGroup))
 					.collect(toGroupVector());
 			final ZqElement product = ZqElement.create(bValue, ZqGroup.sameOrderAs(realGqGroup));
 

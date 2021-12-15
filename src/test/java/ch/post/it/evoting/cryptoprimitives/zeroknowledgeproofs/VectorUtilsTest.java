@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorAddition;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorExponentiation;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorMultiplication;
@@ -196,18 +197,18 @@ class VectorUtilsTest extends TestGroupSetup {
 
 			final GqGroup gqGroup = new GqGroup(p, q, g);
 
-			final GroupVector<GqElement, GqGroup> firstVector = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup),
-					GqElement.create(BigInteger.valueOf(4), gqGroup));
-			final GroupVector<GqElement, GqGroup> secondVector = GroupVector.of(GqElement.create(BigInteger.valueOf(3), gqGroup),
-					GqElement.create(BigInteger.valueOf(4), gqGroup));
-			final GroupVector<GqElement, GqGroup> oneVector = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup),
-					GqElement.create(BigInteger.ONE, gqGroup));
+			final GroupVector<GqElement, GqGroup> firstVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup));
+			final GroupVector<GqElement, GqGroup> secondVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup));
+			final GroupVector<GqElement, GqGroup> oneVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
+					GqElementFactory.fromValue(BigInteger.ONE, gqGroup));
 			final GroupVector<GqElement, GqGroup> firstVectorInverted = firstVector.stream()
 					.map(GqElement::invert)
 					.collect(toGroupVector());
 
-			final GroupVector<GqElement, GqGroup> expected = GroupVector.of(GqElement.create(BigInteger.valueOf(3), gqGroup),
-					GqElement.create(BigInteger.valueOf(5), gqGroup));
+			final GroupVector<GqElement, GqGroup> expected = GroupVector.of(GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup));
 
 			final GroupVector<GqElement, GqGroup> firstVector_multiply_secondVector = vectorMultiplication(firstVector, secondVector);
 			final GroupVector<GqElement, GqGroup> firstVector_multiply_oneVector = vectorMultiplication(firstVector, oneVector);
@@ -264,22 +265,22 @@ class VectorUtilsTest extends TestGroupSetup {
 			final ZqElement oneExponent = ZqElement.create(BigInteger.ONE, ZqGroup.sameOrderAs(gqGroup));
 			final ZqElement zeroExponent = ZqElement.create(BigInteger.ZERO, ZqGroup.sameOrderAs(gqGroup));
 
-			final GroupVector<GqElement, GqGroup> firstVector = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup),
-					GqElement.create(BigInteger.valueOf(4), gqGroup));
-			final GroupVector<GqElement, GqGroup> firstVectorNegated = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup).invert(),
-					GqElement.create(BigInteger.valueOf(4), gqGroup).invert());
+			final GroupVector<GqElement, GqGroup> firstVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup));
+			final GroupVector<GqElement, GqGroup> firstVectorNegated = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup).invert(),
+					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup).invert());
 			final ZqElement fourExponent = ZqElement.create(BigInteger.valueOf(4), ZqGroup.sameOrderAs(gqGroup));
 			final ZqElement threeExponent = ZqElement.create(BigInteger.valueOf(4), ZqGroup.sameOrderAs(gqGroup));
 			final GroupVector<GqElement, GqGroup> firstVectorInverted = firstVector.stream()
 					.map(element -> element.exponentiate(threeExponent))
 					.map(GqElement::invert)
 					.collect(toGroupVector());
-			final GroupVector<GqElement, GqGroup> oneVector = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup),
-					GqElement.create(BigInteger.ONE, gqGroup));
+			final GroupVector<GqElement, GqGroup> oneVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
+					GqElementFactory.fromValue(BigInteger.ONE, gqGroup));
 
 			final GroupVector<GqElement, GqGroup> expected = GroupVector.of(
-					GqElement.create(BigInteger.valueOf(1), gqGroup),
-					GqElement.create(BigInteger.valueOf(3), gqGroup));
+					GqElementFactory.fromValue(BigInteger.valueOf(1), gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup));
 
 			return Stream.of(
 					arguments(firstVector, fourExponent, expected),

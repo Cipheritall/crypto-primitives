@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -54,10 +55,10 @@ class TestArgumentParser {
 		final BigInteger sValue = zeroArgumentData.get("s", BigInteger.class);
 		final BigInteger tValue = zeroArgumentData.get("t", BigInteger.class);
 
-		final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
-		final GqElement cBm = GqElement.create(cBmValue, gqGroup);
+		final GqElement cA0 = GqElementFactory.fromValue(cA0Value, gqGroup);
+		final GqElement cBm = GqElementFactory.fromValue(cBmValue, gqGroup);
 		final GroupVector<GqElement, GqGroup> cd = Arrays.stream(cdValues)
-				.map(bi -> GqElement.create(bi, gqGroup))
+				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
 				.collect(toGroupVector());
 		final GroupVector<ZqElement, ZqGroup> aPrime = Arrays.stream(aValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
@@ -84,7 +85,7 @@ class TestArgumentParser {
 	HadamardArgument parseHadamardArgument(final JsonData hadamardArgumentData) {
 		final BigInteger[] cUpperBValues = hadamardArgumentData.get("cUpperB", BigInteger[].class);
 		GroupVector<GqElement, GqGroup> cUpperB = Arrays.stream(cUpperBValues)
-				.map(bi -> GqElement.create(bi, gqGroup))
+				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
 				.collect(toGroupVector());
 
 		JsonData zeroArgumentData = hadamardArgumentData.getJsonData("zero_argument");
@@ -102,9 +103,9 @@ class TestArgumentParser {
 		final BigInteger rTildeValue = svpArgumentData.get("r_tilde", BigInteger.class);
 		final BigInteger sTildeValue = svpArgumentData.get("s_tilde", BigInteger.class);
 
-		final GqElement cd = GqElement.create(cdValue, gqGroup);
-		final GqElement cLowerDelta = GqElement.create(cLowerDeltaValue, gqGroup);
-		final GqElement cUpperDelta = GqElement.create(cUpperDeltaValue, gqGroup);
+		final GqElement cd = GqElementFactory.fromValue(cdValue, gqGroup);
+		final GqElement cLowerDelta = GqElementFactory.fromValue(cLowerDeltaValue, gqGroup);
+		final GqElement cUpperDelta = GqElementFactory.fromValue(cUpperDeltaValue, gqGroup);
 		final GroupVector<ZqElement, ZqGroup> aTilde = Arrays.stream(aTildeValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
 				.collect(toGroupVector());
@@ -135,9 +136,9 @@ class TestArgumentParser {
 		final BigInteger sValue = multiExpArgumentData.get("s", BigInteger.class);
 		final BigInteger tauValue = multiExpArgumentData.get("tau", BigInteger.class);
 
-		final GqElement cA0 = GqElement.create(cA0Value, gqGroup);
+		final GqElement cA0 = GqElementFactory.fromValue(cA0Value, gqGroup);
 		final GroupVector<GqElement, GqGroup> cB = Arrays.stream(cBValues)
-				.map(bi -> GqElement.create(bi, gqGroup))
+				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
 				.collect(toGroupVector());
 		final GroupVector<ZqElement, ZqGroup> a = Arrays.stream(aValues)
 				.map(bi -> ZqElement.create(bi, zqGroup))
@@ -160,6 +161,7 @@ class TestArgumentParser {
 				.build();
 
 	}
+
 	ProductArgument parseProductArgument(final JsonData argumentData) {
 		final SingleValueProductArgument singleValueProductArgument = this.parseSingleValueProductArgument(argumentData.getJsonData("single_vpa"));
 
@@ -167,7 +169,7 @@ class TestArgumentParser {
 		final JsonData cbJsonData = argumentData.getJsonData("c_b");
 		if (!cbJsonData.getJsonNode().isMissingNode()) {
 			final BigInteger cbValue = argumentData.get("c_b", BigInteger.class);
-			final GqElement cb = GqElement.create(cbValue, gqGroup);
+			final GqElement cb = GqElementFactory.fromValue(cbValue, gqGroup);
 			final HadamardArgument hadamardArgument = this.parseHadamardArgument(argumentData.getJsonData("hadamard_argument"));
 
 			productArgument = new ProductArgument(cb, hadamardArgument, singleValueProductArgument);
@@ -181,9 +183,9 @@ class TestArgumentParser {
 		final BigInteger gammaValue = ciphertextData.get("gamma", BigInteger.class);
 		final BigInteger[] phisValues = ciphertextData.get("phis", BigInteger[].class);
 
-		final GqElement gamma = GqElement.create(gammaValue, gqGroup);
+		final GqElement gamma = GqElementFactory.fromValue(gammaValue, gqGroup);
 		final List<GqElement> phis = Arrays.stream(phisValues)
-				.map(bi -> GqElement.create(bi, gqGroup))
+				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
 				.collect(toList());
 
 		return ElGamalMultiRecipientCiphertext.create(gamma, phis);

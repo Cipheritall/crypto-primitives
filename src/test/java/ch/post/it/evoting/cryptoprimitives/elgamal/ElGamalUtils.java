@@ -28,7 +28,7 @@ public class ElGamalUtils {
 	//Convert a matrix of values to ciphertexts
 	public static List<ElGamalMultiRecipientCiphertext> valuesToCiphertext(Stream<List<Integer>> ciphertextValues, GqGroup group) {
 		return ciphertextValues
-				.map(values -> values.stream().map(BigInteger::valueOf).map(value -> GqElement.create(value, group)).collect(Collectors.toList()))
+				.map(values -> values.stream().map(BigInteger::valueOf).map(value -> GqElement.GqElementFactory.fromValue(value, group)).collect(Collectors.toList()))
 				.map(values -> ElGamalMultiRecipientCiphertext.create(values.get(0), values.subList(1, values.size())))
 				.collect(Collectors.toList());
 	}

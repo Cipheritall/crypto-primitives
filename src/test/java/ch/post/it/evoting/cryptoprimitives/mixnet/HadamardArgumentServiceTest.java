@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestHadamardGenerators.generateHadamardStatement;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestHadamardGenerators.generateHadamardWitness;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -265,16 +266,16 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			BigInteger p = BigInteger.valueOf(11);
 			BigInteger q = BigInteger.valueOf(5L);
 			BigInteger g = BigInteger.valueOf(3L);
-			
+
 			GqGroup gqGroup = new GqGroup(p, q, g);
 			ZqGroup zqGroup = new ZqGroup(q);
 
 			// Instantiate group elements
-			GqElement gqOne = GqElement.create(BigInteger.ONE, gqGroup);
-			GqElement gqThree = GqElement.create(BigInteger.valueOf(3), gqGroup);
-			GqElement gqFour = GqElement.create(BigInteger.valueOf(4), gqGroup);
-			GqElement gqFive = GqElement.create(BigInteger.valueOf(5), gqGroup);
-			GqElement gqNine = GqElement.create(BigInteger.valueOf(9), gqGroup);
+			GqElement gqOne = GqElementFactory.fromValue(BigInteger.ONE, gqGroup);
+			GqElement gqThree = GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup);
+			GqElement gqFour = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
+			GqElement gqFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
+			GqElement gqNine = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
 
 			ZqElement zqZero = ZqElement.create(BigInteger.ZERO, zqGroup);
 			ZqElement zqOne = ZqElement.create(BigInteger.ONE, zqGroup);
@@ -530,7 +531,8 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 		@MethodSource("verifyHadamardArgumentRealValuesProvider")
 		@DisplayName("with real values gives expected result")
 		void verifyHadamardArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-				final HadamardStatement hadamardStatement, final HadamardArgument hadamardArgument, final boolean expectedOutput, String description) {
+				final HadamardStatement hadamardStatement, final HadamardArgument hadamardArgument, final boolean expectedOutput,
+				String description) {
 
 			final HashService hashService = HashService.getInstance();
 
@@ -572,9 +574,9 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 			final BigInteger cBValue = hadamardStatementJsonData.get("c_b", BigInteger.class);
 
 			final GroupVector<GqElement, GqGroup> cA = Arrays.stream(cAValues)
-					.map(bi -> GqElement.create(bi, gqGroup))
+					.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
 					.collect(toGroupVector());
-			final GqElement cB = GqElement.create(cBValue, gqGroup);
+			final GqElement cB = GqElementFactory.fromValue(cBValue, gqGroup);
 
 			return new HadamardStatement(cA, cB);
 		}
