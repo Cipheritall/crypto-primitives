@@ -16,7 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorAddition;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorExponentiation;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorMultiplication;
@@ -267,14 +267,7 @@ class VectorUtilsTest extends TestGroupSetup {
 
 			final GroupVector<GqElement, GqGroup> firstVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
 					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup));
-			final GroupVector<GqElement, GqGroup> firstVectorNegated = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup).invert(),
-					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup).invert());
 			final ZqElement fourExponent = ZqElement.create(BigInteger.valueOf(4), ZqGroup.sameOrderAs(gqGroup));
-			final ZqElement threeExponent = ZqElement.create(BigInteger.valueOf(4), ZqGroup.sameOrderAs(gqGroup));
-			final GroupVector<GqElement, GqGroup> firstVectorInverted = firstVector.stream()
-					.map(element -> element.exponentiate(threeExponent))
-					.map(GqElement::invert)
-					.collect(toGroupVector());
 			final GroupVector<GqElement, GqGroup> oneVector = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
 					GqElementFactory.fromValue(BigInteger.ONE, gqGroup));
 
@@ -284,7 +277,6 @@ class VectorUtilsTest extends TestGroupSetup {
 
 			return Stream.of(
 					arguments(firstVector, fourExponent, expected),
-					arguments(firstVectorInverted, threeExponent, firstVectorNegated),
 					arguments(firstVector, oneExponent, firstVector),
 					arguments(firstVector, zeroExponent, oneVector)
 			);
