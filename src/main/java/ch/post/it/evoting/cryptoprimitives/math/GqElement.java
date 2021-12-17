@@ -104,22 +104,22 @@ public final class GqElement extends GroupElement<GqGroup> {
 		}
 
 		/**
-		 * Creates a GqElement from a ZqElement by squaring it modulo p.
+		 * Creates a GqElement from a BigInteger by squaring it modulo p.
 		 *
-		 * @param element the ZqElement to be squared. Must be non-null.
+		 * @param element the BigInteger to be squared. Must be non-null.
 		 * @param group   the GqGroup in which to get the new GqElement. Must be non-null.
 		 * @return the squared element modulo p.
 		 * @throws NullPointerException     if any of the arguments is null
-		 * @throws IllegalArgumentException if the element's group has a different order than the group
+		 * @throws IllegalArgumentException if the element is 0 or smaller or bigger than the group's order
 		 */
-		public static GqElement fromSquareRoot(ZqElement element, GqGroup group) {
+		public static GqElement fromSquareRoot(BigInteger element, GqGroup group) {
 			checkNotNull(element);
 			checkNotNull(group);
 
-			checkArgument(element.getValue().compareTo(BigInteger.ZERO) > 0, "The element must be strictly greater than 0");
-			checkArgument(element.getGroup().hasSameOrderAs(group), "The element's group must have the same order as the group");
+			checkArgument(element.compareTo(BigInteger.ZERO) > 0, "The element must be strictly greater than 0");
+			checkArgument(element.compareTo(group.getQ()) < 0, "The element must be smaller than the group's order");
 
-			final BigInteger y = BigIntegerOperationsService.modExponentiate(element.getValue(), BigInteger.valueOf(2), group.getP());
+			final BigInteger y = BigIntegerOperationsService.modExponentiate(element, BigInteger.valueOf(2), group.getP());
 			return new GqElement(y, group);
 		}
 

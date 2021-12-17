@@ -96,32 +96,30 @@ class GqElementFactoryTest {
 	@Test
 	void testFromSquareRootWithNullArgumentsThrows() {
 		assertThrows(NullPointerException.class, () -> GqElementFactory.fromSquareRoot(null, group));
-		final ZqElement element = ZqElement.create(1, ZqGroup.sameOrderAs(group));
-		assertThrows(NullPointerException.class, () -> GqElementFactory.fromSquareRoot(element, null));
+		assertThrows(NullPointerException.class, () -> GqElementFactory.fromSquareRoot(BigInteger.ONE, null));
 	}
 
 	@Test
 	void testFromSquareRootWithZeroThrows() {
-		final ZqElement zero = ZqElement.create(0, ZqGroup.sameOrderAs(group));
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> GqElementFactory.fromSquareRoot(zero, group));
+				() -> GqElementFactory.fromSquareRoot(BigInteger.ZERO, group));
 		assertEquals("The element must be strictly greater than 0", exception.getMessage());
 	}
 
 	@Test
 	void testFromSquareRootWithTooBigElementThrows() {
-		final ZqElement element = ZqElement.create(group.getQ(), new ZqGroup(group.getP()));
+		final BigInteger element = group.getQ();
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> GqElementFactory.fromSquareRoot(element, group));
-		assertEquals("The element's group must have the same order as the group", exception.getMessage());
+		assertEquals("The element must be smaller than the group's order", exception.getMessage());
 	}
 
 	@Test
 	void testFromSquareRootWithValidInputReturnsSquaredElement() {
 		final ZqGroup zqGroup = ZqGroup.sameOrderAs(group);
-		final ZqElement one = ZqElement.create(1, zqGroup);
-		final ZqElement two = ZqElement.create(2, zqGroup);
-		final ZqElement five = ZqElement.create(5, zqGroup);
+		final BigInteger one = BigInteger.ONE;
+		final BigInteger two = BigInteger.valueOf(2);
+		final BigInteger five = BigInteger.valueOf(5);
 
 		final GqElement resultOne = GqElementFactory.fromValue(BigInteger.ONE, group);
 		final GqElement resultFour = GqElementFactory.fromValue(BigInteger.valueOf(4), group);

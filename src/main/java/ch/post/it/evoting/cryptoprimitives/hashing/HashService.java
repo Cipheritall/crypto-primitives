@@ -150,9 +150,9 @@ public class HashService {
 
 		final BigInteger q = group.getQ();
 
-		final BigInteger x_h = recursiveHashToZq(q.subtract(BigInteger.ONE), HashableBigInteger.from(x)).add(BigInteger.ONE);
+		final BigInteger x_h = recursiveHashToZq(q.subtract(BigInteger.ONE), HashableBigInteger.from(x)).getValue().add(BigInteger.ONE);
 
-		return GqElement.GqElementFactory.fromSquareRoot(ZqElement.create(x_h, ZqGroup.sameOrderAs(group)), group);
+		return GqElement.GqElementFactory.fromSquareRoot(x_h, group);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class HashService {
 	 *
 	 * @param exclusiveUpperBound the exlusive upper bound for the hash to be returned. Must be strictly positive.
 	 * @param values              the objects to be hashed. Must be non-null.
-	 * @return the result of the hashing as a {@link BigInteger} smaller than q
+	 * @return the result of the hashing as a {@link ZqElement} smaller than q
 	 * @throws NullPointerException     if any of the arguments is null
 	 * @throws IllegalArgumentException if
 	 *                                  <ul>
@@ -170,7 +170,7 @@ public class HashService {
 	 *                                  </ul>
 	 */
 	@SuppressWarnings("java:S117")
-	public BigInteger recursiveHashToZq(final BigInteger exclusiveUpperBound, final Hashable... values) {
+	public ZqElement recursiveHashToZq(final BigInteger exclusiveUpperBound, final Hashable... values) {
 		checkNotNull(exclusiveUpperBound);
 		checkNotNull(values);
 		checkArgument(Arrays.stream(values).allMatch(Objects::nonNull), VALUES_CONTAIN_NULL);
@@ -189,7 +189,7 @@ public class HashService {
 			h = byteArrayToInteger(recursiveHashOfLength(q.bitLength(), h_prependedTo_v));
 		}
 
-		return h;
+		return ZqElement.create(h, new ZqGroup(q));
 	}
 
 	/**

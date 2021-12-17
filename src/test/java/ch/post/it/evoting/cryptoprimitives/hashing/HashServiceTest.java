@@ -396,9 +396,9 @@ class HashServiceTest {
 						+ "12345678901234567890123456789012345678901234567889").mod(largeZqGroup.getQ());
 
 		return Stream.of(
-				Arguments.of(BigInteger.valueOf(2), BigInteger.valueOf(9)),
-				Arguments.of(BigInteger.ZERO, BigInteger.ONE),
-				Arguments.of(hugeBigInteger,
+				Arguments.of(ZqElement.create(BigInteger.valueOf(2), largeZqGroup), BigInteger.valueOf(9)),
+				Arguments.of(ZqElement.create(BigInteger.ZERO, largeZqGroup), BigInteger.ONE),
+				Arguments.of(ZqElement.create(hugeBigInteger, largeZqGroup),
 						new BigInteger(
 								"1524157875323883675049535156256668194500838287337600975522511812231126352691000152415888766956267751867094662703"
 										+ "8562550221003043773814983252552966212772443410028959019878067369875323883776284103056503581773537875324142"
@@ -412,10 +412,10 @@ class HashServiceTest {
 	@ParameterizedTest
 	@MethodSource("onValidGqElementReturnsExpectedResultTestSource")
 	@DisplayName("calling hashAndSquare on a valid gqElement with an hash call returning a specific mocked value returns the expected result.")
-	void onValidGqElementReturnsExpectedResultTest(final BigInteger mockedHash, final BigInteger expectedResult) {
+	void onValidGqElementReturnsExpectedResultTest(final ZqElement mockedHash, final BigInteger expectedResult) {
 
 		final HashService hashService = spy(HashService.class);
-		doReturn(mockedHash).when(hashService).recursiveHashToZq(any(), any());
+		doReturn((mockedHash)).when(hashService).recursiveHashToZq(any(), any());
 
 		final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();
 
@@ -434,7 +434,8 @@ class HashServiceTest {
 			Hashable[] values = readInput(valuesData).toArray(new Hashable[] {});
 
 			JsonData output = testParameters.getOutput();
-			BigInteger result = output.get("result", BigInteger.class);
+			BigInteger resultValue = output.get("result", BigInteger.class);
+			final ZqElement result = ZqElement.create(resultValue, new ZqGroup(q));
 
 			return Arguments.of(q, values, result, testParameters.getDescription());
 		});
@@ -443,9 +444,9 @@ class HashServiceTest {
 	@ParameterizedTest
 	@MethodSource("jsonFileRecursiveHashToZqArgumentProvider")
 	@DisplayName("recursiveHashToZq of specific input returns expected output")
-	void testRecursiveHashToZqWithRealValues(final BigInteger q, final Hashable[] input, final BigInteger output, final String description) {
+	void testRecursiveHashToZqWithRealValues(final BigInteger q, final Hashable[] input, final ZqElement output, final String description) {
 		HashService testHashService = HashService.getInstance();
-		BigInteger actual = testHashService.recursiveHashToZq(q, input);
+		ZqElement actual = testHashService.recursiveHashToZq(q, input);
 		assertEquals(output, actual, String.format("assertion failed for: %s", description));
 	}
 
