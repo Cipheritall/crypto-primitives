@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
@@ -53,12 +54,12 @@ class GqElementValidationTest {
 	@ParameterizedTest
 	@MethodSource("createGqElementFromGroupWithNulls")
 	void testGqElementCreationWithNullThrows(BigInteger value, GqGroup group) {
-		assertThrows(NullPointerException.class, () -> GqElement.create(value, group));
+		assertThrows(NullPointerException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 
 	@ParameterizedTest
 	@MethodSource("createGqElementFromGroupWithInvalidValues")
 	void testGqElementCreationWithInvalidValuesThrows(BigInteger value, GqGroup group) {
-		assertThrows(IllegalArgumentException.class, () -> GqElement.create(value, group));
+		assertThrows(IllegalArgumentException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 }

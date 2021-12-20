@@ -119,4 +119,19 @@ public final class ConversionService {
 
 		return x.toString(10);
 	}
+
+	/**
+	 * Converts an {@link Integer} representation to a decimal {@link String} representation.
+	 *
+	 * @param x, the {@link Integer} representation to convert. Not Null, positive (including 0).
+	 * @return S, the decimal {@link String} representation of the Integer.
+	 * @throws NullPointerException     if x is null.
+	 * @throws IllegalArgumentException if x is not positive.
+	 */
+	public static String integerToString(final Integer x) {
+		checkNotNull(x);
+		checkArgument(x >= 0);
+
+		return Integer.toString(x, 10);
+	}
 }

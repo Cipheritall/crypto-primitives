@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -156,7 +157,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with simple values returns expected result")
 		void getCommitmentWithSpecificValues() {
-			
+
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// a = (2, 10)
@@ -167,12 +168,12 @@ class CommitmentServiceTest {
 			ZqElement r = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			// ck = (2, 3, 4)
 			List<GqElement> gElements = new ArrayList<>(2);
-			GqElement h = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
-			gElements.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
-			gElements.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
+			GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
 			CommitmentKey ck = new CommitmentKey(h, gElements);
 			// c = 3
-			GqElement expected = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
+			GqElement expected = GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup);
 
 			assertEquals(expected, CommitmentService.getCommitment(GroupVector.from(a), r, ck));
 		}
@@ -263,7 +264,7 @@ class CommitmentServiceTest {
 
 		@Test
 		void getCommitmentMatrixWithSpecificValues() {
-			
+
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// a0 = (2, 10)
@@ -283,14 +284,14 @@ class CommitmentServiceTest {
 			GroupVector<ZqElement, ZqGroup> r = GroupVector.from(rValues);
 			// ck = (2, 3, 4)
 			List<GqElement> gElements = new ArrayList<>();
-			GqElement h = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
-			gElements.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
-			gElements.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
+			GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
 			CommitmentKey ck = new CommitmentKey(h, gElements);
 			// c = (3, 4)
 			List<GqElement> expected = new ArrayList<>(2);
-			expected.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
-			expected.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
+			expected.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
+			expected.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
 
 			assertEquals(GroupVector.from(expected), CommitmentService.getCommitmentMatrix(a, r, ck));
 		}
@@ -370,7 +371,7 @@ class CommitmentServiceTest {
 		@Test
 		@DisplayName("with simple values returns expected result")
 		void getCommitmentVectorWithSpecificValues() {
-			
+
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// a = (2, 10)
@@ -383,13 +384,13 @@ class CommitmentServiceTest {
 			r.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
 			// ck = (2, 3)
 			List<GqElement> gElements = new ArrayList<>();
-			GqElement h = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
-			gElements.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
+			GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
 			CommitmentKey ck = new CommitmentKey(h, gElements);
 			// c = (12, 1)
 			List<GqElement> expected = new ArrayList<>(2);
-			expected.add(GqElement.create(BigInteger.valueOf(12), specificGqGroup));
-			expected.add(GqElement.create(BigInteger.ONE, specificGqGroup));
+			expected.add(GqElementFactory.fromValue(BigInteger.valueOf(12), specificGqGroup));
+			expected.add(GqElementFactory.fromValue(BigInteger.ONE, specificGqGroup));
 
 			assertEquals(GroupVector.from(expected),
 					CommitmentService.getCommitmentVector(GroupVector.from(a), GroupVector.from(r), ck));

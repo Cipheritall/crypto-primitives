@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
@@ -36,24 +37,24 @@ public class TestParser {
 	static GroupVector<GqElement, GqGroup> parseCommitment(JsonData parent, String commitmentField, GqGroup group) {
 		final BigInteger[] values = parent.get(commitmentField, BigInteger[].class);
 		return Arrays.stream(values)
-				.map(bi -> GqElement.create(bi, group))
+				.map(bi -> GqElementFactory.fromValue(bi, group))
 				.collect(toGroupVector());
 	}
 
 	static GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertexts(JsonData ciphertextsData, GqGroup group) {
 		List<ElGamalMultiRecipientCiphertext> results = new LinkedList<>();
-		for(JsonNode ciphertextNode: ciphertextsData.getJsonNode()) {
+		for (JsonNode ciphertextNode : ciphertextsData.getJsonNode()) {
 			results.add(parseCiphertext(ciphertextNode, group));
 		}
 		return GroupVector.from(results);
 	}
 
-	static ElGamalMultiRecipientCiphertext parseCiphertext(JsonNode ciphertextNode, GqGroup group){
+	static ElGamalMultiRecipientCiphertext parseCiphertext(JsonNode ciphertextNode, GqGroup group) {
 		JsonData ciphertextData = new JsonData(ciphertextNode);
 		BigInteger gamma = ciphertextData.get("gamma", BigInteger.class);
-		GqElement gammaElement = GqElement.create(gamma, group);
+		GqElement gammaElement = GqElementFactory.fromValue(gamma, group);
 		BigInteger[] phis = ciphertextData.get("phis", BigInteger[].class);
-		List<GqElement> phiElements = Arrays.stream(phis).map(value -> GqElement.create(value, group)).collect(toList());
+		List<GqElement> phiElements = Arrays.stream(phis).map(value -> GqElementFactory.fromValue(value, group)).collect(toList());
 		return ElGamalMultiRecipientCiphertext.create(gammaElement, phiElements);
 	}
 }

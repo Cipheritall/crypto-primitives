@@ -1,0 +1,62 @@
+[
+	{
+		"description": "0xff cut to 1",
+		"input": {
+			"bit_length": 1,
+			"value": "/w=="
+		},
+		"output": {
+			"result": "AQ=="
+		}
+	},
+	{
+		"description": "0xf cut to 2",
+		"input": {
+			"bit_length": 2,
+			"value": "Dw=="
+		},
+		"output": {
+			"result": "Aw=="
+		}
+	},
+	{
+		"description": "0xff cut to 8",
+		"input": {
+			"bit_length": 8,
+			"value": "/w=="
+		},
+		"output": {
+			"result": "/w=="
+		}
+	},
+	{
+		"description": "0xbeef cut to 7",
+		"input": {
+			"bit_length": 7,
+			"value": "vu8="
+		},
+		"output": {
+			"result": "bw=="
+		}
+	},
+	{
+		"description": "0xc0ffee cut to 13",
+		"input": {
+			"bit_length": 13,
+			"value": "wP/u"
+		},
+		"output": {
+			"result": "H+4="
+		}
+	},
+	{
+		"description": "0xabcd cut to 9",
+		"input": {
+			"bit_length": 9,
+			"value": "q80="
+		},
+		"output": {
+			"result": "Ac0="
+		}
+	}
+]

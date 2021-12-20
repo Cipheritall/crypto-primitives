@@ -15,14 +15,13 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
@@ -156,13 +155,13 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 			ZqElement zNine = ZqElement.create(NINE, zqGroup);
 
 			// GqElements
-			GqElement gOne = GqElement.create(BigInteger.ONE, gqGroup);
-			GqElement gTwo = GqElement.create(TWO, gqGroup);
-			GqElement gFour = GqElement.create(FOUR, gqGroup);
-			GqElement gEight = GqElement.create(EIGHT, gqGroup);
-			GqElement gNine = GqElement.create(NINE, gqGroup);
-			GqElement gTwelve = GqElement.create(TWELVE, gqGroup);
-			GqElement gThirteen = GqElement.create(THIRTEEN, gqGroup);
+			GqElement gOne = GqElementFactory.fromValue(BigInteger.ONE, gqGroup);
+			GqElement gTwo = GqElementFactory.fromValue(TWO, gqGroup);
+			GqElement gFour = GqElementFactory.fromValue(FOUR, gqGroup);
+			GqElement gEight = GqElementFactory.fromValue(EIGHT, gqGroup);
+			GqElement gNine = GqElementFactory.fromValue(NINE, gqGroup);
+			GqElement gTwelve = GqElementFactory.fromValue(TWELVE, gqGroup);
+			GqElement gThirteen = GqElementFactory.fromValue(THIRTEEN, gqGroup);
 
 			// Create ciphertext vector: C = ((4, 9, 1), (2, 13, 4))
 			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = GroupVector.of(
@@ -235,11 +234,13 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		@DisplayName("Verifying decryptions with valid inputs does not throw")
 		void verifyDecryptionsWithValidInput() {
 			Boolean result = assertDoesNotThrow(
-					() -> zeroKnowledgeProofservice.verifyDecryptions(ciphertexts, publicKey, verifiableDecryptions, auxiliaryInformation).isVerified());
+					() -> zeroKnowledgeProofservice.verifyDecryptions(ciphertexts, publicKey, verifiableDecryptions, auxiliaryInformation)
+							.isVerified());
 			assertTrue(result);
 
 			result = assertDoesNotThrow(
-					() -> zeroKnowledgeProofservice.verifyDecryptions(ciphertexts, publicKey, verifiableDecryptionsEmptyAux, ImmutableList.of()).isVerified());
+					() -> zeroKnowledgeProofservice.verifyDecryptions(ciphertexts, publicKey, verifiableDecryptionsEmptyAux, ImmutableList.of())
+							.isVerified());
 			assertTrue(result);
 		}
 

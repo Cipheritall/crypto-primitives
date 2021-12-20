@@ -23,13 +23,14 @@ import java.util.Objects;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 @SuppressWarnings("java:S100")
-public class PlaintextEqualityProof implements HashableList {
+public class PlaintextEqualityProof implements GroupVectorElement<ZqGroup>, HashableList {
 
 	private final ZqElement e;
 	private final GroupVector<ZqElement, ZqGroup> z;
@@ -54,6 +55,16 @@ public class PlaintextEqualityProof implements HashableList {
 	}
 
 	@Override
+	public ZqGroup getGroup() {
+		return e.getGroup();
+	}
+
+	@Override
+	public int size() {
+		return z.size();
+	}
+
+	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
@@ -74,4 +85,5 @@ public class PlaintextEqualityProof implements HashableList {
 	public ImmutableList<? extends Hashable> toHashableForm() {
 		return ImmutableList.of(e, z);
 	}
+
 }

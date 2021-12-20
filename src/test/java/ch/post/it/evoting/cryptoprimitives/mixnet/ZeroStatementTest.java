@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -110,7 +110,8 @@ class ZeroStatementTest {
 	@Test
 	@DisplayName("constructed with commitments of different size throws IllegalArgumentException")
 	void constructDiffSizeCommitments() {
-		final GroupVector<GqElement, GqGroup> additionalElementCommitmentsB = commitmentsB.append(GqElement.create(BigInteger.ONE, gqGroup));
+		final GroupVector<GqElement, GqGroup> additionalElementCommitmentsB = commitmentsB.append(
+				GqElementFactory.fromValue(BigInteger.ONE, gqGroup));
 
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroStatement(commitmentsA, additionalElementCommitmentsB, y));
