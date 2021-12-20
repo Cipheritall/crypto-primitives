@@ -161,13 +161,18 @@ class ConversionServiceTest {
 
 	@Test
 	void testIntegerToStringWithNullInputThrowsNullPointerException() {
-		assertThrows(NullPointerException.class, () -> integerToString(null));
+		assertThrows(NullPointerException.class, () -> integerToString((BigInteger) null));
+
+		assertThrows(NullPointerException.class, () -> integerToString((Integer) null));
 	}
 
 	@Test
 	void testIntegerToStringWithNegativeInputThrowsIllegalArgumentException() {
 		BigInteger x = BigInteger.valueOf(-1L);
 		assertThrows(IllegalArgumentException.class, () -> integerToString(x));
+
+		Integer y = -1;
+		assertThrows(IllegalArgumentException.class, () -> integerToString(y));
 	}
 
 	@Test
@@ -183,6 +188,21 @@ class ConversionServiceTest {
 		int size = random.nextInt(32);
 		BigInteger value = new BigInteger(size, random);
 		BigInteger cycledValue = stringToInteger(ConversionService.integerToString(value));
+		assertEquals(value, cycledValue);
+	}
+
+	@Test
+	void testZeroIntegerToStringAndBackIsOriginalValue() {
+		Integer value = 0;
+		Integer cycledValue = stringToInteger(ConversionService.integerToString(value)).intValue();
+		assertEquals(value, cycledValue);
+	}
+
+	//Cyclic test Integer to String and back
+	@RepeatedTest(10)
+	void testRandomIntegerToStringAndBackIsOriginalValue() {
+		Integer value = random.nextInt(32);
+		Integer cycledValue = stringToInteger(ConversionService.integerToString(value)).intValue();
 		assertEquals(value, cycledValue);
 	}
 }

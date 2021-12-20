@@ -49,21 +49,25 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 	private final DecryptionProofService decryptionProofService;
 	private final ExponentiationProofService exponentiationProofService;
+	private final PlaintextEqualityProofService plaintextEqualityProofService;
 
 	/**
 	 * Instantiates a zero knowledge proof service which operates in a given group.
 	 */
 	public ZeroKnowledgeProofService() {
 		final RandomService randomService = new RandomService();
-		HashService hashService = HashService.getInstance();
+		final HashService hashService = HashService.getInstance();
+
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
+		plaintextEqualityProofService = new PlaintextEqualityProofService(randomService, hashService);
 	}
 
 	@VisibleForTesting
 	public ZeroKnowledgeProofService(final RandomService randomService, final HashService hashService) {
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
+		plaintextEqualityProofService = new PlaintextEqualityProofService(randomService, hashService);
 	}
 
 	@Override
@@ -152,5 +156,13 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	public boolean verifyExponentiation(GroupVector<GqElement, GqGroup> bases, GroupVector<GqElement, GqGroup> exponentiations,
 			ExponentiationProof proof, List<String> auxiliaryInformation) {
 		return exponentiationProofService.verifyExponentiation(bases, exponentiations, proof, auxiliaryInformation);
+	}
+
+	@Override
+	public boolean verifyPlaintextEquality(final ElGamalMultiRecipientCiphertext firstCiphertext,
+			final ElGamalMultiRecipientCiphertext secondCiphertext, final GqElement firstPublicKey, final GqElement secondPublicKey,
+			final PlaintextEqualityProof plaintextEqualityProof, final List<String> auxiliaryInformation) {
+		return plaintextEqualityProofService.verifyPlaintextEquality(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey,
+				plaintextEqualityProof, auxiliaryInformation);
 	}
 }

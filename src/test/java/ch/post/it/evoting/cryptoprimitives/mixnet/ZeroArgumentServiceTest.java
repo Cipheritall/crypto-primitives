@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCommitment;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -31,8 +32,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
@@ -542,9 +541,11 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 			// Statement.
 			final GroupVector<GqElement, GqGroup> commitmentsA = GroupVector.of(
-					GqElement.create(FIVE, simpleGqGroup), GqElement.create(THREE, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup));
+					GqElementFactory.fromValue(FIVE, simpleGqGroup), GqElementFactory.fromValue(THREE, simpleGqGroup),
+					GqElementFactory.fromValue(FOUR, simpleGqGroup));
 			final GroupVector<GqElement, GqGroup> commitmentsB = GroupVector.of(
-					GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup), GqElement.create(NINE, simpleGqGroup));
+					GqElementFactory.fromValue(FOUR, simpleGqGroup), GqElementFactory.fromValue(NINE, simpleGqGroup),
+					GqElementFactory.fromValue(NINE, simpleGqGroup));
 			final ZqElement y = ZqElement.create(TWO, simpleZqGroup);
 
 			final ZeroStatement simpleZeroStatement = new ZeroStatement(commitmentsA, commitmentsB, y);
@@ -564,12 +565,14 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			final ZeroWitness simpleZeroWitness = new ZeroWitness(simpleMatrixA, simpleMatrixB, simpleExponentsR, simpleExponentsS);
 
 			// Argument.
-			final GqElement cA0 = GqElement.create(FIVE, simpleGqGroup);
-			final GqElement cBm = GqElement.create(ONE, simpleGqGroup);
+			final GqElement cA0 = GqElementFactory.fromValue(FIVE, simpleGqGroup);
+			final GqElement cBm = GqElementFactory.fromValue(ONE, simpleGqGroup);
 			final GroupVector<GqElement, GqGroup> cd = GroupVector.of(
-					GqElement.create(FOUR, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup),
-					GqElement.create(NINE, simpleGqGroup), GqElement.create(ONE, simpleGqGroup), GqElement.create(THREE, simpleGqGroup),
-					GqElement.create(ONE, simpleGqGroup));
+					GqElementFactory.fromValue(FOUR, simpleGqGroup), GqElementFactory.fromValue(FOUR, simpleGqGroup),
+					GqElementFactory.fromValue(NINE, simpleGqGroup),
+					GqElementFactory.fromValue(NINE, simpleGqGroup), GqElementFactory.fromValue(ONE, simpleGqGroup),
+					GqElementFactory.fromValue(THREE, simpleGqGroup),
+					GqElementFactory.fromValue(ONE, simpleGqGroup));
 			final GroupVector<ZqElement, ZqGroup> aPrime = GroupVector.of(
 					ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
 			final GroupVector<ZqElement, ZqGroup> bPrime = GroupVector.of(
@@ -591,11 +594,12 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			final ZeroArgument simpleZeroArgument = zeroArgumentBuilder.build();
 
 			// PublicKey and commitmentKey.
-			final GqElement h = GqElement.create(NINE, simpleGqGroup);
-			final List<GqElement> g = asList(GqElement.create(FOUR, simpleGqGroup), GqElement.create(NINE, simpleGqGroup));
+			final GqElement h = GqElementFactory.fromValue(NINE, simpleGqGroup);
+			final List<GqElement> g = asList(GqElementFactory.fromValue(FOUR, simpleGqGroup), GqElementFactory.fromValue(NINE, simpleGqGroup));
 			final CommitmentKey simpleCommitmentKey = new CommitmentKey(h, g);
 
-			final List<GqElement> pkElements = asList(GqElement.create(FOUR, simpleGqGroup), GqElement.create(FOUR, simpleGqGroup));
+			final List<GqElement> pkElements = asList(GqElementFactory.fromValue(FOUR, simpleGqGroup),
+					GqElementFactory.fromValue(FOUR, simpleGqGroup));
 			final ElGamalMultiRecipientPublicKey simplePublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 			// Mock random elements. There are 13 values to mock:

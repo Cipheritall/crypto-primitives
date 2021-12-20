@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -50,10 +52,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
@@ -84,7 +90,7 @@ class HashServiceTest {
 		assertEquals(32, hashService.getHashLength());
 	}
 
-	static Stream<Arguments> jsonFileArgumentProvider() {
+	static Stream<Arguments> jsonFileRecursiveHashArgumentProvider() {
 
 		final List<TestParameters> parametersList = TestParameters.fromResource("/recursive-hash-sha3-256.json");
 
@@ -137,7 +143,7 @@ class HashServiceTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("jsonFileArgumentProvider")
+	@MethodSource("jsonFileRecursiveHashArgumentProvider")
 	@DisplayName("recursiveHash of specific input returns expected output")
 	void testRecursiveHashWithRealValues(final String messageDigest, final Hashable[] input, final byte[] output, final String description) {
 		if (!messageDigest.equals("SHA3-256")) {
@@ -352,6 +358,145 @@ class HashServiceTest {
 		byte[] secondHash = hashService.recursiveHash(second);
 		assertNotEquals(firstHash, secondHash);
 	}
+
+	@Test
+	@DisplayName("calling hashAndSquare with a null argument throws an exception.")
+	void nullCheckTest() {
+
+		final HashService hashService = HashService.getInstance();
+		final BigInteger q = BigInteger.valueOf(11);
+		final BigInteger p = BigInteger.valueOf(23);
+		final BigInteger g = BigInteger.valueOf(2);
+
+		final GqGroup group = new GqGroup(p, q, g);
+
+		assertThrows(NullPointerException.class, () -> hashService.hashAndSquare(null, group));
+		assertThrows(NullPointerException.class, () -> hashService.hashAndSquare(g, null));
+	}
+
+	@Test
+	@DisplayName("calling hashAndSquare on a valid element with a hash service with a too big hash length throws an exception.")
+	void hashAndSquareWithIncompatibleHashService() {
+		final HashService hashService = HashService.getInstance();
+		final BigInteger q = BigInteger.valueOf(11);
+		final BigInteger p = BigInteger.valueOf(23);
+		final BigInteger g = BigInteger.valueOf(2);
+
+		final GqGroup group = new GqGroup(p, q, g);
+
+		assertThrows(IllegalArgumentException.class, () -> hashService.hashAndSquare(g, group));
+	}
+
+	private static Stream<Arguments> onValidGqElementReturnsExpectedResultTestSource() {
+		final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();
+		final ZqGroup largeZqGroup = new ZqGroup(largeGqGroup.getQ().subtract(BigInteger.ONE));
+		final BigInteger hugeBigInteger = new BigInteger(
+				"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"
+						+ "90123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+						+ "12345678901234567890123456789012345678901234567889").mod(largeZqGroup.getQ());
+
+		return Stream.of(
+				Arguments.of(ZqElement.create(BigInteger.valueOf(2), largeZqGroup), BigInteger.valueOf(9)),
+				Arguments.of(ZqElement.create(BigInteger.ZERO, largeZqGroup), BigInteger.ONE),
+				Arguments.of(ZqElement.create(hugeBigInteger, largeZqGroup),
+						new BigInteger(
+								"1524157875323883675049535156256668194500838287337600975522511812231126352691000152415888766956267751867094662703"
+										+ "8562550221003043773814983252552966212772443410028959019878067369875323883776284103056503581773537875324142"
+										+ "5392470931290961772004267645087943911297546105808629782048750495351663801249845254991620837982015295046486"
+										+ "8506294772171754305749287913428140039628135128791345625361987773784484098503276941962810547407529340061877"
+										+ "7625383002591070412741960252522481346377076666750190519886267337309751562263087639079520012193273126047859"
+										+ "425087639153757049236500533455762536198787501905199875019052100"))
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("onValidGqElementReturnsExpectedResultTestSource")
+	@DisplayName("calling hashAndSquare on a valid gqElement with an hash call returning a specific mocked value returns the expected result.")
+	void onValidGqElementReturnsExpectedResultTest(final ZqElement mockedHash, final BigInteger expectedResult) {
+
+		final HashService hashService = spy(HashService.class);
+		doReturn((mockedHash)).when(hashService).recursiveHashToZq(any(), any());
+
+		final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();
+
+		assertEquals(expectedResult, hashService.hashAndSquare(BigInteger.ONE, largeGqGroup).getValue());
+	}
+
+	static Stream<Arguments> jsonFileRecursiveHashToZqArgumentProvider() {
+
+		final List<TestParameters> parametersList = TestParameters.fromResource("/recursive-hash-to-zq.json");
+
+		return parametersList.stream().parallel().map(testParameters -> {
+
+			final JsonData input = testParameters.getInput();
+			final BigInteger q = input.get("q", BigInteger.class);
+			final JsonData valuesData = input.getJsonData("values");
+			Hashable[] values = readInput(valuesData).toArray(new Hashable[] {});
+
+			JsonData output = testParameters.getOutput();
+			BigInteger resultValue = output.get("result", BigInteger.class);
+			final ZqElement result = ZqElement.create(resultValue, new ZqGroup(q));
+
+			return Arguments.of(q, values, result, testParameters.getDescription());
+		});
+	}
+
+	@ParameterizedTest
+	@MethodSource("jsonFileRecursiveHashToZqArgumentProvider")
+	@DisplayName("recursiveHashToZq of specific input returns expected output")
+	void testRecursiveHashToZqWithRealValues(final BigInteger q, final Hashable[] input, final ZqElement output, final String description) {
+		HashService testHashService = HashService.getInstance();
+		ZqElement actual = testHashService.recursiveHashToZq(q, input);
+		assertEquals(output, actual, String.format("assertion failed for: %s", description));
+	}
+
+
+	static Stream<Arguments> jsonFileCutToBitLengthArgumentProvider() {
+
+		final List<TestParameters> parametersList = TestParameters.fromResource("/cut-to-bit-length.json");
+
+		return parametersList.stream().parallel().map(testParameters -> {
+
+			final String description = testParameters.getDescription();
+
+			final JsonData input = testParameters.getInput();
+			final Integer bitLength = input.get("bit_length", Integer.class);
+			final byte[] value = input.get("value", byte[].class);
+
+			JsonData output = testParameters.getOutput();
+			final byte[] result = output.get("result", byte[].class);
+
+			return Arguments.of(value, bitLength, result, description);
+		});
+	}
+
+	@Test
+	void testCutToBitLengthWithNullThrows() {
+		assertThrows(NullPointerException.class, () -> hashService.cutToBitLength(null, 1));
+	}
+
+	@Test
+	void testCutToBitLengtRequestedLengthZeroThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> hashService.cutToBitLength(new byte[] { 0b10011 }, 0));
+		assertEquals("The requested length must be strictly positive", Throwables.getRootCause(exception).getMessage());
+	}
+
+	@Test
+	void testCutToBitLengthRequestedLengthGreaterThanByteArrayBitLengthThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> hashService.cutToBitLength(new byte[] { 0b1001101 }, 9));
+		assertEquals("The requested length must not be greater than the bit length of the byte array", Throwables.getRootCause(exception).getMessage());
+	}
+
+	@ParameterizedTest
+	@MethodSource("jsonFileCutToBitLengthArgumentProvider")
+	@DisplayName("cutToBitLength of specific input returns expected output")
+	void testCutToBitLengthWithRealValues(final byte[] byteArray, final int requestedLength, final byte[] expectedResult, final String description) {
+		final byte[] actualResult = hashService.cutToBitLength(byteArray, requestedLength);
+		assertArrayEquals(expectedResult, actualResult, String.format("assertion failed for: %s", description));
+	}
+
 
 	/**
 	 * The test below ascertains that the underlying MessageDigest instance respects the following equality:

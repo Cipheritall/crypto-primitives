@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.PlaintextEqualityProofService.computePhiPlaintextEquality;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -149,10 +150,10 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 			final ZqGroup zqGroup = new ZqGroup(BigInteger.valueOf(5));
 			final ZqElement zero = ZqElement.create(BigInteger.valueOf(0), zqGroup);
 			final ZqElement three = ZqElement.create(BigInteger.valueOf(3), zqGroup);
-			final GqElement one = GqElement.create(BigInteger.valueOf(1), gqGroup);
-			final GqElement four = GqElement.create(BigInteger.valueOf(4), gqGroup);
-			final GqElement five = GqElement.create(BigInteger.valueOf(5), gqGroup);
-			final GqElement nine = GqElement.create(BigInteger.valueOf(9), gqGroup);
+			final GqElement one = GqElementFactory.fromValue(BigInteger.valueOf(1), gqGroup);
+			final GqElement four = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
+			final GqElement five = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
+			final GqElement nine = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
 
 			final GroupVector<GqElement, GqGroup> image = computePhiPlaintextEquality(GroupVector.of(zero, three), four, nine);
 			final GroupVector<GqElement, GqGroup> expectedImage = GroupVector.of(one, five, four);
@@ -315,15 +316,15 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 			final ZqElement zqTwo = ZqElement.create(2, zqGroup);
 			final ZqElement zqTree = ZqElement.create(3, zqGroup);
 
-			final GqElement gqOne = GqElement.create(BigInteger.valueOf(1), gqGroup);
-			final GqElement gqThree = GqElement.create(BigInteger.valueOf(3), gqGroup);
-			final GqElement gqFive = GqElement.create(BigInteger.valueOf(5), gqGroup);
+			final GqElement gqOne = GqElementFactory.fromValue(BigInteger.valueOf(1), gqGroup);
+			final GqElement gqThree = GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup);
+			final GqElement gqFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
 
 			// Inputs.
 			final ElGamalMultiRecipientCiphertext firstCiphertext = ElGamalMultiRecipientCiphertext.create(gqThree, singletonList(gqOne));
 			final ElGamalMultiRecipientCiphertext secondCiphertext = ElGamalMultiRecipientCiphertext.create(gqThree, singletonList(gqFive));
-			final GqElement firstPublicKey = GqElement.create(BigInteger.valueOf(4), gqGroup);
-			final GqElement secondPublicKey = GqElement.create(BigInteger.valueOf(9), gqGroup);
+			final GqElement firstPublicKey = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
+			final GqElement secondPublicKey = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
 			final GroupVector<ZqElement, ZqGroup> randomness = GroupVector.of(zqTwo, zqTwo);
 			final List<String> iAux = Arrays.asList("aux", "info");
 
@@ -504,7 +505,7 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 					// Parse firstCiphertext (upper_c) parameters
 					final BigInteger[] upperCArray = input.get("upper_c", BigInteger[].class);
 					final List<GqElement> upperCElements = Arrays.stream(upperCArray)
-							.map(upperCA -> GqElement.create(upperCA, gqGroup))
+							.map(upperCA -> GqElementFactory.fromValue(upperCA, gqGroup))
 							.collect(toList());
 
 					final GqElement firstGamma = upperCElements.get(0);
@@ -515,7 +516,7 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 					// Parse secondCiphertext (upper_c_prime) parameters
 					final BigInteger[] upperCPrimeArray = input.get("upper_c_prime", BigInteger[].class);
 					final List<GqElement> upperCPrimeElements = Arrays.stream(upperCPrimeArray)
-							.map(upperCPrimeA -> GqElement.create(upperCPrimeA, gqGroup))
+							.map(upperCPrimeA -> GqElementFactory.fromValue(upperCPrimeA, gqGroup))
 							.collect(toList());
 
 					final GqElement secondGamma = upperCPrimeElements.get(0);
@@ -525,11 +526,11 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 
 					// Parse firstPublicKey (h) parameter
 					final BigInteger h = input.get("h", BigInteger.class);
-					GqElement firstPublicKey = GqElement.create(h, gqGroup);
+					GqElement firstPublicKey = GqElementFactory.fromValue(h, gqGroup);
 
 					// Parse secondPublicKey (h_prime) parameter
 					final BigInteger hPrime = input.get("h_prime", BigInteger.class);
-					GqElement secondPublicKey = GqElement.create(hPrime, gqGroup);
+					GqElement secondPublicKey = GqElementFactory.fromValue(hPrime, gqGroup);
 
 					// Parse plaintextEqualityProof (proof) parameters
 					final JsonData proof = input.getJsonData("proof");
