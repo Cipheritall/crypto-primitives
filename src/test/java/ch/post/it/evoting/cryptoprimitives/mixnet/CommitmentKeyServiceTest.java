@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -142,24 +143,24 @@ class CommitmentKeyServiceTest {
 
 		assertNotNull(verifiableCommitmentKey.getGroup());
 
-		final GqElement h = GqElement.create(BigInteger.valueOf(36), gqGroup);
+		final GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(36), gqGroup);
 
 		final List<GqElement> gqElements = Arrays.asList(
-				GqElement.create(BigInteger.valueOf(28), gqGroup),
-				GqElement.create(BigInteger.valueOf(15), gqGroup),
-				GqElement.create(BigInteger.valueOf(35), gqGroup),
-				GqElement.create(BigInteger.valueOf(45), gqGroup),
-				GqElement.create(BigInteger.valueOf(26), gqGroup),
-				GqElement.create(BigInteger.valueOf(53), gqGroup),
-				GqElement.create(BigInteger.valueOf(22), gqGroup),
-				GqElement.create(BigInteger.valueOf(48), gqGroup),
-				GqElement.create(BigInteger.valueOf(25), gqGroup),
-				GqElement.create(BigInteger.valueOf(20), gqGroup),
-				GqElement.create(BigInteger.valueOf(9), gqGroup),
-				GqElement.create(BigInteger.valueOf(12), gqGroup),
-				GqElement.create(BigInteger.valueOf(29), gqGroup),
-				GqElement.create(BigInteger.valueOf(21), gqGroup),
-				GqElement.create(BigInteger.valueOf(4), gqGroup));
+				GqElementFactory.fromValue(BigInteger.valueOf(28), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(15), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(35), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(45), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(26), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(53), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(22), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(48), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(25), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(20), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(12), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(29), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(21), gqGroup),
+				GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup));
 
 		final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gqElements);
 
@@ -186,8 +187,9 @@ class CommitmentKeyServiceTest {
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
-				final GqElement h = GqElement.create(output.get("h", BigInteger.class), gqGroup);
-				final List<GqElement> gVector = Arrays.stream(output.get("g", BigInteger[].class)).map(value -> GqElement.create(value, gqGroup))
+				final GqElement h = GqElementFactory.fromValue(output.get("h", BigInteger.class), gqGroup);
+				final List<GqElement> gVector = Arrays.stream(output.get("g", BigInteger[].class))
+						.map(value -> GqElementFactory.fromValue(value, gqGroup))
 						.collect(Collectors.toList());
 				final CommitmentKey expectedCommitmentKey = new CommitmentKey(h, gVector);
 

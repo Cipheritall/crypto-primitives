@@ -190,9 +190,11 @@ def resetPomVersion(projectName, workspace, gitUrl, branchName, releaseVersion, 
 		sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --tags"
 	}
 
-	//Merge and push Release branche into develop (snapshot)
+	//Merge and push Release branch into develop (snapshot)
+	sh "git checkout ${branchName} || exit"
+	sh "git merge -s ours origin/develop || exit"
 	sh "git checkout develop || exit"
-	sh "git merge --squash -X theirs ${branchName} || git merge --squash -X theirs develop || exit"
+	sh "git merge --squash ${branchName} || exit"
 	sh "git add ."
 
 	//Commit

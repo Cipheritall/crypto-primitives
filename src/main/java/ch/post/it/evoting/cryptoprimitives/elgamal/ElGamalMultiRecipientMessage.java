@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -59,7 +60,7 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	 * @return the message (1, ..., 1) with {@code size} elements
 	 */
 	public static ElGamalMultiRecipientMessage ones(final GqGroup group, final int size) {
-		return constantMessage(GqElement.create(BigInteger.ONE, group), size);
+		return constantMessage(GqElementFactory.fromValue(BigInteger.ONE, group), size);
 	}
 
 	/**

@@ -179,22 +179,8 @@ public class PlaintextEqualityProofService {
 	}
 
 	/**
-	 * Verifies the validity of a plaintext equality proof.
-	 *
-	 * @param firstCiphertext        C = (c<sub>0</sub>, c<sub>1</sub>) ∈ G<sub>q</sub><sup>2</sup>. Not null.
-	 * @param secondCiphertext       C' = (c'<sub>0</sub>, c'<sub>1</sub>) ∈ G<sub>q</sub><sup>2</sup>. Not null.
-	 * @param firstPublicKey         h ∈ G<sub>q</sub>. Not null.
-	 * @param secondPublicKey        h' ∈ G<sub>q</sub>. Not null.
-	 * @param plaintextEqualityProof (e, z), the plaintext equality proof to be verified. Must be non null.
-	 * @param auxiliaryInformation   i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null. Can be empty.
-	 * @return {@code true} if the plaintext equality proof is valid, {@code false} otherwise.
-	 * @throws NullPointerException     if any of the bases, exponentiations, or plaintextEqualityProof is null
-	 * @throws IllegalArgumentException if
-	 *                                  <ul>
-	 *                                      <li>the ciphertexts do not contain exactly one phi</li>
-	 *                                      <li>the ciphertexts and public keys do not belong to the same group</li>
-	 *                                      <li>The plaintext equality proof must have the same group order as the ciphertext, the message and the public key.</li>
-	 *                                  </ul>
+	 * @see ZeroKnowledgeProof#verifyPlaintextEquality(ElGamalMultiRecipientCiphertext, ElGamalMultiRecipientCiphertext, GqElement, GqElement,
+	 * PlaintextEqualityProof, List)
 	 */
 	boolean verifyPlaintextEquality(final ElGamalMultiRecipientCiphertext firstCiphertext,
 			final ElGamalMultiRecipientCiphertext secondCiphertext, final GqElement firstPublicKey, final GqElement secondPublicKey,

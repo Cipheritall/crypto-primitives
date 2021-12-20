@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -105,7 +106,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createArgumentsProvider() {
 
-		final List<GqElement> invalidPhis = Arrays.asList(GqElement.create(BigInteger.ONE, gqGroup), null);
+		final List<GqElement> invalidPhis = Arrays.asList(GqElementFactory.fromValue(BigInteger.ONE, gqGroup), null);
 
 		final List<GqElement> differentGroupPhis = Arrays.asList(gqGroupGenerator.genMember(), otherGqGroupGenerator.genMember());
 
@@ -248,23 +249,23 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 				// Parse first ciphertext parameters.
 				final JsonData upperCa = testParameters.getInput().getJsonData("upper_c_a");
 
-				final GqElement gammaA = GqElement.create(upperCa.get("gamma", BigInteger.class), group);
+				final GqElement gammaA = GqElementFactory.fromValue(upperCa.get("gamma", BigInteger.class), group);
 				final BigInteger[] phisAArray = upperCa.get("phis", BigInteger[].class);
-				final List<GqElement> phisA = Arrays.stream(phisAArray).map(phiA -> GqElement.create(phiA, group)).collect(toList());
+				final List<GqElement> phisA = Arrays.stream(phisAArray).map(phiA -> GqElementFactory.fromValue(phiA, group)).collect(toList());
 
 				// Parse second ciphertext parameters.
 				final JsonData upperCb = testParameters.getInput().getJsonData("upper_c_b");
 
-				final GqElement gammaB = GqElement.create(upperCb.get("gamma", BigInteger.class), group);
+				final GqElement gammaB = GqElementFactory.fromValue(upperCb.get("gamma", BigInteger.class), group);
 				final BigInteger[] phisBArray = upperCb.get("phis", BigInteger[].class);
-				final List<GqElement> phisB = Arrays.stream(phisBArray).map(phi -> GqElement.create(phi, group)).collect(toList());
+				final List<GqElement> phisB = Arrays.stream(phisBArray).map(phi -> GqElementFactory.fromValue(phi, group)).collect(toList());
 
 				// Parse multiplication result parameters.
 				final JsonData outputJsonData = testParameters.getOutput();
 
-				final GqElement gammaRes = GqElement.create(outputJsonData.get("gamma", BigInteger.class), group);
+				final GqElement gammaRes = GqElementFactory.fromValue(outputJsonData.get("gamma", BigInteger.class), group);
 				final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
-				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElement.create(phi, group)).collect(toList());
+				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElementFactory.fromValue(phi, group)).collect(toList());
 
 				return Arguments.of(gammaA, phisA, gammaB, phisB, gammaRes, phisRes, testParameters.getDescription());
 			}
@@ -295,20 +296,20 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		final GqGroup group = new GqGroup(BigInteger.valueOf(11), BigInteger.valueOf(5), BigInteger.valueOf(3));
 
 		// Create first ciphertext.
-		final GqElement gammaA = GqElement.create(BigInteger.valueOf(4), group);
+		final GqElement gammaA = GqElementFactory.fromValue(BigInteger.valueOf(4), group);
 		final List<GqElement> phisA = Arrays
-				.asList(GqElement.create(BigInteger.valueOf(3), group), GqElement.create(BigInteger.valueOf(5), group));
+				.asList(GqElementFactory.fromValue(BigInteger.valueOf(3), group), GqElementFactory.fromValue(BigInteger.valueOf(5), group));
 		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.create(gammaA, phisA);
 
 		// Create second ciphertext.
-		final GqElement gammaB = GqElement.create(BigInteger.valueOf(5), group);
+		final GqElement gammaB = GqElementFactory.fromValue(BigInteger.valueOf(5), group);
 		final List<GqElement> phisB = Arrays
-				.asList(GqElement.create(BigInteger.valueOf(9), group), GqElement.create(BigInteger.ONE, group));
+				.asList(GqElementFactory.fromValue(BigInteger.valueOf(9), group), GqElementFactory.fromValue(BigInteger.ONE, group));
 		final ElGamalMultiRecipientCiphertext ciphertextB = ElGamalMultiRecipientCiphertext.create(gammaB, phisB);
 
 		// Expected multiplication result.
-		final GqElement gammaRes = GqElement.create(BigInteger.valueOf(9), group);
-		final List<GqElement> phisRes = Arrays.asList(GqElement.create(BigInteger.valueOf(5), group), GqElement.create(BigInteger.valueOf(5),
+		final GqElement gammaRes = GqElementFactory.fromValue(BigInteger.valueOf(9), group);
+		final List<GqElement> phisRes = Arrays.asList(GqElementFactory.fromValue(BigInteger.valueOf(5), group), GqElementFactory.fromValue(BigInteger.valueOf(5),
 				group));
 		final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
 

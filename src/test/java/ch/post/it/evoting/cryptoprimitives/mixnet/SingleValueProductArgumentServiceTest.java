@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductGenerator.genSingleValueProductWitness;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductGenerator.getSingleValueProductStatement;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -30,8 +31,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -198,7 +197,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			GqGroup specificGqGroup = new GqGroup(BigInteger.valueOf(23), BigInteger.valueOf(11), BigInteger.valueOf(6));
 			ZqGroup specificZqGroup = ZqGroup.sameOrderAs(specificGqGroup);
 			// commitment = 3
-			GqElement commitment = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
+			GqElement commitment = GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup);
 			// product = 9
 			ZqElement product = ZqElement.create(BigInteger.valueOf(9), specificZqGroup);
 			// a = (2, 10)
@@ -209,19 +208,19 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			ZqElement r = ZqElement.create(BigInteger.valueOf(5), specificZqGroup);
 			// pk = (8, 16)
 			List<GqElement> pkElements = new ArrayList<>(2);
-			pkElements.add(GqElement.create(BigInteger.valueOf(8), specificGqGroup));
-			pkElements.add(GqElement.create(BigInteger.valueOf(16), specificGqGroup));
+			pkElements.add(GqElementFactory.fromValue(BigInteger.valueOf(8), specificGqGroup));
+			pkElements.add(GqElementFactory.fromValue(BigInteger.valueOf(16), specificGqGroup));
 			ElGamalMultiRecipientPublicKey pk = new ElGamalMultiRecipientPublicKey(pkElements);
 			// ck = (2, 3, 4)
 			List<GqElement> gElements = new ArrayList<>(2);
-			GqElement h = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
-			gElements.add(GqElement.create(BigInteger.valueOf(3), specificGqGroup));
-			gElements.add(GqElement.create(BigInteger.valueOf(4), specificGqGroup));
+			GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
+			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
 			CommitmentKey ck = new CommitmentKey(h, gElements);
 			// expected = (16, 2, 3, (1, 8), (1, 2), 5, 7)
-			GqElement cd = GqElement.create(BigInteger.valueOf(16), specificGqGroup);
-			GqElement cdelta = GqElement.create(BigInteger.valueOf(2), specificGqGroup);
-			GqElement cDelta = GqElement.create(BigInteger.valueOf(3), specificGqGroup);
+			GqElement cd = GqElementFactory.fromValue(BigInteger.valueOf(16), specificGqGroup);
+			GqElement cdelta = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
+			GqElement cDelta = GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup);
 			List<ZqElement> aTilde = new ArrayList<>(2);
 			aTilde.add(ZqElement.create(BigInteger.ONE, specificZqGroup));
 			aTilde.add(ZqElement.create(BigInteger.valueOf(8), specificZqGroup));
@@ -360,7 +359,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			final BigInteger caValue = svpStatement.get("c_a", BigInteger.class);
 			final BigInteger bValue = svpStatement.get("b", BigInteger.class);
 
-			final GqElement ca = GqElement.create(caValue, gqGroup);
+			final GqElement ca = GqElementFactory.fromValue(caValue, gqGroup);
 			final ZqElement b = ZqElement.create(bValue, zqGroup);
 
 			return new SingleValueProductStatement(ca, b);

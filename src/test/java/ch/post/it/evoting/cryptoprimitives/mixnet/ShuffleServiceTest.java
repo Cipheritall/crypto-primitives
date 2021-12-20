@@ -128,7 +128,7 @@ class ShuffleServiceTest {
 
 		//Create public key
 		List<GqElement> pkElements =
-				Stream.of(6, 4, 3).map(pki -> GqElement.create(BigInteger.valueOf(pki), localGroup)).collect(Collectors.toList());
+				Stream.of(6, 4, 3).map(pki -> GqElement.GqElementFactory.fromValue(BigInteger.valueOf(pki), localGroup)).collect(Collectors.toList());
 		ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 		//Create ciphertexts

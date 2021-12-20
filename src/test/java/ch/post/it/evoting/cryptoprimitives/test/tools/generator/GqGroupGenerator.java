@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementList;
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 
@@ -92,7 +93,7 @@ public class GqGroupGenerator {
 	 * Generate a GqElement belonging to the group.
 	 */
 	public GqElement genMember() {
-		return GqElement.create(genMemberValue(), group);
+		return GqElementFactory.fromValue(genMemberValue(), group);
 	}
 
 	/**

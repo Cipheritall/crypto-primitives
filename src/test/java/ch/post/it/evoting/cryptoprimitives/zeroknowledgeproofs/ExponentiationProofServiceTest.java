@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -83,10 +84,10 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		private final GqGroup gqGroup = new GqGroup(p, q, g);
 		private final ZqGroup zqGroup = new ZqGroup(q);
 
-		private final GqElement gThree = GqElement.create(BigInteger.valueOf(3), gqGroup);
-		private final GqElement gFour = GqElement.create(BigInteger.valueOf(4), gqGroup);
-		private final GqElement gFive = GqElement.create(BigInteger.valueOf(5), gqGroup);
-		private final GqElement gNine = GqElement.create(BigInteger.valueOf(9), gqGroup);
+		private final GqElement gThree = GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup);
+		private final GqElement gFour = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
+		private final GqElement gFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
+		private final GqElement gNine = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
 
 		private final ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
 		private final ZqElement zTwo = ZqElement.create(BigInteger.valueOf(2), zqGroup);
@@ -175,13 +176,13 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		void withSpecificValues() {
 			final GqGroup gqGroup = GroupTestData.getGroupP59();
 			final ZqElement preimage = ZqElement.create(3, ZqGroup.sameOrderAs(gqGroup));
-			final GroupVector<GqElement, GqGroup> bases = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup),
-					GqElement.create(BigInteger.valueOf(4), gqGroup),
-					GqElement.create(BigInteger.valueOf(9), gqGroup));
+			final GroupVector<GqElement, GqGroup> bases = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup));
 
-			final GroupVector<GqElement, GqGroup> expected = GroupVector.of(GqElement.create(BigInteger.ONE, gqGroup),
-					GqElement.create(BigInteger.valueOf(5), gqGroup),
-					GqElement.create(BigInteger.valueOf(21), gqGroup));
+			final GroupVector<GqElement, GqGroup> expected = GroupVector.of(GqElementFactory.fromValue(BigInteger.ONE, gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup),
+					GqElementFactory.fromValue(BigInteger.valueOf(21), gqGroup));
 			assertEquals(expected, ExponentiationProofService.computePhiExponentiation(preimage, bases));
 		}
 	}
@@ -268,10 +269,10 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void exponentiationsArePhiExponentiationCheck() {
-			final ZqElement otherExponent = exponent.add(ZqElement.create(BigInteger.ONE, zqGroup));
-			exponentiations = ExponentiationProofService.computePhiExponentiation(otherExponent, bases);
+			final GroupVector<GqElement, GqGroup> otherExponentiations = exponentiations.stream().map(exp -> exp.multiply(gqGroup.getGenerator()))
+					.collect(toGroupVector());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> proofService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation));
+					() -> proofService.genExponentiationProof(bases, exponent, otherExponentiations, auxiliaryInformation));
 			assertEquals("The exponentiations must correspond to the exponent's and bases' phi exponentiation.", exception.getMessage());
 		}
 
@@ -446,13 +447,13 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 					// Parse bases parameters.
 
 					final BigInteger[] basesArray = input.get("bases", BigInteger[].class);
-					final GroupVector<GqElement, GqGroup> bases = Arrays.stream(basesArray).map(basesA -> GqElement.create(basesA, gqGroup))
+					final GroupVector<GqElement, GqGroup> bases = Arrays.stream(basesArray).map(basesA -> GqElementFactory.fromValue(basesA, gqGroup))
 							.collect(toGroupVector());
 
 					// Parse exponentiations parameters
 					final BigInteger[] exponentiationsArray = input.get("statement", BigInteger[].class);
 					final GroupVector<GqElement, GqGroup> exponentiations = Arrays.stream(exponentiationsArray)
-							.map(eA -> GqElement.create(eA, gqGroup))
+							.map(eA -> GqElementFactory.fromValue(eA, gqGroup))
 							.collect(toGroupVector());
 
 					// Parse decryption proof parameters

@@ -15,15 +15,15 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 
-import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
+import com.google.common.annotations.VisibleForTesting;
+
+import ch.post.it.evoting.cryptoprimitives.GroupVector;
 
 /**
  * Defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
@@ -37,21 +37,6 @@ public final class GqElement extends GroupElement<GqGroup> {
 	// group (such as multiplying two elements of the same group).
 	private GqElement(final BigInteger value, final GqGroup group) {
 		super(value, group);
-	}
-
-	/**
-	 * Creates a {@code GqElement}. The specified value should be an element of the group.
-	 *
-	 * @param value the value of the element. Must not be null and must be an element of the group.
-	 * @param group the {@link GqGroup} to which this element belongs.
-	 * @return a new GqElement with the specified value in the given group
-	 */
-	public static GqElement create(final BigInteger value, final GqGroup group) {
-		checkNotNull(value);
-		checkNotNull(group);
-		checkArgument(group.isGroupMember(value), "Cannot create a GroupElement with value %s as it is not an element of group %s", value, group);
-
-		return new GqElement(value, group);
 	}
 
 	/**
@@ -83,28 +68,6 @@ public final class GqElement extends GroupElement<GqGroup> {
 		return new GqElement(valueExponentiated, this.group);
 	}
 
-	/**
-	 * Hashes and squares the GqElement.
-	 *
-	 * @param hashService The hash service to be used for hash computation. Must be non-null.
-	 * @return the squared hash of the GqElement.
-	 */
-	public GqElement hashAndSquare(final HashService hashService) {
-		checkNotNull(hashService);
-
-		checkArgument(hashService.getHashLength() * Byte.SIZE < this.getGroup().getQ().bitLength(),
-				"The hash length must be smaller than the bit length of this GqGroup's q.");
-
-		final byte[] x_B = integerToByteArray(this.value);
-
-		final byte[] x_h_B = hashService.recursiveHash(HashableByteArray.from(x_B));
-
-		final BigInteger x_h = byteArrayToInteger(x_h_B).add(BigInteger.ONE);
-
-		final BigInteger x_h_2 = BigIntegerOperationsService.modExponentiate(x_h, BigInteger.valueOf(2), this.group.getP());
-		return new GqElement(x_h_2, this.group);
-	}
-
 	private boolean isOfSameOrderGroup(final ZqElement exponent) {
 		return this.group.hasSameOrderAs(exponent.getGroup());
 	}
@@ -119,4 +82,106 @@ public final class GqElement extends GroupElement<GqGroup> {
 		return "GqElement [value=" + value + "," + group.toString() + "]";
 	}
 
+	public static class GqElementFactory {
+
+		private GqElementFactory() {
+			// empty on purpose
+		}
+
+		/**
+		 * Creates a {@code GqElement}. The specified value should be an element of the group.
+		 *
+		 * @param value the value of the element. Must not be null and must be an element of the group.
+		 * @param group the {@link GqGroup} to which this element belongs.
+		 * @return a new GqElement with the specified value in the given group
+		 */
+		public static GqElement fromValue(final BigInteger value, final GqGroup group) {
+			checkNotNull(value);
+			checkNotNull(group);
+			checkArgument(group.isGroupMember(value), "Cannot create a GroupElement with value %s as it is not an element of group %s", value, group);
+
+			return new GqElement(value, group);
+		}
+
+		/**
+		 * Creates a GqElement from a BigInteger by squaring it modulo p.
+		 *
+		 * @param element the BigInteger to be squared. Must be non-null.
+		 * @param group   the GqGroup in which to get the new GqElement. Must be non-null.
+		 * @return the squared element modulo p.
+		 * @throws NullPointerException     if any of the arguments is null
+		 * @throws IllegalArgumentException if the element is 0 or smaller or bigger than the group's order
+		 */
+		public static GqElement fromSquareRoot(BigInteger element, GqGroup group) {
+			checkNotNull(element);
+			checkNotNull(group);
+
+			checkArgument(element.compareTo(BigInteger.ZERO) > 0, "The element must be strictly greater than 0");
+			checkArgument(element.compareTo(group.getQ()) < 0, "The element must be smaller than the group's order");
+
+			final BigInteger y = BigIntegerOperationsService.modExponentiate(element, BigInteger.valueOf(2), group.getP());
+			return new GqElement(y, group);
+		}
+
+		/**
+		 * Collects the desired number of primes belonging to a group into a vector.
+		 *
+		 * @param gqGroup               the group of which to get the small prime group members
+		 * @param desiredNumberOfPrimes r, the desired number of prime group members. Must be strictly positive.
+		 * @return a vector of prime group members of the desired length
+		 * @throws IllegalStateException if the group does not contain the desired number of prime group members
+		 */
+		@SuppressWarnings("java:S117")
+		public static GroupVector<GqElement, GqGroup> getSmallPrimeGroupMembers(GqGroup gqGroup, final int desiredNumberOfPrimes) {
+			final int r = desiredNumberOfPrimes;
+			final BigInteger g = gqGroup.getGenerator().getValue();
+
+			checkArgument(r > 0, "The desired number of primes must be strictly positive");
+			checkArgument(BigInteger.valueOf(2).compareTo(g) <= 0 && g.compareTo(BigInteger.valueOf(4)) <= 0, "g must be 2, 3, or 4");
+			checkArgument(BigInteger.valueOf(r).compareTo(gqGroup.getQ().subtract(BigInteger.valueOf(4))) <= 0,
+					"The number of desired primes must be smaller than the number of elements in the GqGroup by at least 4");
+			checkArgument(r < 10000, "The number of desired primes must be smaller than 10000");
+
+			BigInteger current = BigInteger.valueOf(5);
+			ArrayList<GqElement> p_vector = new ArrayList<>(r);
+			int count = 0;
+			while (count < r && current.compareTo(gqGroup.getP()) < 0) {
+				if (gqGroup.isGroupMember(current) && isPrime(current.intValueExact())) {
+					p_vector.add(new GqElement(current, gqGroup));
+					count++;
+				}
+				current = current.add(BigInteger.valueOf(2));
+			}
+			if (count != r) {
+				throw new IllegalStateException("The number of primes found does not correspond to the number of desired primes.");
+			}
+			return GroupVector.from(p_vector);
+		}
+
+		/**
+		 * Checks if a given number is a prime number. This is efficient for small primes only.
+		 *
+		 * @param number n, the number to be tested. Positive
+		 * @return true if n is prime, false otherwise
+		 */
+		@VisibleForTesting
+		static boolean isPrime(final int number) {
+			checkArgument(number > 0, "The number n must be strictly positive");
+			final int n = number;
+
+			if (n == 1) {
+				return false;
+			} else if (n == 2) {
+				return true;
+			} else {
+				for (int i = 2; i <= Math.ceil(Math.sqrt(n)); i++) {
+					if (n % i == 0) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+	}
 }

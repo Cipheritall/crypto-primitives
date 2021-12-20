@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -108,10 +109,10 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		private final BigInteger TEN = BigInteger.TEN;
 
 		// Create GqElements
-		private final GqElement gThree = GqElement.create(THREE, gqGroup);
-		private final GqElement gFour = GqElement.create(FOUR, gqGroup);
-		private final GqElement gEight = GqElement.create(EIGHT, gqGroup);
-		private final GqElement gThirteen = GqElement.create(BigInteger.valueOf(13), gqGroup);
+		private final GqElement gThree = GqElementFactory.fromValue(THREE, gqGroup);
+		private final GqElement gFour = GqElementFactory.fromValue(FOUR, gqGroup);
+		private final GqElement gEight = GqElementFactory.fromValue(EIGHT, gqGroup);
+		private final GqElement gThirteen = GqElementFactory.fromValue(BigInteger.valueOf(13), gqGroup);
 
 		// Create ZqElements
 		private final ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
@@ -213,7 +214,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		void checkPhiFunctionAgainstHandCalculations() {
 
 			GqGroup groupP59 = GroupTestData.getGroupP59();
-			GqElement gamma = GqElement.create(BigInteger.valueOf(12), groupP59);
+			GqElement gamma = GqElementFactory.fromValue(BigInteger.valueOf(12), groupP59);
 
 			ZqGroup zqGroup = ZqGroup.sameOrderAs(groupP59);
 			ZqElement zqElement9 = ZqElement.create(BigInteger.valueOf(9), zqGroup);
@@ -226,12 +227,12 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 			List<GqElement> computePhiFunction = DecryptionProofService.computePhiDecryption(preImage, gamma);
 
-			GqElement gqElement36 = GqElement.create(BigInteger.valueOf(36), groupP59);
-			GqElement gqElement48 = GqElement.create(BigInteger.valueOf(48), groupP59);
-			GqElement gqElement12 = GqElement.create(BigInteger.valueOf(12), groupP59);
-			GqElement gqElement16 = GqElement.create(BigInteger.valueOf(16), groupP59);
-			GqElement gqElement22 = GqElement.create(BigInteger.valueOf(22), groupP59);
-			GqElement gqElement21 = GqElement.create(BigInteger.valueOf(21), groupP59);
+			GqElement gqElement36 = GqElementFactory.fromValue(BigInteger.valueOf(36), groupP59);
+			GqElement gqElement48 = GqElementFactory.fromValue(BigInteger.valueOf(48), groupP59);
+			GqElement gqElement12 = GqElementFactory.fromValue(BigInteger.valueOf(12), groupP59);
+			GqElement gqElement16 = GqElementFactory.fromValue(BigInteger.valueOf(16), groupP59);
+			GqElement gqElement22 = GqElementFactory.fromValue(BigInteger.valueOf(22), groupP59);
+			GqElement gqElement21 = GqElementFactory.fromValue(BigInteger.valueOf(21), groupP59);
 
 			List<GqElement> phiFunction = Arrays.asList(gqElement36, gqElement48, gqElement12, gqElement16, gqElement22, gqElement21);
 
@@ -632,19 +633,19 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 					// Parse ciphertext parameters.
 					final JsonData ciphertextData = input.getJsonData("ciphertext");
 
-					final GqElement gamma = GqElement.create(ciphertextData.get("gamma", BigInteger.class), gqGroup);
+					final GqElement gamma = GqElementFactory.fromValue(ciphertextData.get("gamma", BigInteger.class), gqGroup);
 					final BigInteger[] phisAArray = ciphertextData.get("phis", BigInteger[].class);
-					final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElement.create(phiA, gqGroup)).collect(toList());
+					final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElementFactory.fromValue(phiA, gqGroup)).collect(toList());
 					final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gamma, phi);
 
 					// Parse key pair parameters
 					final BigInteger[] pkArray = input.get("public_key", BigInteger[].class);
-					final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElement.create(skA, gqGroup)).collect(toList());
+					final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElementFactory.fromValue(skA, gqGroup)).collect(toList());
 					final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 					// Parse message parameters
 					final BigInteger[] messageArray = input.get("message", BigInteger[].class);
-					final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElement.create(mA, gqGroup)).collect(toList());
+					final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElementFactory.fromValue(mA, gqGroup)).collect(toList());
 					final ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(messageElements);
 
 					// Parse decryption proof parameters
