@@ -16,7 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -269,10 +269,10 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void exponentiationsArePhiExponentiationCheck() {
-			final ZqElement otherExponent = exponent.add(ZqElement.create(BigInteger.ONE, zqGroup));
-			exponentiations = ExponentiationProofService.computePhiExponentiation(otherExponent, bases);
+			final GroupVector<GqElement, GqGroup> otherExponentiations = exponentiations.stream().map(exp -> exp.multiply(gqGroup.getGenerator()))
+					.collect(toGroupVector());
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> proofService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation));
+					() -> proofService.genExponentiationProof(bases, exponent, otherExponentiations, auxiliaryInformation));
 			assertEquals("The exponentiations must correspond to the exponent's and bases' phi exponentiation.", exception.getMessage());
 		}
 
