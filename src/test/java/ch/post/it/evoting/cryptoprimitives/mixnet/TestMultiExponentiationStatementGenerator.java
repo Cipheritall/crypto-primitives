@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;

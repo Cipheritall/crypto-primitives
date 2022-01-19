@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 public class GroupVectorElementGenerator {

@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2021 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
-package ch.post.it.evoting.cryptoprimitives;
+package ch.post.it.evoting.cryptoprimitives.utils;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToString;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToInteger;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.integerToString;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.stringToInteger;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +36,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import ch.post.it.evoting.cryptoprimitives.utils.ConversionService;
 
 class ConversionServiceTest {
 

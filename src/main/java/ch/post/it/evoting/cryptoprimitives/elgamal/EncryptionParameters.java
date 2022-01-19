@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.integerToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.stringToByteArray;
 import static ch.post.it.evoting.cryptoprimitives.math.GqGroup.isGroupMember;
 import static com.google.common.base.Preconditions.checkNotNull;
 

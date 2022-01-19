@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -25,8 +25,6 @@ import java.util.Base64;
 import java.util.stream.Stream;
 
 import com.google.common.io.BaseEncoding;
-
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 
 /**
  * This class is thread safe.

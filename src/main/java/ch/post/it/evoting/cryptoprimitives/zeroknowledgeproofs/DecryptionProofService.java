@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.Validations.allEqual;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.utils.Validations.allEqual;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorAddition;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorScalarMultiplication;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.Verifiable;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.utils.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;

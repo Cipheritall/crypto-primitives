@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.integerToByteArray;
 
 import java.math.BigInteger;
 
@@ -31,6 +31,7 @@ public class TestHashService extends HashService {
 	private final BigInteger upperBound;
 
 	private TestHashService(final BigInteger lowerBound, final BigInteger upperBound) {
+		super();
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}
