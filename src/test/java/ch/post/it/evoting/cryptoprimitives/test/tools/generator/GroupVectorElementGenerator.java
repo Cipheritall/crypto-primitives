@@ -15,7 +15,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;

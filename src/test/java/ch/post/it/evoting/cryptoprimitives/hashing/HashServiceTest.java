@@ -19,7 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.intege
 import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.stringToByteArray;
 import static com.google.common.primitives.Bytes.concat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,7 +51,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -62,7 +60,6 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
-import ch.post.it.evoting.cryptoprimitives.utils.ByteArrays;
 
 class HashServiceTest {
 

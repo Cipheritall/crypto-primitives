@@ -30,9 +30,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.utils.Verifiable;
-import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
-
 @DisplayName("A Verifiable")
 class VerifiableTest {
 

@@ -17,8 +17,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
-import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
-
 /**
  * Elements of a GroupVector or GroupMatrix.
  *

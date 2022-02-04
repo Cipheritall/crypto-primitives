@@ -39,12 +39,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestSizedElement;
 import ch.post.it.evoting.cryptoprimitives.test.tools.math.TestGroup;
-import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 
 class GroupVectorTest {
 

@@ -29,8 +29,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.utils.ConversionService;
-
 class ConversionServiceEquivalenceTest {
 
 	private static SecureRandom secureRandom;
