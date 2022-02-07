@@ -147,7 +147,7 @@ public class RandomService {
 	 * @param byteLength The number of bytes to generate.
 	 * @return An array of {@code byteLength} random bytes.
 	 */
-	private byte[] randomBytes(final int byteLength) {
+	public byte[] randomBytes(final int byteLength) {
 		final byte[] randomBytes = new byte[byteLength];
 		secureRandom.nextBytes(randomBytes);
 
