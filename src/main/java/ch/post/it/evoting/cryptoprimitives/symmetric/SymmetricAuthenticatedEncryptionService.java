@@ -36,8 +36,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.google.common.primitives.Bytes;
 
-import ch.post.it.evoting.cryptoprimitives.ConversionService;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.utils.ConversionService;
 
 @SuppressWarnings({ "java:S116", "java:S117" })
 public class SymmetricAuthenticatedEncryptionService {

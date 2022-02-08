@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Throwables;
 
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 
 @DisplayName("SymmetricAuthenticatedEncryptionService calling")
 class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
