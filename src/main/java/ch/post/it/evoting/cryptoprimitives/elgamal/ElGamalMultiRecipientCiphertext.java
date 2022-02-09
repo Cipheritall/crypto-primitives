@@ -155,10 +155,9 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 		// Algorithm.
 		final GqElement gamma = g.exponentiate(r);
-		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 
 		final LinkedList<GqElement> phis = IntStream.range(0, l)
-				.mapToObj(i -> pk_prime.get(i).exponentiate(r).multiply(m.get(i)))
+				.mapToObj(i -> pk.get(i).exponentiate(r).multiply(m.get(i)))
 				.collect(Collectors.toCollection(LinkedList::new));
 
 		return new ElGamalMultiRecipientCiphertext(gamma, GroupVector.from(phis));

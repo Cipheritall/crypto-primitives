@@ -147,10 +147,10 @@ public class DecryptionProofService {
 		final GroupVector<ZqElement, ZqGroup> b = randomService.genRandomVector(q, l);
 		final GroupVector<GqElement, GqGroup> c = computePhiDecryption(b, gamma);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
-		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
+
 		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-						pk_prime.stream(),
+						pk.stream().limit(l),
 						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
 				.collect(toGroupVector());
 		final HashableList h_aux;
@@ -166,8 +166,8 @@ public class DecryptionProofService {
 		}
 		final BigInteger e_value = byteArrayToInteger(hashService.recursiveHash(f, y, c, h_aux));
 		final ZqElement e = ZqElement.create(e_value, ZqGroup.sameOrderAs(gqGroup));
-		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
-		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(e, sk_prime.stream().collect(toGroupVector())));
+		final GroupVector<ZqElement, ZqGroup> sk_prime = sk.stream().limit(l).collect(toGroupVector());
+		final GroupVector<ZqElement, ZqGroup> z = vectorAddition(b, vectorScalarMultiplication(e, sk_prime));
 
 		return new DecryptionProof(e, z);
 	}
@@ -232,9 +232,8 @@ public class DecryptionProofService {
 		// Algorithm.
 		final GroupVector<GqElement, GqGroup> x = computePhiDecryption(z, gamma);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
-		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
-						pk_prime.stream(),
+						pk.stream().limit(l),
 						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
 				.collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, 2 * l)

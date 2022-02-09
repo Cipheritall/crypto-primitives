@@ -19,7 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -55,29 +54,6 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
 		this.privateKeyElements = GroupVector.from(keyElements);
 		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
-	}
-
-	/**
-	 * Implements the specification CompressSecretKey algorithm. It compresses the private key to the requested length.
-	 *
-	 * @param length l, the requested length for key compression. Must be strictly positive and at most the private key size.
-	 * @return a new compressed private key with the first {@code length}-1 elements of the private key followed by the compressed computed element.
-	 */
-	public ElGamalMultiRecipientPrivateKey compress(final int length) {
-		checkArgument(0 < length, "The requested length for key compression must be strictly positive.");
-		checkArgument(length <= this.size(), "The requested length for key compression must be at most the secret key size.");
-		final int l = length;
-
-		final ZqElement identity = this.getGroup().getIdentity();
-		final ZqElement sk_prime = this.stream()
-				.skip(l - 1L)
-				.reduce(identity, ZqElement::add);
-
-		final List<ZqElement> keyElements = new LinkedList<>(this.privateKeyElements.subList(0, l - 1));
-
-		keyElements.add(sk_prime);
-
-		return new ElGamalMultiRecipientPrivateKey(keyElements);
 	}
 
 	/**

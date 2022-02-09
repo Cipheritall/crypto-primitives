@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -60,29 +59,6 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
 		this.publicKeyElements = GroupVector.from(keyElements);
 		checkArgument(!publicKeyElements.isEmpty(), "An ElGamal public key must not be empty.");
-	}
-
-	/**
-	 * Implements the specification CompressPublicKey algorithm. It compresses the public key to the requested length.
-	 *
-	 * @param length l, the requested length for key compression. Must be strictly positive and at most the public key size.
-	 * @return a compressed public key with the first {@code length}-1 elements of the public key followed by the compressed computed element.
-	 */
-	public ElGamalMultiRecipientPublicKey compress(final int length) {
-		checkArgument(0 < length, "The requested length for key compression must be strictly positive.");
-		checkArgument(length <= this.size(), "The requested length for key compression must be at most the public key size.");
-		final int l = length;
-
-		final GqElement identity = this.getGroup().getIdentity();
-		final GqElement pk_prime = this.stream()
-				.skip(l - 1L)
-				.reduce(identity, GqElement::multiply);
-
-		final List<GqElement> keyElements = new LinkedList<>(this.publicKeyElements.subList(0, l - 1));
-
-		keyElements.add(pk_prime);
-
-		return new ElGamalMultiRecipientPublicKey(keyElements);
 	}
 
 	@Override

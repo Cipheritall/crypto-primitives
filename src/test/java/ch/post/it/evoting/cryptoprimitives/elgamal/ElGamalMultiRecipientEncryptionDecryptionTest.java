@@ -110,7 +110,7 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	}
 
 	@Test
-	void testEncryptAndDecryptWithDifferentKeySizesGivesDifferentMessage() {
+	void testEncryptAndDecryptWithDifferentKeySizesGivesSameMessage() {
 		final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		final ZqElement exponent = genNonZeroExponent(gqGroup.getQ());
 		final ElGamalMultiRecipientPublicKey publicKey = keyPair.getPublicKey();
@@ -118,9 +118,9 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 		final List<ZqElement> privateKeyElements = keyPair.getPrivateKey().stream().collect(Collectors.toList());
 		privateKeyElements.add(genNonZeroExponent(gqGroup.getQ()));
 		final ElGamalMultiRecipientPrivateKey longerPrivateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
-		final ElGamalMultiRecipientMessage differentMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, longerPrivateKey);
+		final ElGamalMultiRecipientMessage otherMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, longerPrivateKey);
 
-		assertNotEquals(message, differentMessage);
+		assertEquals(message, otherMessage);
 	}
 
 	private ZqElement genNonZeroExponent(BigInteger q) {

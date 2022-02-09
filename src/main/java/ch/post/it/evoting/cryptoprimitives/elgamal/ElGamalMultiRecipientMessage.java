@@ -108,10 +108,8 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 		final GqElement gamma = c.getGamma();
 
 		// Algorithm.
-		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
-
 		final LinkedList<GqElement> messageElements = IntStream.range(0, l)
-				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk_prime.get(i).negate())))
+				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk.get(i).negate())))
 				.collect(Collectors.toCollection(LinkedList::new));
 
 		return new ElGamalMultiRecipientMessage(messageElements);
