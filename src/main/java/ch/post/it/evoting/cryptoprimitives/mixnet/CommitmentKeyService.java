@@ -13,9 +13,10 @@ import java.util.stream.Collectors;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
+import ch.post.it.evoting.cryptoprimitives.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.utils.ConversionService;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
  * Creates commitment keys.
@@ -80,13 +81,12 @@ public class CommitmentKeyService {
 
 		while (count <= nu) {
 
-			final BigInteger u = ConversionService.byteArrayToInteger(hashService.recursiveHash(
-					HashableBigInteger.from(q),
+			final ZqElement u = hashService.recursiveHashToZq(q, HashableBigInteger.from(q),
 					HashableString.from(HASH_CONSTANT),
 					HashableBigInteger.from(BigInteger.valueOf(i)),
-					HashableBigInteger.from(BigInteger.valueOf(count))));
+					HashableBigInteger.from(BigInteger.valueOf(count)));
 
-			final BigInteger w = u.modPow(BigInteger.valueOf(2), p);
+			final BigInteger w = BigIntegerOperationsService.modExponentiate(u.getValue(), BigInteger.valueOf(2), p);
 
 			if (validElement.test(w)) {
 				v.add(w);
