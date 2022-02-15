@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -51,10 +51,7 @@ import org.mockito.MockedStatic;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
-import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -64,14 +61,17 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
+import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
 
 class DecryptionProofServiceTest extends TestGroupSetup {
 

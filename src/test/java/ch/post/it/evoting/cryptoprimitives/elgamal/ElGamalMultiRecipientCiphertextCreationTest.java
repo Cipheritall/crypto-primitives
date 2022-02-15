@@ -16,7 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -142,7 +142,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 	}
 
 	@Test
-	void testFewerMessagesThanKeysWithIdentityRandomnessAndIdentityMessageElementsThenCompression() {
+	void testFewerMessagesThanKeysWithIdentityRandomnessAndIdentityMessageElementsThenCut() {
 		int nMessages = NUM_RECIPIENTS / 2;
 		List<GqElement> oneElements =
 				Stream.generate(() -> GqElementFactory.fromValue(BigInteger.ONE, gqGroup)).limit(nMessages).collect(Collectors.toList());
@@ -151,16 +151,8 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 		ElGamalMultiRecipientCiphertext ciphertext = getCiphertext(smallOneMessage, oneExponent, validPK);
 
 		//With a exponent of one and message of ones, the ciphertext phis is just the public key
-		assertEquals(validPK.stream().limit(nMessages - 1).collect(Collectors.toList()),
-				ciphertext.stream().skip(1).limit(nMessages - 1).collect(Collectors.toList()));
-
-		GqElement compressedKey =
-				validPK
-						.stream()
-						.skip(nMessages - 1)
-						.reduce(GqElement::multiply)
-						.orElseThrow(() -> new RuntimeException("Should not reach"));
-		assertEquals(compressedKey, ciphertext.get(nMessages - 1));
+		assertEquals(validPK.stream().limit(nMessages).collect(Collectors.toList()),
+				ciphertext.getPhi().stream().collect(Collectors.toList()));
 	}
 
 	@Test

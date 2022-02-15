@@ -137,6 +137,11 @@ pipeline {
 		}
 		failure {
 			sendBuildMail(projectName: PROJECT_NAME, message: 'Hi, the crypto-primitives build has failed!!', onError: true, toCommitters: true)
+
+			script {
+				if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop')
+					office365ConnectorSend message: "**Jenkins build is broken:**<br> Check console output at $BUILD_URL to view the results.", webhookUrl: 'https://postchag.webhook.office.com/webhookb2/1b25b8a0-5358-4a0d-85a6-c619f1c215e0@3ae7c479-0cf1-47f4-8f84-929f364eff67/IncomingWebhook/b2af48935ba44042a6bd2b3d35444826/931ef1e6-141f-407b-bb51-90169ca9c9bf'
+			}
 		}
 	}
 }

@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCiphertexts;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestParser.parseCommitment;
 import static ch.post.it.evoting.cryptoprimitives.mixnet.TestShuffleArgumentGenerator.ShuffleArgumentPair;
@@ -54,9 +54,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
-import ch.post.it.evoting.cryptoprimitives.VerificationResult;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -64,14 +61,17 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.GroupVectors;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
+import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
 
 @DisplayName("A ShuffleArgumentService")
 class ShuffleArgumentServiceTest extends TestGroupSetup {
