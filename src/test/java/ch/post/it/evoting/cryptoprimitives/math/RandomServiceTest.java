@@ -38,16 +38,17 @@ class RandomServiceTest {
 	private static final Pattern base32Alphabet = Pattern.compile("^[A-Z2-7=]+$");
 	private static final Pattern base16Alphabet = Pattern.compile("^[A-F0-9=]+$");
 
-	private final RandomService randomService = new RandomService();
 	private static ZqGroup smallGroup;
 	private static ZqGroup largeGroup;
 
+	private final RandomService randomService = new RandomService();
+
 	@BeforeAll
 	static void setUp() {
-		BigInteger smallQ = BigInteger.valueOf(11);
+		final BigInteger smallQ = BigInteger.valueOf(11);
 		smallGroup = new ZqGroup(smallQ);
 
-		BigInteger largeQ = new BigInteger(
+		final BigInteger largeQ = new BigInteger(
 				"129393962833354210499210688582114332331264955144078865695142258397576823398124617906793313278446446028832209901197744118689034771985"
 						+ "09705601122060967876228374690884782515835193957431967788948058212827424653299092753997868946254919808472248036853722669403"
 						+ "05071273369448896874451022839183805131028098532234200793438301404002468642493605752610410721973630167774154782002075773042"
@@ -77,7 +78,7 @@ class RandomServiceTest {
 	void genRandomIntegerWithInvalidUpperBounds() {
 		assertThrows(NullPointerException.class, () -> randomService.genRandomInteger(null));
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(BigInteger.ZERO));
-		BigInteger minusOne = BigInteger.ONE.negate();
+		final BigInteger minusOne = BigInteger.ONE.negate();
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(minusOne));
 	}
 
@@ -158,9 +159,9 @@ class RandomServiceTest {
 
 	@Test
 	void genRandomVector() {
-		BigInteger upperBound = BigInteger.valueOf(100);
-		int length = 20;
-		List<ZqElement> randomVector = randomService.genRandomVector(upperBound, length);
+		final BigInteger upperBound = BigInteger.valueOf(100);
+		final int length = 20;
+		final List<ZqElement> randomVector = randomService.genRandomVector(upperBound, length);
 
 		assertEquals(length, randomVector.size());
 		assertEquals(0, (int) randomVector.stream().filter(zq -> zq.getValue().compareTo(upperBound) >= 0).count());
@@ -173,4 +174,17 @@ class RandomServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ZERO, 1));
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomVector(BigInteger.ONE, 0));
 	}
+
+	@Test
+	void randomBytes() {
+		final int RANDOM_BYTES_LENGTH_NINTY_SIX = 96;
+		final int RANDOM_BYTES_LENGTH_ZERO = 0;
+
+		byte[] randomBytes = randomService.randomBytes(RANDOM_BYTES_LENGTH_NINTY_SIX);
+		assertEquals(RANDOM_BYTES_LENGTH_NINTY_SIX, randomBytes.length);
+
+		randomBytes = randomService.randomBytes(RANDOM_BYTES_LENGTH_ZERO);
+		assertEquals(RANDOM_BYTES_LENGTH_ZERO, randomBytes.length);
+	}
+
 }

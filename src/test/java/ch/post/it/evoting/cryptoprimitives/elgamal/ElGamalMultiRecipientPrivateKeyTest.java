@@ -36,9 +36,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 
@@ -82,92 +82,6 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 			List<ZqElement> messageElements, final Class<? extends RuntimeException> exceptionClass, String errorMsg) {
 		final Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientPrivateKey(messageElements));
 		assertEquals(errorMsg, exception.getMessage());
-	}
-
-	@Nested
-	@DisplayName("calling compress with")
-	class CompressTest {
-
-		private static final int PRIVATE_KEY_SIZE = 10;
-
-		private final SecureRandom secureRandom = new SecureRandom();
-
-		private ElGamalMultiRecipientPrivateKey elGamalMultiRecipientPrivateKey;
-		private int length;
-
-		@BeforeEach
-		void setUpEach() {
-			elGamalMultiRecipientPrivateKey = elGamalGenerator.genRandomPrivateKey(PRIVATE_KEY_SIZE);
-			length = secureRandom.nextInt(PRIVATE_KEY_SIZE) + 1;
-		}
-
-		@Test
-		@DisplayName("any non positive length throws an IllegalArgumentException.")
-		void compressParameterShouldBePositive() {
-			final IllegalArgumentException illegalArgumentException0 =
-					assertThrows(IllegalArgumentException.class, () -> elGamalMultiRecipientPrivateKey.compress(-1));
-
-			assertEquals("The requested length for key compression must be strictly positive.", illegalArgumentException0.getMessage());
-
-			final IllegalArgumentException illegalArgumentException1 =
-					assertThrows(IllegalArgumentException.class, () -> elGamalMultiRecipientPrivateKey.compress(0));
-
-			assertEquals("The requested length for key compression must be strictly positive.", illegalArgumentException1.getMessage());
-		}
-
-		@Test
-		@DisplayName("any length greater than the private key size throws an IllegalArgumentException.")
-		void compressParameterShouldAtMostPrivateKeySize() {
-			final IllegalArgumentException illegalArgumentException =
-					assertThrows(IllegalArgumentException.class, () -> elGamalMultiRecipientPrivateKey.compress(PRIVATE_KEY_SIZE + 1));
-
-			assertEquals("The requested length for key compression must be at most the secret key size.", illegalArgumentException.getMessage());
-		}
-
-		@Test
-		@DisplayName("a length of 1 on a private key of size 1 returns a compressed private key of size 1 with the same element as the unique private key element.")
-		void compressPrivateKeyOfSizeOne() {
-			final int length = 1;
-			final ElGamalMultiRecipientPrivateKey elGamalMultiRecipientPrivateKey = elGamalGenerator.genRandomPrivateKey(length);
-			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
-
-			assertAll(
-					() -> assertEquals(length, compressedPrivateKey.size()),
-					() -> assertEquals(elGamalMultiRecipientPrivateKey.get(0), compressedPrivateKey.get(0)));
-		}
-
-		@Test
-		@DisplayName("any valid length returns a compressed private key of size length.")
-		void compressWithValidParameterReturnsCompressedOfExpectedSize() {
-
-			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
-
-			assertEquals(length, compressedPrivateKey.size());
-		}
-
-		@Test
-		@DisplayName("any valid length returns a compressed private key with the same first (length - 1) elements as the private key.")
-		void compressWithValidParameterReturnsCompressedWithSameFirstLengthMinus1Elements() {
-
-			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
-
-			for (int i = 0; i < length - 1; i++) {
-				assertEquals(elGamalMultiRecipientPrivateKey.get(i), compressedPrivateKey.get(i));
-			}
-		}
-
-		@Test
-		@DisplayName("any valid length returns a compressed private key with a correct compressed last element.")
-		void compressWithValidParameterReturnsCompressedWithCorrectElement() {
-
-			final ElGamalMultiRecipientPrivateKey compressedPrivateKey = elGamalMultiRecipientPrivateKey.compress(length);
-
-			final ZqElement compressedKeyElement = elGamalMultiRecipientPrivateKey.stream()
-					.skip(length - 1L)
-					.reduce(elGamalMultiRecipientPrivateKey.getGroup().getIdentity(), ZqElement::add);
-
-			assertEquals(compressedKeyElement, compressedPrivateKey.get(length - 1));
-		}
 	}
 
 	@Nested

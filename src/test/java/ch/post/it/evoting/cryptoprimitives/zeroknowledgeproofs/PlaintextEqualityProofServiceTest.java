@@ -15,14 +15,15 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.PlaintextEqualityProofService.computePhiPlaintextEquality;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -44,17 +45,19 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
@@ -179,19 +182,25 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setUp() {
-			firstCiphertext = elGamalGenerator.genRandomCiphertext(1);
-			secondCiphertext = elGamalGenerator.genRandomCiphertext(1);
+			final ElGamalMultiRecipientMessage plaintext = new ElGamalMultiRecipientMessage(gqGroupGenerator.genRandomGqElementVector(1));
+
+			randomness = zqGroupGenerator.genRandomZqElementVector(2);
 			firstPublicKey = gqGroupGenerator.genMember();
 			secondPublicKey = gqGroupGenerator.genMember();
-			randomness = zqGroupGenerator.genRandomZqElementVector(2);
+			firstCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(plaintext, randomness.get(0),
+					new ElGamalMultiRecipientPublicKey(Collections.singletonList(firstPublicKey)));
+			secondCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(plaintext, randomness.get(1),
+					new ElGamalMultiRecipientPublicKey(Collections.singletonList(secondPublicKey)));
+
 			auxiliaryInformation = Arrays.asList(randomService.genRandomBase16String(STR_LEN), randomService.genRandomBase64String(STR_LEN));
 		}
 
 		@Test
 		@DisplayName("valid parameters does not throw")
 		void validParams() {
-			assertDoesNotThrow(() -> plaintextEqualityProofService
-					.genPlaintextEqualityProof(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey, randomness, auxiliaryInformation));
+			assertDoesNotThrow(
+					() -> plaintextEqualityProofService.genPlaintextEqualityProof(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey,
+							randomness, auxiliaryInformation));
 		}
 
 		@Test
@@ -364,25 +373,37 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setUp() {
-			firstCiphertext = elGamalGenerator.genRandomCiphertext(1);
-			secondCiphertext = elGamalGenerator.genRandomCiphertext(1);
+			final ElGamalMultiRecipientMessage plaintext = elGamalGenerator.genRandomMessage(1);
+
+			randomness = zqGroupGenerator.genRandomZqElementVector(2);
 			firstPublicKey = gqGroupGenerator.genMember();
 			secondPublicKey = gqGroupGenerator.genMember();
-			randomness = zqGroupGenerator.genRandomZqElementVector(2);
+			firstCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(plaintext, randomness.get(0),
+					new ElGamalMultiRecipientPublicKey(Collections.singletonList(firstPublicKey)));
+			secondCiphertext = ElGamalMultiRecipientCiphertext.getCiphertext(plaintext, randomness.get(1),
+					new ElGamalMultiRecipientPublicKey(Collections.singletonList(secondPublicKey)));
+
 			auxiliaryInformation = Arrays.asList(randomService.genRandomBase16String(STR_LEN), randomService.genRandomBase64String(STR_LEN));
+
 			plaintextEqualityProof = plaintextEqualityProofService.genPlaintextEqualityProof(firstCiphertext, secondCiphertext, firstPublicKey,
 					secondPublicKey, randomness, auxiliaryInformation);
 		}
 
 		@Test
-		@DisplayName("valid parameters does not throw")
+		@DisplayName("valid parameters returns true")
 		void validParams() {
-			assertDoesNotThrow(() -> plaintextEqualityProofService
-					.verifyPlaintextEquality(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey, plaintextEqualityProof,
-							auxiliaryInformation));
-			assertDoesNotThrow(() -> plaintextEqualityProofService
-					.verifyPlaintextEquality(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey, plaintextEqualityProof,
-							Collections.emptyList()));
+			assertTrue(plaintextEqualityProofService.verifyPlaintextEquality(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey,
+					plaintextEqualityProof, auxiliaryInformation));
+		}
+
+		@Test
+		@DisplayName("empty auxiliary information returns true")
+		void emptyAux() {
+			final PlaintextEqualityProof plaintextEqualityProof = plaintextEqualityProofService.genPlaintextEqualityProof(firstCiphertext,
+					secondCiphertext, firstPublicKey, secondPublicKey, randomness, Collections.emptyList());
+
+			assertTrue(plaintextEqualityProofService.verifyPlaintextEquality(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey,
+					plaintextEqualityProof, Collections.emptyList()));
 		}
 
 		@Test

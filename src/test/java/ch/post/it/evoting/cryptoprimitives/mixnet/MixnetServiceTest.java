@@ -19,20 +19,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 
@@ -126,7 +131,7 @@ class MixnetServiceTest extends TestGroupSetup {
 
 		@Test
 		void testValidShuffle() {
-			final GqGroup group = GroupTestData.getGroupP59();
+			final GqGroup group = GroupTestData.getLargeGqGroup();
 
 			publicKey = new ElGamalGenerator(group).genRandomPublicKey(keySize);
 
@@ -169,11 +174,13 @@ class MixnetServiceTest extends TestGroupSetup {
 
 		@Test
 		void testNullChecking() {
-			final HashService hashService = TestHashService.create(gqGroup.getQ());
+			final GqGroup gqGroup = GroupTestData.getLargeGqGroup();
+			final HashService hashService = HashService.getInstance();
 			final Mixnet mixnet = new MixnetService(hashService);
 
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = new ElGamalGenerator(gqGroup)
 					.genRandomCiphertextVector(2, keySize);
+			final ElGamalMultiRecipientPublicKey publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(keySize);
 			final VerifiableShuffle verifiableShuffle = mixnet.genVerifiableShuffle(ciphertexts, publicKey);
 			final ShuffleArgument shuffleArgument = verifiableShuffle.getShuffleArgument();
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = verifiableShuffle.getShuffledCiphertexts();
@@ -199,7 +206,7 @@ class MixnetServiceTest extends TestGroupSetup {
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = elGamalGenerator.genRandomCiphertextVector(Nc, l);
 			final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
 					() -> mixnetService.verifyShuffle(ciphertexts, shuffledCiphertexts, shuffleArgument, publicKey));
-			assertEquals("The hash service's bit length must be smaller than the bit length of q.", illegalArgumentException.getMessage());
+			assertEquals("The exclusive upper bound must have a bit length of at least 512.", illegalArgumentException.getMessage());
 		}
 
 		@Test
@@ -352,15 +359,17 @@ class MixnetServiceTest extends TestGroupSetup {
 
 		@Test
 		void testVerifiesCorrectlyGeneratedArgument() {
-			final HashService hashService = TestHashService.create(gqGroup.getQ());
+			final GqGroup gqGroup = GroupTestData.getLargeGqGroup();
+			final HashService hashService = HashService.getInstance();
 			final Mixnet mixnet = new MixnetService(hashService);
 
 			final int minNumberOfVotes = 2;
-			final int maxGroupCommitmentKeySize = gqGroup.getQ().intValueExact() - 3;
+			final int maxGroupCommitmentKeySize = 5;
 			final int Nc = secureRandom.nextInt(maxGroupCommitmentKeySize - minNumberOfVotes + 1) + minNumberOfVotes;
 			final int l = secureRandom.nextInt(keySize) + 1;
 
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = new ElGamalGenerator(gqGroup).genRandomCiphertextVector(Nc, l);
+			final ElGamalMultiRecipientPublicKey publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(keySize);
 			final VerifiableShuffle verifiableShuffle = mixnet.genVerifiableShuffle(ciphertexts, publicKey);
 			final ShuffleArgument shuffleArgument = verifiableShuffle.getShuffleArgument();
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = verifiableShuffle.getShuffledCiphertexts();

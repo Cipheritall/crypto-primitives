@@ -17,8 +17,8 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 /**

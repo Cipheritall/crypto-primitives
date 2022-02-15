@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.getMessage;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -32,11 +32,11 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -155,10 +155,9 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 		// Algorithm.
 		final GqElement gamma = g.exponentiate(r);
-		final ElGamalMultiRecipientPublicKey pk_prime = pk.compress(l);
 
 		final LinkedList<GqElement> phis = IntStream.range(0, l)
-				.mapToObj(i -> pk_prime.get(i).exponentiate(r).multiply(m.get(i)))
+				.mapToObj(i -> pk.get(i).exponentiate(r).multiply(m.get(i)))
 				.collect(Collectors.toCollection(LinkedList::new));
 
 		return new ElGamalMultiRecipientCiphertext(gamma, GroupVector.from(phis));

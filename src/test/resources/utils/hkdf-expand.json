@@ -1,0 +1,110 @@
+[
+	{
+		"description": "rfc values - Test case 3",
+		"context": {
+			"hash": "SHA-256"
+		},
+		"input": {
+			"prk": "Ge8koyxxexZ/M6kdb2SL35ZZZ3av22N3rENMHCk8ywQ=",
+			"info": [],
+			"length": 42
+		},
+		"output": {
+			"okm": "jaTndaVjwY9xX4AqBjxaMbihH1xe4Yeew0VOXzxzjS2dIBOV+qS2GpbI"
+		}
+	},
+	{
+		"description": "rfc values - Test case 6",
+		"context": {
+			"hash": "SHA-1"
+		},
+		"input": {
+			"prk": "2oyKc8f6dyiOxvXnwpd4aqDTLQE=",
+			"info": [],
+			"length": 42
+		},
+		"output": {
+			"okm": "CsGvcAKz12HR5VKY2p0FBrmuUgVyIKMG4Htrh+jfIdDqAAM94DmE00kY"
+		}
+	},
+	{
+		"description": "rfc values - Test case 7",
+		"context": {
+			"hash": "SHA-1"
+		},
+		"input": {
+			"prk": "KtzK2hh3nnwgd60usZ0/PnMThd0=",
+			"info": [],
+			"length": 42
+		},
+		"output": {
+			"okm": "LJERcgTXRfNQDWNqYvZPCrO65UiqU9QjsNHyfrum9eVnOggdcMznrPxI"
+		}
+	},
+	{
+		"description": "SHA3 - simple input",
+		"context": {
+			"hash": "SHA3-256"
+		},
+		"input": {
+			"prk": "thWS3S9h6DC/W5VncsL2xWuU+lQgGc5g6QlDv/ABFZ0=",
+			"info": [
+				"some simple test string"
+			],
+			"length": 48
+		},
+		"output": {
+			"okm": "i9GEnd49eLk59ON1pGAJTPq8PfyaS+8m6GJd6hshTZ/WcctjVJRiNX2rORhuJBpa"
+		}
+	},
+	{
+		"description": "SHA3 - several strings",
+		"context": {
+			"hash": "SHA3-256"
+		},
+		"input": {
+			"prk": "KWSkJydEf+DpdYK5Lopm5GYT7xbZHj0j/fNEVrOwjyk=",
+			"info": [
+				"some simple test string",
+				"another string",
+				"and one more"
+			],
+			"length": 48
+		},
+		"output": {
+			"okm": "d3CcJWzZvpdtD2SK9zJen5/dXS8QtIKOV3xFoBYmGuIH+idfXEZPR0vNxF46ht4P"
+		}
+	},
+	{
+		"description": "SHA3 - longer PRK",
+		"context": {
+			"hash": "SHA3-256"
+		},
+		"input": {
+			"prk": "BljUZxIqgvEa4raRKsByO9cI+z2FXpoU/m5SVIEkh8u84zb3RvABrYkymADMH01u",
+			"info": [
+				"context"
+			],
+			"length": 48
+		},
+		"output": {
+			"okm": "2g8JvfU3ctoN+NUzyXOXj1EgoY4UqIxyL/8C0MxsFGddV6I/XLLLst+SL9NqJqjS"
+		}
+	},
+	{
+		"description": "SHA3 - longer output",
+		"context": {
+			"hash": "SHA3-256"
+		},
+		"input": {
+			"prk": "CJQwcYuomRgRkpF+q9UUh/EZhWKLK7LMJgXOl0eczbM=",
+			"info": [
+				"context"
+			],
+			"length": 91
+		},
+		"output": {
+			"okm": "4iGdVCht0uU43FFwpfNNuF9J9NedXHLzIvjCleqtCWkS+pXYgy/MTUSd0jNE4anYrl0P1YYDoNypIXPc7MpY4uE/mMDthgff7YIe7RRlEPaJe0DmzV/QkMc9/Q=="
+		}
+	}
+]

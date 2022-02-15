@@ -15,11 +15,10 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.integerToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.stringToByteArray;
 import static com.google.common.primitives.Bytes.concat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,7 +51,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -81,13 +79,6 @@ class HashServiceTest {
 		hashService = HashService.getInstance();
 		secureRandom = new SecureRandom();
 		randomService = new RandomService();
-	}
-
-	@Test
-	void testEmpty_SHA3_256_Constructor() {
-		final HashService hashService = assertDoesNotThrow(HashService::new);
-
-		assertEquals(32, hashService.getHashLength());
 	}
 
 	static Stream<Arguments> jsonFileRecursiveHashArgumentProvider() {
@@ -449,54 +440,6 @@ class HashServiceTest {
 		ZqElement actual = testHashService.recursiveHashToZq(q, input);
 		assertEquals(output, actual, String.format("assertion failed for: %s", description));
 	}
-
-
-	static Stream<Arguments> jsonFileCutToBitLengthArgumentProvider() {
-
-		final List<TestParameters> parametersList = TestParameters.fromResource("/cut-to-bit-length.json");
-
-		return parametersList.stream().parallel().map(testParameters -> {
-
-			final String description = testParameters.getDescription();
-
-			final JsonData input = testParameters.getInput();
-			final Integer bitLength = input.get("bit_length", Integer.class);
-			final byte[] value = input.get("value", byte[].class);
-
-			JsonData output = testParameters.getOutput();
-			final byte[] result = output.get("result", byte[].class);
-
-			return Arguments.of(value, bitLength, result, description);
-		});
-	}
-
-	@Test
-	void testCutToBitLengthWithNullThrows() {
-		assertThrows(NullPointerException.class, () -> hashService.cutToBitLength(null, 1));
-	}
-
-	@Test
-	void testCutToBitLengtRequestedLengthZeroThrows() {
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> hashService.cutToBitLength(new byte[] { 0b10011 }, 0));
-		assertEquals("The requested length must be strictly positive", Throwables.getRootCause(exception).getMessage());
-	}
-
-	@Test
-	void testCutToBitLengthRequestedLengthGreaterThanByteArrayBitLengthThrows() {
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> hashService.cutToBitLength(new byte[] { 0b1001101 }, 9));
-		assertEquals("The requested length must not be greater than the bit length of the byte array", Throwables.getRootCause(exception).getMessage());
-	}
-
-	@ParameterizedTest
-	@MethodSource("jsonFileCutToBitLengthArgumentProvider")
-	@DisplayName("cutToBitLength of specific input returns expected output")
-	void testCutToBitLengthWithRealValues(final byte[] byteArray, final int requestedLength, final byte[] expectedResult, final String description) {
-		final byte[] actualResult = hashService.cutToBitLength(byteArray, requestedLength);
-		assertArrayEquals(expectedResult, actualResult, String.format("assertion failed for: %s", description));
-	}
-
 
 	/**
 	 * The test below ascertains that the underlying MessageDigest instance respects the following equality:
