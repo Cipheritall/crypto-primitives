@@ -94,23 +94,8 @@ public class PlaintextEqualityProofService {
 	}
 
 	/**
-	 * Generates a proof of equality of the plaintext corresponding to the two provided encryptions.
-	 *
-	 * @param firstCiphertext      C = (c<sub>0</sub>, c<sub>1</sub>) ∈ G<sub>q</sub><sup>2</sup>. Not null.
-	 * @param secondCiphertext     C' = (c'<sub>0</sub>, c'<sub>1</sub>) ∈ G<sub>q</sub><sup>2</sup>. Not null.
-	 * @param firstPublicKey       h ∈ G<sub>q</sub>. Not null.
-	 * @param secondPublicKey      h' ∈ G<sub>q</sub>. Not null.
-	 * @param randomness           (r, r') ∈ Z<sub>q</sub><sup>2</sup>. Not null.
-	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null. Can be empty.
-	 * @return a plaintext equality proof as a {@link PlaintextEqualityProof}.
-	 * @throws NullPointerException     if any of the inputs is null or {@code auxiliaryInformation} contains any null.
-	 * @throws IllegalArgumentException if
-	 *                                  <ul>
-	 *                                      <li>the ciphertexts do not contain exactly one phi</li>
-	 *                                      <li>the randomness vector does not contain exactly two elements</li>
-	 *                                      <li>the ciphertexts and public keys do not belong to the same group</li>
-	 *                                      <li>the randomness has a group of different order than the ciphertexts and public keys</li>
-	 *                                  </ul>
+	 * @see ZeroKnowledgeProof#genPlaintextEqualityProof(ElGamalMultiRecipientCiphertext, ElGamalMultiRecipientCiphertext, GqElement, GqElement,
+	 * GroupVector, List)
 	 */
 	PlaintextEqualityProof genPlaintextEqualityProof(final ElGamalMultiRecipientCiphertext firstCiphertext,
 			final ElGamalMultiRecipientCiphertext secondCiphertext, final GqElement firstPublicKey, final GqElement secondPublicKey,

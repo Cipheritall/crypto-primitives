@@ -148,7 +148,6 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	@Override
 	public ExponentiationProof genExponentiationProof(final GroupVector<GqElement, GqGroup> bases, final ZqElement exponent,
 			final GroupVector<GqElement, GqGroup> exponentiations, final List<String> auxiliaryInformation) {
-
 		return exponentiationProofService.genExponentiationProof(bases, exponent, exponentiations, auxiliaryInformation);
 	}
 
@@ -156,6 +155,14 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	public boolean verifyExponentiation(GroupVector<GqElement, GqGroup> bases, GroupVector<GqElement, GqGroup> exponentiations,
 			ExponentiationProof proof, List<String> auxiliaryInformation) {
 		return exponentiationProofService.verifyExponentiation(bases, exponentiations, proof, auxiliaryInformation);
+	}
+
+	@Override
+	public PlaintextEqualityProof genPlaintextEqualityProof(final ElGamalMultiRecipientCiphertext firstCiphertext,
+			final ElGamalMultiRecipientCiphertext secondCiphertext, final GqElement firstPublicKey, final GqElement secondPublicKey,
+			final GroupVector<ZqElement, ZqGroup> randomness, final List<String> auxiliaryInformation) {
+		return plaintextEqualityProofService
+				.genPlaintextEqualityProof(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey, randomness, auxiliaryInformation);
 	}
 
 	@Override
