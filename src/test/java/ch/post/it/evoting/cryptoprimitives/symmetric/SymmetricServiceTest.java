@@ -35,10 +35,11 @@ import org.junit.jupiter.api.Test;
 import com.google.common.base.Throwables;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricAuthenticatedEncryptionService.SymmetricCiphertext;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 
-@DisplayName("SymmetricAuthenticatedEncryptionService calling")
-class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
+@DisplayName("SymmetricService calling")
+class SymmetricServiceTest extends TestGroupSetup {
 
 	private static final int AES_KEY_SIZE = 256;
 	private static final int NONCE_LENGTH = 12;
@@ -50,14 +51,13 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 	private static byte[] nonce;
 	private static String plainText;
 	private static RandomService randomService;
-	private static SymmetricAuthenticatedEncryptionService symmetricAuthenticatedEncryptionService;
+	private static SymmetricService symmetricEncryptionService;
 	private static List<String> associatedData;
 
 	@BeforeAll
 	static void setUpAll() throws NoSuchAlgorithmException {
 		randomService = new RandomService();
-		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService,
-				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES_GCM_NOPADDING);
+		symmetricEncryptionService = new SymmetricService(randomService);
 
 		final KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 		keyGenerator.init(AES_KEY_SIZE);
@@ -77,10 +77,10 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 	@Test
 	@DisplayName("valid parameters does not throw, basic encryption path with Java AES 256 GCM Encryption Algorithm")
 	void basicJavaAES256GCMEncryptionPath() throws Exception {
-		final SymmetricAuthenticatedEncryptionService.SymmetricCiphertext authenticationEncrypted = symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(
+		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
-		final byte[] authenticationDecrypted = symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
+		final byte[] authenticationDecrypted = symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
 				authenticationEncrypted.nonce, associatedData);
 
 		assertEquals(plainText, new String(authenticationDecrypted, StandardCharsets.UTF_8));
@@ -90,13 +90,13 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 	@DisplayName("wrong parameters throws illegalArgumentException, basic encryption path with Java AES 256 GCM Encryption Algorithm")
 	void wrongEncryptionInvalidNonceLength() throws Exception {
 		// Different nonce between encryption and decryption execute 'Invalid nonce length'!
-		final SymmetricAuthenticatedEncryptionService.SymmetricCiphertext authenticationEncrypted = symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(
+		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
 		nonce = randomService.randomBytes(DIFFERENT_NONCE_LENGTH);
 
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C, nonce, associatedData));
+				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C, nonce, associatedData));
 
 		assertEquals("Invalid nonce length, expected 12", Throwables.getRootCause(illegalArgumentException).getMessage());
 	}
@@ -105,11 +105,11 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 	@DisplayName("wrong parameters throws AEADBadTagException, basic encryption path with Java AES 256 GCM Encryption Algorithm")
 	void wrongEncryptionTagMismatch() throws Exception {
 		// Different nonce between encryption and decryption execute Tag mismatch!
-		final SymmetricAuthenticatedEncryptionService.SymmetricCiphertext authenticationEncrypted = symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(
+		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
 		final AEADBadTagException aeadBadTagException = assertThrows(AEADBadTagException.class,
-				() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
+				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
 						nonce, associatedData));
 
 		assertEquals("Tag mismatch!", aeadBadTagException.getMessage());
@@ -125,13 +125,13 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 			final byte[] plainTextBytes = plainText.getBytes(StandardCharsets.UTF_8);
 
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(null, plainTextBytes,
+					() -> symmetricEncryptionService.genCiphertextSymmetric(null, plainTextBytes,
 							associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(encryptionKey, null,
+					() -> symmetricEncryptionService.genCiphertextSymmetric(encryptionKey, null,
 							associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(encryptionKey, plainTextBytes,
+					() -> symmetricEncryptionService.genCiphertextSymmetric(encryptionKey, plainTextBytes,
 							null));
 		}
 
@@ -141,7 +141,7 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 			associatedData.set(0, null);
 			final byte[] plainTextBytes = plainText.getBytes(StandardCharsets.UTF_8);
 
-			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> symmetricAuthenticatedEncryptionService
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> symmetricEncryptionService
 					.genCiphertextSymmetric(encryptionKey, plainTextBytes,
 							associatedData));
 			assertEquals("The associated data must not contain null objects.", exception.getMessage());
@@ -155,20 +155,20 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("null parameters throws NullPointerException")
 		void nullParams() throws Exception {
-			final SymmetricAuthenticatedEncryptionService.SymmetricCiphertext authenticationEncrypted = symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(
+			final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 					encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(null, authenticationEncrypted.C,
+					() -> symmetricEncryptionService.getPlaintextSymmetric(null, authenticationEncrypted.C,
 							authenticationEncrypted.nonce, associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, null,
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, null,
 							authenticationEncrypted.nonce, associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
 							null, associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
 							authenticationEncrypted.nonce, null));
 		}
 
@@ -178,7 +178,7 @@ class SymmetricAuthenticatedEncryptionServiceTest extends TestGroupSetup {
 			associatedData.set(0, null);
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-					() -> symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, new byte[] {}, new byte[] {}, associatedData));
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, new byte[] {}, new byte[] {}, associatedData));
 
 			assertEquals("The associated data must not contain null objects.", exception.getMessage());
 		}
