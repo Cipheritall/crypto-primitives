@@ -39,4 +39,5 @@ public enum SecurityLevel {
 	public int getBitLength() {
 		return this.bitLength;
 	}
+
 }

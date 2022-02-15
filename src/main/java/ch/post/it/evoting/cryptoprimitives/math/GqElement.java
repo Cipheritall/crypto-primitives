@@ -23,8 +23,6 @@ import java.util.ArrayList;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
-
 /**
  * Defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
  *

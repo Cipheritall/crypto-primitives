@@ -16,21 +16,19 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.GroupMatrix;
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;

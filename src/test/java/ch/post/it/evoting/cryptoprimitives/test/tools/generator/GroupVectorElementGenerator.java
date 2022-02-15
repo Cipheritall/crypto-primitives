@@ -15,7 +15,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 public class GroupVectorElementGenerator {

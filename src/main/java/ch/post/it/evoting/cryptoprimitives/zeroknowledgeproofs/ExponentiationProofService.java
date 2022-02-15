@@ -15,8 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteArrayToInteger;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -28,13 +28,13 @@ import java.util.stream.IntStream;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -82,8 +82,7 @@ public class ExponentiationProofService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.ZeroKnowledgeProof#genExponentiationProof(GroupVector, ZqElement, GroupVector,
-	 * List)
+	 * @see ZeroKnowledgeProof#genExponentiationProof(GroupVector, ZqElement, GroupVector, List)
 	 */
 	ExponentiationProof genExponentiationProof(final GroupVector<GqElement, GqGroup> bases, final ZqElement exponent,
 			final GroupVector<GqElement, GqGroup> exponentiations, final List<String> auxiliaryInformation) {
@@ -140,24 +139,7 @@ public class ExponentiationProofService {
 	}
 
 	/**
-	 * Verifies the validity of a given {@link ExponentiationProof}.
-	 *
-	 * @param bases                g, the bases that were used to generate the proof. Must be non null.
-	 * @param exponentiations      y, the exponentiations the were used to generate the proof. Must be non null.
-	 * @param proof                (e, z), the proof to be verified
-	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information that was used during proof generation. Must be non null and not contain
-	 *                             nulls.
-	 * @return {@code true} if the exponentiation proof is valid, {@code false} otherwise.
-	 * @throws NullPointerException     if any of the bases, exponentiations, or proof is null
-	 * @throws IllegalArgumentException if
-	 *                                  <ul>
-	 *                                      <li>the auxiliary information contains null elements</li>
-	 *                                      <li>the bases are empty</li>
-	 *                                      <li>the exponentations do not have the same size as the bases</li>
-	 *                                      <li>the bases and the exponentiations do not have the same group</li>
-	 *                                      <li>the exponentiation proof does not have the same group order as the bases and the exponentiations</li>
-	 *                                      <li>the group order q's bit length is smaller than the hash service's hash length</li>
-	 *                                  </ul>
+	 * @see ZeroKnowledgeProof#verifyExponentiation(GroupVector, GroupVector, ExponentiationProof, List)
 	 */
 	boolean verifyExponentiation(final GroupVector<GqElement, GqGroup> bases, final GroupVector<GqElement, GqGroup> exponentiations,
 			final ExponentiationProof proof, final List<String> auxiliaryInformation) {
