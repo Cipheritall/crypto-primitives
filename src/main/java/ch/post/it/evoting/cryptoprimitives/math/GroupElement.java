@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.math;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVectorElement;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 
 /**
