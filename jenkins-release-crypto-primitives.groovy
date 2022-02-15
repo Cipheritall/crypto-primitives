@@ -153,13 +153,18 @@ def tagAndCommit(projectName, gitUrl, releaseVersion, releaseMessage) {
 
 // reset pom to snapshotVersion
 def resetPomVersion(projectName, workspace, gitUrl, branchName, releaseVersion, newSnapshotVersion) {
+	if (!branchName.contains("hotfix/")) {
+		//Checkout
+		sh "git checkout ${branchName} || git checkout master || exit"
+	} else {
+		//Checkout
+		sh "git checkout develop || exit"
+	}
+
 	def pomName = "pom.xml"
 	if (commonBuildPipeline.MAVEN_POM_NAME != '') {
 		pomName = commonBuildPipeline.MAVEN_POM_NAME.replace('-f ', '')
 	}
-
-	//Checkout
-	sh "git checkout ${branchName} || git checkout master || exit"
 
 	//Find oldversion
 	def pomFile = 'pom.xml'
@@ -190,20 +195,22 @@ def resetPomVersion(projectName, workspace, gitUrl, branchName, releaseVersion, 
 		sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --tags"
 	}
 
-	//Merge and push Release branch into develop (snapshot)
-	sh "git checkout ${branchName} || exit"
-	sh "git merge -s ours origin/develop || exit"
-	sh "git checkout develop || exit"
-	sh "git merge --squash ${branchName} || exit"
-	sh "git add ."
+	if (!branchName.contains("hotfix/")) {
+		//Merge and push Release branch into develop (snapshot)
+		sh "git checkout ${branchName} || exit"
+		sh "git merge -s ours origin/develop || exit"
+		sh "git checkout develop || exit"
+		sh "git merge --squash ${branchName} || exit"
+		sh "git add ."
 
-	//Commit
-	sh "git commit -m 'merge snapshot poms - ${projectName}-${releaseVersion}'"
+		//Commit
+		sh "git commit -m 'merge snapshot poms - ${projectName}-${releaseVersion}'"
 
-	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 's-cicd-evoting', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS']]) {
-		def url = gitUrl.replace('https://', '')
-		sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --all"
-		sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --tags"
+		withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 's-cicd-evoting', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS']]) {
+			def url = gitUrl.replace('https://', '')
+			sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --all"
+			sh "git push https://${GIT_USER}:${GIT_PASS}@${url} --tags"
+		}
 	}
 
 }
