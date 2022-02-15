@@ -24,10 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 
 @DisplayName("A PlaintextEqualityProof")
 class PlaintextEqualityProofTest extends TestGroupSetup {

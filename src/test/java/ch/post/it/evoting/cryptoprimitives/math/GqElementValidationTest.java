@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;

@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.integerToByteArray;
-import static ch.post.it.evoting.cryptoprimitives.ConversionService.stringToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.integerToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.stringToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.primitives.Bytes.concat;
@@ -43,6 +43,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.utils.ByteArrays;
 
 /**
  * Recursive hash service using a default SHA3-256 message digest.
@@ -52,7 +53,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class HashService {
 
 	public static final int HASH_LENGTH_BYTES = 32;
-	private static final HashService Instance = new HashService();
+	private static final HashService INSTANCE = new HashService();
 
 	private static final byte[] BYTE_ARRAY_PREFIX = new byte[] { 0x00 };
 	private static final byte[] BIG_INTEGER_PREFIX = new byte[] { 0x01 };
@@ -75,7 +76,7 @@ public class HashService {
 	}
 
 	public static HashService getInstance() {
-		return Instance;
+		return INSTANCE;
 	}
 
 	/**
@@ -226,14 +227,14 @@ public class HashService {
 
 			if (value instanceof HashableByteArray) {
 				final byte[] w = ((HashableByteArray) value).toHashableForm();
-				return cutToBitLength(shake256(L, concat(BYTE_ARRAY_PREFIX, w)), l);
+				return ByteArrays.cutToBitLength(shake256(L, concat(BYTE_ARRAY_PREFIX, w)), l);
 			} else if (value instanceof HashableBigInteger) {
 				final BigInteger w = ((HashableBigInteger) value).toHashableForm();
 				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
-				return cutToBitLength(shake256(L, concat(BIG_INTEGER_PREFIX, integerToByteArray(w))), l);
+				return ByteArrays.cutToBitLength(shake256(L, concat(BIG_INTEGER_PREFIX, integerToByteArray(w))), l);
 			} else if (value instanceof HashableString) {
 				final String w = ((HashableString) value).toHashableForm();
-				return cutToBitLength(shake256(L, concat(STRING_PREFIX, stringToByteArray(w))), l);
+				return ByteArrays.cutToBitLength(shake256(L, concat(STRING_PREFIX, stringToByteArray(w))), l);
 			} else if (value instanceof HashableList) {
 				final ImmutableList<? extends Hashable> w = ((HashableList) value).toHashableForm();
 
@@ -245,48 +246,13 @@ public class HashService {
 				} else {
 					final byte[] h = w.stream().map(w_i -> recursiveHashOfLength(l, w_i)).reduce(new byte[] {}, Bytes::concat);
 
-					return cutToBitLength(shake256(L, h), l);
+					return ByteArrays.cutToBitLength(shake256(L, h), l);
 				}
 
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}
 		}
-	}
-
-	/**
-	 * Cuts the given byte array to the requested bit length
-	 *
-	 * @param byteArray       the byte array to be cut
-	 * @param requestedLength the length in bits to which the array is to be cut. Greater than 0 and not greater than the byte array's bit length.
-	 * @return the byte array cut to the requested length
-	 * @throws NullPointerException     if the given byte array is null
-	 * @throws IllegalArgumentException if the requested length is not within the required range
-	 */
-	@SuppressWarnings("java:S117")
-	@VisibleForTesting
-	byte[] cutToBitLength(final byte[] byteArray, final int requestedLength) {
-		checkNotNull(byteArray);
-
-		final byte[] B = byteArray;
-		final int n = requestedLength;
-
-		checkArgument(0 < n, "The requested length must be strictly positive");
-		checkArgument(n <= (B.length * Byte.SIZE), "The requested length must not be greater than the bit length of the byte array");
-
-		final int length = (int) Math.ceil(n / (double) Byte.SIZE);
-		final int offset = B.length - length;
-		final byte[] B_prime = new byte[length];
-		if (n % 8 != 0) {
-			B_prime[0] = (byte) (B[offset] & (byte) (Math.pow(2, n % 8) - 1));
-		} else {
-			B_prime[0] = B[offset];
-		}
-
-		for (int i = 1; i < length; i++) {
-			B_prime[i] = B[offset + i];
-		}
-		return B_prime;
 	}
 
 	/**

@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.math;
 
-import static ch.post.it.evoting.cryptoprimitives.math.GqElement.*;
+import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -27,7 +27,6 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 

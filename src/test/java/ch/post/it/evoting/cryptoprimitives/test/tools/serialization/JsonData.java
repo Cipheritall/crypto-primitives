@@ -43,8 +43,10 @@ public final class JsonData {
 	 * <li>BigInteger[]</li>
 	 * <li>BigInteger[][]</li>
 	 * <li>String</li>
+	 * <li>String[]</li>
 	 * <li>byte[]</li>
 	 * <li>Boolean</li>
+	 * <li>Integer</li>
 	 *
 	 * @param field The name of the field to search for.
 	 * @param clazz The target class to convert the field to.

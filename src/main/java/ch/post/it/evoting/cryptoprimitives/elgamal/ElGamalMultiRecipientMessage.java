@@ -31,11 +31,11 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 
 /**
  * Represents an ElGamal message containing multiple elements.
@@ -108,10 +108,8 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 		final GqElement gamma = c.getGamma();
 
 		// Algorithm.
-		final ElGamalMultiRecipientPrivateKey sk_prime = sk.compress(l);
-
 		final LinkedList<GqElement> messageElements = IntStream.range(0, l)
-				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk_prime.get(i).negate())))
+				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk.get(i).negate())))
 				.collect(Collectors.toCollection(LinkedList::new));
 
 		return new ElGamalMultiRecipientMessage(messageElements);

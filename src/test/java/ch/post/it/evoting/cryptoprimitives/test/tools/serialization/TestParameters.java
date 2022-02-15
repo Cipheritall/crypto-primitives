@@ -57,6 +57,10 @@ public final class TestParameters {
 	public static List<TestParameters> fromResource(final String resourceName) {
 		final URL url = TestParameters.class.getResource(resourceName);
 
+		if (url == null){
+			throw new IllegalStateException(String.format("Cannot find resource %s", resourceName));
+		}
+
 		try {
 			final ObjectMapper jsonMapper = new ObjectMapper();
 

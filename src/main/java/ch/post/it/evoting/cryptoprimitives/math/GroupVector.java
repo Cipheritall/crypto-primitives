@@ -1,19 +1,21 @@
 /*
- * Copyright 2021 Post CH Ltd
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Copyright 2022 Post CH Ltd
+ * 
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives;
+package ch.post.it.evoting.cryptoprimitives.math;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -29,13 +31,13 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingList;
 import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
-import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
-import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
+import ch.post.it.evoting.cryptoprimitives.utils.Validations;
 
 /**
  * Represents a vector of {@link GroupElement} belonging to the same {@link MathematicalGroup} and having the same size.
@@ -80,7 +82,7 @@ public class GroupVector<E extends GroupVectorElement<G> & Hashable, G extends M
 		final ImmutableList<E> elementsCopy = ImmutableList.copyOf(elements);
 
 		//Check same group
-		checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::getGroup), "All elements must belong to the same group.");
+		Preconditions.checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::getGroup), "All elements must belong to the same group.");
 
 		//Check same size
 		checkArgument(Validations.allEqual(elementsCopy.stream(), GroupVectorElement::size), "All vector elements must be the same size.");
