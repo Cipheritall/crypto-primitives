@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,12 +84,12 @@ class TestArgumentParser {
 
 	HadamardArgument parseHadamardArgument(final JsonData hadamardArgumentData) {
 		final BigInteger[] cUpperBValues = hadamardArgumentData.get("cUpperB", BigInteger[].class);
-		GroupVector<GqElement, GqGroup> cUpperB = Arrays.stream(cUpperBValues)
+		final GroupVector<GqElement, GqGroup> cUpperB = Arrays.stream(cUpperBValues)
 				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
 				.collect(toGroupVector());
 
-		JsonData zeroArgumentData = hadamardArgumentData.getJsonData("zero_argument");
-		ZeroArgument zeroArgument = parseZeroArgument(zeroArgumentData);
+		final JsonData zeroArgumentData = hadamardArgumentData.getJsonData("zero_argument");
+		final ZeroArgument zeroArgument = parseZeroArgument(zeroArgumentData);
 
 		return new HadamardArgument(cUpperB, zeroArgument);
 	}
@@ -165,7 +165,7 @@ class TestArgumentParser {
 	ProductArgument parseProductArgument(final JsonData argumentData) {
 		final SingleValueProductArgument singleValueProductArgument = this.parseSingleValueProductArgument(argumentData.getJsonData("single_vpa"));
 
-		ProductArgument productArgument;
+		final ProductArgument productArgument;
 		final JsonData cbJsonData = argumentData.getJsonData("c_b");
 		if (!cbJsonData.getJsonNode().isMissingNode()) {
 			final BigInteger cbValue = argumentData.get("c_b", BigInteger.class);

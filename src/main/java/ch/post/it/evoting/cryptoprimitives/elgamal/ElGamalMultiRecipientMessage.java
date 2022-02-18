@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	}
 
 	@Override
-	public GqElement get(int i) {
+	public GqElement get(final int i) {
 		return this.messageElements.get(i);
 	}
 

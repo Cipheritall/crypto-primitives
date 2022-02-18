@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,14 @@ public interface VerificationResult {
 
 /**
  * Represents a successful verification.
- *
+ * <p>
  * This class is immutable.
  */
 class VerificationSuccess implements VerificationResult {
 
 	static final VerificationSuccess INSTANCE = new VerificationSuccess();
 
-	private VerificationSuccess(){
+	private VerificationSuccess() {
 		//Intentionally left blank
 	}
 
@@ -69,7 +69,7 @@ class VerificationSuccess implements VerificationResult {
 
 /**
  * Represents a verification failure. Contains a collection of error messages.
- *
+ * <p>
  * This class is immutable.
  */
 class VerificationFailure implements VerificationResult {
@@ -106,7 +106,7 @@ class VerificationFailure implements VerificationResult {
 	 * @param errorMessage the error message to add. Must be not null.
 	 * @return a new VerificationResult containing the newly added {@code errorMessage}.
 	 */
-	VerificationFailure addErrorMessage(String errorMessage) {
+	VerificationFailure addErrorMessage(final String errorMessage) {
 		checkNotNull(errorMessage);
 
 		final LinkedList<String> copy = new LinkedList<>(errorMessages);

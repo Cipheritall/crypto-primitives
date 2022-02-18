@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ public interface Mixnet {
 	 * @param publicKey   pk, the {@link ElGamalMultiRecipientPublicKey} to be used for re-encrypting. Not null.
 	 * @return the Bayer-Groth shuffle proof and the shuffled ciphertexts as a {@link VerifiableShuffle}
 	 */
-	VerifiableShuffle genVerifiableShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final ElGamalMultiRecipientPublicKey publicKey);
+	VerifiableShuffle genVerifiableShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
+			final ElGamalMultiRecipientPublicKey publicKey);
 
 	/**
 	 * Verifies the correctness of a shuffle argument for the given ciphertexts and their shuffled and re-encrypted counterparts.

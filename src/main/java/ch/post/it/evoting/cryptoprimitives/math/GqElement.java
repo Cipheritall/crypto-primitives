@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		 * @throws NullPointerException     if any of the arguments is null
 		 * @throws IllegalArgumentException if the element is 0 or smaller or bigger than the group's order
 		 */
-		public static GqElement fromSquareRoot(BigInteger element, GqGroup group) {
+		public static GqElement fromSquareRoot(final BigInteger element, final GqGroup group) {
 			checkNotNull(element);
 			checkNotNull(group);
 
@@ -130,7 +130,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 		 * @throws IllegalStateException if the group does not contain the desired number of prime group members
 		 */
 		@SuppressWarnings("java:S117")
-		public static GroupVector<GqElement, GqGroup> getSmallPrimeGroupMembers(GqGroup gqGroup, final int desiredNumberOfPrimes) {
+		public static GroupVector<GqElement, GqGroup> getSmallPrimeGroupMembers(final GqGroup gqGroup, final int desiredNumberOfPrimes) {
 			final int r = desiredNumberOfPrimes;
 			final BigInteger g = gqGroup.getGenerator().getValue();
 
@@ -141,7 +141,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 			checkArgument(r < 10000, "The number of desired primes must be smaller than 10000");
 
 			BigInteger current = BigInteger.valueOf(5);
-			ArrayList<GqElement> p_vector = new ArrayList<>(r);
+			final ArrayList<GqElement> p_vector = new ArrayList<>(r);
 			int count = 0;
 			while (count < r && current.compareTo(gqGroup.getP()) < 0) {
 				if (gqGroup.isGroupMember(current) && isPrime(current.intValueExact())) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public final class JsonData {
 			return clazz.cast(Base64.getDecoder().decode(jsonNode.get(field).asText()));
 		} else if (clazz.equals(Boolean.class)) {
 			return clazz.cast(jsonNode.get(field).asBoolean());
-		} else if (clazz.equals(Integer.class)){
+		} else if (clazz.equals(Integer.class)) {
 			return clazz.cast(jsonNode.get(field).asInt());
 		} else {
 			throw new IllegalArgumentException("Unsupported target class.");

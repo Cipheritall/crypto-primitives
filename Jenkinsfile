@@ -1,6 +1,6 @@
 #!groovy
 /*
- * Copyright 2021 by Swiss Post, Information Technology Services
+* Copyright 2022 Post CH Ltd
 *
 */
 

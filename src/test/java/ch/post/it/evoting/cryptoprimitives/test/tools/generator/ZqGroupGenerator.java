@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class ZqGroupGenerator {
 		return ZqElement.create(value, this.group);
 	}
 
-	public ZqElement otherElement(ZqElement element) {
+	public ZqElement otherElement(final ZqElement element) {
 		return Generators.genWhile(this::genRandomZqElementMember, element::equals);
 	}
 
@@ -63,7 +63,7 @@ public class ZqGroupGenerator {
 	 * @param element,    value with which the matrix is initialised
 	 * @return a vector of {@code numElements} defined {@link ZqElement}.
 	 */
-	public GroupVector<ZqElement, ZqGroup> initializeElementVectorWithElement(final int numElements, ZqElement element) {
+	public GroupVector<ZqElement, ZqGroup> initializeElementVectorWithElement(final int numElements, final ZqElement element) {
 		return GroupVector.from(generateElementList(numElements, () -> element));
 	}
 
@@ -88,7 +88,7 @@ public class ZqGroupGenerator {
 	 * @param element, value with which the matrix is initialised
 	 * @return a m &times; n matrix of defined {@link ZqElement}.
 	 */
-	public GroupMatrix<ZqElement, ZqGroup> initializeMatrixWithElement(final int m, final int n, ZqElement element) {
+	public GroupMatrix<ZqElement, ZqGroup> initializeMatrixWithElement(final int m, final int n, final ZqElement element) {
 		return GroupMatrix.fromRows(generateElementMatrix(m, n, () -> element));
 	}
 }

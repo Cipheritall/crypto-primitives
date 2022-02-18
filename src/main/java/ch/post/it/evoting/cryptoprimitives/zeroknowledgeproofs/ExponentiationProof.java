@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,14 +68,14 @@ public class ExponentiationProof implements GroupVectorElement<ZqGroup>, Hashabl
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ExponentiationProof that = (ExponentiationProof) o;
+		final ExponentiationProof that = (ExponentiationProof) o;
 		return e.equals(that.e) && z.equals(that.z);
 	}
 

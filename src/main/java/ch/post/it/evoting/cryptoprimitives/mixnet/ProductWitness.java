@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  *
  * <p>Instances of this class are immutable.</p>
  */
-@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 class ProductWitness {
 
 	private final GroupMatrix<ZqElement, ZqGroup> A;
@@ -46,7 +46,7 @@ class ProductWitness {
 	 *     <li>the number of columns in the matrix must be equal to the number of exponents</li>
 	 * </ul>
 	 *
-	 * @param A    A, a {@link GroupMatrix} of {@code ZqElements}
+	 * @param A A, a {@link GroupMatrix} of {@code ZqElements}
 	 * @param r <b><i>r</i></b>, a {@link GroupVector} of {@code ZqElements}
 	 */
 	ProductWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupVector<ZqElement, ZqGroup> r) {
