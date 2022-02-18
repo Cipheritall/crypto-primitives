@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.math.BigInteger;
 public interface CryptoPrimitives {
 
 	/**
-	 * Generates a random string using the Base16 alphabet (RFC 4648). 
+	 * Generates a random string using the Base16 alphabet (RFC 4648).
 	 *
 	 * @param length l, the length of the string to be generated, in number of chars.
 	 * @return a random Base16-encoded string of {@code length} characters. Must be greater than or equal to 1.

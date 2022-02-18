@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 	@Test
 	@DisplayName("Constructing a ZeroArgumentService with a hashService that has a too long hash length throws an IllegalArgumentException")
 	void constructWithHashServiceWithTooLongHashLength() {
-		HashService otherHashService = HashService.getInstance();
+		final HashService otherHashService = HashService.getInstance();
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> new ZeroArgumentService(publicKey, commitmentKey, randomService, otherHashService));
 		assertEquals("The hash service's bit length must be smaller than the bit length of q.", exception.getMessage());
@@ -410,8 +410,8 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setUp() {
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
-			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+			final ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
+			final ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
 			zeroStatement = testData.getZeroStatement();
 			zeroWitness = testData.getZeroWitness();
 			m = testData.getM();
@@ -421,10 +421,10 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with valid statement and witness does not throw")
 		void getZeroArgValidStatementAndWitness() {
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
-			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
-			ZeroStatement zeroStatement = testData.getZeroStatement();
-			ZeroWitness zeroWitness = testData.getZeroWitness();
+			final ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
+			final ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+			final ZeroStatement zeroStatement = testData.getZeroStatement();
+			final ZeroWitness zeroWitness = testData.getZeroWitness();
 
 			final ZeroArgumentService otherZeroArgumentService = testData.getZeroArgumentService();
 
@@ -495,7 +495,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			final GroupVector<GqElement, GqGroup> commitmentsB = zeroStatement.get_c_B();
 
 			// Generate a different commitment.
-			GroupVector<GqElement, GqGroup> otherCommitments = Generators
+			final GroupVector<GqElement, GqGroup> otherCommitments = Generators
 					.genWhile(() -> gqGroupGenerator.genRandomGqElementVector(m), commitments -> commitments.equals(commitmentsB));
 
 			final GroupVector<GqElement, GqGroup> commitmentsA = zeroStatement.get_c_A();
@@ -629,21 +629,21 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		@RepeatedTest(10)
 		void verifyZeroArgumentTest() {
-			ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
-			ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
-			ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
-			ZeroStatement statement = testData.getZeroStatement();
-			ZeroWitness witness = testData.getZeroWitness();
+			final ZeroArgumentService zeroArgumentService = new ZeroArgumentService(publicKey, commitmentKey, randomService, hashService);
+			final ZeroArgumentTestData testData = new ZeroArgumentTestData(commitmentKey, zeroArgumentService);
+			final ZeroArgumentService verifyZeroArgumentService = testData.getZeroArgumentService();
+			final ZeroStatement statement = testData.getZeroStatement();
+			final ZeroWitness witness = testData.getZeroWitness();
 
-			ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
+			final ZeroArgument zeroArgument = verifyZeroArgumentService.getZeroArgument(statement, witness);
 
 			assertTrue(verifyZeroArgumentService.verifyZeroArgument(statement, zeroArgument).verify().isVerified());
 		}
 
 		@Test
 		void testNullInputParameters() {
-			ZeroArgument zeroArgument = mock(ZeroArgument.class);
-			ZeroStatement zeroStatement = mock(ZeroStatement.class);
+			final ZeroArgument zeroArgument = mock(ZeroArgument.class);
+			final ZeroStatement zeroStatement = mock(ZeroStatement.class);
 
 			assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(zeroStatement, null));
 			assertThrows(NullPointerException.class, () -> zeroArgumentService.verifyZeroArgument(null, zeroArgument));
@@ -651,8 +651,8 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testInputParameterGroupSizes() {
-			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
-			ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
+			final ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
+			final ZeroStatement zeroStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
 			when(zeroArgument.getGroup()).thenReturn(gqGroup);
 			when(zeroStatement.getGroup()).thenReturn(gqGroup);
@@ -660,7 +660,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 			when(zeroArgument.get_m()).thenReturn(1);
 			when(zeroStatement.get_m()).thenReturn(2);
 
-			IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
+			final IllegalArgumentException invalidMException = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.verifyZeroArgument(zeroStatement, zeroArgument));
 			assertEquals("The statement and argument must have the same dimension m.", invalidMException.getMessage());
 
@@ -668,13 +668,13 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testInputParameterGroupMembership() {
-			ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
-			ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
+			final ZeroArgument zeroArgument = mock(ZeroArgument.class, Mockito.RETURNS_DEEP_STUBS);
+			final ZeroStatement otherGroupStatement = mock(ZeroStatement.class, Mockito.RETURNS_DEEP_STUBS);
 
 			when(zeroArgument.get_c_d().getGroup()).thenReturn(gqGroup);
 			when(otherGroupStatement.get_c_A().getGroup()).thenReturn(GroupTestData.getDifferentGqGroup(gqGroup));
 
-			IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
+			final IllegalArgumentException wrongGroupException = assertThrows(IllegalArgumentException.class,
 					() -> zeroArgumentService.verifyZeroArgument(otherGroupStatement, zeroArgument));
 			assertEquals("Statement and argument must belong to the same group.", wrongGroupException.getMessage());
 
@@ -684,7 +684,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 		@MethodSource("verifyZeroArgumentRealValuesProvider")
 		@DisplayName("with real values gives expected result")
 		void verifyZeroArgumentRealValues(final ElGamalMultiRecipientPublicKey publicKey, final CommitmentKey commitmentKey,
-				final ZeroStatement zeroStatement, final ZeroArgument zeroArgument, final boolean expectedOutput, String description) {
+				final ZeroStatement zeroStatement, final ZeroArgument zeroArgument, final boolean expectedOutput, final String description) {
 
 			final HashService hashService = HashService.getInstance();
 

@@ -1,8 +1,8 @@
 #!groovy
 /*
- * Copyright 2021 by Swiss Post, Information Technology Services
- *
- */
+* Copyright 2022 Post CH Ltd
+*
+*/
 
 @Library(['pipeline-library@master', 'evoting-pipeline@master']) _
 
@@ -39,26 +39,26 @@ pipeline {
 
 	stages {
 
-        stage('Prepare') {
-            steps {
-                script {
-                    currentBuild.displayName = "#${BUILD_INFO.number} : ${RELEASE_VERSION} - ${NEW_SNAPSHOT_VERSION}"
-                    currentBuild.description = "Jenkins job to release the crypto-primitives"
+		stage('Prepare') {
+			steps {
+				script {
+					currentBuild.displayName = "#${BUILD_INFO.number} : ${RELEASE_VERSION} - ${NEW_SNAPSHOT_VERSION}"
+					currentBuild.description = "Jenkins job to release the crypto-primitives"
 
-                    cleanWs()
-                    clone(
-                            branch: BRANCH_NAME,
-                            url: SCM_URL,
-                            credentialsId: "s-cicd-evoting")
-                }
-            }
-        }
+					cleanWs()
+					clone(
+							branch: BRANCH_NAME,
+							url: SCM_URL,
+							credentialsId: "s-cicd-evoting")
+				}
+			}
+		}
 
 		stage('Release') {
 			steps {
 				script {
 					def cryptoPrimitivesReleasePipelineLib = load 'jenkins-release-crypto-primitives.groovy'
-					
+
 					withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
 						cryptoPrimitivesReleasePipelineLib.performRelease(PROJECT_NAME, SCM_URL, BRANCH_NAME, AUTO_MERGE, 'clean deploy', '-Pdoc -DskipTests --settings ${EVOTING_HOME}/.mvn/settings.xml', WORKSPACE, RELEASE_VERSION, NEW_SNAPSHOT_VERSION, "spoc-dev-evoting@post.ch", false, PROJECT_NAME, RELEASE_MESSAGE)
 					}
@@ -83,7 +83,7 @@ pipeline {
 						credentialsId: "s-cicd-evoting");
 			}
 		}
-		
+
 	}
 	post {
 		failure {

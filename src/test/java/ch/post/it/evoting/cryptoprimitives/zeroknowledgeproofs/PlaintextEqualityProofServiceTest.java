@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -495,7 +495,7 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 		@DisplayName("not the same group order throws IllegalArgumentException")
 		void differentGroupOrder() {
 
-			PlaintextEqualityProof otherPlaintextEqualityProof = new PlaintextEqualityProof(otherZqGroupGenerator.genRandomZqElementMember(),
+			final PlaintextEqualityProof otherPlaintextEqualityProof = new PlaintextEqualityProof(otherZqGroupGenerator.genRandomZqElementMember(),
 					otherZqGroupGenerator.genRandomZqElementVector(2));
 
 			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> plaintextEqualityProofService
@@ -516,7 +516,7 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 				final BigInteger q = context.get("q", BigInteger.class);
 				final BigInteger g = context.get("g", BigInteger.class);
 
-				try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+				try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
 					mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
 					final GqGroup gqGroup = new GqGroup(p, q, g);
 					final ZqGroup zqGroup = new ZqGroup(q);
@@ -547,11 +547,11 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 
 					// Parse firstPublicKey (h) parameter
 					final BigInteger h = input.get("h", BigInteger.class);
-					GqElement firstPublicKey = GqElementFactory.fromValue(h, gqGroup);
+					final GqElement firstPublicKey = GqElementFactory.fromValue(h, gqGroup);
 
 					// Parse secondPublicKey (h_prime) parameter
 					final BigInteger hPrime = input.get("h_prime", BigInteger.class);
-					GqElement secondPublicKey = GqElementFactory.fromValue(hPrime, gqGroup);
+					final GqElement secondPublicKey = GqElementFactory.fromValue(hPrime, gqGroup);
 
 					// Parse plaintextEqualityProof (proof) parameters
 					final JsonData proof = input.getJsonData("proof");

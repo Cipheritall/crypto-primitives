@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,15 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 public class TestGroupSetup {
+	protected static final SecureRandom secureRandom = new SecureRandom();
 	protected static GqGroup gqGroup;
 	protected static GqGroupGenerator gqGroupGenerator;
 	protected static GqGroup otherGqGroup;
 	protected static GqGroupGenerator otherGqGroupGenerator;
-
 	protected static ZqGroup zqGroup;
 	protected static ZqGroupGenerator zqGroupGenerator;
 	protected static ZqGroup otherZqGroup;
 	protected static ZqGroupGenerator otherZqGroupGenerator;
-
-	protected static final SecureRandom secureRandom = new SecureRandom();
 
 	@BeforeAll
 	static void testGroupSetup() {

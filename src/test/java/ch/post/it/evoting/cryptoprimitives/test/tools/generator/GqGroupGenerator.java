@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class GqGroupGenerator {
 	private final GqGroup group;
 	private final SecureRandom random;
 
-	public GqGroupGenerator(GqGroup group) {
+	public GqGroupGenerator(final GqGroup group) {
 		this.group = group;
 		this.random = new SecureRandom();
 	}
@@ -55,7 +55,7 @@ public class GqGroupGenerator {
 			throw new IllegalArgumentException("It would take too much time to generate all the group members for such a large group.");
 		}
 
-		Set<BigInteger> members =
+		final Set<BigInteger> members =
 				integersModP()
 						.map(bi -> bi.modPow(BigInteger.valueOf(2), group.getP()))
 						.collect(Collectors.toSet());
@@ -71,8 +71,8 @@ public class GqGroupGenerator {
 			throw new IllegalArgumentException("It would take too much time to generate all the group members for such a large group.");
 		}
 
-		Set<BigInteger> members = getMembers();
-		Set<BigInteger> nonMembers = integersModP().collect(Collectors.toSet());
+		final Set<BigInteger> members = getMembers();
+		final Set<BigInteger> nonMembers = integersModP().collect(Collectors.toSet());
 		nonMembers.removeAll(members);
 		return nonMembers;
 	}
@@ -83,7 +83,7 @@ public class GqGroupGenerator {
 	public BigInteger genMemberValue() {
 		BigInteger member;
 		do {
-			BigInteger randomInteger = randomBigInteger(group.getP().bitLength());
+			final BigInteger randomInteger = randomBigInteger(group.getP().bitLength());
 			member = randomInteger.modPow(BigInteger.valueOf(2), group.getP());
 		} while (member.compareTo(BigInteger.ZERO) <= 0 || member.compareTo(group.getP()) >= 0);
 		return member;
@@ -131,12 +131,12 @@ public class GqGroupGenerator {
 		return GroupVector.from(generateElementList(numElements, this::genMember));
 	}
 
-	public GroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, int numColumns) {
-		List<List<GqElement>> elements = generateElementMatrix(numRows, numColumns, this::genMember);
+	public GroupMatrix<GqElement, GqGroup> genRandomGqElementMatrix(final int numRows, final int numColumns) {
+		final List<List<GqElement>> elements = generateElementMatrix(numRows, numColumns, this::genMember);
 		return GroupMatrix.fromRows(elements);
 	}
 
-	private BigInteger randomBigInteger(int bitLength) {
+	private BigInteger randomBigInteger(final int bitLength) {
 		return new BigInteger(bitLength, random);
 	}
 
@@ -144,7 +144,7 @@ public class GqGroupGenerator {
 		return IntStream.range(1, group.getP().intValue()).mapToObj(BigInteger::valueOf);
 	}
 
-	public GqElement otherElement(GqElement element) {
+	public GqElement otherElement(final GqElement element) {
 		return Generators.genWhile(this::genMember, element::equals);
 	}
 }

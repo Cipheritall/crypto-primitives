@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ public interface BigIntegerOperations {
 	 */
 	BigInteger modExponentiate(BigInteger base, BigInteger exponent, BigInteger modulus);
 
-
 	/**
 	 * Exponentiates the elements of a list of {@link BigInteger}s by the elements of a second list and multiply the resulting terms. If an exponent
 	 * is negative, then the corresponding base must be relatively prime to the modulus. This operations needs both lists to be of equal size.
@@ -90,13 +89,11 @@ public interface BigIntegerOperations {
 	BigInteger modInvert(BigInteger n, BigInteger modulus);
 
 	/**
-	 * Calculates the Jacobi symbol(a|n). The Jacobi symbol allows us determining group membership efficiently.
-	 * integers
+	 * Calculates the Jacobi symbol(a|n). The Jacobi symbol allows us determining group membership efficiently. integers
 	 *
 	 * @param a positive integer
 	 * @param n modulus
 	 * @return (a | n) Possible values -1,0,1
-	 *
 	 */
 	int getJacobi(BigInteger a, BigInteger n);
 }

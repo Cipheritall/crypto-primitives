@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,14 +72,14 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 	@Override
 	public VerifiableDecryptions genVerifiableDecryptions(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,
-			final ElGamalMultiRecipientKeyPair keyPair, List<String> auxiliaryInformation) {
+			final ElGamalMultiRecipientKeyPair keyPair, final List<String> auxiliaryInformation) {
 		checkNotNull(ciphertexts);
 		checkNotNull(keyPair);
 		checkNotNull(auxiliaryInformation);
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
-		List<String> i_aux = auxiliaryInformation;
+		final List<String> i_aux = auxiliaryInformation;
 		final int l = C.getElementSize();
 		final int k = sk.size();
 
@@ -152,8 +152,8 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	}
 
 	@Override
-	public boolean verifyExponentiation(GroupVector<GqElement, GqGroup> bases, GroupVector<GqElement, GqGroup> exponentiations,
-			ExponentiationProof proof, List<String> auxiliaryInformation) {
+	public boolean verifyExponentiation(final GroupVector<GqElement, GqGroup> bases, final GroupVector<GqElement, GqGroup> exponentiations,
+			final ExponentiationProof proof, final List<String> auxiliaryInformation) {
 		return exponentiationProofService.verifyExponentiation(bases, exponentiations, proof, auxiliaryInformation);
 	}
 

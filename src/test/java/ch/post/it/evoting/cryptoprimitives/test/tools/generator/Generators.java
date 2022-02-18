@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Generators {
-	public static <T> T genWhile(Supplier<T> producer, Predicate<T> invalid) {
+	public static <T> T genWhile(final Supplier<T> producer, final Predicate<T> invalid) {
 		T member;
 		do {
 			member = producer.get();

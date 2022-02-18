@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,21 +30,21 @@ public class TestMultiExponentiationArgumentGenerator {
 	private final ElGamalGenerator elGamalGenerator;
 	private final ZqGroupGenerator zqGroupGenerator;
 
-	public TestMultiExponentiationArgumentGenerator(GqGroup gqGroup) {
+	public TestMultiExponentiationArgumentGenerator(final GqGroup gqGroup) {
 		this.gqGroupGenerator = new GqGroupGenerator(gqGroup);
 		this.elGamalGenerator = new ElGamalGenerator(gqGroup);
 		this.zqGroupGenerator = new ZqGroupGenerator(ZqGroup.sameOrderAs(gqGroup));
 	}
 
-	MultiExponentiationArgument genRandomArgument(int n, int m, int l) {
-		GqElement cA0 = gqGroupGenerator.genMember();
-		GroupVector<GqElement, GqGroup> cB = gqGroupGenerator.genRandomGqElementVector(2 * m);
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = elGamalGenerator.genRandomCiphertextVector(2 * m, l);
-		GroupVector<ZqElement, ZqGroup> a = zqGroupGenerator.genRandomZqElementVector(n);
-		ZqElement r = zqGroupGenerator.genRandomZqElementMember();
-		ZqElement b = zqGroupGenerator.genRandomZqElementMember();
-		ZqElement s = zqGroupGenerator.genRandomZqElementMember();
-		ZqElement tau = zqGroupGenerator.genRandomZqElementMember();
+	MultiExponentiationArgument genRandomArgument(final int n, final int m, final int l) {
+		final GqElement cA0 = gqGroupGenerator.genMember();
+		final GroupVector<GqElement, GqGroup> cB = gqGroupGenerator.genRandomGqElementVector(2 * m);
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E = elGamalGenerator.genRandomCiphertextVector(2 * m, l);
+		final GroupVector<ZqElement, ZqGroup> a = zqGroupGenerator.genRandomZqElementVector(n);
+		final ZqElement r = zqGroupGenerator.genRandomZqElementMember();
+		final ZqElement b = zqGroupGenerator.genRandomZqElementMember();
+		final ZqElement s = zqGroupGenerator.genRandomZqElementMember();
+		final ZqElement tau = zqGroupGenerator.genRandomZqElementMember();
 		return new MultiExponentiationArgument.Builder()
 				.with_c_A_0(cA0)
 				.with_c_B(cB)

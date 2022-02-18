@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class EncryptionParametersTest {
 
 	@BeforeAll
 	static void setUpAll() {
-		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
 			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
 			encryptionParameters = new EncryptionParameters();
 		}
@@ -99,7 +99,7 @@ class EncryptionParametersTest {
 			final BigInteger q = output.get("q", BigInteger.class);
 			final BigInteger g = output.get("g", BigInteger.class);
 
-			try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+			try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
 				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
 
 				final GqGroup expectedParameters = new GqGroup(p, q, g);
@@ -115,7 +115,7 @@ class EncryptionParametersTest {
 	void getEncryptionParameters(final String seed, final GqGroup expectedParameters,
 			final String description, final SecurityLevel securityLevel) {
 
-		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
 			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(securityLevel);
 
 			final GqGroup encryptionParameters = new EncryptionParameters().getEncryptionParameters(seed);

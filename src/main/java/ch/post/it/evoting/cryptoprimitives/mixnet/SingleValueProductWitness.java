@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class SingleValueProductWitness {
 	 * <p>The elements and randomness passed as arguments must be non null and have the same {@link ZqGroup}.
 	 * The list of elements must not contain null elements.</p>
 	 *
-	 * @param a   (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
+	 * @param a (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
 	 * @param r r, the randomness
 	 */
 	SingleValueProductWitness(final GroupVector<ZqElement, ZqGroup> a, final ZqElement r) {
