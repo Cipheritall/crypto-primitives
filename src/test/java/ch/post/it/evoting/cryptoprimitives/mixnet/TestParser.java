@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,27 +34,27 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 
 public class TestParser {
 
-	static GroupVector<GqElement, GqGroup> parseCommitment(JsonData parent, String commitmentField, GqGroup group) {
+	static GroupVector<GqElement, GqGroup> parseCommitment(final JsonData parent, final String commitmentField, final GqGroup group) {
 		final BigInteger[] values = parent.get(commitmentField, BigInteger[].class);
 		return Arrays.stream(values)
 				.map(bi -> GqElementFactory.fromValue(bi, group))
 				.collect(toGroupVector());
 	}
 
-	static GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertexts(JsonData ciphertextsData, GqGroup group) {
-		List<ElGamalMultiRecipientCiphertext> results = new LinkedList<>();
-		for (JsonNode ciphertextNode : ciphertextsData.getJsonNode()) {
+	static GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> parseCiphertexts(final JsonData ciphertextsData, final GqGroup group) {
+		final List<ElGamalMultiRecipientCiphertext> results = new LinkedList<>();
+		for (final JsonNode ciphertextNode : ciphertextsData.getJsonNode()) {
 			results.add(parseCiphertext(ciphertextNode, group));
 		}
 		return GroupVector.from(results);
 	}
 
-	static ElGamalMultiRecipientCiphertext parseCiphertext(JsonNode ciphertextNode, GqGroup group) {
-		JsonData ciphertextData = new JsonData(ciphertextNode);
-		BigInteger gamma = ciphertextData.get("gamma", BigInteger.class);
-		GqElement gammaElement = GqElementFactory.fromValue(gamma, group);
-		BigInteger[] phis = ciphertextData.get("phis", BigInteger[].class);
-		List<GqElement> phiElements = Arrays.stream(phis).map(value -> GqElementFactory.fromValue(value, group)).collect(toList());
+	static ElGamalMultiRecipientCiphertext parseCiphertext(final JsonNode ciphertextNode, final GqGroup group) {
+		final JsonData ciphertextData = new JsonData(ciphertextNode);
+		final BigInteger gamma = ciphertextData.get("gamma", BigInteger.class);
+		final GqElement gammaElement = GqElementFactory.fromValue(gamma, group);
+		final BigInteger[] phis = ciphertextData.get("phis", BigInteger[].class);
+		final List<GqElement> phiElements = Arrays.stream(phis).map(value -> GqElementFactory.fromValue(value, group)).collect(toList());
 		return ElGamalMultiRecipientCiphertext.create(gammaElement, phiElements);
 	}
 }

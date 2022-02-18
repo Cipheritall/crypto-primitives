@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,7 +262,7 @@ public class HadamardArgumentService {
 	 * @param argument  the argument to be verified.
 	 * @return a {@link VerificationResult} being valid iff the argument is valid for the given statement.
 	 */
-	Verifiable verifyHadamardArgument(HadamardStatement statement, HadamardArgument argument) {
+	Verifiable verifyHadamardArgument(final HadamardStatement statement, final HadamardArgument argument) {
 		checkNotNull(statement);
 		checkNotNull(argument);
 
@@ -357,7 +357,7 @@ public class HadamardArgumentService {
 		checkArgument(bound >= 0, "The column index must be greater than or equal to 0.");
 		checkArgument(bound < matrix.numColumns(), "The column index must be smaller than the number of rows in the matrix.");
 
-		ZqElement one = ZqElement.create(1, matrix.getGroup());
+		final ZqElement one = ZqElement.create(1, matrix.getGroup());
 		final int n = matrix.numRows();
 		return IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream()

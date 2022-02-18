@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ class ZeroArgumentTest extends TestGroupSetup {
 		@Test
 		@DisplayName("built with cd of bad size throws IllegalArgumentException")
 		void zeroArgumentBuilderBuildCdBadSize() {
-			GroupVector<GqElement, GqGroup> badCd = gqGroupGenerator.genRandomGqElementVector(4);
+			final GroupVector<GqElement, GqGroup> badCd = gqGroupGenerator.genRandomGqElementVector(4);
 			final ZeroArgument.Builder builder = new ZeroArgument.Builder()
 					.with_c_A_0(cA0)
 					.with_c_B_m(cBm)

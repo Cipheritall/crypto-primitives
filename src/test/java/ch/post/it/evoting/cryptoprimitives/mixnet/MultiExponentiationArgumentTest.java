@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	@Test
 	void builtWithAllSetDoesNotThrow() {
-		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
+		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		assertDoesNotThrow(() -> builder
 				.with_c_A_0(cA0)
 				.with_c_B(cBVector)
@@ -103,11 +103,12 @@ class MultiExponentiationArgumentTest extends TestGroupSetup {
 
 	@ParameterizedTest
 	@MethodSource("nullArgumentsProvider")
-	void builtWithNullFields(GqElement cA0, GroupVector<GqElement, GqGroup> cBVector,
-			GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector, GroupVector<ZqElement, ZqGroup> aVector, ZqElement r, ZqElement b,
-			ZqElement s, ZqElement tau) {
+	void builtWithNullFields(final GqElement cA0, final GroupVector<GqElement, GqGroup> cBVector,
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> EVector, final GroupVector<ZqElement, ZqGroup> aVector, final ZqElement r,
+			final ZqElement b,
+			final ZqElement s, final ZqElement tau) {
 
-		MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
+		final MultiExponentiationArgument.Builder builder = new MultiExponentiationArgument.Builder();
 		builder.with_c_A_0(cA0)
 				.with_c_B(cBVector)
 				.with_E(EVector)

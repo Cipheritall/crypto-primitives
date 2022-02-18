@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,16 @@ class BigIntegerOperationsInactiveAndMockGMPRunnerIT {
 
 	@Test
 	void shouldRepeatTestClass() {
-		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+		final LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
 				.selectors(
 						selectPackage("ch.post.it.evoting.cryptoprimitives.math"),
 						selectClass(BigIntegerOperationsServiceTest.class)
 				)
 				.build();
 
-		Launcher launcher = LauncherFactory.create();
+		final Launcher launcher = LauncherFactory.create();
 
-		try (MockedStatic<Gmp> gmpMockedStatic = Mockito.mockStatic(Gmp.class)) {
+		try (final MockedStatic<Gmp> gmpMockedStatic = Mockito.mockStatic(Gmp.class)) {
 			gmpMockedStatic.when(Gmp::checkLoaded).thenThrow(new UnsatisfiedLinkError());
 			launcher.execute(request);
 		}

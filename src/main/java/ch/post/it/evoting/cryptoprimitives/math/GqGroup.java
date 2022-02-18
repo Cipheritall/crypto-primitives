@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 		checkArgument(q.isProbablePrime(securityLevel.getStrength()), "Group Gq parameter q must be prime");
 		checkArgument(q.compareTo(BigInteger.ZERO) > 0);
 		checkArgument(q.compareTo(p) < 0);
-		BigInteger computedP = q.multiply(BigInteger.valueOf(2)).add(BigInteger.ONE);
+		final BigInteger computedP = q.multiply(BigInteger.valueOf(2)).add(BigInteger.ONE);
 		checkArgument(computedP.equals(p), "Group Gq parameter p must be equal to 2q + 1");
 		this.q = q;
 

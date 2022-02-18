@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ class PermutationService {
 				.boxed()
 				.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
 		for (int i = 0; i < N; i++) {
-			int offset = genRandomInteger(N - i);
-			int tmp = pi.get(i);
+			final int offset = genRandomInteger(N - i);
+			final int tmp = pi.get(i);
 			pi.set(i, pi.get(i + offset));
 			pi.set(i + offset, tmp);
 		}
@@ -62,8 +62,8 @@ class PermutationService {
 	}
 
 	/*
-	* Generates a random integer with an int bound.
-	* */
+	 * Generates a random integer with an int bound.
+	 * */
 	private int genRandomInteger(final int bound) {
 		final BigInteger boundAsBigInteger = BigInteger.valueOf(bound);
 		final BigInteger randomValue = this.randomService.genRandomInteger(boundAsBigInteger);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,25 +31,25 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator
 class TestHadamardGenerators {
 
 	static HadamardWitness generateHadamardWitness(final int n, final int m, final ZqGroup zqGroup) {
-		ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
+		final ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
 
 		// Generate the Hadamard witness
-		ZqGroupGenerator zqGenerator = new ZqGroupGenerator(zqGroup);
-		GroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, m);
-		GroupVector<ZqElement, ZqGroup> vector = IntStream.range(0, n)
+		final ZqGroupGenerator zqGenerator = new ZqGroupGenerator(zqGroup);
+		final GroupMatrix<ZqElement, ZqGroup> matrix = zqGenerator.genRandomZqElementMatrix(n, m);
+		final GroupVector<ZqElement, ZqGroup> vector = IntStream.range(0, n)
 				.mapToObj(i -> matrix.getRow(i).stream().reduce(one, ZqElement::multiply))
 				.collect(toGroupVector());
-		GroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(m);
-		ZqElement randomness = zqGenerator.genRandomZqElementMember();
+		final GroupVector<ZqElement, ZqGroup> exponents = zqGenerator.genRandomZqElementVector(m);
+		final ZqElement randomness = zqGenerator.genRandomZqElementMember();
 
 		return new HadamardWitness(matrix, vector, exponents, randomness);
 	}
 
-	static HadamardStatement generateHadamardStatement(HadamardWitness witness, CommitmentKey commitmentKey) {
+	static HadamardStatement generateHadamardStatement(final HadamardWitness witness, final CommitmentKey commitmentKey) {
 		// Generate the Hadamard statement
-		GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService
+		final GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService
 				.getCommitmentMatrix(witness.get_A(), witness.get_r(), commitmentKey);
-		GqElement commitmentB = CommitmentService.getCommitment(witness.get_b(), witness.get_s(), commitmentKey);
+		final GqElement commitmentB = CommitmentService.getCommitment(witness.get_b(), witness.get_s(), commitmentKey);
 		return new HadamardStatement(commitmentsA, commitmentB);
 	}
 }
