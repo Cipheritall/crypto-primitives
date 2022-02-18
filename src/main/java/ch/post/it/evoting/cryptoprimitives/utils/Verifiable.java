@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ public class Verifiable {
 		this.toVerify = toVerify;
 	}
 
-
 	/**
 	 * Combines {@code this} with another Verifiable {@code other} such that it verifies only if both verify. This allows to chain multiple Verifiable
 	 * together. If {@code this} fails, {@code other} will not be evaluated (fail fast behavior).
@@ -46,7 +45,7 @@ public class Verifiable {
 	public Verifiable and(final Verifiable other) {
 		checkNotNull(other);
 		return new Verifiable(() -> {
-			VerificationResult thisResult = this.verify();
+			final VerificationResult thisResult = this.verify();
 			return thisResult.isVerified() ? other.verify() : thisResult;
 		});
 	}
@@ -61,8 +60,8 @@ public class Verifiable {
 	}
 
 	/**
-	 * Creates a Verifiable returning a {@link VerificationSuccess} when {@code toVerify} evaluates to {@code true}, or a {@link
-	 * VerificationFailure} containing {@code errorMessage} when {@code toVerify} evaluates to {@code false}.
+	 * Creates a Verifiable returning a {@link VerificationSuccess} when {@code toVerify} evaluates to {@code true}, or a {@link VerificationFailure}
+	 * containing {@code errorMessage} when {@code toVerify} evaluates to {@code false}.
 	 *
 	 * @param toVerify     a supplier of a boolean condition to verify. Not null.
 	 * @param errorMessage the error message when {@code toVerify} evaluates to {@code false}. Not null.
@@ -76,6 +75,7 @@ public class Verifiable {
 
 	/**
 	 * Adds an error message to the VerificationResult in case of failure.
+	 *
 	 * @param errorMessage the errorMessage to add. Not null.
 	 * @return a new Verifiable.
 	 */
@@ -83,7 +83,7 @@ public class Verifiable {
 		checkNotNull(errorMessage);
 
 		return new Verifiable(() -> {
-			VerificationResult result = this.verify();
+			final VerificationResult result = this.verify();
 			return result.isVerified() ? result : ((VerificationFailure) result).addErrorMessage(errorMessage);
 		});
 	}

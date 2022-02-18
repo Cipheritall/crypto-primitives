@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public final class ConversionService {
 
 		try {
 			return new BigInteger(s, 10);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw new IllegalArgumentException(
 					String.format("The string to convert \"%s\" is not a valid decimal representation of a BigInteger.", s));
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	 * @return the ith element.
 	 */
 	@Override
-	public ZqElement get(int i) {
+	public ZqElement get(final int i) {
 		return this.privateKeyElements.get(i);
 	}
 

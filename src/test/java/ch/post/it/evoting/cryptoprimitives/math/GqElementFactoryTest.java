@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,26 +45,26 @@ class GqElementFactoryTest {
 
 	@Test
 	void givenAValueWhenAGroupElementIsCreatedWithThatValueThenHasThatValue() {
-		BigInteger value = BigInteger.valueOf(2);
-		GqElement element = GqElementFactory.fromValue(value, group);
+		final BigInteger value = BigInteger.valueOf(2);
+		final GqElement element = GqElementFactory.fromValue(value, group);
 		assertEquals(value, element.getValue(), "The returned element value is not the expected one");
 	}
 
 	@Test
 	void whenCreateAnElementWithValueZeroThenError() {
-		BigInteger value = BigInteger.ZERO;
+		final BigInteger value = BigInteger.ZERO;
 		assertThrows(IllegalArgumentException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 
 	@Test
 	void whenCreateAnElementWithNegativeValueThenError() {
-		BigInteger value = BigInteger.valueOf(-1);
+		final BigInteger value = BigInteger.valueOf(-1);
 		assertThrows(IllegalArgumentException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 
 	@Test
 	void whenCreateAnElementWithValueGreaterThanPThenError() {
-		BigInteger value = BigInteger.valueOf(24);
+		final BigInteger value = BigInteger.valueOf(24);
 		assertThrows(IllegalArgumentException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 
@@ -75,20 +75,20 @@ class GqElementFactoryTest {
 
 	@Test
 	void whenCreateAnElementWithNullGroupThenError() {
-		BigInteger value = BigInteger.ONE;
+		final BigInteger value = BigInteger.ONE;
 		assertThrows(NullPointerException.class, () -> GqElementFactory.fromValue(value, null));
 	}
 
 	@Test
 	void whenCreateAnElementNotMemberOfTheGroupError() {
-		BigInteger nonMemberValue = groupGenerator.genNonMemberValue();
+		final BigInteger nonMemberValue = groupGenerator.genNonMemberValue();
 		assertThrows(IllegalArgumentException.class, () -> GqElementFactory.fromValue(nonMemberValue, group));
 	}
 
 	@Test
 	void whenCreateAnElementMemberOfTheGroupNoError() {
-		BigInteger memberValue = groupGenerator.genMemberValue();
-		GqElement groupMember = GqElementFactory.fromValue(memberValue, group);
+		final BigInteger memberValue = groupGenerator.genMemberValue();
+		final GqElement groupMember = GqElementFactory.fromValue(memberValue, group);
 		assertTrue(group.isGroupMember(groupMember.getValue()));
 	}
 
@@ -189,7 +189,7 @@ class GqElementFactoryTest {
 	@Test
 	void testGetSmallGroupMembersNotEnoughPrimesThrows() {
 		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
-		IllegalStateException exception = assertThrows(IllegalStateException.class,
+		final IllegalStateException exception = assertThrows(IllegalStateException.class,
 				() -> GqElementFactory.getSmallPrimeGroupMembers(gqGroup, 4));
 		assertEquals("The number of primes found does not correspond to the number of desired primes.", exception.getMessage());
 	}

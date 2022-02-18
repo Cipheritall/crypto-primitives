@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class BigIntegerOperationsService {
 			Gmp.checkLoaded();
 			gmpInstalled = true;
 			LOG.info("GMP is installed and ready to use");
-		} catch (UnsatisfiedLinkError e) {
+		} catch (final UnsatisfiedLinkError e) {
 			LOG.warn("GMP is not installed, native code optimisations are not available, integer operations will now take longer");
 		}
 

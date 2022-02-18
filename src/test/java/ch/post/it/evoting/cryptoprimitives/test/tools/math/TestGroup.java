@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
 
 public class TestGroup implements MathematicalGroup<TestGroup> {
 	@Override
-	public boolean isGroupMember(BigInteger value) {
+	public boolean isGroupMember(final BigInteger value) {
 		throw new UnsupportedOperationException();
 	}
 

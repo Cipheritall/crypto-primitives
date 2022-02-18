@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public final class TestParameters {
 	public static List<TestParameters> fromResource(final String resourceName) {
 		final URL url = TestParameters.class.getResource(resourceName);
 
-		if (url == null){
+		if (url == null) {
 			throw new IllegalStateException(String.format("Cannot find resource %s", resourceName));
 		}
 

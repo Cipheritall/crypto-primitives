@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class SingleValueProductWitnessTest {
 	@BeforeEach
 	void setup() {
 		zqGroup = GroupTestData.getZqGroup();
-		ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
+		final ZqGroupGenerator zqGroupGenerator = new ZqGroupGenerator(zqGroup);
 
 		elements = zqGroupGenerator.genRandomZqElementVector(NUM_ELEMENTS);
 		randomness = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
@@ -64,17 +64,17 @@ class SingleValueProductWitnessTest {
 	@Test
 	@DisplayName("throw an IllegalArgumentException when the elements and the randomness have different groups")
 	void constructSingleValueProductWitnessWithElementsAndRandomnessDifferentGroupThrows() {
-		ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqElement differentRandomness = differentZqGroup.getIdentity();
+		final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
+		final ZqElement differentRandomness = differentZqGroup.getIdentity();
 		assertThrows(IllegalArgumentException.class, () -> new SingleValueProductWitness(elements, differentRandomness));
 	}
 
 	@Test
 	void testEquals() {
-		SingleValueProductWitness singleValueProdWitness1 = new SingleValueProductWitness(elements, randomness);
-		SingleValueProductWitness singleValueProdWitness2 = new SingleValueProductWitness(elements, randomness);
-		ZqElement otherRandomness = randomness.add(ZqElement.create(BigInteger.ONE, randomness.getGroup()));
-		SingleValueProductWitness singleValueProdWitness3 = new SingleValueProductWitness(elements, otherRandomness);
+		final SingleValueProductWitness singleValueProdWitness1 = new SingleValueProductWitness(elements, randomness);
+		final SingleValueProductWitness singleValueProdWitness2 = new SingleValueProductWitness(elements, randomness);
+		final ZqElement otherRandomness = randomness.add(ZqElement.create(BigInteger.ONE, randomness.getGroup()));
+		final SingleValueProductWitness singleValueProdWitness3 = new SingleValueProductWitness(elements, otherRandomness);
 
 		assertEquals(singleValueProdWitness1, singleValueProdWitness1);
 		assertEquals(singleValueProdWitness1, singleValueProdWitness2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class GroupTestData {
 
 	static {
 		// More groups can be added to this class as needed.
-		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
+		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
 			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
 			final BigInteger p1 = BigInteger.valueOf(11);
 			final BigInteger q1 = BigInteger.valueOf(5);
@@ -86,7 +86,7 @@ public class GroupTestData {
 	 * @return a different {@link GqGroup}.
 	 */
 	public static GqGroup getDifferentGqGroup(final GqGroup gqGroup) {
-		List<GqGroup> otherGroups = new ArrayList<>(smallTestGroups);
+		final List<GqGroup> otherGroups = new ArrayList<>(smallTestGroups);
 		otherGroups.remove(gqGroup);
 		return getRandomGqGroupFrom(otherGroups);
 	}
@@ -118,7 +118,7 @@ public class GroupTestData {
 	public static GqGroup getLargeGqGroup() {
 		try {
 			return new GqGroupLoader("/large-group.json").getGroup();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new UncheckedIOException("Cannot read large group from file.", e);
 		}
 	}
@@ -132,7 +132,7 @@ public class GroupTestData {
 		final BigInteger q = BigInteger.valueOf(29);
 		final BigInteger g = BigInteger.valueOf(3);
 
-		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
+		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
 			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
 			return new GqGroup(p, q, g);
 		}
