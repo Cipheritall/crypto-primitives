@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import ch.post.it.evoting.cryptoprimitives.math.MathematicalGroup;
  */
 interface ElGamalMultiRecipientObject<E extends GroupElement<G>, G extends MathematicalGroup<G>> extends GroupVectorElement<G> {
 
-	 @Override
-	 G getGroup();
+	@Override
+	G getGroup();
 
 	/**
 	 * @return the size of this actor.
 	 */
-	 int size();
+	int size();
 
 	/**
 	 * @param i the index of the element to return

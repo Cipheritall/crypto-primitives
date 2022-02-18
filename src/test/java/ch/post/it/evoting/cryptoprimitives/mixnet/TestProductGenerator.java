@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,17 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator
 class TestProductGenerator {
 
 	static ProductWitness genProductWitness(final int n, final int m, final ZqGroupGenerator zqGroupGenerator) {
-		GroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m);
-		GroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.genRandomZqElementVector(m);
+		final GroupMatrix<ZqElement, ZqGroup> matrixA = zqGroupGenerator.genRandomZqElementMatrix(n, m);
+		final GroupVector<ZqElement, ZqGroup> exponentsR = zqGroupGenerator.genRandomZqElementVector(m);
 		return new ProductWitness(matrixA, exponentsR);
 	}
 
 	static ProductStatement getProductStatement(final ProductWitness witness, final CommitmentKey commitmentKey) {
-		GroupMatrix<ZqElement, ZqGroup> matrixA = witness.get_A();
-		GroupVector<ZqElement, ZqGroup> exponentsR = witness.get_r();
-		GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
-		ZqElement one = ZqElement.create(BigInteger.ONE, matrixA.getGroup());
-		ZqElement productB = matrixA.flatStream().reduce(one, ZqElement::multiply);
+		final GroupMatrix<ZqElement, ZqGroup> matrixA = witness.get_A();
+		final GroupVector<ZqElement, ZqGroup> exponentsR = witness.get_r();
+		final GroupVector<GqElement, GqGroup> commitmentsA = CommitmentService.getCommitmentMatrix(matrixA, exponentsR, commitmentKey);
+		final ZqElement one = ZqElement.create(BigInteger.ONE, matrixA.getGroup());
+		final ZqElement productB = matrixA.flatStream().reduce(one, ZqElement::multiply);
 		return new ProductStatement(commitmentsA, productB);
 	}
 }

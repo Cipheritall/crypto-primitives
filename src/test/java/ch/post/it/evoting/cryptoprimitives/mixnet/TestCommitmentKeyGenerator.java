@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class TestCommitmentKeyGenerator {
 
 	private final GqGroupGenerator generator;
 
-	TestCommitmentKeyGenerator(GqGroup group) {
+	TestCommitmentKeyGenerator(final GqGroup group) {
 		checkNotNull(group);
 		this.generator = new GqGroupGenerator(group);
 
@@ -41,9 +41,9 @@ public class TestCommitmentKeyGenerator {
 	 * @param nu the number of g elements of the key.
 	 * @return a new commitment key of length ν.
 	 */
-	CommitmentKey genCommitmentKey(int nu) {
-		GqElement h = generator.genNonIdentityNonGeneratorMember();
-		List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(nu).collect(Collectors.toList());
+	CommitmentKey genCommitmentKey(final int nu) {
+		final GqElement h = generator.genNonIdentityNonGeneratorMember();
+		final List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(nu).collect(Collectors.toList());
 		return new CommitmentKey(h, gList);
 	}
 }

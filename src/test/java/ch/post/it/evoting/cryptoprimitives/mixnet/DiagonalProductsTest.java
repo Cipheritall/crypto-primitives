@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 
 		final TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
 		final CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(KEY_SIZE);
-		HashService hashService = TestHashService.create(gqGroup.getQ());
+		final HashService hashService = TestHashService.create(gqGroup.getQ());
 		multiExponentiationArgumentService = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(), hashService);
 
 	}
@@ -124,7 +124,7 @@ class DiagonalProductsTest extends TestGroupSetup {
 				.collect(Collectors.toList());
 		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 		final List<List<ElGamalMultiRecipientCiphertext>> randomCiphertexts = Stream.generate(
-				() -> elGamalGenerator.genRandomCiphertexts(otherPublicKey, KEY_SIZE + 1, n))
+						() -> elGamalGenerator.genRandomCiphertexts(otherPublicKey, KEY_SIZE + 1, n))
 				.limit(m)
 				.collect(Collectors.toList());
 		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = GroupMatrix.fromRows(randomCiphertexts);
@@ -142,9 +142,9 @@ class DiagonalProductsTest extends TestGroupSetup {
 		final List<GqElement> pkElements = Stream.generate(otherGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(l)
 				.collect(Collectors.toList());
 		final ElGamalMultiRecipientPublicKey differentGroupPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
-		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(otherGqGroup);
+		final ElGamalGenerator elGamalGenerator = new ElGamalGenerator(otherGqGroup);
 		final List<List<ElGamalMultiRecipientCiphertext>> otherGroupRandomCiphertexts = Stream.generate(
-				() -> elGamalGenerator.genRandomCiphertexts(differentGroupPublicKey, l, n))
+						() -> elGamalGenerator.genRandomCiphertexts(differentGroupPublicKey, l, n))
 				.limit(m)
 				.collect(Collectors.toList());
 		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> differentGroupCiphertexts = GroupMatrix
@@ -169,75 +169,75 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@DisplayName("with specific values returns the expected result")
 	void getDiagonalProductsWithSpecificValues() {
 		// Create groups
-		BigInteger p = BigInteger.valueOf(23);
-		BigInteger q = BigInteger.valueOf(11);
-		BigInteger g = BigInteger.valueOf(2);
-		
-		GqGroup gqGroup = new GqGroup(p, q, g);
-		ZqGroup zqGroup = new ZqGroup(q);
+		final BigInteger p = BigInteger.valueOf(23);
+		final BigInteger q = BigInteger.valueOf(11);
+		final BigInteger g = BigInteger.valueOf(2);
+
+		final GqGroup gqGroup = new GqGroup(p, q, g);
+		final ZqGroup zqGroup = new ZqGroup(q);
 
 		// Create BigIntegers
-		BigInteger ZERO = BigInteger.ZERO;
-		BigInteger ONE = BigInteger.ONE;
-		BigInteger THREE = BigInteger.valueOf(3);
-		BigInteger FOUR = BigInteger.valueOf(4);
-		BigInteger FIVE = BigInteger.valueOf(5);
-		BigInteger SIX = BigInteger.valueOf(6);
-		BigInteger EIGHT = BigInteger.valueOf(8);
-		BigInteger NINE = BigInteger.valueOf(9);
+		final BigInteger ZERO = BigInteger.ZERO;
+		final BigInteger ONE = BigInteger.ONE;
+		final BigInteger THREE = BigInteger.valueOf(3);
+		final BigInteger FOUR = BigInteger.valueOf(4);
+		final BigInteger FIVE = BigInteger.valueOf(5);
+		final BigInteger SIX = BigInteger.valueOf(6);
+		final BigInteger EIGHT = BigInteger.valueOf(8);
+		final BigInteger NINE = BigInteger.valueOf(9);
 
 		// Create GqElements
-		GqElement gOne = gqGroup.getIdentity();
-		GqElement gTwo = gqGroup.getGenerator();
-		GqElement gThree = GqElementFactory.fromValue(THREE, gqGroup);
-		GqElement gFour = GqElementFactory.fromValue(FOUR, gqGroup);
-		GqElement gSix = GqElementFactory.fromValue(SIX, gqGroup);
-		GqElement gEight = GqElementFactory.fromValue(EIGHT, gqGroup);
-		GqElement gNine = GqElementFactory.fromValue(NINE, gqGroup);
-		GqElement gTwelve = GqElementFactory.fromValue(BigInteger.valueOf(12), gqGroup);
-		GqElement gThirteen = GqElementFactory.fromValue(BigInteger.valueOf(13), gqGroup);
-		GqElement gSixteen = GqElementFactory.fromValue(BigInteger.valueOf(16), gqGroup);
-		GqElement gEighteen = GqElementFactory.fromValue(BigInteger.valueOf(18), gqGroup);
+		final GqElement gOne = gqGroup.getIdentity();
+		final GqElement gTwo = gqGroup.getGenerator();
+		final GqElement gThree = GqElementFactory.fromValue(THREE, gqGroup);
+		final GqElement gFour = GqElementFactory.fromValue(FOUR, gqGroup);
+		final GqElement gSix = GqElementFactory.fromValue(SIX, gqGroup);
+		final GqElement gEight = GqElementFactory.fromValue(EIGHT, gqGroup);
+		final GqElement gNine = GqElementFactory.fromValue(NINE, gqGroup);
+		final GqElement gTwelve = GqElementFactory.fromValue(BigInteger.valueOf(12), gqGroup);
+		final GqElement gThirteen = GqElementFactory.fromValue(BigInteger.valueOf(13), gqGroup);
+		final GqElement gSixteen = GqElementFactory.fromValue(BigInteger.valueOf(16), gqGroup);
+		final GqElement gEighteen = GqElementFactory.fromValue(BigInteger.valueOf(18), gqGroup);
 
 		// Create ZqElements
-		ZqElement zZero = ZqElement.create(ZERO, zqGroup);
-		ZqElement zOne = ZqElement.create(ONE, zqGroup);
-		ZqElement zThree = ZqElement.create(THREE, zqGroup);
-		ZqElement zFive = ZqElement.create(FIVE, zqGroup);
-		ZqElement zNine = ZqElement.create(NINE, zqGroup);
+		final ZqElement zZero = ZqElement.create(ZERO, zqGroup);
+		final ZqElement zOne = ZqElement.create(ONE, zqGroup);
+		final ZqElement zThree = ZqElement.create(THREE, zqGroup);
+		final ZqElement zFive = ZqElement.create(FIVE, zqGroup);
+		final ZqElement zNine = ZqElement.create(NINE, zqGroup);
 
 		// Create the ciphertext matrix:
 		// C0 = [ {1, ( 3, 6,  4)} { 4, (12, 16, 6)} ]
 		// C1 = [ {1, (13, 4, 18)} {13, ( 2,  3, 1)} ]
-		ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThree, gSix, gFour));
-		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
-		ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
-		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
-		GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = GroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
+		final ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThree, gSix, gFour));
+		final ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gTwelve, gSixteen, gSix));
+		final ElGamalMultiRecipientCiphertext c2 = ElGamalMultiRecipientCiphertext.create(gOne, Arrays.asList(gThirteen, gFour, gEighteen));
+		final ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
+		final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix = GroupVector.of(c0, c1, c2, c3).toMatrix(2, 2);
 
 		// Create the exponent matrix
 		// A = [0 3 5]
 		// 	   [1 9 1]
-		GroupMatrix<ZqElement, ZqGroup> matrixA = GroupVector.of(zZero, zThree, zFive, zOne, zNine, zOne).toMatrix(2, 3);
+		final GroupMatrix<ZqElement, ZqGroup> matrixA = GroupVector.of(zZero, zThree, zFive, zOne, zNine, zOne).toMatrix(2, 3);
 
 		// Create the expected output
 		// D = ( {13, (2, 3, 1)}, {12, (13, 9, 9)}, {8, (13, 16, 13)}, {4, (18, 9, 3)} )
-		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> expected = GroupVector.of(
+		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> expected = GroupVector.of(
 				ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne)),
 				ElGamalMultiRecipientCiphertext.create(gTwelve, Arrays.asList(gThirteen, gNine, gNine)),
 				ElGamalMultiRecipientCiphertext.create(gEight, Arrays.asList(gThirteen, gSixteen, gThirteen)),
 				ElGamalMultiRecipientCiphertext.create(gFour, Arrays.asList(gEighteen, gNine, gThree))
 		);
 
-		ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
-		ElGamalMultiRecipientPublicKey publicKey = elGamalGenerator.genRandomPublicKey(3);
+		final ElGamalGenerator elGamalGenerator = new ElGamalGenerator(gqGroup);
+		final ElGamalMultiRecipientPublicKey publicKey = elGamalGenerator.genRandomPublicKey(3);
 
 		// The commitment key and the hash service are only needed for instantiating the service
 		// and are not relevant for the test itself
-		TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
-		CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
-		HashService hashService = TestHashService.create(q);
-		MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),
+		final TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(gqGroup);
+		final CommitmentKey commitmentKey = ckGenerator.genCommitmentKey(3);
+		final HashService hashService = TestHashService.create(q);
+		final MultiExponentiationArgumentService service = new MultiExponentiationArgumentService(publicKey, commitmentKey, new RandomService(),
 				hashService);
 
 		assertEquals(expected, service.getDiagonalProducts(ciphertextMatrix, matrixA));

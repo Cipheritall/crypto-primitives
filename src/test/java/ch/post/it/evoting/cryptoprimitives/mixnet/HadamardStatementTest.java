@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class HadamardStatementTest {
 
 	@BeforeEach
 	void setup() {
-		int n = secureRandom.nextInt(10) + 1;
+		final int n = secureRandom.nextInt(10) + 1;
 		group = GroupTestData.getGqGroup();
 		generator = new GqGroupGenerator(group);
 		commitmentsA = generator.genRandomGqElementVector(n);
@@ -68,9 +68,9 @@ class HadamardStatementTest {
 	@Test
 	@DisplayName("Constructing a Hadamard statement with commitments A and commitment b of different groups should throw")
 	void constructStatementWithCommitmentsFromDifferentGroups() {
-		GqGroup differentGroup = GroupTestData.getDifferentGqGroup(group);
+		final GqGroup differentGroup = GroupTestData.getDifferentGqGroup(group);
 		commitmentB = new GqGroupGenerator(differentGroup).genMember();
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardStatement(commitmentsA, commitmentB));
+		final Exception exception = assertThrows(IllegalArgumentException.class, () -> new HadamardStatement(commitmentsA, commitmentB));
 		assertEquals("The commitments A and commitment b must have the same group.", exception.getMessage());
 	}
 }

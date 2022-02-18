@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,22 @@ public class ConversionServiceBenchmark {
 	@Param({ "2048", "3072" })
 	static int bitLength;
 
+	@Benchmark
+	@Warmup(iterations = 4, time = 5)
+	@Fork(value = 1)
+	@Measurement(iterations = 4, time = 5)
+	public byte[] bigIntegerToByteArrayUsingJdk(final MyState state) {
+		return ConversionService.integerToByteArray(state.randomBigInteger);
+	}
+
+	@Benchmark
+	@Warmup(iterations = 4, time = 5)
+	@Fork(value = 1)
+	@Measurement(iterations = 4, time = 5)
+	public byte[] bigIntegerToByteArray(final MyState state) {
+		return ConversionServiceEquivalenceTest.integerToByteArraySpec(state.randomBigInteger);
+	}
+
 	@State(Scope.Thread)
 	public static class MyState {
 
@@ -47,21 +63,5 @@ public class ConversionServiceBenchmark {
 		public void genRandomBigInteger() {
 			randomBigInteger = new BigInteger(bitLength, secureRandom);
 		}
-	}
-
-	@Benchmark
-	@Warmup(iterations = 4, time = 5)
-	@Fork(value = 1)
-	@Measurement(iterations = 4, time = 5)
-	public byte[] bigIntegerToByteArrayUsingJdk(MyState state) {
-		return ConversionService.integerToByteArray(state.randomBigInteger);
-	}
-
-	@Benchmark
-	@Warmup(iterations = 4, time = 5)
-	@Fork(value = 1)
-	@Measurement(iterations = 4, time = 5)
-	public byte[] bigIntegerToByteArray(MyState state) {
-		return ConversionServiceEquivalenceTest.integerToByteArraySpec(state.randomBigInteger);
 	}
 }

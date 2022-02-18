@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  *
  * <p>Instances of this class are immutable. </p>
  */
-@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 class ZeroStatement {
 
 	private final GroupVector<GqElement, GqGroup> c_A;
@@ -51,7 +51,7 @@ class ZeroStatement {
 	 *
 	 * @param c_A c<sub>A</sub>, a non-empty list of {@link GqElement}s.
 	 * @param c_B c<sub>B</sub>, a non-empty list of {@link GqElement}s.
-	 * @param y            The value defining the bilinear mapping.
+	 * @param y   The value defining the bilinear mapping.
 	 */
 	ZeroStatement(final GroupVector<GqElement, GqGroup> c_A, final GroupVector<GqElement, GqGroup> c_B, final ZqElement y) {
 		// Null checking.

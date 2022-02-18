@@ -33,19 +33,19 @@ We strive for excellent code quality to minimize the risk of bugs and vulnerabil
 
 ### SonarQube Analysis
 
-We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 4 code smells.
+We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells.
 
 ![SonarQube](SonarQube.jpg)
 
-Out of the 4 code smells:
+Out of the 6 code smells:
 
-* 4 code smells concern duplicated blocks in the argument classes. We left the code blocks as is since removing them reduces the code's readability.
+* 4 code smells concern duplicated blocks in the argument and proof classes. We left the code blocks as is since removing them reduces the code's readability.
 
 Moreover, a high test coverage illustrates the fact that we extensively test the crypto-primitives library.
 
 ### Fortify Analysis
 
-The Fortify analysis showed 0 critical, 0 high, 0 medium, and 55 low criticality issues. We manually reviewed all 55 low-criticality issues and assessed them as false positives.
+The Fortify analysis showed 0 critical, 0 high, 0 medium, and 58 low criticality issues. We manually reviewed all 58 low-criticality issues and assessed them as false positives.
 
 ### JFrog X-Ray Analysis
 
@@ -98,14 +98,36 @@ We aim for a mathematical naming convention that aligns with the following goals
 
 ![Mathematical Naming Convention Examples](naming_convention_examples.jpg)
 
-## Change Log Release 0.12
+## Change Log Release 0.13
 
-Release 0.12 includes some feedback from the Federal Chancellery's mandated experts. The experts' reports will be published at a later point.
+Release 0.13 includes some feedback from the Federal Chancellery's mandated experts. The experts' reports will be published at a later point.
 We want to thank the experts for their high-quality, constructive remarks:
 
 * Vanessa Teague (Thinking Cybersecurity), Olivier Pereira (Université catholique Louvain), Thomas Edmund Haines (Australian National University)
 * Aleksander Essex (Western University Canada)
 * Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis (Bern University of Applied Sciences)
+
+The following functionalities and improvements are included in release 0.13:
+
+* [Code] Implemented the generation and verification of plaintext-equality proofs.
+* [Code, Specification] Specified and implemented a KDF and KDFtoZq method based on HKDF (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Code, Specification] Specified and implemented the collision-resistant HashAndSquare method.
+* [Code, Specification] Updated the generation of commitment keys (GetVerifiableCommitmentKeys) to use the entire domain of generators (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Code] Updated the unit tests with the test vectors from the collision-resistant hash functions.
+* [Code] Aligned the input of the hash functions in the zero-knowledge proofs to the specification (corresponds to Gitlab issue [#10](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/10 )).
+* [Code, Specification] Specified and implemented authenticated symmetric encryption (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Specified and implemented the IntegerToString and StringToInteger methods (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Removed compression of excess public keys in ElGamal operations (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Code] Updated dependencies.
+* [Specification] Made the usage of Require and Ensure uniform across all algorithms (feedback from Aleksander Essex).
+* [Specification] Introduced a specific section for defining the desired security level (feedback from Aleksander Essex, Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Aligned the usage of various symbols (feedback from Aleksander Essex).
+* [Specification] Specified the truncate method (feedback from Aleksander Essex).
+* [Specification] Some minor fixes and alignments in various algorithms (feedback from Aleksander Essex).
+
+## Change Log Release 0.12
+
+Release 0.12 includes some feedback from the Federal Chancellery's mandated experts (see the change log of release 0.13 above)
 
 The following functionalities and improvements are included in release 0.12:
 
@@ -127,8 +149,8 @@ The following functionalities and improvements are included in release 0.12:
 The following functionalities and improvements are included in release 0.11:
 
 * [Code] Implemented the VerifyDecryptions method.
-* [Specification] Simplified the *GetCommitmentVector* algorithm.
-* [Specification] Added the *HashAndSquare* algorithm.
+* [Specification] Simplified the _GetCommitmentVector_ algorithm.
+* [Specification] Added the _HashAndSquare_ algorithm.
 
 ## Change Log Release 0.10
 
@@ -170,7 +192,6 @@ The following functionalities and improvements are included in release 0.8:
 We plan for the following improvements to the crypto-primitives library:
 
 * Investigating potential improvements in parametrizing the Bayer-Groth mix net. We parametrize the Bayer-Groth with two parameters (m,n). If m and n have equal size, the Bayer-Groth mix net is memory-optimal. However, setting m=1 is the most efficient setting for computational performance. Moreover, setting m=1 allows for further simplifications since one can omit the Hadamard and the zero arguments in that case. We plan to conduct other performance tests to analyze the memory-performance trade-off.
-* Making the RecursiveHash function collision-resistant across different input domains (corresponds to Gitlab issue [#9](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/9)).
 * Enforcing abstractions in mathematical operations. Currently, we have some unnecessary conversions between abstract mathematical objects (such as GqElements) and plain values (such as BigIntegers). We should work more strictly with mathematically abstract classes.
 * Investigating the usage of a "context" object that encapsulates values that do not change between protocol executions (group parameters, security level, etc.).
 * Implementing the ByteArrayToString method. This method is currently not used; therefore, we did not implement it yet.
@@ -179,10 +200,9 @@ We plan for the following improvements to the crypto-primitives library:
 
 The current release has the following open issues:
 
-* Implementing plaintext-equality proofs.
-* Implementing the collision-resistant RecursiveHash function.
-* Implementing the RecursiveHashToZq function.
-* Updating the unit tests with the test vectors from the collision-resistant RecursiveHash function.
+* Specifying a proof of knowledge of the exponent (Schnorr Proof),
+* Specifying methods to sign and validate signatures,
+* Implementing methods for probabilistic primality testing.
 
 ## Additional documentation
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  *
  * <p>Instances of this class are immutable.</p>
  */
-@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 class ShuffleStatement {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C;
@@ -50,9 +50,9 @@ class ShuffleStatement {
 	 *     <li>both vectors must be part of the same group</li>
 	 * </ul>
 	 *
-	 * @param C         <b>C</b>, the ciphertexts as a {@link GroupVector}. All ciphertexts must have the same size.
+	 * @param C       <b>C</b>, the ciphertexts as a {@link GroupVector}. All ciphertexts must have the same size.
 	 * @param C_prime <b>C'</b>, the shuffled and re-encrypted ciphertexts as a {@link GroupVector}. All shuffled ciphertexts must
-	 *                            have the same size.
+	 *                have the same size.
 	 */
 	ShuffleStatement(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C,
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime) {

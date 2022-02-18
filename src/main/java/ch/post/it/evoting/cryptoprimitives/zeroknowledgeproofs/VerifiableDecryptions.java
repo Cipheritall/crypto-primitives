@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>
  * Instances of this class are immutable.
  */
-@SuppressWarnings({"java:S116", "java:S100"})
+@SuppressWarnings({ "java:S116", "java:S100" })
 public class VerifiableDecryptions implements HashableList {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;

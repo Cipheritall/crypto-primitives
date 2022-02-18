@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class ZqGroupTest {
 
 	@Test
 	void testCanNotCreateAGroupWithQNegative() {
-		BigInteger negativeQ = BigInteger.valueOf(-1);
+		final BigInteger negativeQ = BigInteger.valueOf(-1);
 		assertThrows(IllegalArgumentException.class, () -> new ZqGroup(negativeQ));
 	}
 
@@ -73,9 +73,9 @@ class ZqGroupTest {
 
 	@Test
 	void testEquals() {
-		ZqGroup same1 = new ZqGroup(BigInteger.TEN);
-		ZqGroup same2 = new ZqGroup(BigInteger.TEN);
-		ZqGroup differentQ = new ZqGroup(BigInteger.valueOf(20));
+		final ZqGroup same1 = new ZqGroup(BigInteger.TEN);
+		final ZqGroup same2 = new ZqGroup(BigInteger.TEN);
+		final ZqGroup differentQ = new ZqGroup(BigInteger.valueOf(20));
 
 		assertEquals(same1, same2);
 		assertNotEquals(same1, differentQ);
