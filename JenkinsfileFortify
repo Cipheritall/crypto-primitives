@@ -1,8 +1,8 @@
-#!/usr/bin/env groovy
+#!groovy
 /*
- * Copyright 2021 by Swiss Post, Information Technology Services
- *
- */
+* Copyright 2022 Post CH Ltd
+*
+*/
 
 // builds opc and executes JUnit-tests of tt.
 // param: boolean create dcf

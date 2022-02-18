@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public abstract class GroupElement<G extends MathematicalGroup<G>> implements Gr
 	}
 
 	@Override
-	public int size(){
+	public int size() {
 		return 1;
 	}
 
@@ -64,7 +64,7 @@ public abstract class GroupElement<G extends MathematicalGroup<G>> implements Gr
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		GroupElement<?> that = (GroupElement<?>) o;
+		final GroupElement<?> that = (GroupElement<?>) o;
 		return value.equals(that.value) && group.equals(that.group);
 	}
 

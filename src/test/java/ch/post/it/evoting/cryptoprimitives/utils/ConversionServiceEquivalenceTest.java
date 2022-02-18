@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,10 @@ class ConversionServiceEquivalenceTest {
 
 	@RepeatedTest(100)
 	void randomBigIntegerConversionIsEquivalentWithTwoMethods() {
-		int BIT_LENGTH = 2048;
-		BigInteger random = new BigInteger(BIT_LENGTH, secureRandom);
-		byte[] expected = integerToByteArraySpec(random);
-		byte[] result = ConversionService.integerToByteArray(random);
+		final int BIT_LENGTH = 2048;
+		final BigInteger random = new BigInteger(BIT_LENGTH, secureRandom);
+		final byte[] expected = integerToByteArraySpec(random);
+		final byte[] result = ConversionService.integerToByteArray(random);
 		assertArrayEquals(expected, result);
 	}
 
@@ -54,15 +54,15 @@ class ConversionServiceEquivalenceTest {
 
 	@Test
 	void throwsForNegativeValue() {
-		BigInteger value = BigInteger.valueOf(-1);
+		final BigInteger value = BigInteger.valueOf(-1);
 		assertThrows(IllegalArgumentException.class, () -> ConversionService.integerToByteArray(value));
 	}
 
 	@Test
 	void sameByteArrayConversionForZero() {
-		BigInteger x = BigInteger.ZERO;
-		byte[] expected = integerToByteArraySpec(x);
-		byte[] result = ConversionService.integerToByteArray(x);
+		final BigInteger x = BigInteger.ZERO;
+		final byte[] expected = integerToByteArraySpec(x);
+		final byte[] result = ConversionService.integerToByteArray(x);
 		assertArrayEquals(expected, result);
 	}
 

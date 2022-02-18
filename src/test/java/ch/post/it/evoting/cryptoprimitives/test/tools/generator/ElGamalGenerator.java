@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,64 +42,67 @@ public class ElGamalGenerator {
 	private final GqGroup group;
 	private final GqGroupGenerator groupGenerator;
 
-	public ElGamalGenerator(GqGroup group) {
+	public ElGamalGenerator(final GqGroup group) {
 		this.group = group;
 		this.groupGenerator = new GqGroupGenerator(group);
 	}
 
-	private List<GqElement> genRandomMessageElements(int size) {
+	private List<GqElement> genRandomMessageElements(final int size) {
 		return generateElementList(size, this.groupGenerator::genMember);
 	}
 
-	public ElGamalMultiRecipientMessage genRandomMessage(int size) {
+	public ElGamalMultiRecipientMessage genRandomMessage(final int size) {
 		return new ElGamalMultiRecipientMessage(genRandomMessageElements(size));
 	}
 
-	public ElGamalMultiRecipientPublicKey genRandomPublicKey(int size) {
+	public ElGamalMultiRecipientPublicKey genRandomPublicKey(final int size) {
 		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPublicKey();
 	}
 
-	public ElGamalMultiRecipientPrivateKey genRandomPrivateKey(int size) {
+	public ElGamalMultiRecipientPrivateKey genRandomPrivateKey(final int size) {
 		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPrivateKey();
 	}
 
-	public ElGamalMultiRecipientCiphertext genRandomCiphertext(int ciphertextSize) {
-		ElGamalMultiRecipientMessage randomMessage = genRandomMessage(ciphertextSize);
-		ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
+	public ElGamalMultiRecipientCiphertext genRandomCiphertext(final int ciphertextSize) {
+		final ElGamalMultiRecipientMessage randomMessage = genRandomMessage(ciphertextSize);
+		final ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 		return ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, genRandomPublicKey(ciphertextSize));
 	}
 
-	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextVector(int size, int ciphertextSize) {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextVector(final int size, final int ciphertextSize) {
 		return GroupVector.from(generateElementList(size, () -> genRandomCiphertext(ciphertextSize)));
 	}
 
-	public GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextMatrix(int numRows, int numColumns, int ciphertextSize) {
+	public GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextMatrix(final int numRows, final int numColumns,
+			final int ciphertextSize) {
 		return GroupMatrix.fromRows(generateElementMatrix(numRows, numColumns, () -> genRandomCiphertext(ciphertextSize)));
 	}
 
-	public GroupVector<ElGamalMultiRecipientMessage, GqGroup> genRandomMessageVector(int size, int messageSize) {
+	public GroupVector<ElGamalMultiRecipientMessage, GqGroup> genRandomMessageVector(final int size, final int messageSize) {
 		return GroupVector.from(generateElementList(size, () -> genRandomMessage(messageSize)));
 	}
 
 	/**
 	 * Generate a random list of ciphertexts encrypted with the same publicKey.
 	 */
-	public List<ElGamalMultiRecipientCiphertext> genRandomCiphertexts(ElGamalMultiRecipientPublicKey publicKey, int numElements, int numCiphertexts) {
-		ElGamalMultiRecipientMessage randomMessage = genRandomMessage(numElements);
-		ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
+	public List<ElGamalMultiRecipientCiphertext> genRandomCiphertexts(final ElGamalMultiRecipientPublicKey publicKey, final int numElements,
+			final int numCiphertexts) {
+		final ElGamalMultiRecipientMessage randomMessage = genRandomMessage(numElements);
+		final ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 
 		return Stream.generate(() -> ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, publicKey))
 				.limit(numCiphertexts).collect(Collectors.toList());
 	}
 
-	public static ElGamalMultiRecipientCiphertext encryptMessage(ElGamalMultiRecipientMessage originalMessage, ElGamalMultiRecipientKeyPair keyPair,
-			ZqGroup zqGroup) {
-		RandomService randomService = new RandomService();
-		ZqElement exponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
+	public static ElGamalMultiRecipientCiphertext encryptMessage(
+			final ElGamalMultiRecipientMessage originalMessage, final ElGamalMultiRecipientKeyPair keyPair,
+			final ZqGroup zqGroup) {
+		final RandomService randomService = new RandomService();
+		final ZqElement exponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
 		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
 	}
 
-	public ElGamalMultiRecipientCiphertext otherCiphertext(ElGamalMultiRecipientCiphertext element) {
+	public ElGamalMultiRecipientCiphertext otherCiphertext(final ElGamalMultiRecipientCiphertext element) {
 		return Generators.genWhile(() -> genRandomCiphertext(element.size()), element::equals);
 	}
 }

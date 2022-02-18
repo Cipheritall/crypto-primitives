@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,15 +52,15 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createInvalidArgumentsProvider() {
-		List<ZqElement> messageElementsFirstNull = new LinkedList<>();
+		final List<ZqElement> messageElementsFirstNull = new LinkedList<>();
 		messageElementsFirstNull.add(null);
 		messageElementsFirstNull.add(zqGroupGenerator.genRandomZqElementMember());
 
-		List<ZqElement> messageElementsSecondNull = new LinkedList<>();
+		final List<ZqElement> messageElementsSecondNull = new LinkedList<>();
 		messageElementsSecondNull.add(zqGroupGenerator.genRandomZqElementMember());
 		messageElementsSecondNull.add(null);
 
-		List<ZqElement> messageElementsDifferentGroups = new LinkedList<>();
+		final List<ZqElement> messageElementsDifferentGroups = new LinkedList<>();
 		messageElementsDifferentGroups.add(zqGroupGenerator.genRandomZqElementMember());
 		messageElementsDifferentGroups.add(otherZqGroupGenerator.genRandomZqElementMember());
 
@@ -79,7 +77,7 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 	@MethodSource("createInvalidArgumentsProvider")
 	@DisplayName("created with invalid parameters")
 	void constructionWithInvalidParametersTest(
-			List<ZqElement> messageElements, final Class<? extends RuntimeException> exceptionClass, String errorMsg) {
+			final List<ZqElement> messageElements, final Class<? extends RuntimeException> exceptionClass, final String errorMsg) {
 		final Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientPrivateKey(messageElements));
 		assertEquals(errorMsg, exception.getMessage());
 	}

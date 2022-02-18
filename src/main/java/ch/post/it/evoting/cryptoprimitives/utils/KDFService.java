@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class KDFService {
 	private static final KDFService instance = new KDFService(SHA256Digest::new);
 	private final Supplier<Digest> hashSupplier;
 
-	private KDFService(Supplier<Digest> hashSupplier) {
+	private KDFService(final Supplier<Digest> hashSupplier) {
 		this.hashSupplier = hashSupplier;
 	}
 
@@ -54,21 +54,21 @@ public class KDFService {
 	}
 
 	@VisibleForTesting
-	static KDFService testService(Supplier<Digest> hashSupplier) {
+	static KDFService testService(final Supplier<Digest> hashSupplier) {
 		return new KDFService(hashSupplier);
 	}
 
 	/**
 	 * Derives a key from a cryptographically strong pseudo-random key. Uses SHA-256 as a hash function.
 	 *
-	 * @param pseudoRandomKey a cryptographically strong pseudo-random key, of byte length greater or equal to 32.
+	 * @param pseudoRandomKey    a cryptographically strong pseudo-random key, of byte length greater or equal to 32.
 	 * @param contextInformation optional additional context information
 	 * @param requiredByteLength the required byte length of the output key, in range 0 (exclusive) to 8160 (inclusive).
 	 * @return a cryptographically strong key of length {@code requiredByteLength}
-	 * @throws NullPointerException if any input is null or contains nulls
+	 * @throws NullPointerException     if any input is null or contains nulls
 	 * @throws IllegalArgumentException if any of the preconditions mentioned above are not respected.
 	 */
-	@SuppressWarnings({"java:S117", "java:S100"})
+	@SuppressWarnings({ "java:S117", "java:S100" })
 	public byte[] KDF(final byte[] pseudoRandomKey, final ImmutableList<String> contextInformation, final int requiredByteLength) {
 		checkNotNull(pseudoRandomKey);
 		checkNotNull(contextInformation);
@@ -97,7 +97,7 @@ public class KDFService {
 
 	//HKDF-Expand as specified in RFC5869 section 2.3
 	//Delegates the implementation to BouncyCastle's implementation
-	@SuppressWarnings({"java:S117", "java:S100"})
+	@SuppressWarnings({ "java:S117", "java:S100" })
 	private byte[] HKDFExpand(final byte[] PRK, final byte[] info, final int L) {
 		final HKDFBytesGenerator hkdf = new HKDFBytesGenerator(this.hashSupplier.get());
 		final HKDFParameters parameters = HKDFParameters.skipExtractParameters(PRK, info);
@@ -112,14 +112,14 @@ public class KDFService {
 	/**
 	 * Generates a value in Zq using the Key Derivation Function based on SHA-256.
 	 *
-	 * @param pseudoRandomKey a cryptographically strong pseudo-random key, of byte length greater or equal to 32
-	 * @param contextInformation optional additional context information
+	 * @param pseudoRandomKey     a cryptographically strong pseudo-random key, of byte length greater or equal to 32
+	 * @param contextInformation  optional additional context information
 	 * @param exclusiveUpperBound the requested exclusive upper bound, such that {@code ceil(exclusiveUpperBound / 8) >= 32}
 	 * @return an element of Zq
-	 * @throws NullPointerException if any input is null or contains nulls
+	 * @throws NullPointerException     if any input is null or contains nulls
 	 * @throws IllegalArgumentException if any of the preconditions mentioned above are not respected.
 	 */
-	@SuppressWarnings({"java:S117", "java:S100"})
+	@SuppressWarnings({ "java:S117", "java:S100" })
 	public ZqElement KDFToZq(final byte[] pseudoRandomKey, final ImmutableList<String> contextInformation, final BigInteger exclusiveUpperBound) {
 		checkNotNull(pseudoRandomKey);
 		checkNotNull(contextInformation);

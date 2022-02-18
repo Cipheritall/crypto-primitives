@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,16 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -50,15 +45,15 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createInvalidArgumentsProvider() {
-		List<GqElement> keyElementsFirstNull = new LinkedList<>();
+		final List<GqElement> keyElementsFirstNull = new LinkedList<>();
 		keyElementsFirstNull.add(null);
 		keyElementsFirstNull.add(gqGroupGenerator.genMember());
 
-		List<GqElement> keyElementsSecondNull = new LinkedList<>();
+		final List<GqElement> keyElementsSecondNull = new LinkedList<>();
 		keyElementsSecondNull.add(gqGroupGenerator.genMember());
 		keyElementsSecondNull.add(null);
 
-		List<GqElement> keyElementsDifferentGroups = new LinkedList<>();
+		final List<GqElement> keyElementsDifferentGroups = new LinkedList<>();
 		keyElementsDifferentGroups.add(gqGroupGenerator.genMember());
 		keyElementsDifferentGroups.add(otherGqGroupGenerator.genMember());
 
@@ -75,8 +70,8 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 	@MethodSource("createInvalidArgumentsProvider")
 	@DisplayName("created with invalid parameters")
 	void constructionWithInvalidParametersTest(
-			List<GqElement> keyElements, final Class<? extends RuntimeException> exceptionClass, String errorMsg) {
-		Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientPublicKey(keyElements));
+			final List<GqElement> keyElements, final Class<? extends RuntimeException> exceptionClass, final String errorMsg) {
+		final Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientPublicKey(keyElements));
 		assertEquals(errorMsg, exception.getMessage());
 	}
 }

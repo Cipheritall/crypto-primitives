@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Post CH Ltd
+ * Copyright 2022 Post CH Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,13 @@ class GqElementValidationTest {
 
 	@ParameterizedTest
 	@MethodSource("createGqElementFromGroupWithNulls")
-	void testGqElementCreationWithNullThrows(BigInteger value, GqGroup group) {
+	void testGqElementCreationWithNullThrows(final BigInteger value, final GqGroup group) {
 		assertThrows(NullPointerException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 
 	@ParameterizedTest
 	@MethodSource("createGqElementFromGroupWithInvalidValues")
-	void testGqElementCreationWithInvalidValuesThrows(BigInteger value, GqGroup group) {
+	void testGqElementCreationWithInvalidValuesThrows(final BigInteger value, final GqGroup group) {
 		assertThrows(IllegalArgumentException.class, () -> GqElementFactory.fromValue(value, group));
 	}
 }
