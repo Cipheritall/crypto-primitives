@@ -21,6 +21,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -41,6 +44,25 @@ public final class ConversionService {
 	public static byte[] stringToByteArray(final String s) {
 		checkNotNull(s);
 		return s.getBytes(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Converts a byte array to a {@link String} representation.
+	 *
+	 * @param b B, the byte array to convert.
+	 * @return the string representation of the byte array.
+	 * @throws IllegalArgumentException if the byte array does not correspond to a valid sequence of UTF-8 encoding.
+	 */
+	public static String byteArrayToString(final byte[] b) {
+		checkNotNull(b);
+		checkArgument(b.length > 0, "The length of the byte array must be strictly positive.");
+
+		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+		try {
+			return decoder.decode(ByteBuffer.wrap(b)).toString();
+		} catch (CharacterCodingException ex) {
+			throw new IllegalArgumentException("The byte array does not correspond to a valid sequence of UTF-8 encoding.");
+		}
 	}
 
 	/**
