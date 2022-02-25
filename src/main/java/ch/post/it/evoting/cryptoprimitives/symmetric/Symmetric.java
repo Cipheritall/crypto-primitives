@@ -24,8 +24,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricAuthenticatedEncryptionService.SymmetricCiphertext;
-
 /**
  * Provides methods for symmetric encryption/decryption.
  */
