@@ -210,16 +210,4 @@ public class SymmetricAuthenticatedEncryptionService {
 		}
 	}
 
-	static class SymmetricCiphertext {
-		final byte[] C;
-		final byte[] nonce;
-
-		SymmetricCiphertext(final byte[] C, final byte[] nonce) {
-
-			this.C = checkNotNull(C);
-			this.nonce = checkNotNull(nonce);
-
-		}
-	}
-
 }

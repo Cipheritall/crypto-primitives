@@ -27,7 +27,6 @@ import javax.crypto.NoSuchPaddingException;
 import com.google.common.annotations.VisibleForTesting;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricAuthenticatedEncryptionService.SymmetricCiphertext;
 
 public class SymmetricService implements Symmetric {
 
