@@ -43,6 +43,11 @@ public final class CryptoPrimitivesService implements CryptoPrimitives {
 		return randomService.genRandomInteger(upperBound);
 	}
 
+	@Override
+	public String genRandomBase10String(final int codeLength) {
+		return randomService.genRandomBase10String(codeLength);
+	}
+
 	public static CryptoPrimitives get() {
 		return new CryptoPrimitivesService();
 	}
