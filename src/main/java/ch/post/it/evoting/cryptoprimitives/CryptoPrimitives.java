@@ -54,4 +54,11 @@ public interface CryptoPrimitives {
 	 */
 	BigInteger genRandomInteger(final BigInteger upperBound);
 
+	/**
+	 * Generates a String of random digits of the specified length.
+	 *
+	 * @param codeLength l, the desired length of the code. Must be strictly positive.
+	 * @return a random digits String of {@code codeLength}.
+	 */
+	String genRandomBase10String(final int codeLength);
 }

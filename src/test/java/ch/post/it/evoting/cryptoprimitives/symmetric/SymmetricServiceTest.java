@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import com.google.common.base.Throwables;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricAuthenticatedEncryptionService.SymmetricCiphertext;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 
 @DisplayName("SymmetricService calling")
@@ -80,8 +79,8 @@ class SymmetricServiceTest extends TestGroupSetup {
 		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
-		final byte[] authenticationDecrypted = symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
-				authenticationEncrypted.nonce, associatedData);
+		final byte[] authenticationDecrypted = symmetricEncryptionService.getPlaintextSymmetric(encryptionKey,
+				authenticationEncrypted.getCiphertext(), authenticationEncrypted.getNonce(), associatedData);
 
 		assertEquals(plainText, new String(authenticationDecrypted, StandardCharsets.UTF_8));
 	}
@@ -95,8 +94,9 @@ class SymmetricServiceTest extends TestGroupSetup {
 
 		nonce = randomService.randomBytes(DIFFERENT_NONCE_LENGTH);
 
+		final byte[] ciphertext = authenticationEncrypted.getCiphertext();
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C, nonce, associatedData));
+				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, associatedData));
 
 		assertEquals("Invalid nonce length, expected 12", Throwables.getRootCause(illegalArgumentException).getMessage());
 	}
@@ -109,7 +109,7 @@ class SymmetricServiceTest extends TestGroupSetup {
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
 		final AEADBadTagException aeadBadTagException = assertThrows(AEADBadTagException.class,
-				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
+				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.getCiphertext(),
 						nonce, associatedData));
 
 		assertEquals("Tag mismatch!", aeadBadTagException.getMessage());
@@ -158,18 +158,16 @@ class SymmetricServiceTest extends TestGroupSetup {
 			final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 					encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
+			final byte[] ciphertext = authenticationEncrypted.getCiphertext();
+			final byte[] nonce = authenticationEncrypted.getNonce();
 			assertThrows(NullPointerException.class,
-					() -> symmetricEncryptionService.getPlaintextSymmetric(null, authenticationEncrypted.C,
-							authenticationEncrypted.nonce, associatedData));
+					() -> symmetricEncryptionService.getPlaintextSymmetric(null, ciphertext, nonce, associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, null,
-							authenticationEncrypted.nonce, associatedData));
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, null, nonce, associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
-							null, associatedData));
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, null, associatedData));
 			assertThrows(NullPointerException.class,
-					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.C,
-							authenticationEncrypted.nonce, null));
+					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, null));
 		}
 
 		@Test
