@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.math;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
+import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.integerToString;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -24,12 +25,15 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.stream.Stream;
 
+import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 
 /**
  * This class is thread safe.
  */
 public class RandomService {
+
+	private static final char ZERO_PAD_CHAR = '0';
 
 	private final SecureRandom secureRandom;
 
@@ -152,5 +156,28 @@ public class RandomService {
 		secureRandom.nextBytes(randomBytes);
 
 		return randomBytes;
+	}
+
+	/**
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase10String(int)
+	 */
+	public String genRandomBase10String(final int codeLength) {
+		checkArgument(codeLength > 0, "Length of the code must be greater than zero");
+
+		final int l = codeLength;
+
+		final BigInteger x = genRandomIntegerByDigits(l);
+
+		return leftPad(integerToString(x), l, ZERO_PAD_CHAR);
+	}
+
+	private BigInteger genRandomIntegerByDigits(final int length) {
+		final BigInteger upperBound = BigInteger.TEN.pow(length);
+
+		return genRandomInteger(upperBound);
+	}
+
+	private String leftPad(final String string, final int minLength, final char padChar) {
+		return Strings.padStart(string, minLength, padChar);
 	}
 }

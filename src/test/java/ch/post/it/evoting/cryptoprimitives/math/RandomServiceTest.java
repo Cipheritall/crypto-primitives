@@ -19,17 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 
 class RandomServiceTest {
 
@@ -37,33 +34,8 @@ class RandomServiceTest {
 	private static final Pattern base64Alphabet = Pattern.compile("^[A-Za-z0-9+/=]+$");
 	private static final Pattern base32Alphabet = Pattern.compile("^[A-Z2-7=]+$");
 	private static final Pattern base16Alphabet = Pattern.compile("^[A-F0-9=]+$");
-
-	private static ZqGroup smallGroup;
-	private static ZqGroup largeGroup;
-
+	private final SecureRandom secureRandom = new SecureRandom();
 	private final RandomService randomService = new RandomService();
-
-	@BeforeAll
-	static void setUp() {
-		final BigInteger smallQ = BigInteger.valueOf(11);
-		smallGroup = new ZqGroup(smallQ);
-
-		final BigInteger largeQ = new BigInteger(
-				"129393962833354210499210688582114332331264955144078865695142258397576823398124617906793313278446446028832209901197744118689034771985"
-						+ "09705601122060967876228374690884782515835193957431967788948058212827424653299092753997868946254919808472248036853722669403"
-						+ "05071273369448896874451022839183805131028098532234200793438301404002468642493605752610410721973630167774154782002075773042"
-						+ "57379855591360625666120039748442218402148340456567370594375408103734599537838411991045221718260736643114334173004199390571"
-						+ "42509409231555113555807016335721042732921970354542359833932880562757400121671030866342014401323096601105149589569705303",
-				10);
-		largeGroup = new ZqGroup(largeQ);
-	}
-
-	static Stream<Arguments> createLowerAndUpperBounds() {
-		return Stream.of(
-				arguments(BigInteger.valueOf(1849), BigInteger.valueOf(1849)),
-				arguments(BigInteger.valueOf(1849), BigInteger.valueOf(1848))
-		);
-	}
 
 	@RepeatedTest(1000)
 	void genRandomIntegerTest() {
@@ -187,4 +159,31 @@ class RandomServiceTest {
 		assertEquals(RANDOM_BYTES_LENGTH_ZERO, randomBytes.length);
 	}
 
+	@Test
+	void genRandomCodeWithCodeLength0Throws() {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase10String(0));
+
+		String expectedMessage = "Length of the code must be greater than zero";
+		String actualMessage = exception.getMessage();
+
+		assertEquals(expectedMessage, actualMessage);
+	}
+
+	@Test
+	void genRandomCodeWithCodeLength1() {
+		String code = randomService.genRandomBase10String(1);
+
+		assertEquals(1, code.length(), "code should be of size 1");
+		assertTrue(code.matches("[0-9]"), "code should match [0-9]: " + code);
+	}
+
+	@RepeatedTest(value = 10)
+	void genRandomCodeWithRandomCodeLength() {
+		final int codeLength = secureRandom.nextInt(2000) + 1;
+
+		String code = randomService.genRandomBase10String(codeLength);
+
+		assertEquals(codeLength, code.length(), "code should be of size " + codeLength);
+		assertTrue(code.matches("[0]*[0-9]*"), "code should match [0]*[0-9]*: " + code);
+	}
 }
