@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.symmetric;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -75,7 +76,7 @@ class SymmetricServiceTest extends TestGroupSetup {
 
 	@Test
 	@DisplayName("valid parameters does not throw, basic encryption path with Java AES 256 GCM Encryption Algorithm")
-	void basicJavaAES256GCMEncryptionPath() throws Exception {
+	void basicJavaAES256GCMEncryptionPath() {
 		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
@@ -87,7 +88,7 @@ class SymmetricServiceTest extends TestGroupSetup {
 
 	@Test
 	@DisplayName("wrong parameters throws illegalArgumentException, basic encryption path with Java AES 256 GCM Encryption Algorithm")
-	void wrongEncryptionInvalidNonceLength() throws Exception {
+	void wrongEncryptionInvalidNonceLength() {
 		// Different nonce between encryption and decryption execute 'Invalid nonce length'!
 		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
@@ -99,20 +100,6 @@ class SymmetricServiceTest extends TestGroupSetup {
 				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, associatedData));
 
 		assertEquals("Invalid nonce length, expected 12", Throwables.getRootCause(illegalArgumentException).getMessage());
-	}
-
-	@Test
-	@DisplayName("wrong parameters throws AEADBadTagException, basic encryption path with Java AES 256 GCM Encryption Algorithm")
-	void wrongEncryptionTagMismatch() throws Exception {
-		// Different nonce between encryption and decryption execute Tag mismatch!
-		final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
-				encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
-
-		final AEADBadTagException aeadBadTagException = assertThrows(AEADBadTagException.class,
-				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, authenticationEncrypted.getCiphertext(),
-						nonce, associatedData));
-
-		assertEquals("Tag mismatch!", aeadBadTagException.getMessage());
 	}
 
 	@Nested
@@ -180,5 +167,17 @@ class SymmetricServiceTest extends TestGroupSetup {
 
 			assertEquals("The associated data must not contain null objects.", exception.getMessage());
 		}
+	}
+
+	@Test
+	@DisplayName("getNonceLength")
+	void nonceLength() {
+		assertEquals(NONCE_LENGTH, symmetricEncryptionService.getNonceLength());
+	}
+
+	@Test
+	@DisplayName("call default constructor")
+	void defaultConstructor() {
+		assertDoesNotThrow(() -> new SymmetricService());
 	}
 }
