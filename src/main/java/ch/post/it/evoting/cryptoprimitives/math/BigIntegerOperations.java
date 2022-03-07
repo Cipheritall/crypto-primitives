@@ -96,4 +96,34 @@ public interface BigIntegerOperations {
 	 * @return (a | n) Possible values -1,0,1
 	 */
 	int getJacobi(BigInteger a, BigInteger n);
+
+	/**
+	 * Checks if the given number is a prime number. This is efficient for small primes only.
+	 *
+	 * @param number n, the number to be tested. Must be non-null and strictly positive.
+	 * @return true if n is prime, false otherwise.
+	 * @throws NullPointerException if n is null.
+	 * @throws IllegalArgumentException if n is not strictly positive.
+	 * @throws ArithmeticException if n does not fit in an int (max is {@value Integer#MAX_VALUE}).
+	 */
+	default boolean isSmallPrime(final BigInteger number) {
+		checkNotNull(number);
+		checkArgument(number.compareTo(BigInteger.ZERO) > 0, "The number n must be strictly positive");
+
+		final int n = number.intValueExact();
+
+		if (n == 1) {
+			return false;
+		} else if (n == 2) {
+			return true;
+		} else {
+			for (int i = 2; i <= Math.ceil(Math.sqrt(n)); i++) {
+				if (n % i == 0) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }

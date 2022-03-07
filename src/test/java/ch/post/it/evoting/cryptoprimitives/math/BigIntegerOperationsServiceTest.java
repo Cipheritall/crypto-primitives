@@ -17,7 +17,9 @@ package ch.post.it.evoting.cryptoprimitives.math;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -237,5 +239,31 @@ class BigIntegerOperationsServiceTest {
 		assertEquals(1, BigIntegerOperationsService.getJacobi(FIVE, ONE));
 		assertEquals(-1, BigIntegerOperationsService.getJacobi(THREE, EIGHT));
 		assertEquals(0, BigIntegerOperationsService.getJacobi(TWENTY_ONE, SEVEN));
+	}
+
+	@Test
+	void testIsSmallPrimeTrue() {
+		assertTrue(BigIntegerOperationsService.isSmallPrime(TWO));
+		assertTrue(BigIntegerOperationsService.isSmallPrime(THREE));
+		assertTrue(BigIntegerOperationsService.isSmallPrime(FIVE));
+		assertTrue(BigIntegerOperationsService.isSmallPrime(SEVEN));
+		assertTrue(BigIntegerOperationsService.isSmallPrime(BigInteger.valueOf(11L)));
+		assertTrue(BigIntegerOperationsService.isSmallPrime(BigInteger.valueOf(47L)));
+	}
+
+	@Test
+	void testIsSmallPrimeFalse() {
+		assertFalse(BigIntegerOperationsService.isSmallPrime(ONE));
+		assertFalse(BigIntegerOperationsService.isSmallPrime(FOUR));
+		assertFalse(BigIntegerOperationsService.isSmallPrime(NINE));
+		assertFalse(BigIntegerOperationsService.isSmallPrime(BigInteger.valueOf(35L)));
+		assertFalse(BigIntegerOperationsService.isSmallPrime(BigInteger.valueOf(77L)));
+		assertFalse(BigIntegerOperationsService.isSmallPrime(BigInteger.valueOf(143L)));
+	}
+
+	@Test
+	void testIsSmallPrimeTooSmallNThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> BigIntegerOperationsService.isSmallPrime(ZERO));
+		assertEquals("The number n must be strictly positive", exception.getMessage());
 	}
 }
