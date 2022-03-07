@@ -21,8 +21,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * Defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
  *
@@ -144,7 +142,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 			final ArrayList<GqElement> p_vector = new ArrayList<>(r);
 			int count = 0;
 			while (count < r && current.compareTo(gqGroup.getP()) < 0) {
-				if (gqGroup.isGroupMember(current) && isPrime(current.intValueExact())) {
+				if (gqGroup.isGroupMember(current) && BigIntegerOperationsService.isSmallPrime(current)) {
 					p_vector.add(new GqElement(current, gqGroup));
 					count++;
 				}
@@ -156,30 +154,5 @@ public final class GqElement extends GroupElement<GqGroup> {
 			return GroupVector.from(p_vector);
 		}
 
-		/**
-		 * Checks if a given number is a prime number. This is efficient for small primes only.
-		 *
-		 * @param number n, the number to be tested. Positive
-		 * @return true if n is prime, false otherwise
-		 */
-		@VisibleForTesting
-		static boolean isPrime(final int number) {
-			checkArgument(number > 0, "The number n must be strictly positive");
-			final int n = number;
-
-			if (n == 1) {
-				return false;
-			} else if (n == 2) {
-				return true;
-			} else {
-				for (int i = 2; i <= Math.ceil(Math.sqrt(n)); i++) {
-					if (n % i == 0) {
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
 	}
 }
