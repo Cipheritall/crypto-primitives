@@ -15,14 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.symmetric;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -49,20 +42,17 @@ public class SymmetricService implements Symmetric {
 	}
 
 	@Override
-	public SymmetricCiphertext genCiphertextSymmetric(final byte[] encryptionKey, final byte[] plainText,
-			final List<String> associatedData)
-			throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-			BadPaddingException, InvalidKeyException {
-
-		return symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(encryptionKey, plainText, associatedData);
+	public SymmetricCiphertext genCiphertextSymmetric(final byte[] encryptionKey, final byte[] plaintext, final List<String> associatedData) {
+		return symmetricAuthenticatedEncryptionService.genCiphertextSymmetric(encryptionKey, plaintext, associatedData);
 	}
 
 	@Override
-	public byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] cipherText,
-			final byte[] nonce, final List<String> associatedData)
-			throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-			BadPaddingException, InvalidKeyException {
+	public byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] ciphertext, final byte[] nonce, final List<String> associatedData) {
+		return symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, associatedData);
+	}
 
-		return symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, cipherText, nonce, associatedData);
+	@Override
+	public int getNonceLength() {
+		return symmetricAuthenticatedEncryptionService.getNonceLength();
 	}
 }
