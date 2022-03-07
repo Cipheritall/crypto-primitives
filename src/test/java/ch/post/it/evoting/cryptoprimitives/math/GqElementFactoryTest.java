@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.math;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -127,32 +126,6 @@ class GqElementFactoryTest {
 		assertEquals(GqElementFactory.fromSquareRoot(one, group), resultOne);
 		assertEquals(GqElementFactory.fromSquareRoot(two, group), resultFour);
 		assertEquals(GqElementFactory.fromSquareRoot(five, group), resultTwo);
-	}
-
-	@Test
-	void testIsPrimeTrue() {
-		assertTrue(GqElementFactory.isPrime(2));
-		assertTrue(GqElementFactory.isPrime(3));
-		assertTrue(GqElementFactory.isPrime(5));
-		assertTrue(GqElementFactory.isPrime(7));
-		assertTrue(GqElementFactory.isPrime(11));
-		assertTrue(GqElementFactory.isPrime(47));
-	}
-
-	@Test
-	void testIsPrimeFalse() {
-		assertFalse(GqElementFactory.isPrime(1));
-		assertFalse(GqElementFactory.isPrime(4));
-		assertFalse(GqElementFactory.isPrime(9));
-		assertFalse(GqElementFactory.isPrime(35));
-		assertFalse(GqElementFactory.isPrime(77));
-		assertFalse(GqElementFactory.isPrime(143));
-	}
-
-	@Test
-	void testIsPrimeTooSmallNThrows() {
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> GqElementFactory.isPrime(0));
-		assertEquals("The number n must be strictly positive", exception.getMessage());
 	}
 
 	@Test
