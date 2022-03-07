@@ -51,33 +51,25 @@ public class SymmetricAuthenticatedEncryptionService {
 	}
 
 	/**
-	 * Symmetric authenticated encryption scheme based on authenticated Encryption with Associated Data (AEAD)
-	 *
-	 * @param encryptionKey  K ∈ B<sup>k</sup>. Not null.
-	 * @param plainText      P ∈ B<sup>p</sup>. Not null.
-	 * @param associatedData (associated<sub>0</sub>,....,associated<sub>n-1</sub>) ∈ A<sub>UCS</sub><sup>*</sup>)<sup>n</sup>, s.t. n ∈ N. Not null.
-	 * @return The authenticated plaintext P ∈ B<sup>p</sup>. Throws an exception if the ciphertext does not authenticate
-	 * @throws InvalidAlgorithmParameterException if algorithm parameters are invalid or inappropriate.
-	 * @throws NoSuchPaddingException             if padding requested in the algorithm is not available in the environment.
-	 * @throws IllegalBlockSizeException          if the length of data provided to the cipher block is incorrect, i.e., does not match the block size
-	 *                                            of the cipher.
-	 * @throws NoSuchAlgorithmException           if the cryptographic algorithm requested is not available in the environment.
-	 * @throws BadPaddingException                if padding mechanism expected for the input data is not padded properly.
-	 * @throws InvalidKeyException                if there are invalid Keys (invalid encoding, wrong length, uninitialized, etc).
+	 * @see Symmetric#getNonceLength()
 	 */
-	SymmetricCiphertext genCiphertextSymmetric(final byte[] encryptionKey, final byte[] plainText,
-			final List<String> associatedData)
-			throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-			BadPaddingException, InvalidKeyException {
+	int getNonceLength() {
+		return algorithm.nonceLength;
+	}
+
+	/**
+	 * @see Symmetric#genCiphertextSymmetric(byte[], byte[], List)
+	 */
+	SymmetricCiphertext genCiphertextSymmetric(final byte[] encryptionKey, final byte[] plaintext, final List<String> associatedData) {
 
 		checkNotNull(encryptionKey);
-		checkNotNull(plainText);
+		checkNotNull(plaintext);
 		checkNotNull(associatedData);
 		checkArgument(associatedData.stream().allMatch(Objects::nonNull), "The associated data must not contain null objects.");
 
 		// Context.
 		final byte[] K = encryptionKey;
-		final byte[] P = plainText;
+		final byte[] P = plaintext;
 
 		// Operation.
 		final byte[] nonce = randomService.randomBytes(this.algorithm.nonceLength);
@@ -94,35 +86,19 @@ public class SymmetricAuthenticatedEncryptionService {
 	}
 
 	/**
-	 * Symmetric authenticated decryption scheme based on authenticated Decryption with Associated Data (AEAD)
-	 *
-	 * @param encryptionKey  K ∈ B<sup>k</sup>. Not null.
-	 * @param cipherText     C ∈ B<sup>c</sup>. Not null.
-	 * @param nonce          nonce ∈ B<sup>n</sup>. Not null.
-	 * @param associatedData (associated<sub>0</sub>,....,associated<sub>n-1</sub>) ∈ A<sub>UCS</sub><sup>*</sup>)<sup>n</sup>, s.t. n ∈ N. Not null.
-	 * @return plaintextSymmetric - AuthenticatedDecryption(K,nonce,associated,C)
-	 * @throws InvalidAlgorithmParameterException if algorithm parameters are invalid or inappropriate.
-	 * @throws NoSuchPaddingException             if padding requested in the algorithm is not available in the environment.
-	 * @throws IllegalBlockSizeException          if the length of data provided to the cipher block is incorrect, i.e., does not match the block size
-	 *                                            of the cipher.
-	 * @throws NoSuchAlgorithmException           if the cryptographic algorithm requested is not available in the environment.
-	 * @throws BadPaddingException                if padding mechanism expected for the input data is not padded properly.
-	 * @throws InvalidKeyException                if where are invalid Keys (invalid encoding, wrong length, uninitialized, etc).
+	 * @see Symmetric#getPlaintextSymmetric(byte[], byte[], byte[], List)
 	 */
-	byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] cipherText, final byte[] nonce,
-			final List<String> associatedData)
-			throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-			BadPaddingException, InvalidKeyException {
+	byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] ciphertext, final byte[] nonce, final List<String> associatedData) {
 
 		checkNotNull(encryptionKey);
-		checkNotNull(cipherText);
+		checkNotNull(ciphertext);
 		checkNotNull(nonce);
 		checkNotNull(associatedData);
 		checkArgument(associatedData.stream().allMatch(Objects::nonNull), "The associated data must not contain null objects.");
 
 		// Context.
 		final byte[] K = encryptionKey;
-		final byte[] C = cipherText;
+		final byte[] C = ciphertext;
 
 		// Operation.
 		final byte[] associated =
@@ -136,41 +112,68 @@ public class SymmetricAuthenticatedEncryptionService {
 		return authenticatedDecryption(K, nonce, associated, C);
 	}
 
-	byte[] authenticatedEncryption(final byte[] encryptionKey, final byte[] nonce, final byte[] plaintext, final byte[] associatedData)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+	byte[] authenticatedEncryption(final byte[] encryptionKey, final byte[] nonce, final byte[] plaintext, final byte[] associatedData) {
 
-		final Cipher cipher = getCipher(encryptionKey, nonce, Cipher.ENCRYPT_MODE);
+		final Cipher cipher;
+		try {
+			cipher = getCipher(encryptionKey, nonce, Cipher.ENCRYPT_MODE);
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new IllegalStateException("Configured algorithm parameters are invalid or inappropriate.", e);
+		}
 
 		cipher.updateAAD(associatedData);
 
-		return cipher.doFinal(plaintext);
+		try {
+			return cipher.doFinal(plaintext);
+		} catch (BadPaddingException e) {
+			throw new IllegalStateException("We should never get this exception since it is only thrown in decryption mode.");
+		} catch (IllegalBlockSizeException e) {
+			throw new IllegalStateException("We should never get this exception since our algorithm is not a block cipher.");
+		}
 	}
 
-	byte[] authenticatedDecryption(final byte[] encryptionKey, final byte[] nonce, final byte[] associatedData, final byte[] cipherText)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+	byte[] authenticatedDecryption(final byte[] encryptionKey, final byte[] nonce, final byte[] associatedData, final byte[] ciphertext) {
 
-		final Cipher cipher = getCipher(encryptionKey, nonce, Cipher.DECRYPT_MODE);
+		final Cipher cipher;
+		try {
+			cipher = getCipher(encryptionKey, nonce, Cipher.DECRYPT_MODE);
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new IllegalArgumentException("Error with the given nonce during Cipher initialization", e);
+		}
 
 		cipher.updateAAD(associatedData);
 
-		return cipher.doFinal(cipherText);
+		try {
+			return cipher.doFinal(ciphertext);
+		} catch (BadPaddingException e) {
+			throw new IllegalStateException("We should never get this exception since no padding is needed for the configured algorithm.", e);
+		} catch (IllegalBlockSizeException e) {
+			throw new IllegalStateException("We should never get this exception since our algorithm is not a block cipher.", e);
+		}
 	}
 
 	private Cipher getCipher(final byte[] encryptionKey, final byte[] nonce, final int opmode)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+			throws InvalidAlgorithmParameterException {
 		// Get Cipher Instance
-		final Cipher cipher = Cipher.getInstance(this.algorithm.getAlgorithmName());
+		final Cipher cipher;
+		try {
+			cipher = Cipher.getInstance(this.algorithm.getAlgorithmName());
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			throw new IllegalStateException("Requested cryptographic algorithm or padding in the algorithm is not available in the environment.", e);
+		}
 
 		// Create the encryptionKey
 		final Key key = this.algorithm.getKey(encryptionKey);
 
 		// Create the algorithm used for the authentication
-		final AlgorithmParameterSpec algorithmParameterSpec = this.algorithm.getAlgorithmParameterSpec(nonce);
+		final AlgorithmParameterSpec params = this.algorithm.getAlgorithmParameterSpec(nonce);
 
 		// Initialize Cipher for the authentication
-		cipher.init(opmode, key, algorithmParameterSpec);
+		try {
+			cipher.init(opmode, key, params);
+		} catch (InvalidKeyException e) {
+			throw new IllegalArgumentException("Error with the given encryptionKey during Cipher initialization", e);
+		}
 
 		return cipher;
 	}
