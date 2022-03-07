@@ -72,4 +72,8 @@ public class BigIntegerOperationsService {
 	static int getJacobi(final BigInteger a, final BigInteger n) {
 		return bigIntegerOperations.getJacobi(a, n);
 	}
+
+	public static boolean isSmallPrime(final BigInteger number) {
+		return bigIntegerOperations.isSmallPrime(number);
+	}
 }
