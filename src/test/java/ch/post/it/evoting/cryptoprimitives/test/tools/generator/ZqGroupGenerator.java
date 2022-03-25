@@ -37,12 +37,23 @@ public class ZqGroupGenerator {
 		this.randomService = new RandomService();
 	}
 
+	/**
+	 * Generates a random {@link ZqElement} in this {@code group}.
+	 *
+	 * @return a random {@link ZqElement}.
+	 */
 	public ZqElement genRandomZqElementMember() {
 		final BigInteger value = randomService.genRandomInteger(this.group.getQ());
 		return ZqElement.create(value, this.group);
 	}
 
-	public ZqElement otherElement(final ZqElement element) {
+	/**
+	 * Generates a random {@link ZqElement} in this {@code group} different from another {@link ZqElement}.
+	 *
+	 * @param element the other {@link ZqElement}.
+	 * @return a random {@link ZqElement} different from the other {@link ZqElement}.
+	 */
+	public ZqElement genOtherElement(final ZqElement element) {
 		return Generators.genWhile(this::genRandomZqElementMember, element::equals);
 	}
 
@@ -54,6 +65,17 @@ public class ZqGroupGenerator {
 	 */
 	public GroupVector<ZqElement, ZqGroup> genRandomZqElementVector(final int numElements) {
 		return GroupVector.from(generateElementList(numElements, this::genRandomZqElementMember));
+	}
+
+	/**
+	 * Generates a random {@link GroupVector} of {@link ZqElement} in this {@code group} different from another {@link GroupVector}.
+	 *
+	 * @param vector      the other {@link GroupVector}.
+	 * @param numElements the number of elements to generate.
+	 * @return a vector of {@code numElements} random {@link ZqElement} different from the other {@link GroupVector}.
+	 */
+	public GroupVector<ZqElement, ZqGroup> genOtherVector(final GroupVector<ZqElement, ZqGroup> vector, final int numElements) {
+		return Generators.genWhile(() -> genRandomZqElementVector(numElements), vector::equals);
 	}
 
 	/**
