@@ -17,7 +17,7 @@ def MAVEN_PARAMS = '-T 1.5C -U --settings .mvn/settings.xml --no-transfer-progre
 def PR_ID = env.BRANCH_NAME.replace('PR-', '')
 
 // Tools
-def MAVEN = 'maven-3.8.2'
+def MAVEN = 'maven-3'
 
 pipeline {
 
@@ -31,6 +31,10 @@ pipeline {
         ansiColor('xterm')
         timestamps()
     }
+
+    tools {
+   		maven "${MAVEN}"
+   	}
 
     stages {
 
