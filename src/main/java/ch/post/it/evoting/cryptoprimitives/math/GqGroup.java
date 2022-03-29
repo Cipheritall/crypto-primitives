@@ -24,11 +24,11 @@ import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
-import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 
 /**
  * Quadratic residues group of integers modulo p, such that p is a safe prime, i.e. p = 2q + 1. In this case q is the order of the group (ie the
