@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives;
+package ch.post.it.evoting.cryptoprimitives.securitylevel;
 
 /**
  * Provides functionality to retrieve the security level from an environment variable
