@@ -25,11 +25,11 @@ import java.util.List;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 
 class TestContextParser {
