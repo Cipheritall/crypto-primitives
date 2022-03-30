@@ -47,8 +47,8 @@ class BigIntegerOperationsServiceTest {
 	private static final BigInteger SIX = BigInteger.valueOf(6L);
 	private static final BigInteger SEVEN = BigInteger.valueOf(7L);
 	private static final BigInteger EIGHT = BigInteger.valueOf(8L);
-	public static final BigInteger NINE = BigInteger.valueOf(9L);
-	public static final BigInteger TWENTY_ONE = BigInteger.valueOf(21L);
+	private static final BigInteger NINE = BigInteger.valueOf(9L);
+	private static final BigInteger TWENTY_ONE = BigInteger.valueOf(21L);
 
 	private static List<BigInteger> bases;
 	private static List<BigInteger> exponents;
@@ -265,5 +265,13 @@ class BigIntegerOperationsServiceTest {
 	void testIsSmallPrimeTooSmallNThrows() {
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> BigIntegerOperationsService.isSmallPrime(ZERO));
 		assertEquals("The number n must be strictly positive", exception.getMessage());
+	}
+
+	@Test
+	void testIsSmallPrimeTooBigNThrows() {
+		final BigInteger maxIntPlusOne = BigInteger.valueOf(Integer.MAX_VALUE).add(ONE);
+		final ArithmeticException exception = assertThrows(ArithmeticException.class,
+				() -> BigIntegerOperationsService.isSmallPrime(maxIntPlusOne));
+		assertEquals("BigInteger out of int range", exception.getMessage());
 	}
 }

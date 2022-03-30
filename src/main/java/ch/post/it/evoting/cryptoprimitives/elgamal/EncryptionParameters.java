@@ -27,9 +27,9 @@ import org.bouncycastle.crypto.digests.SHAKEDigest;
 
 import com.google.common.primitives.Bytes;
 
-import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 
 /**
  * Provides functionality to create verifiable encryption parameters as a {@link GqGroup}.

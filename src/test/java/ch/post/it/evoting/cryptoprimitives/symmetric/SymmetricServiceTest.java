@@ -42,6 +42,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 class SymmetricServiceTest extends TestGroupSetup {
 
 	private static final int AES_KEY_SIZE = 256;
+	private static final int DIFFERENT_AES_KEY_SIZE = 128;
 	private static final int NONCE_LENGTH = 12;
 	private static final int DIFFERENT_NONCE_LENGTH = 96;
 	private static final int ASSOCIATED_LENGTH = 4;
@@ -100,6 +101,19 @@ class SymmetricServiceTest extends TestGroupSetup {
 				() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, associatedData));
 
 		assertEquals("Invalid nonce length, expected 12", Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("wrong encryption key length throws illegalArgumentException, basic encryption path with Java AES 256 GCM Encryption Algorithm")
+	void wrongEncryptionInvalidKeyLength() {
+
+		final byte[] differentEncryptionKey = randomService.randomBytes(DIFFERENT_AES_KEY_SIZE / 8);
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> symmetricEncryptionService.genCiphertextSymmetric(
+						differentEncryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData));
+
+		assertEquals("The key must be 32 bytes", Throwables.getRootCause(illegalArgumentException).getMessage());
 	}
 
 	@Nested
