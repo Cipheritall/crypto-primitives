@@ -45,9 +45,9 @@ class PlaintextEqualityProofTest extends TestGroupSetup {
 	@DisplayName("equals works as expected")
 	void equalsTest() {
 		final PlaintextEqualityProof proof1 = new PlaintextEqualityProof(e, z);
-		final GroupVector<ZqElement, ZqGroup> z2 = zqGroupGenerator.genRandomZqElementVector(2);
+		final GroupVector<ZqElement, ZqGroup> z2 = zqGroupGenerator.genOtherVector(z, 2);
 		final PlaintextEqualityProof proof2 = new PlaintextEqualityProof(e, z2);
-		final ZqElement e3 = zqGroupGenerator.otherElement(e);
+		final ZqElement e3 = zqGroupGenerator.genOtherElement(e);
 		final PlaintextEqualityProof proof3 = new PlaintextEqualityProof(e3, z);
 		final PlaintextEqualityProof proof4 = new PlaintextEqualityProof(e, z);
 

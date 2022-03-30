@@ -75,7 +75,7 @@ class DecryptionProofTest extends TestGroupSetup {
 		DecryptionProof proof1 = new DecryptionProof(e, z);
 		GroupVector<ZqElement, ZqGroup> z2 = zqGroupGenerator.genRandomZqElementVector(l + 1);
 		DecryptionProof proof2 = new DecryptionProof(e, z2);
-		ZqElement e3 = zqGroupGenerator.otherElement(e);
+		ZqElement e3 = zqGroupGenerator.genOtherElement(e);
 		DecryptionProof proof3 = new DecryptionProof(e3, z);
 		DecryptionProof proof4 = new DecryptionProof(e, z);
 

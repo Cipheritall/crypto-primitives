@@ -32,13 +32,13 @@ public class SymmetricService implements Symmetric {
 		final RandomService randomService = new RandomService();
 
 		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService,
-				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES_GCM_NOPADDING);
+				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES256_GCM_NOPADDING);
 	}
 
 	@VisibleForTesting
 	public SymmetricService(final RandomService randomService) {
 		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService,
-				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES_GCM_NOPADDING);
+				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES256_GCM_NOPADDING);
 	}
 
 	@Override
