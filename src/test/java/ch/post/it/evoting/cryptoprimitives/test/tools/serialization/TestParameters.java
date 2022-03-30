@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import ch.post.it.evoting.cryptoprimitives.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 
 /**
  * General deserialization of json test files according to the schema defined in the specifications.

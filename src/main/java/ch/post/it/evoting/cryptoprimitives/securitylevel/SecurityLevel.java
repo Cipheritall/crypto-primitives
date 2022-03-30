@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives;
+package ch.post.it.evoting.cryptoprimitives.securitylevel;
+
+import static ch.post.it.evoting.cryptoprimitives.securitylevel.SigningParameters.RSASSA_PSS;
 
 /**
  * Represents the possible security levels.
  */
 public enum SecurityLevel {
 
-	TESTING_ONLY(16, 48),
-	DEFAULT(112, 2048),
-	EXTENDED(128, 3072);
+	TESTING_ONLY(16, 48, RSASSA_PSS),
+	DEFAULT(112, 2048, RSASSA_PSS),
+	EXTENDED(128, 3072, RSASSA_PSS);
 
 	private final int strength;
 	private final int bitLength;
+	private final SigningParameters signingParameters;
 
-	SecurityLevel(final int strength, final int bitLength) {
+	SecurityLevel(final int strength, final int bitLength, final SigningParameters signingParameters) {
 		this.strength = strength;
 		this.bitLength = bitLength;
+		this.signingParameters = signingParameters;
 	}
 
 	public int getStrength() {
@@ -40,4 +44,7 @@ public enum SecurityLevel {
 		return this.bitLength;
 	}
 
+	public SigningParameters getSigningParameters() {
+		return signingParameters;
+	}
 }

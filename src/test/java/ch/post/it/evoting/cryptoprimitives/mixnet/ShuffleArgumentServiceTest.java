@@ -702,7 +702,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final ProductArgument productArgument = shuffleArgument.getProductArgument();
 
 			final SingleValueProductArgument singleValueProductArgument = productArgument.getSingleValueProductArgument();
-			final ZqElement badRTilde = zqGroupGenerator.otherElement(singleValueProductArgument.get_r_tilde());
+			final ZqElement badRTilde = zqGroupGenerator.genOtherElement(singleValueProductArgument.get_r_tilde());
 			final SingleValueProductArgument badSingleValueProductArgument = new SingleValueProductArgument.Builder()
 					.with_c_d(singleValueProductArgument.get_c_d())
 					.with_c_delta(singleValueProductArgument.get_c_delta())

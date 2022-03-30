@@ -179,7 +179,7 @@ public class SymmetricAuthenticatedEncryptionService {
 	}
 
 	public enum SymmetricEncryptionAlgorithm {
-		AES_GCM_NOPADDING("AES/GCM/NoPadding", 12,
+		AES256_GCM_NOPADDING("AES_256/GCM/NoPadding", 12,
 				(byte[] nonce) -> new GCMParameterSpec(SymmetricEncryptionAlgorithm.AES_GCM_TAG_LENGTH * 8, nonce),
 				(byte[] key) -> new SecretKeySpec(key, "AES"));
 

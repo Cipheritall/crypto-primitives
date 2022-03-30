@@ -24,6 +24,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.bouncycastle.crypto.Digest;
@@ -69,15 +71,15 @@ public class KDFService {
 	 * @throws IllegalArgumentException if any of the preconditions mentioned above are not respected.
 	 */
 	@SuppressWarnings({ "java:S117", "java:S100" })
-	public byte[] KDF(final byte[] pseudoRandomKey, final ImmutableList<String> contextInformation, final int requiredByteLength) {
+	public byte[] KDF(final byte[] pseudoRandomKey, final List<String> contextInformation, final int requiredByteLength) {
 		checkNotNull(pseudoRandomKey);
 		checkNotNull(contextInformation);
-		checkArgument(!contextInformation.contains(null), "Info contains a null.");
+		checkArgument(contextInformation.stream().allMatch(Objects::nonNull), "Info contains a null.");
 
 		final int L = this.hashSupplier.get().getDigestSize();
 		final byte[] PRK = pseudoRandomKey;
 		final int l_straight = PRK.length;
-		final ImmutableList<String> info_vector = contextInformation;
+		final ImmutableList<String> info_vector = ImmutableList.copyOf(contextInformation);
 		final int l_curved = requiredByteLength;
 
 		checkArgument(l_curved > 0, "Requested byte length must be greater than 0. ");
@@ -120,16 +122,16 @@ public class KDFService {
 	 * @throws IllegalArgumentException if any of the preconditions mentioned above are not respected.
 	 */
 	@SuppressWarnings({ "java:S117", "java:S100" })
-	public ZqElement KDFToZq(final byte[] pseudoRandomKey, final ImmutableList<String> contextInformation, final BigInteger exclusiveUpperBound) {
+	public ZqElement KDFToZq(final byte[] pseudoRandomKey, final List<String> contextInformation, final BigInteger exclusiveUpperBound) {
 		checkNotNull(pseudoRandomKey);
 		checkNotNull(contextInformation);
-		checkArgument(!contextInformation.contains(null), "Info contains a null.");
+		checkArgument(contextInformation.stream().allMatch(Objects::nonNull), "Info contains a null.");
 		checkNotNull(exclusiveUpperBound);
 
 		final int L = this.hashSupplier.get().getDigestSize();
 		final byte[] PRK = pseudoRandomKey;
 		final int l_straight = PRK.length;
-		final ImmutableList<String> info = contextInformation;
+		final ImmutableList<String> info = ImmutableList.copyOf(contextInformation);
 		final BigInteger q = exclusiveUpperBound;
 
 		checkArgument(l_straight >= L, "The pseudo random key length must be greater than the hash function output length.");
