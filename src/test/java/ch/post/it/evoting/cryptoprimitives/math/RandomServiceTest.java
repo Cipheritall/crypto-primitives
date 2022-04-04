@@ -16,7 +16,9 @@
 package ch.post.it.evoting.cryptoprimitives.math;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -160,30 +162,94 @@ class RandomServiceTest {
 	}
 
 	@Test
-	void genRandomCodeWithCodeLength0Throws() {
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> randomService.genRandomBase10String(0));
-
-		String expectedMessage = "Length of the code must be greater than zero";
-		String actualMessage = exception.getMessage();
-
-		assertEquals(expectedMessage, actualMessage);
+	void genUniqueDecimalStringsWithTooSmallDesiredCodeLengthThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> randomService.genUniqueDecimalStrings(0, 1));
+		assertEquals("The desired length of the unique codes must be strictly positive.", exception.getMessage());
 	}
 
 	@Test
-	void genRandomCodeWithCodeLength1() {
-		String code = randomService.genRandomBase10String(1);
-
-		assertEquals(1, code.length(), "code should be of size 1");
-		assertTrue(code.matches("[0-9]"), "code should match [0-9]: " + code);
+	void genUniqueDecimalStringsWithTooSmallNumberOfUniqueCodesThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> randomService.genUniqueDecimalStrings(1, 0));
+		assertEquals("The number of unique codes must be strictly positive.", exception.getMessage());
 	}
 
-	@RepeatedTest(value = 10)
-	void genRandomCodeWithRandomCodeLength() {
-		final int codeLength = secureRandom.nextInt(2000) + 1;
+	@RepeatedTest(10)
+	void genUniqueDecimalStringsReturnsStringsOfCorrectSize() {
+		final int desiredCodesLength = secureRandom.nextInt(10) + 1;
+		final int numberOfCodes = secureRandom.nextInt(10) + 1;
+		final List<String> uniqueStrings = assertDoesNotThrow(() -> randomService.genUniqueDecimalStrings(desiredCodesLength, numberOfCodes));
+		final boolean allHaveCorrectSize = uniqueStrings.stream().map(String::length).allMatch(codeSize -> codeSize == desiredCodesLength);
+		assertTrue(allHaveCorrectSize);
+	}
 
-		String code = randomService.genRandomBase10String(codeLength);
+	@RepeatedTest(10)
+	void genUniqueDecimalStringsReturnsDesiredNumberOfStrings() {
+		final int desiredCodesLength = secureRandom.nextInt(10) + 1;
+		final int numberOfCodes = secureRandom.nextInt(10) + 1;
+		final List<String> uniqueStrings = assertDoesNotThrow(() -> randomService.genUniqueDecimalStrings(desiredCodesLength, numberOfCodes));
+		assertEquals(numberOfCodes, uniqueStrings.size());
+	}
 
-		assertEquals(codeLength, code.length(), "code should be of size " + codeLength);
-		assertTrue(code.matches("[0]*[0-9]*"), "code should match [0]*[0-9]*: " + code);
+	@RepeatedTest(10)
+	void genUniqueDecimalStringsGeneratesUniqueStrings() {
+		final int desiredCodesLength = secureRandom.nextInt(10) + 1;
+		final List<String> uniqueStrings = assertDoesNotThrow(() -> randomService.genUniqueDecimalStrings(desiredCodesLength, 3));
+		final String s1 = uniqueStrings.get(0);
+		final String s2 = uniqueStrings.get(1);
+		final String s3 = uniqueStrings.get(2);
+
+		assertNotEquals(s1, s2);
+		assertNotEquals(s1, s3);
+		assertNotEquals(s2, s3);
+	}
+
+	@RepeatedTest(10)
+	void genUniqueDecimalStringsWithTooManyCodesThrows() {
+		final int desiredCodesLength = secureRandom.nextInt(10) + 1;
+		assertThrows(IllegalArgumentException.class, () -> randomService.genUniqueDecimalStrings(desiredCodesLength, 10 * desiredCodesLength + 1));
+	}
+
+	@Test
+	void leftPadWithNullStringThrows() {
+		assertThrows(NullPointerException.class, () -> randomService.leftPad(null, 1, 'c'));
+	}
+
+	@Test
+	void leftPadWithEmptyStringThrows() {
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> randomService.leftPad("", 1, 'c'));
+		assertEquals("The string to be padded must contain at least one character.", exception.getMessage());
+	}
+
+	@Test
+	void leftPadWithStringLengthGreaterThanDesiredLengthThrows() {
+		final String string = "Test too short desired length";
+		final int desiredLength = string.length() - 1;
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> randomService.leftPad(string, desiredLength, 'c'));
+		assertEquals("The desired string length must not be smaller than the string.", exception.getMessage());
+	}
+
+	@Test
+	void leftPadWithStringLengthEqualsDesiredLengthReturnsString() {
+		final String string = "test";
+		assertEquals(string, randomService.leftPad(string, string.length(), 'c'));
+	}
+
+	@Test
+	void leftPadWithStringLengthGreaterThanDesiredLengthReturnsPaddedString() {
+		final String string = "Test short string";
+		final int paddingSize = secureRandom.nextInt(10) + 1;
+		final int desiredStringLength = string.length() + paddingSize;
+		final char paddingCharacter = '&';
+		final String paddedString = randomService.leftPad(string, desiredStringLength, paddingCharacter);
+
+		for (int i=0; i < paddingSize; i++) {
+			assertEquals(paddingCharacter, paddedString.charAt(i));
+		}
+
+		assertTrue(paddedString.contains(string));
+		assertEquals(desiredStringLength, paddedString.length());
 	}
 }
