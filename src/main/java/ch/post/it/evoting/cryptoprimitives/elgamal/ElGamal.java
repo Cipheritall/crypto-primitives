@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 
 public interface ElGamal {
 
@@ -35,4 +36,12 @@ public interface ElGamal {
 	 * @return a {@link GqGroup} containing parameters p, q and g.
 	 */
 	GqGroup getEncryptionParameters(final String seed);
+
+	/**
+	 * Combines the public keys by multiplying them element wise.
+	 *
+	 * @param publicKeyList (pk<sub>0</sub>, ..., pk<sub>s</sub>), the list of public keys to be combined. Must be non-null.
+	 * @return the combined public key
+	 */
+	ElGamalMultiRecipientPublicKey combinePublicKeys(final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> publicKeyList);
 }

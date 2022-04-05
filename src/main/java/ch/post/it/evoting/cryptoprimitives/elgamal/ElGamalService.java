@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 
 public class ElGamalService implements ElGamal {
 
@@ -28,5 +29,10 @@ public class ElGamalService implements ElGamal {
 	@Override
 	public GqGroup getEncryptionParameters(final String seed) {
 		return new EncryptionParameters().getEncryptionParameters(seed);
+	}
+
+	@Override
+	public ElGamalMultiRecipientPublicKey combinePublicKeys(GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> publicKeyList) {
+		return ElGamalMultiRecipientPublicKey.combinePublicKeys(publicKeyList);
 	}
 }
