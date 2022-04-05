@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Interface exposing all methods that need to be accessed outside of crypto-primitives.
@@ -55,10 +56,15 @@ public interface CryptoPrimitives {
 	BigInteger genRandomInteger(final BigInteger upperBound);
 
 	/**
-	 * Generates a String of random digits of the specified length.
+	 * Generates a list of unique decimal strings.
+	 * <p>
+	 * Each string in the list is guaranteed to have a different value. Strings that were generated in different calls of this method, might have the
+	 * same value.
+	 * </p>
 	 *
-	 * @param codeLength l, the desired length of the code. Must be strictly positive.
-	 * @return a random digits String of {@code codeLength}.
+	 * @param desiredCodeLength   l, the desired length of each code. Must be strictly positive.
+	 * @param numberOfUniqueCodes n, the number of unique codes. Must be strictly positive.
+	 * @return a list of unique decimal strings.
 	 */
-	String genRandomBase10String(final int codeLength);
+	List<String> genUniqueDecimalStrings(final int desiredCodeLength, final int numberOfUniqueCodes);
 }

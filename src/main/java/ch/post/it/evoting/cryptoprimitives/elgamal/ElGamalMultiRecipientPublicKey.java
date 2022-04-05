@@ -16,10 +16,13 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
@@ -108,5 +111,23 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	@Override
 	public ImmutableList<? extends Hashable> toHashableForm() {
 		return this.publicKeyElements.toHashableForm();
+	}
+
+	/**
+	 * @see	ElGamal#combinePublicKeys(GroupVector)
+	 */
+	static ElGamalMultiRecipientPublicKey combinePublicKeys(final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> publicKeyList) {
+		checkNotNull(publicKeyList);
+
+		final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> pk = publicKeyList;
+		final int N = publicKeyList.getElementSize();
+		final int s = publicKeyList.size();
+		final GqGroup group = publicKeyList.getGroup();
+
+		return IntStream.range(0, N)
+				.mapToObj(i -> IntStream.range(0, s)
+						.mapToObj(j -> pk.get(j).get(i))
+						.reduce(group.getIdentity(), GqElement::multiply))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), ElGamalMultiRecipientPublicKey::new));
 	}
 }
