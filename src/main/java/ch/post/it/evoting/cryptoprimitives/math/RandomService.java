@@ -22,9 +22,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.stream.Stream;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 
@@ -32,8 +35,6 @@ import com.google.common.io.BaseEncoding;
  * This class is thread safe.
  */
 public class RandomService {
-
-	private static final char ZERO_PAD_CHAR = '0';
 
 	private final SecureRandom secureRandom;
 
@@ -124,6 +125,30 @@ public class RandomService {
 	}
 
 	/**
+	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genUniqueDecimalStrings(int, int)
+	 */
+	public List<String> genUniqueDecimalStrings(final int desiredCodeLength, final int numberOfUniqueCodes) {
+		final int l = desiredCodeLength;
+		final int n = numberOfUniqueCodes;
+		checkArgument(l > 0, "The desired length of the unique codes must be strictly positive.");
+		checkArgument(n > 0, "The number of unique codes must be strictly positive.");
+
+		checkArgument(n <= 10 * l, "There cannot be more codes than 10 times the desired code length.");
+
+		final List<String> codes = new ArrayList<>(n);
+		final BigInteger m = BigInteger.valueOf(10).pow(l);
+		while (codes.size() < n) {
+			final BigInteger x = genRandomInteger(m);
+			final String c = leftPad(integerToString(x), l, '0');
+			if (!codes.contains(c)) {
+				codes.add(c);
+			}
+		}
+
+		return codes;
+	}
+
+	/**
 	 * Generates a vector (collection) of random {@link ZqElement}s between 0 (incl.) and {@code upperBound} (excl.).
 	 *
 	 * @param upperBound q, the exclusive upper bound. Must be non null and strictly positive.
@@ -159,25 +184,25 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase10String(int)
+	 * Pads a string to the desired length by adding the given character to the left of the string.
+	 *
+	 * @param string              S, the string to be padded. Must be of size > 0.
+	 * @param desiredStringLength l, the desired string length. Must be greater than the string length.
+	 * @param paddingCharacter    c, the character to be used for the padding.
+	 * @return the string padded to the desired length by adding the padding character the needed number of times on the left-hand side
+	 * @throws NullPointerException     if the string is null
+	 * @throws IllegalArgumentException if the desired length is smaller than the length of the string to be padded
 	 */
-	public String genRandomBase10String(final int codeLength) {
-		checkArgument(codeLength > 0, "Length of the code must be greater than zero");
+	@VisibleForTesting
+	String leftPad(final String string, final int desiredStringLength, final char paddingCharacter) {
+		checkNotNull(string);
+		checkArgument(!string.isEmpty(), "The string to be padded must contain at least one character.");
 
-		final int l = codeLength;
+		final int k = string.length();
+		final int l = desiredStringLength;
+		checkArgument(k <= l, "The desired string length must not be smaller than the string.");
 
-		final BigInteger x = genRandomIntegerByDigits(l);
-
-		return leftPad(integerToString(x), l, ZERO_PAD_CHAR);
-	}
-
-	private BigInteger genRandomIntegerByDigits(final int length) {
-		final BigInteger upperBound = BigInteger.TEN.pow(length);
-
-		return genRandomInteger(upperBound);
-	}
-
-	private String leftPad(final String string, final int minLength, final char padChar) {
-		return Strings.padStart(string, minLength, padChar);
+		// This method is equivalent to the specification
+		return Strings.padStart(string, desiredStringLength, paddingCharacter);
 	}
 }
