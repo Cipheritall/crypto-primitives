@@ -74,7 +74,8 @@ pipeline {
             }
             steps {
                 withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
-                    mvnBuild(buildInfo: BUILD_INFO, mavenTool: MAVEN, mavenParams: MAVEN_PARAMS, releaseRepo: MAVEN_RELEASE_REPO, snapshotRepo: MAVEN_SNAPSHOT_REPO, resolveRepo: MAVEN_RESOLVE_REPO, deployArtifacts: 'false')
+                    sh "mvn clean install -T 1.5C -U --settings .mvn/settings.xml --no-transfer-progress"
+                    //mvnBuild(buildInfo: BUILD_INFO, mavenTool: MAVEN, mavenParams: MAVEN_PARAMS, releaseRepo: MAVEN_RELEASE_REPO, snapshotRepo: MAVEN_SNAPSHOT_REPO, resolveRepo: MAVEN_RESOLVE_REPO, deployArtifacts: 'false')
                 }
             }
         }
@@ -91,7 +92,8 @@ pipeline {
             }
             steps {
                 withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
-                    mvnBuild(buildInfo: BUILD_INFO, mavenTool: MAVEN, mavenParams: MAVEN_PARAMS, releaseRepo: MAVEN_RELEASE_REPO, snapshotRepo: MAVEN_SNAPSHOT_REPO, resolveRepo: MAVEN_RESOLVE_REPO, deployArtifacts: 'true')
+                    sh "mvn clean install -T 1.5C -U --settings .mvn/settings.xml --no-transfer-progress"
+                    //mvnBuild(buildInfo: BUILD_INFO, mavenTool: MAVEN, mavenParams: MAVEN_PARAMS, releaseRepo: MAVEN_RELEASE_REPO, snapshotRepo: MAVEN_SNAPSHOT_REPO, resolveRepo: MAVEN_RESOLVE_REPO, deployArtifacts: 'true')
                     publishBuildInformation(buildName: BUILD_NAME, buildInfo: BUILD_INFO)
                 }
             }
