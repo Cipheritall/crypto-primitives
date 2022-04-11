@@ -25,7 +25,8 @@ public class SecurityLevelConfig {
 	}
 
 	/**
-	 * Gets the system security level provided by the environment variable SECURITY_LEVEL. If SECURITY_LEVEL is not set, DEFAULT is used.
+	 * Gets the system security level provided by the environment variable SECURITY_LEVEL. If SECURITY_LEVEL is not set, {@link SecurityLevel#DEFAULT}
+	 * is used.
 	 *
 	 * @return a {@link SecurityLevel}
 	 */

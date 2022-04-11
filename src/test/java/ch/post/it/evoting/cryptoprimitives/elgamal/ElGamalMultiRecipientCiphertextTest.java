@@ -309,8 +309,9 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 
 		// Expected multiplication result.
 		final GqElement gammaRes = GqElementFactory.fromValue(BigInteger.valueOf(9), group);
-		final List<GqElement> phisRes = Arrays.asList(GqElementFactory.fromValue(BigInteger.valueOf(5), group), GqElementFactory.fromValue(BigInteger.valueOf(5),
-				group));
+		final List<GqElement> phisRes = Arrays.asList(GqElementFactory.fromValue(BigInteger.valueOf(5), group),
+				GqElementFactory.fromValue(BigInteger.valueOf(5),
+						group));
 		final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
 
 		assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB));
