@@ -21,29 +21,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
 
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 public enum SigningParameters {
-	RSASSA_PSS("RSASSA-PSS", new PSSParameterSpec("SHA-256", "MFG1", MGF1ParameterSpec.SHA256, 32, PSSParameterSpec.TRAILER_FIELD_BC), "RSASSA-PSS",
-			3072);
+	RSASSA_PSS("SHA256WITHRSAANDMGF1", "RSASSA-PSS", 3072);
 
 	static {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
 	private final String signatureAlgorithm;
-	private final PSSParameterSpec signatureParameters;
 	private final String keyGenerationAlgorithm;
 	private final int keyLength;
 
-	SigningParameters(final String signatureAlgorithm, final PSSParameterSpec signatureParameters, final String keyGenerationAlgorithm,
+	SigningParameters(final String signatureAlgorithm, final String keyGenerationAlgorithm,
 			final int keyLength) {
 		this.signatureAlgorithm = checkNotNull(signatureAlgorithm);
-		this.signatureParameters = checkNotNull(signatureParameters);
 		this.keyGenerationAlgorithm = checkNotNull(keyGenerationAlgorithm);
 		checkArgument(keyLength > 0);
 		this.keyLength = keyLength;
@@ -62,6 +59,11 @@ public enum SigningParameters {
 	}
 
 	public JcaContentSignerBuilder getContentSigner() {
-		return new JcaContentSignerBuilder(signatureAlgorithm, signatureParameters);
+		return new JcaContentSignerBuilder(signatureAlgorithm);
+	}
+
+	public AlgorithmIdentifier getAlgorithmIdentifier() {
+		final DefaultSignatureAlgorithmIdentifierFinder algorithmIdentifierFinder = new DefaultSignatureAlgorithmIdentifierFinder();
+		return algorithmIdentifierFinder.find(signatureAlgorithm);
 	}
 }

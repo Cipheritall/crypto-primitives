@@ -222,14 +222,16 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 				// Parse public key.
 				final BigInteger[] boldPk = input.get("bold_pk", BigInteger[].class);
-				final List<GqElement> publicKey = Arrays.stream(boldPk).map(pk -> GqElementFactory.fromValue(pk, gqGroup)).collect(Collectors.toList());
+				final List<GqElement> publicKey = Arrays.stream(boldPk).map(pk -> GqElementFactory.fromValue(pk, gqGroup))
+						.collect(Collectors.toList());
 
 				// Parse resulting ciphertext.
 				final JsonData outputJsonData = testParameters.getOutput();
 
 				final GqElement gammaRes = GqElementFactory.fromValue(outputJsonData.get("gamma", BigInteger.class), gqGroup);
 				final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
-				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElementFactory.fromValue(phi, gqGroup)).collect(Collectors.toList());
+				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElementFactory.fromValue(phi, gqGroup))
+						.collect(Collectors.toList());
 
 				return Arguments.of(message, exponent, publicKey, gammaRes, phisRes, testParameters.getDescription());
 			}
