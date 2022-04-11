@@ -2,7 +2,7 @@
 /****************** JENKINS-CRYPTO-PRIMITIVES-RELEASE LIB ****************/
 /***************************************************************/
 
-sh "wget -O ./jenkins-build-pipeline.groovy https://artifactory.tools.pnet.ch/artifactory/libs-release-local/ch/post/it/common/jenkins/pipeline/00.02.03.05/pipeline-00.02.03.05.jar!jenkins-build-pipeline.groovy"
+sh "wget -O ./jenkins-build-pipeline.groovy https://artifactory.tools.post.ch/artifactory/libs-release-local/ch/post/it/common/jenkins/pipeline/00.02.03.05/pipeline-00.02.03.05.jar!jenkins-build-pipeline.groovy"
 commonBuildPipeline = load 'jenkins-build-pipeline.groovy'
 
 public performRelease(projectName, gitUrl, branchName, autoMerge, mavenGoals, mavenParameters, workspace, releaseVersion, newSnapshotVersion, releaseEmail, useArtifactoryArtifactUploader, buildInfoArtifactName, releaseMessage) {
