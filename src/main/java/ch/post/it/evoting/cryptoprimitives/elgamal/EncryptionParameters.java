@@ -35,7 +35,6 @@ import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
  * Provides functionality to create verifiable encryption parameters as a {@link GqGroup}.
  *
  * <p> This class is immutable and thread safe. </p>
- *
  */
 class EncryptionParameters {
 
