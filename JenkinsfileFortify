@@ -24,7 +24,7 @@ properties([
 node {
 	timestamps {
 		env.JAVA_HOME = "${tool 'jdk-8u131'}"
-		env.PATH = "${tool 'Fortify_21.1.2'}/Fortify_SCA_and_Apps_21.1.2/bin:${tool 'maven-3.8.5'}/bin:${env.PATH}"
+		env.PATH = "${tool 'Fortify_21.1.2'}/Fortify_SCA_and_Apps_21.1.2/bin:${tool 'maven-3'}/bin:${env.PATH}"
 
 		step([$class: 'StashNotifier'])
 		currentBuild.result = 'SUCCESS'
