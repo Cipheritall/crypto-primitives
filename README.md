@@ -37,15 +37,15 @@ We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQ
 
 ![SonarQube](SonarQube.jpg)
 
-Out of the 6 code smells:
+Out of the 8 code smells:
 
-* 4 code smells concern duplicated blocks in the argument and proof classes. We left the code blocks as is since removing them reduces the code's readability.
+* 8 code smells concern duplicated blocks in the argument and proof classes. We left the code blocks as is since removing them reduces the code's readability.
 
 Moreover, a high test coverage illustrates the fact that we extensively test the crypto-primitives library.
 
 ### Fortify Analysis
 
-The Fortify analysis showed 0 critical, 0 high, 0 medium, and 58 low criticality issues. We manually reviewed all 58 low-criticality issues and assessed them as false positives.
+The Fortify analysis showed 0 critical, 0 high, 0 medium, and 60 low criticality issues. We manually reviewed all 60 low-criticality issues and assessed them as false positives.
 
 ### JFrog X-Ray Analysis
 
@@ -98,14 +98,28 @@ We aim for a mathematical naming convention that aligns with the following goals
 
 ![Mathematical Naming Convention Examples](naming_convention_examples.jpg)
 
-## Change Log Release 0.13
+## Change Log Release 0.14
 
-Release 0.13 includes some feedback from the Federal Chancellery's mandated experts. The experts' reports will be published at a later point.
+Release 0.14 includes some feedback from the Federal Chancellery's mandated experts.
 We want to thank the experts for their high-quality, constructive remarks:
 
 * Vanessa Teague (Thinking Cybersecurity), Olivier Pereira (Université catholique Louvain), Thomas Edmund Haines (Australian National University)
 * Aleksander Essex (Western University Canada)
 * Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis (Bern University of Applied Sciences)
+
+The following functionalities and improvements are included in release 0.14:
+
+* [Code, Specification] Specified and implemented methods for handling digital signatures: key and certificate generation, signing, and verifying a signature (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Code, Specification] Specified and implemented a GenUniqueDecimalStrings method (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Specified and implemented an ElGamal CombinePublicKeys method.
+* [Code, Specification] Specified and implemented the Schnorr Proof of knowledge (feedback from Vanessa Teague, Olivier Pereira, and Thomas Haines).
+* [Code] Implemented the ByteArrayToString method.
+* [Specification] Specified a method for probabilistic primality testing (feedback from Aleksander Essex).
+* [Specification] Aligned the definition of Base16, Base32, and Base64 alphabets and made the padding character explicit.
+
+## Change Log Release 0.13
+
+Release 0.13 includes some feedback from the Federal Chancellery's mandated experts (see above)
 
 The following functionalities and improvements are included in release 0.13:
 
@@ -127,7 +141,7 @@ The following functionalities and improvements are included in release 0.13:
 
 ## Change Log Release 0.12
 
-Release 0.12 includes some feedback from the Federal Chancellery's mandated experts (see the change log of release 0.13 above)
+Release 0.12 includes some feedback from the Federal Chancellery's mandated experts (see above)
 
 The following functionalities and improvements are included in release 0.12:
 
@@ -187,24 +201,22 @@ The following functionalities and improvements are included in release 0.8:
 * Decoupled the size of the commitment key and the size of the public key in the mix net.
 * Fixed the problem with some randomized unit tests failing for exceptional edge cases.
 
-## Future work
+## Future Work
 
 We plan for the following improvements to the crypto-primitives library:
 
 * Investigating potential improvements in parametrizing the Bayer-Groth mix net. We parametrize the Bayer-Groth with two parameters (m,n). If m and n have equal size, the Bayer-Groth mix net is memory-optimal. However, setting m=1 is the most efficient setting for computational performance. Moreover, setting m=1 allows for further simplifications since one can omit the Hadamard and the zero arguments in that case. We plan to conduct other performance tests to analyze the memory-performance trade-off.
 * Enforcing abstractions in mathematical operations. Currently, we have some unnecessary conversions between abstract mathematical objects (such as GqElements) and plain values (such as BigIntegers). We should work more strictly with mathematically abstract classes.
 * Investigating the usage of a "context" object that encapsulates values that do not change between protocol executions (group parameters, security level, etc.).
-* Implementing the ByteArrayToString method. This method is currently not used; therefore, we did not implement it yet.
+* Implementing methods for probabilistic primality testing.
 
 ## Open Issues
 
 The current release has the following open issues:
 
-* Specifying a proof of knowledge of the exponent (Schnorr Proof),
-* Specifying methods to sign and validate signatures,
-* Implementing methods for probabilistic primality testing.
+* Change the context data in the GenSignature and VerifySignature methods to Hashable object instead of a single String object.
 
-## Additional documentation
+## Additional Documentation
 
 You can find additional documents related to the crypto-primitives in the following locations:
 
