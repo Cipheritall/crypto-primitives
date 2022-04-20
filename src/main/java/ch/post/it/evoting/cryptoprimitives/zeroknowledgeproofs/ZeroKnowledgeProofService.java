@@ -50,6 +50,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 	private final DecryptionProofService decryptionProofService;
 	private final ExponentiationProofService exponentiationProofService;
 	private final PlaintextEqualityProofService plaintextEqualityProofService;
+	private final SchnorrProofService schnorrProofService;
 
 	/**
 	 * Instantiates a zero knowledge proof service which operates in a given group.
@@ -61,6 +62,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
 		plaintextEqualityProofService = new PlaintextEqualityProofService(randomService, hashService);
+		schnorrProofService = new SchnorrProofService(randomService, hashService);
 	}
 
 	@VisibleForTesting
@@ -68,6 +70,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		decryptionProofService = new DecryptionProofService(randomService, hashService);
 		exponentiationProofService = new ExponentiationProofService(randomService, hashService);
 		plaintextEqualityProofService = new PlaintextEqualityProofService(randomService, hashService);
+		schnorrProofService = new SchnorrProofService(randomService, hashService);
 	}
 
 	@Override
@@ -172,4 +175,15 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		return plaintextEqualityProofService.verifyPlaintextEquality(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey,
 				plaintextEqualityProof, auxiliaryInformation);
 	}
+
+	@Override
+	public SchnorrProof genSchnorrProof(final ZqElement witness, final GqElement statement, final List<String> auxiliaryInformation) {
+		return schnorrProofService.genSchnorrProof(witness, statement, auxiliaryInformation);
+	}
+
+	@Override
+	public boolean verifySchnorrProof(final SchnorrProof proof, final GqElement statement, final List<String> auxiliaryInformation) {
+		return schnorrProofService.verifySchnorrProof(proof, statement, auxiliaryInformation);
+	}
+
 }
