@@ -68,6 +68,7 @@ pipeline {
 
 		stage('Anonymize') {
 			steps {
+				sh "git checkout master"
 				anonymization(
 						gitAnonymousUserName: "SwissPost-Bot",
 						gitAnonymousUserEmail: "evotingspoc@poste.ch",

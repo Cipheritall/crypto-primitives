@@ -151,4 +151,28 @@ public interface ZeroKnowledgeProof {
 	boolean verifyPlaintextEquality(final ElGamalMultiRecipientCiphertext firstCiphertext, final ElGamalMultiRecipientCiphertext secondCiphertext,
 			final GqElement firstPublicKey, final GqElement secondPublicKey, final PlaintextEqualityProof plaintextEqualityProof,
 			final List<String> auxiliaryInformation);
+
+	/**
+	 * Generates a proof of knowledge of a discrete logarithm.
+	 *
+	 * @param witness              x ∈ Z<sub>q</sub>. Not null.
+	 * @param statement            y ∈ G<sub>q</sub>. Not null.
+	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null. Can be empty.
+	 * @return a {@link SchnorrProof}.
+	 * @throws NullPointerException     if auxiliary information is null
+	 * @throws IllegalArgumentException if the auxiliary information contains null elements
+	 */
+	SchnorrProof genSchnorrProof(final ZqElement witness, final GqElement statement, final List<String> auxiliaryInformation);
+
+	/**
+	 * Verifies the validity of a Schnorr proof.
+	 *
+	 * @param proof                (e,z) ∈ Z<sub>q</sub> X Z<sub>q</sub>. Not null.
+	 * @param statement            y ∈ G<sub>q</sub>. Not null.
+	 * @param auxiliaryInformation i<sub>aux</sub>, auxiliary information to be used for the hash. Must be non null. Can be empty.
+	 * @return {@code true} if the schnorr proof is valid, {@code false} otherwise.
+	 * @throws NullPointerException if any of the bases, exponentiations, or plaintextEqualityProof is null
+	 */
+	boolean verifySchnorrProof(final SchnorrProof proof, final GqElement statement, final List<String> auxiliaryInformation);
+
 }

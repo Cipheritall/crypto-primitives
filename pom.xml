@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.14.0.1</version>
+	<version>0.14.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -40,8 +40,10 @@
 		<!-- Project settings -->
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven-enforcer-plugin.requiredJavaVersion>[1.8.0-312, 1.9)</maven-enforcer-plugin.requiredJavaVersion>
+		<maven-enforcer-plugin.requiredMavenVersion>3.8.5</maven-enforcer-plugin.requiredMavenVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.build.outputTimestamp>2022-04-14T11:52:55+02:00</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2022-04-20T13:44:05+02:00</project.build.outputTimestamp>
 
 		<!--  Sonar  -->
 		<sonar.scm.disabled>true</sonar.scm.disabled>
@@ -329,9 +331,11 @@
 						<configuration>
 							<rules>
 								<banDuplicatePomDependencyVersions/>
+								<requireJavaVersion>
+									<version>${maven-enforcer-plugin.requiredJavaVersion}</version>
+								</requireJavaVersion>
 								<requireMavenVersion>
-									<version>[3.6,)</version>
-									<message>The Maven version should be 3.6 or higher.</message>
+									<version>${maven-enforcer-plugin.requiredMavenVersion}</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>
@@ -391,5 +395,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

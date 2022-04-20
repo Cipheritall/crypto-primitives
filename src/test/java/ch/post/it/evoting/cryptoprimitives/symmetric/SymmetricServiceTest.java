@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.crypto.AEADBadTagException;
 import javax.crypto.KeyGenerator;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -109,9 +108,9 @@ class SymmetricServiceTest extends TestGroupSetup {
 
 		final byte[] differentEncryptionKey = randomService.randomBytes(DIFFERENT_AES_KEY_SIZE / 8);
 
+		final byte[] plainTextBytes = plainText.getBytes(StandardCharsets.UTF_8);
 		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> symmetricEncryptionService.genCiphertextSymmetric(
-						differentEncryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData));
+				() -> symmetricEncryptionService.genCiphertextSymmetric(differentEncryptionKey, plainTextBytes, associatedData));
 
 		assertEquals("The key must be 32 bytes", Throwables.getRootCause(illegalArgumentException).getMessage());
 	}
@@ -155,7 +154,7 @@ class SymmetricServiceTest extends TestGroupSetup {
 
 		@Test
 		@DisplayName("null parameters throws NullPointerException")
-		void nullParams() throws Exception {
+		void nullParams() {
 			final SymmetricCiphertext authenticationEncrypted = symmetricEncryptionService.genCiphertextSymmetric(
 					encryptionKey, plainText.getBytes(StandardCharsets.UTF_8), associatedData);
 
