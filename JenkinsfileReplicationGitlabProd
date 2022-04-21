@@ -81,7 +81,7 @@ pipeline {
 				expression { replicationConfig.any { it.sourceBranch == env.BRANCH_NAME } }
 				anyOf {
 					branch 'publication-develop'
-					branch 'pre-publication-master'
+					branch 'publication-master'
 				}
 			}
 			steps {
