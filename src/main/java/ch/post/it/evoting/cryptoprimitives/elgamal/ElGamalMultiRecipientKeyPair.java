@@ -24,6 +24,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -35,7 +39,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  *
  * <p>Instances of this class are immutable. </p>
  */
-public class ElGamalMultiRecipientKeyPair {
+public class ElGamalMultiRecipientKeyPair implements HashableList {
 
 	private final ElGamalMultiRecipientPublicKey publicKey;
 	private final ElGamalMultiRecipientPrivateKey privateKey;
@@ -136,5 +140,10 @@ public class ElGamalMultiRecipientKeyPair {
 	@Override
 	public int hashCode() {
 		return Objects.hash(publicKey, privateKey);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return ImmutableList.of(publicKey, privateKey);
 	}
 }

@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
+
+import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
@@ -36,7 +40,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * Instances of this class are immutable.
  */
 @SuppressWarnings("java:S117")
-public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup> {
+public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipientObject<ZqElement, ZqGroup>, HashableList {
 
 	private final GroupVector<ZqElement, ZqGroup> privateKeyElements;
 
@@ -111,5 +115,10 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	@Override
 	public int hashCode() {
 		return Objects.hash(privateKeyElements);
+	}
+
+	@Override
+	public ImmutableList<? extends Hashable> toHashableForm() {
+		return privateKeyElements.toHashableForm();
 	}
 }
