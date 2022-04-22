@@ -20,7 +20,7 @@ replicationConfig = [
 
 credentialsIdGitit = 's-cicd-evoting'
 credentialsIdGitlab = 'GITLAB_CRED_ID'
-currentJenkinsFileName = 'JenkinsfileReplicationGitlabInt,JenkinsfileReplicationGitlabProd'
+currentJenkinsFileName = '"JenkinsfileReplicationGitlabInt" "JenkinsfileReplicationGitlabProd"'
 webhookUrl = null
 
 
@@ -81,7 +81,7 @@ pipeline {
 				expression { replicationConfig.any { it.sourceBranch == env.BRANCH_NAME } }
 				anyOf {
 					branch 'publication-develop'
-					branch 'pre-publication-master'
+					branch 'publication-master'
 				}
 			}
 			steps {
@@ -92,8 +92,8 @@ pipeline {
 									.findAll { it.sourceBranch == env.BRANCH_NAME }
 									.each { config ->
 										sh """
-                                       git filter-branch -f --index-filter \
-                                       'git rm --cached --ignore-unmatch ${currentJenkinsFileName}' \
+                                       git filter-branch -f --env-filter \
+                                       '' --index-filter 'git rm -r --cached --ignore-unmatch ${currentJenkinsFileName}' \
                                        --tag-name-filter cat -- --all 
                                        """
 										forcePushWithUserPass(
