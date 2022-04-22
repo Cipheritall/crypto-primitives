@@ -64,7 +64,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
+import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 
@@ -85,7 +87,7 @@ class SignatureServiceTest {
 		final X509Certificate certificate = getCertificate(from, until, keyPair);
 		authorityId = "authorityId";
 		trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		char[] trustStorePassword = "abcdefgh".toCharArray();
+		final char[] trustStorePassword = "abcdefgh".toCharArray();
 		trustStore.load(null, trustStorePassword);
 		trustStore.setCertificateEntry(authorityId, certificate);
 		hashService = HashService.getInstance();
@@ -99,16 +101,16 @@ class SignatureServiceTest {
 
 	private static X509Certificate getCertificate(final Date from, final Date until, final KeyPair keyPair) throws
 			CertificateException, IOException, OperatorCreationException {
-		SecureRandom random = new SecureRandom();
+		final SecureRandom random = new SecureRandom();
 
 		// fill in certificate fields
-		X500Name subject = new X500NameBuilder(BCStyle.INSTANCE)
+		final X500Name subject = new X500NameBuilder(BCStyle.INSTANCE)
 				.addRDN(BCStyle.CN, "it.post.ch")
 				.build();
-		byte[] id = new byte[20];
+		final byte[] id = new byte[20];
 		random.nextBytes(id);
-		BigInteger serial = new BigInteger(160, random);
-		X509v3CertificateBuilder certificate = new JcaX509v3CertificateBuilder(
+		final BigInteger serial = new BigInteger(160, random);
+		final X509v3CertificateBuilder certificate = new JcaX509v3CertificateBuilder(
 				subject,
 				serial,
 				from,
@@ -117,14 +119,14 @@ class SignatureServiceTest {
 				keyPair.getPublic());
 		certificate.addExtension(Extension.subjectKeyIdentifier, false, id);
 		certificate.addExtension(Extension.authorityKeyIdentifier, false, id);
-		BasicConstraints constraints = new BasicConstraints(true);
+		final BasicConstraints constraints = new BasicConstraints(true);
 		certificate.addExtension(
 				Extension.basicConstraints,
 				true,
 				constraints.getEncoded());
-		KeyUsage usage = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.digitalSignature);
+		final KeyUsage usage = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.digitalSignature);
 		certificate.addExtension(Extension.keyUsage, false, usage.getEncoded());
-		ExtendedKeyUsage usageEx = new ExtendedKeyUsage(new KeyPurposeId[] {
+		final ExtendedKeyUsage usageEx = new ExtendedKeyUsage(new KeyPurposeId[] {
 				KeyPurposeId.id_kp_serverAuth,
 				KeyPurposeId.id_kp_clientAuth
 		});
@@ -134,12 +136,12 @@ class SignatureServiceTest {
 				usageEx.getEncoded());
 
 		// build BouncyCastle certificate
-		ContentSigner signer = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getContentSigner()
+		final ContentSigner signer = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getContentSigner()
 				.build(keyPair.getPrivate());
-		X509CertificateHolder holder = certificate.build(signer);
+		final X509CertificateHolder holder = certificate.build(signer);
 
 		// convert to JRE certificate
-		JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
+		final JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
 		converter.setProvider(new BouncyCastleProvider());
 		return converter.getCertificate(holder);
 	}
@@ -151,7 +153,9 @@ class SignatureServiceTest {
 		@Test
 		@DisplayName("null parameters throws a NullPointerException")
 		void genSignatureWithNullParametersThrowsNullPointerException() {
-			assertThrows(NullPointerException.class, () -> signatureService.genSignature(null, ""));
+			final HashableString additionalContextData = HashableString.from("");
+			assertThrows(NullPointerException.class, () -> signatureService.genSignature(null, additionalContextData));
+
 			final HashableByteArray message = HashableByteArray.from(new byte[] { 0b0000001 });
 			assertThrows(NullPointerException.class, () -> signatureService.genSignature(message, null));
 		}
@@ -160,7 +164,7 @@ class SignatureServiceTest {
 		@DisplayName("too early timestamp throws a SignatureException")
 		void genSignatureWithTooEarlyTimestamp() throws CertificateException, IOException, OperatorCreationException {
 			final Hashable message = HashableString.from("tooEarlyMessage");
-			final String context = "tooEarly";
+			final HashableString additionalContextData = HashableString.from("tooEarly");
 			final KeyPair keyPair = genKeyPair();
 			final Date from = Date.from(Instant.now().plusSeconds(3600));
 			final Date until = Date.from(from.toInstant().plusSeconds(315360000));
@@ -168,7 +172,7 @@ class SignatureServiceTest {
 			final SignatureService signatureServiceNotYetValid = new SignatureService(keyPair.getPrivate(), certificate, trustStore, hashService);
 
 			final SignatureException exception = assertThrows(SignatureException.class,
-					() -> signatureServiceNotYetValid.genSignature(message, context));
+					() -> signatureServiceNotYetValid.genSignature(message, additionalContextData));
 			assertTrue(exception.getMessage().startsWith("The current timestamp is outside the signing certificate's validity"));
 		}
 
@@ -176,7 +180,7 @@ class SignatureServiceTest {
 		@DisplayName("too late timestamp throws a SignatureException")
 		void genSignatureWithTooLateTimestamp() throws CertificateException, IOException, OperatorCreationException {
 			final Hashable message = HashableString.from("tooEarlyMessage");
-			final String context = "tooEarly";
+			final HashableString additionalContextData = HashableString.from("tooEarly");
 			final KeyPair keyPair = genKeyPair();
 			final Date until = Date.from(Instant.now().minusSeconds(3600));
 			final Date from = Date.from(until.toInstant().minusSeconds(315360000));
@@ -184,7 +188,7 @@ class SignatureServiceTest {
 			final SignatureService signatureServiceNotValidAnymore = new SignatureService(keyPair.getPrivate(), certificate, trustStore, hashService);
 
 			final SignatureException exception = assertThrows(SignatureException.class,
-					() -> signatureServiceNotValidAnymore.genSignature(message, context));
+					() -> signatureServiceNotValidAnymore.genSignature(message, additionalContextData));
 			assertTrue(exception.getMessage().startsWith("The current timestamp is outside the signing certificate's validity"));
 		}
 
@@ -192,7 +196,8 @@ class SignatureServiceTest {
 		@DisplayName("valid certificate signs message")
 		void genSignatureWithValidCertificateSigns() {
 			final Hashable message = HashableString.from("Good to go!");
-			assertDoesNotThrow(() -> signatureService.genSignature(message, ""));
+			final HashableString additionalContextData = HashableString.from("");
+			assertDoesNotThrow(() -> signatureService.genSignature(message, additionalContextData));
 		}
 	}
 
@@ -200,25 +205,27 @@ class SignatureServiceTest {
 	@DisplayName("verifySignature with")
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	class VerifySignatureTest {
+
 		final Hashable message = HashableString.from("message");
-		final String contextData = "context";
+		final Hashable additionalContextData = HashableList.of(HashableString.from("context"), HashableBigInteger.from(BigInteger.ONE),
+				HashableString.from("1234"));
 		final byte[] signature = "signature".getBytes();
 
 		private Stream<Arguments> getNullArguments() {
 			return Stream.of(
-					Arguments.of(null, message, contextData, signature),
-					Arguments.of(authorityId, null, contextData, signature),
+					Arguments.of(null, message, additionalContextData, signature),
+					Arguments.of(authorityId, null, additionalContextData, signature),
 					Arguments.of(authorityId, message, null, signature),
-					Arguments.of(authorityId, message, contextData, null)
+					Arguments.of(authorityId, message, additionalContextData, null)
 			);
 		}
 
 		@ParameterizedTest
 		@MethodSource("getNullArguments")
 		@DisplayName("null parameters throws a NullPointerException")
-		void verifySignatureWithNullParametersThrows(final String authorityId, final Hashable message, final String contextData,
+		void verifySignatureWithNullParametersThrows(final String authorityId, final Hashable message, final Hashable additionalContextData,
 				final byte[] signature) {
-			assertThrows(NullPointerException.class, () -> signatureService.verifySignature(authorityId, message, contextData, signature));
+			assertThrows(NullPointerException.class, () -> signatureService.verifySignature(authorityId, message, additionalContextData, signature));
 		}
 
 		@Test
@@ -226,7 +233,7 @@ class SignatureServiceTest {
 		void verifySignatureWithTooEarlyTimestampThrows()
 				throws KeyStoreException, CertificateException, IOException, OperatorCreationException {
 			final Hashable message = HashableString.from("tooEarlyMessage");
-			final String contextData = "tooEarly";
+			final HashableString additionalContextData = HashableString.from("tooEarly");
 			final KeyPair keyPair = genKeyPair();
 			final Date from = Date.from(Instant.now().plusSeconds(3600));
 			final Date until = Date.from(from.toInstant().plusSeconds(315360000));
@@ -236,7 +243,7 @@ class SignatureServiceTest {
 			trustStore.setCertificateEntry(authorityId, certificate);
 
 			final SignatureException exception = assertThrows(SignatureException.class,
-					() -> signatureServiceNotYetValid.verifySignature(authorityId, message, contextData, signature));
+					() -> signatureServiceNotYetValid.verifySignature(authorityId, message, additionalContextData, signature));
 			assertTrue(exception.getMessage().startsWith("The timestamp is outside the signing certificate's validity"));
 		}
 
@@ -245,7 +252,7 @@ class SignatureServiceTest {
 		void verifySignatureWithTooLateTimestampThrows()
 				throws KeyStoreException, CertificateException, IOException, OperatorCreationException {
 			final Hashable message = HashableString.from("tooLateMessage");
-			final String contextData = "tooLate";
+			final HashableString additionalContextData = HashableString.from("tooLate");
 			final KeyPair keyPair = genKeyPair();
 			final Date until = Date.from(Instant.now().minusSeconds(3600));
 			final Date from = Date.from(until.toInstant().minusSeconds(315360000));
@@ -255,19 +262,19 @@ class SignatureServiceTest {
 			trustStore.setCertificateEntry(authorityId, certificate);
 
 			final SignatureException exception = assertThrows(SignatureException.class,
-					() -> signatureServiceNotYetValid.verifySignature(authorityId, message, contextData, signature));
+					() -> signatureServiceNotYetValid.verifySignature(authorityId, message, additionalContextData, signature));
 			assertTrue(exception.getMessage().startsWith("The timestamp is outside the signing certificate's validity"));
 		}
 
 		@Test
 		@DisplayName("correct signature returns true")
 		void verifySignatureWithCorrectSignatureVerifiesCorrectly() throws SignatureException {
-			final byte[] signature = signatureService.genSignature(message, contextData);
-			assertTrue(signatureService.verifySignature(authorityId, message, contextData, signature));
+			final byte[] signature = signatureService.genSignature(message, additionalContextData);
+			assertTrue(signatureService.verifySignature(authorityId, message, additionalContextData, signature));
 		}
 
 		@Test
-		@DisplayName("with key store not initialized throws IllegalStateExeption")
+		@DisplayName("with key store not initialized throws IllegalStateException")
 		void verifySignatureWithUninitializedKeyStore()
 				throws CertificateException, IOException, OperatorCreationException, KeyStoreException, SignatureException {
 			final KeyPair keyPair = genKeyPair();
@@ -278,9 +285,9 @@ class SignatureServiceTest {
 			final SignatureService signatureService = new SignatureService(keyPair.getPrivate(), certificate, uninitializedTrustStore, hashService);
 
 			final HashableString message = HashableString.from("Good to go!");
-			final byte[] signature = signatureService.genSignature(message, contextData);
+			final byte[] signature = signatureService.genSignature(message, additionalContextData);
 			final IllegalStateException exception = assertThrows(IllegalStateException.class,
-					() -> signatureService.verifySignature(authorityId, message, contextData, signature));
+					() -> signatureService.verifySignature(authorityId, message, additionalContextData, signature));
 			assertEquals(String.format("Could not find certificate for authority. [authorityId: %s].", authorityId), exception.getMessage());
 		}
 	}
