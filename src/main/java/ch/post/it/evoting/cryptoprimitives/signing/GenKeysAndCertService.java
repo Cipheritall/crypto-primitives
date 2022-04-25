@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.bouncycastle.asn1.x509.KeyUsage;
 
@@ -33,7 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 /**
  * Implements the GenKeysAndCert algorithm.
  */
-public class GenKeysAndCertService implements DigitalSignatures {
+public class GenKeysAndCertService {
 
 	private final GenKeyPair genKeyPair;
 	private final GetCertificate getCertificate;
@@ -45,7 +45,7 @@ public class GenKeysAndCertService implements DigitalSignatures {
 	 * @throws NullPointerException if any argument is null
 	 */
 
-	public GenKeysAndCertService(final RandomService random, AuthorityInformation authorityInformation) {
+	GenKeysAndCertService(final RandomService random, AuthorityInformation authorityInformation) {
 		this(random, authorityInformation, SecurityLevelConfig.getSystemSecurityLevel());
 	}
 
@@ -60,11 +60,10 @@ public class GenKeysAndCertService implements DigitalSignatures {
 		this.authorityInformation = checkNotNull(authorityInformation);
 	}
 
-	@Override
-	public GenKeysAndCertOutput genKeysAndCert(final Date validFrom, final Date validUntil) throws IllegalArgumentException {
+	public GenKeysAndCertOutput genKeysAndCert(final LocalDate validFrom, final LocalDate validUntil) throws IllegalArgumentException {
 		checkNotNull(validFrom);
 		checkNotNull(validUntil);
-		checkArgument(validUntil.after(validFrom), "Date validFrom is after validUntil");
+		checkArgument(validUntil.isAfter(validFrom), "Date validFrom is after validUntil");
 
 		final KeyPair keyPair = genKeyPair.get();
 
@@ -78,5 +77,4 @@ public class GenKeysAndCertService implements DigitalSignatures {
 
 		return new GenKeysAndCertOutput(keyPair.getPrivate(), certificate);
 	}
-
 }

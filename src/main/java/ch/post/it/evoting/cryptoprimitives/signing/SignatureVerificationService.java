@@ -22,18 +22,15 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
@@ -42,49 +39,16 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 
 /**
- * Signs and verifies signatures.
+ * Verifies signatures.
  */
-public class SignatureService {
+public class SignatureVerificationService {
 
-	private final PrivateKey privKey;
-	private final X509Certificate certificate;
 	private final KeyStore trustStore;
 	private final HashService hashService;
 
-	SignatureService(final PrivateKey privateKey, final X509Certificate certificate, final KeyStore trustStore, final HashService hashService) {
-		this.privKey = privateKey;
-		this.certificate = certificate;
+	SignatureVerificationService(final KeyStore trustStore, final HashService hashService) {
 		this.trustStore = trustStore;
 		this.hashService = hashService;
-	}
-
-	/**
-	 * Generates a signature for the given message.
-	 *
-	 * @param message               m, the message to be signed. Must be non-null.
-	 * @param additionalContextData c, additional context data. Must be non-null. May be empty.
-	 * @return the signature for the message as a byte array.
-	 * @throws SignatureException if the message is timestamped at a date the certificate is not valid for.
-	 */
-	public byte[] genSignature(final Hashable message, final Hashable additionalContextData) throws SignatureException {
-		checkNotNull(message);
-		checkNotNull(additionalContextData);
-
-		final Hashable m = message;
-		final Hashable c = additionalContextData;
-
-		final Instant t = getTimeStamp();
-		final Instant validFrom = certificate.getNotBefore().toInstant();
-		final Instant validUntil = certificate.getNotAfter().toInstant();
-		if (validFrom.compareTo(t) <= 0 && t.compareTo(validUntil) < 0) {
-			final byte[] h = hashService.recursiveHash(HashableList.of(m, c));
-			return sign(privKey, h);
-		} else {
-			final String errorMessage = String.format(
-					"The current timestamp is outside the signing certificate's validity [valid from: %s, valid until: %s, timestamp: %s].",
-					validFrom, validUntil, t);
-			throw new SignatureException(errorMessage);
-		}
 	}
 
 	/**
@@ -94,11 +58,11 @@ public class SignatureService {
 	 * @param message               The message that was signed. Must be non-null.
 	 * @param additionalContextData Additional context data. Must be non-null. May be empty.
 	 * @param signature             The signature of the message. Must be non-null.
-	 * @return {@code true} if the signature is valid and the message has a timestamp during which the certificate was valid, {@code false} otherwise.
+	 * @return true if the signature is valid and the message has a timestamp during which the certificate was valid, false otherwise.
+	 * @throws NullPointerException if any argument is null or if the certificate for the authorityId is not found.
 	 */
 	public boolean verifySignature(final String authorityId, final Hashable message, final Hashable additionalContextData, final byte[] signature)
 			throws SignatureException {
-
 		final String id = checkNotNull(authorityId);
 		final Hashable m = checkNotNull(message);
 		final Hashable c = checkNotNull(additionalContextData);
@@ -110,8 +74,8 @@ public class SignatureService {
 		final Instant validUntil = cert.getNotAfter().toInstant();
 		if (t.compareTo(validFrom) < 0 || t.compareTo(validUntil) >= 0) {
 			final String errorMessage = String.format(
-					"The timestamp is outside the signing certificate's validity [valid from: %s, valid until: %s, timestamp: %s].",
-					validFrom, validUntil, t);
+					"The timestamp is outside the signing certificate's validity [valid from: %s, valid until: %s, timestamp: %s].", validFrom,
+					validUntil, t);
 			throw new SignatureException(errorMessage);
 		}
 
@@ -127,28 +91,11 @@ public class SignatureService {
 
 	private X509Certificate findCertificate(final String authorityId) {
 		try {
-			return (X509Certificate) trustStore.getCertificate(authorityId);
+			return checkNotNull((X509Certificate) trustStore.getCertificate(authorityId),
+					String.format("Could not find certificate for authority. [authorityId: %s].", authorityId));
 		} catch (final KeyStoreException e) {
-			throw new IllegalStateException(String.format("Could not find certificate for authority. [authorityId: %s].", authorityId));
+			throw new IllegalStateException("The trust store has not been initialized correctly.");
 		}
-	}
-
-	private byte[] sign(final PrivateKey privateKey, final byte[] message) {
-		final JcaContentSignerBuilder contentSignerBuilder = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getContentSigner();
-		final ContentSigner contentSigner;
-		try {
-			contentSigner = contentSignerBuilder.build(privateKey);
-		} catch (final OperatorCreationException e) {
-			throw new IllegalStateException("Could not build content signer with private key.", e);
-		}
-		final OutputStream outputStream = contentSigner.getOutputStream();
-		try {
-			outputStream.write(message);
-			outputStream.close();
-		} catch (final IOException e) {
-			throw new UncheckedIOException("Could not write message to output stream.", e);
-		}
-		return contentSigner.getSignature();
 	}
 
 	private boolean verify(final PublicKey publicKey, final byte[] hash, final byte[] signatureBytes) {
@@ -163,8 +110,7 @@ public class SignatureService {
 		} catch (final OperatorCreationException e) {
 			throw new IllegalStateException("Could not build content verifier provider with public key.", e);
 		}
-		final AlgorithmIdentifier algorithmIdentifier = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters()
-				.getAlgorithmIdentifier();
+		final AlgorithmIdentifier algorithmIdentifier = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getAlgorithmIdentifier();
 		final ContentVerifier contentVerifier;
 		try {
 			contentVerifier = contentVerifierProvider.get(algorithmIdentifier);
