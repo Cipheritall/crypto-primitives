@@ -15,20 +15,31 @@
  */
 package ch.post.it.evoting.cryptoprimitives.signing;
 
-import java.util.Date;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
+/**
+ * Provides factory for signing services.
+ */
 public interface DigitalSignatures {
 
 	/**
-	 * Generates a private key and a self-signed certificate containing the corresponding public key, with use restricted to signing, for a limited
-	 * duration.
-	 *
-	 * @param validFrom  - validFrom, start of certificate validity. Must not be null.
-	 * @param validUntil - validUntil, end of certificate validity. Must not be null.
-	 * @return the private key and the associated certificate encapsulated in a {@link GenKeysAndCertOutput}.
-	 * @throws NullPointerException     if any argument is null.
-	 * @throws IllegalArgumentException if the dates are incoherent (validFrom after validUntil).
+	 * @param authorityInformation used to generate the certificate. Must not be null.
+	 * @return a new GenKeysAndCertService.
 	 */
-	GenKeysAndCertOutput genKeysAndCert(final Date validFrom, final Date validUntil) throws IllegalArgumentException;
+	GenKeysAndCertService createGenKeysAndCertService(final AuthorityInformation authorityInformation);
 
+	/**
+	 * @param privateKey  used by the service to sign the payload.
+	 * @param certificate related to the private key to ensure that signed content can be validated.
+	 * @return a new SignatureGenerationService.
+	 */
+	SignatureGenerationService createSignatureGenerationService(final PrivateKey privateKey, final X509Certificate certificate);
+
+	/**
+	 * @param trustStore which stores the certificates to validate messages.
+	 * @return a new SignatureVerificationService.
+	 */
+	SignatureVerificationService createSignatureVerificationService(final KeyStore trustStore);
 }

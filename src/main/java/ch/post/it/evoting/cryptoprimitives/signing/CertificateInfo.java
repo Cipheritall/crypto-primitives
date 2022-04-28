@@ -18,7 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.signing;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.bouncycastle.asn1.x509.KeyUsage;
 
@@ -28,8 +28,8 @@ import org.bouncycastle.asn1.x509.KeyUsage;
 class CertificateInfo {
 
 	private final AuthorityInformation authorityInformation;
-	private Date validFrom;
-	private Date validUntil;
+	private LocalDate validFrom;
+	private LocalDate validUntil;
 	private KeyUsage usage;
 
 	public CertificateInfo(final AuthorityInformation authorityInformation) {
@@ -40,11 +40,11 @@ class CertificateInfo {
 		return authorityInformation;
 	}
 
-	public Date getValidFrom() {
+	public LocalDate getValidFrom() {
 		return validFrom;
 	}
 
-	public Date getValidUntil() {
+	public LocalDate getValidUntil() {
 		return validUntil;
 	}
 
@@ -52,12 +52,12 @@ class CertificateInfo {
 		return usage;
 	}
 
-	public void setValidFrom(final Date validFrom) {
+	public void setValidFrom(final LocalDate validFrom) {
 		this.validFrom = checkNotNull(validFrom);
 		checkValidityDatesConsistency();
 	}
 
-	public void setValidUntil(final Date validUntil) {
+	public void setValidUntil(final LocalDate validUntil) {
 		this.validUntil = checkNotNull(validUntil);
 		checkValidityDatesConsistency();
 	}
@@ -68,7 +68,7 @@ class CertificateInfo {
 
 	private void checkValidityDatesConsistency() {
 		if (validFrom != null && validUntil != null) {
-			checkArgument(validUntil.after(validFrom), "Date validFrom is after validUntil");
+			checkArgument(validUntil.isAfter(validFrom), "Date validFrom is after validUntil");
 		}
 	}
 }
