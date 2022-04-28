@@ -16,12 +16,14 @@
 package ch.post.it.evoting.cryptoprimitives.signing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Date.from;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.ZoneId;
 import java.util.function.BiFunction;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -84,8 +86,8 @@ class GetCertificate implements BiFunction<KeyPair, CertificateInfo, X509Certifi
 		final JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
 				subject,
 				serial,
-				info.getValidFrom(),
-				info.getValidUntil(),
+				from(info.getValidFrom().atStartOfDay(ZoneId.of("Europe/Zurich")).toInstant()),
+				from(info.getValidUntil().atStartOfDay(ZoneId.of("Europe/Zurich")).toInstant()),
 				subject,
 				publicKey);
 
