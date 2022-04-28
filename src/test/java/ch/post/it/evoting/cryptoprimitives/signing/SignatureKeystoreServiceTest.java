@@ -44,7 +44,7 @@ import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 
-class KeystoreServiceTest {
+class SignatureKeystoreServiceTest {
 
 	private static final SecurityLevel securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
 	private static final String EMPTY_KEY_ENTRY_PASSWORD = "";
@@ -81,9 +81,9 @@ class KeystoreServiceTest {
 		store2.setCertificateEntry(alias1, store1.getCertificate(alias1));
 		store1.setCertificateEntry(alias2, store2.getCertificate(alias2));
 
-		final KeystoreService<Supplier<String>> service1 = new KeystoreService<>(keyStoreToStream(store1, password1), KEYSTORE_TYPE,
+		final SignatureKeystoreService<Supplier<String>> service1 = new SignatureKeystoreService<>(keyStoreToStream(store1, password1), KEYSTORE_TYPE,
 				password1.toCharArray(), () -> alias1, hashService);
-		final KeystoreService<Supplier<String>> service2 = new KeystoreService<>(keyStoreToStream(store2, password2), KEYSTORE_TYPE,
+		final SignatureKeystoreService<Supplier<String>> service2 = new SignatureKeystoreService<>(keyStoreToStream(store2, password2), KEYSTORE_TYPE,
 				password2.toCharArray(), () -> alias2, hashService);
 
 		final HashableByteArray message = HashableByteArray.from(randomService.randomBytes(1000));
@@ -108,9 +108,9 @@ class KeystoreServiceTest {
 		final KeyStore store1 = generateNewKeyStore(alias1);
 		final KeyStore store2 = generateNewKeyStore(alias2);
 
-		final KeystoreService<Supplier<String>> service1 = new KeystoreService<>(keyStoreToStream(store1, password1), KEYSTORE_TYPE,
+		final SignatureKeystoreService<Supplier<String>> service1 = new SignatureKeystoreService<>(keyStoreToStream(store1, password1), KEYSTORE_TYPE,
 				password1.toCharArray(), () -> alias1, hashService);
-		final KeystoreService<Supplier<String>> service2 = new KeystoreService<>(keyStoreToStream(store2, password2), KEYSTORE_TYPE,
+		final SignatureKeystoreService<Supplier<String>> service2 = new SignatureKeystoreService<>(keyStoreToStream(store2, password2), KEYSTORE_TYPE,
 				password2.toCharArray(), () -> alias2, hashService);
 
 		final HashableByteArray message = HashableByteArray.from(randomService.randomBytes(1000));
@@ -129,7 +129,7 @@ class KeystoreServiceTest {
 		final String alias = "test";
 		final String password = "password";
 		final KeyStore keyStore = generateNewKeyStore(alias);
-		final KeystoreService<Supplier<String>> service = new KeystoreService<>(keyStoreToStream(keyStore, password), KEYSTORE_TYPE,
+		final SignatureKeystoreService<Supplier<String>> service = new SignatureKeystoreService<>(keyStoreToStream(keyStore, password), KEYSTORE_TYPE,
 				password.toCharArray(), () -> alias, hashService);
 
 		// when

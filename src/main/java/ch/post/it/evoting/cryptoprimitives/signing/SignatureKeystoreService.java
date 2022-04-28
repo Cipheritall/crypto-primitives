@@ -39,7 +39,7 @@ import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
  *
  * @param <T> Type of supplier which provides a lookup key to the keystore.
  */
-public class KeystoreService<T extends Supplier<String>> {
+public class SignatureKeystoreService<T extends Supplier<String>> {
 
 	private static final String EMPTY_KEY_ENTRY_PASSWORD = "";
 
@@ -54,7 +54,7 @@ public class KeystoreService<T extends Supplier<String>> {
 	 * @param signingAlias   providing the alias of the component using this service. Must be present in the keystore.
 	 * @param hashService    service to generate the hash for signing and verification.
 	 */
-	public KeystoreService(final InputStream keyStoreStream, final String keystoreType, final char[] password, final T signingAlias,
+	public SignatureKeystoreService(final InputStream keyStoreStream, final String keystoreType, final char[] password, final T signingAlias,
 			final HashService hashService) {
 		checkNotNull(keyStoreStream);
 		checkNotNull(keystoreType);
@@ -98,6 +98,7 @@ public class KeystoreService<T extends Supplier<String>> {
 	 * @param signature             of the message. Must be non-null.
 	 * @return true if the signature is valid and the message has a timestamp during which the certificate was valid, false otherwise.
 	 * @throws NullPointerException if message is null or if the certificate for the authorityId is not found.
+	 * @throws SignatureException   if the message is timestamped at a date the certificate is not valid for.
 	 */
 	public boolean verifySignature(final T signerAlias, final Hashable message, final Hashable additionalContextData, final byte[] signature)
 			throws SignatureException {

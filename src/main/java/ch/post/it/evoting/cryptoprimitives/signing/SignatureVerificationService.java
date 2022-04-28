@@ -60,6 +60,7 @@ public class SignatureVerificationService {
 	 * @param signature             The signature of the message. Must be non-null.
 	 * @return true if the signature is valid and the message has a timestamp during which the certificate was valid, false otherwise.
 	 * @throws NullPointerException if any argument is null or if the certificate for the authorityId is not found.
+	 * @throws SignatureException   if the message is timestamped at a date the certificate is not valid for.
 	 */
 	public boolean verifySignature(final String authorityId, final Hashable message, final Hashable additionalContextData, final byte[] signature)
 			throws SignatureException {
