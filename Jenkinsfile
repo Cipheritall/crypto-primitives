@@ -69,6 +69,7 @@ pipeline {
 					anyOf {
 						branch 'develop'
 						branch 'master'
+                        branch 'hotfix/*'
 					}
 				}
 			}
@@ -87,6 +88,7 @@ pipeline {
 				anyOf {
 					branch 'develop'
 					branch 'master'
+                    branch 'hotfix/*'
 				}
 			}
 			steps {
@@ -117,6 +119,7 @@ pipeline {
 				anyOf {
 					branch 'master'
 					branch 'develop'
+                    branch 'hotfix/*'
 				}
 			}
 			environment {
@@ -134,6 +137,7 @@ pipeline {
 					anyOf {
 						branch 'master'
 						branch 'develop'
+                        branch 'hotfix/*'
 					}
 				}
 			}
