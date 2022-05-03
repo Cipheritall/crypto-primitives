@@ -27,6 +27,7 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
@@ -48,17 +49,19 @@ public class SignatureKeystoreService<T extends Supplier<String>> {
 	private final T signingAlias;
 
 	/**
-	 * @param keyStoreStream containing the private key of the current component and the all certificates of other components. Use JKS format.
-	 * @param keystoreType   of the keystore provided.
-	 * @param password       to unlock the keystore.
-	 * @param signingAlias   providing the alias of the component using this service. Must be present in the keystore.
-	 * @param hashService    service to generate the hash for signing and verification.
+	 * @param keyStoreStream    containing the private key of the current component and the all certificates of other components. Use JKS format.
+	 * @param keystoreType      of the keystore provided.
+	 * @param password          to unlock the keystore.
+	 * @param keystoreValidator to run custom check on the keystore.
+	 * @param signingAlias      providing the alias of the component using this service. Must be present in the keystore.
+	 * @param hashService       service to generate the hash for signing and verification.
 	 */
-	public SignatureKeystoreService(final InputStream keyStoreStream, final String keystoreType, final char[] password, final T signingAlias,
-			final HashService hashService) {
+	public SignatureKeystoreService(final InputStream keyStoreStream, final String keystoreType, final char[] password,
+			final Predicate<KeyStore> keystoreValidator, final T signingAlias, final HashService hashService) {
 		checkNotNull(keyStoreStream);
 		checkNotNull(keystoreType);
 		checkNotNull(password);
+		checkNotNull(keystoreValidator);
 		checkNotNull(signingAlias);
 		checkNotNull(hashService);
 
@@ -67,6 +70,9 @@ public class SignatureKeystoreService<T extends Supplier<String>> {
 		try {
 			final KeyStore keyStore = KeyStore.getInstance(keystoreType);
 			keyStore.load(keyStoreStream, password);
+			if (!keystoreValidator.test(keyStore)) {
+				throw new IllegalArgumentException("The validation of keystore failed");
+			}
 			final PrivateKey key = (PrivateKey) keyStore.getKey(signingAlias.get(), EMPTY_KEY_ENTRY_PASSWORD.toCharArray());
 			final X509Certificate certificate = (X509Certificate) keyStore.getCertificate(signingAlias.get());
 			this.signatureGenerationService = new SignatureGenerationService(key, certificate, hashService);
