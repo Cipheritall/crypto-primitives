@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.signing;
 
 import static java.time.LocalDate.now;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -72,8 +73,8 @@ class SignatureKeystoreServiceTest {
 		final String alias1 = "alias1";
 		final String alias2 = "alias2";
 
-		final String password1 = "password_1";
-		final String password2 = "password_2";
+		final char[] password1 = "password_1".toCharArray();
+		final char[] password2 = "password_2".toCharArray();
 
 		final KeyStore store1 = generateNewKeyStore(alias1);
 		final KeyStore store2 = generateNewKeyStore(alias2);
@@ -82,9 +83,9 @@ class SignatureKeystoreServiceTest {
 		store1.setCertificateEntry(alias2, store2.getCertificate(alias2));
 
 		final SignatureKeystoreService<Supplier<String>> service1 = new SignatureKeystoreService<>(keyStoreToStream(store1, password1), KEYSTORE_TYPE,
-				password1.toCharArray(), () -> alias1, hashService);
+				password1, (keystore) -> true, () -> alias1, hashService);
 		final SignatureKeystoreService<Supplier<String>> service2 = new SignatureKeystoreService<>(keyStoreToStream(store2, password2), KEYSTORE_TYPE,
-				password2.toCharArray(), () -> alias2, hashService);
+				password2, (keystore) -> true, () -> alias2, hashService);
 
 		final HashableByteArray message = HashableByteArray.from(randomService.randomBytes(1000));
 
@@ -102,16 +103,16 @@ class SignatureKeystoreServiceTest {
 		final String alias1 = "alias1";
 		final String alias2 = "alias2";
 
-		final String password1 = "password_1";
-		final String password2 = "password_2";
+		final char[] password1 = "password_1".toCharArray();
+		final char[] password2 = "password_2".toCharArray();
 
 		final KeyStore store1 = generateNewKeyStore(alias1);
 		final KeyStore store2 = generateNewKeyStore(alias2);
 
 		final SignatureKeystoreService<Supplier<String>> service1 = new SignatureKeystoreService<>(keyStoreToStream(store1, password1), KEYSTORE_TYPE,
-				password1.toCharArray(), () -> alias1, hashService);
+				password1, (keystore) -> true, () -> alias1, hashService);
 		final SignatureKeystoreService<Supplier<String>> service2 = new SignatureKeystoreService<>(keyStoreToStream(store2, password2), KEYSTORE_TYPE,
-				password2.toCharArray(), () -> alias2, hashService);
+				password2, (keystore) -> true, () -> alias2, hashService);
 
 		final HashableByteArray message = HashableByteArray.from(randomService.randomBytes(1000));
 
@@ -127,16 +128,43 @@ class SignatureKeystoreServiceTest {
 	void testAliasGetter() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
 		// given
 		final String alias = "test";
-		final String password = "password";
+		final char[] password = "password".toCharArray();
 		final KeyStore keyStore = generateNewKeyStore(alias);
 		final SignatureKeystoreService<Supplier<String>> service = new SignatureKeystoreService<>(keyStoreToStream(keyStore, password), KEYSTORE_TYPE,
-				password.toCharArray(), () -> alias, hashService);
+				password, (keystore) -> true, () -> alias, hashService);
 
 		// when
 		final String selfAlias = service.getSigningAlias().get();
 
 		// then
 		assertEquals(alias, selfAlias);
+	}
+
+	@Test
+	void testKeystoreValidationPass() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+		// given
+		final String alias = "test";
+		final char[] password = "password".toCharArray();
+		final KeyStore keyStore = generateNewKeyStore(alias);
+
+		// when / then
+		assertDoesNotThrow(
+				() -> new SignatureKeystoreService<>(keyStoreToStream(keyStore, password), KEYSTORE_TYPE, password, (keystore) -> true, () -> alias,
+						hashService));
+	}
+
+	@Test
+	void testKeystoreValidationFail() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+		// given
+		final String alias = "test";
+		final char[] password = "password".toCharArray();
+		final KeyStore keyStore = generateNewKeyStore(alias);
+
+		// when / then
+		try (final InputStream inputStream = keyStoreToStream(keyStore, password)) {
+			assertThrows(IllegalArgumentException.class,
+					() -> new SignatureKeystoreService<>(inputStream, KEYSTORE_TYPE, password, (keystore) -> false, () -> alias, hashService));
+		}
 	}
 
 	private KeyStore generateNewKeyStore(final String alias) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
@@ -151,11 +179,11 @@ class SignatureKeystoreServiceTest {
 		return keyStore;
 	}
 
-	private InputStream keyStoreToStream(final KeyStore keyStore, final String password)
+	private InputStream keyStoreToStream(final KeyStore keyStore, final char[] password)
 			throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
 
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		keyStore.store(outputStream, password.toCharArray());
+		keyStore.store(outputStream, password);
 		return new ByteArrayInputStream(outputStream.toByteArray());
 	}
 }
