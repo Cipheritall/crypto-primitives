@@ -62,7 +62,7 @@ class GenKeysAndCertServiceTest {
 	@BeforeAll
 	static void beforeAll() {
 		genKeyPair = new TestGenKeyPair(securityLevel);
-		GetCertificate getCertificate = new GetCertificate(new RandomService(), securityLevel);
+		final GetCertificate getCertificate = new GetCertificate(new RandomService(), securityLevel);
 		authorityInformation = AuthorityInformation.builder().setCountry("dummy-C").setCommonName("dummy-Cn").setOrganisation("dummy-O")
 				.setLocality("dummy-L").setState("dummy-St").build();
 		keysAndCertService = new GenKeysAndCertService(genKeyPair, getCertificate, authorityInformation);
@@ -93,7 +93,7 @@ class GenKeysAndCertServiceTest {
 
 	@ParameterizedTest(name = "{0}: valid from {1} to {2}")
 	@MethodSource("validityDateGenerator")
-	void createValidCertificate_validityCheckWorksAsExpected(String title, LocalDate validFrom, LocalDate validUntil) {
+	void createValidCertificate_validityCheckWorksAsExpected(final String title, final LocalDate validFrom, final LocalDate validUntil) {
 		// given
 		final LocalDate invalidFrom = validFrom.minusDays(1);
 		final LocalDate invalidUntil = validUntil.plusDays(1);
@@ -117,8 +117,8 @@ class GenKeysAndCertServiceTest {
 	}
 
 	static Stream<Arguments> validityDateGenerator() {
-		LocalDate dayLightSavingTimeMarch = LocalDate.of(2021, 3, 28);
-		LocalDate dayLightSavingTimeOctober = LocalDate.of(2021, 10, 31);
+		final LocalDate dayLightSavingTimeMarch = LocalDate.of(2021, 3, 28);
+		final LocalDate dayLightSavingTimeOctober = LocalDate.of(2021, 10, 31);
 
 		return Stream.of(Arguments.of("random date", defaultValidFrom, defaultValidUntil),
 				Arguments.of("march daylight saving time (from)", dayLightSavingTimeMarch, dayLightSavingTimeMarch.plusMonths(1)),
@@ -187,11 +187,11 @@ class GenKeysAndCertServiceTest {
 		assertTrue(verifyPayload(certificate.getPublicKey(), payload, actual));
 	}
 
-	private static Date toOldJavaDate(LocalDate localDate) {
+	private static Date toOldJavaDate(final LocalDate localDate) {
 		return Date.from(localDate.atStartOfDay(ZoneId.of("Europe/Zurich")).toInstant());
 	}
 
-	private static LocalDate toNewJavaDate(Date date) {
+	private static LocalDate toNewJavaDate(final Date date) {
 		return date.toInstant().atZone(ZoneId.of("Europe/Zurich")).toLocalDate();
 	}
 
