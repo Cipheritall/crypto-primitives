@@ -100,6 +100,9 @@ pipeline {
 
 
 		stage('Sonar') {
+			tools {
+				jdk "jdk-11"
+			}
 			steps {
 				script {
 					withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
