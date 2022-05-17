@@ -17,6 +17,7 @@ def MAVEN_PARAMS = '-T 1.5C -U --settings .mvn/settings.xml --no-transfer-progre
 def PR_ID = env.BRANCH_NAME.replace('PR-', '')
 
 // Tools
+def JDK = 'jdk-17'
 def MAVEN = 'maven-3'
 
 pipeline {
@@ -33,8 +34,14 @@ pipeline {
 	}
 
 	tools {
+        jdk "${JDK}"
 		maven "${MAVEN}"
 	}
+
+    environment {
+        MAVEN_OPTS = '-Xms512m -Xmx768m -Djava.awt.headless=true'
+        //workaround for https://gitit.post.ch/projects/JENKINS/repos/jenkins-slave-selenium/browse/Dockerfile#15
+    }
 
 	stages {
 
