@@ -16,10 +16,24 @@ RTMAVEN = Artifactory.newMavenBuild()
 RTMAVEN.deployer releaseRepo: 'libs-release-evoting-local', snapshotRepo: 'libs-snapshot-evoting-local', server: ARTIFACTORY_SERVER
 RTMAVEN.resolver releaseRepo: 'swisspost', snapshotRepo: 'swisspost', server: ARTIFACTORY_SERVER
 
+// Tools
+def JDK = 'jdk-17'
+def MAVEN = 'maven-3'
+
 pipeline {
 
 	agent {
 		label 'apps-slaves-evoting'
+	}
+
+	tools {
+		jdk "${JDK}"
+		maven "${MAVEN}"
+	}
+
+	environment {
+		MAVEN_OPTS = '-Xms512m -Xmx768m -Djava.awt.headless=true'
+		//workaround for https://gitit.post.ch/projects/JENKINS/repos/jenkins-slave-selenium/browse/Dockerfile#15
 	}
 
 	parameters {
