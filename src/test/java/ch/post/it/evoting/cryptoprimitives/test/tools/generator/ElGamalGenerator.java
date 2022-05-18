@@ -63,6 +63,10 @@ public class ElGamalGenerator {
 		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPrivateKey();
 	}
 
+	public ElGamalMultiRecipientKeyPair genRandomKeyPair(final int size) {
+		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService);
+	}
+
 	public ElGamalMultiRecipientCiphertext genRandomCiphertext(final int ciphertextSize) {
 		final ElGamalMultiRecipientMessage randomMessage = genRandomMessage(ciphertextSize);
 		final ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
