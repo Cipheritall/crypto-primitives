@@ -22,7 +22,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
@@ -135,7 +134,7 @@ class CommitmentKey implements HashableList {
 
 	@Override
 	public String toString() {
-		final List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
+		final List<String> simpleGElements = gElements.stream().map(GqElement::getValue).map(BigInteger::toString).toList();
 		return "CommitmentKey{" + "h=" + h + ", g elements=" + simpleGElements + '}';
 	}
 

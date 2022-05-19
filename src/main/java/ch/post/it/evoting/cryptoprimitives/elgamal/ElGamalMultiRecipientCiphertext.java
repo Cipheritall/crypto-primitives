@@ -20,7 +20,6 @@ import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.LinkedList;
@@ -200,7 +199,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		checkNotNull(group);
 		checkArgument(numPhi > 0, "The neutral ciphertext must have at least one phi.");
 
-		return create(group.getIdentity(), Stream.generate(group::getIdentity).limit(numPhi).collect(toList()));
+		return create(group.getIdentity(), Stream.generate(group::getIdentity).limit(numPhi).toList());
 	}
 
 	/**
@@ -325,7 +324,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 	@Override
 	public String toString() {
-		final List<String> simplePhis = phis.stream().map(GqElement::getValue).map(BigInteger::toString).collect(Collectors.toList());
+		final List<String> simplePhis = phis.stream().map(GqElement::getValue).map(BigInteger::toString).toList();
 		return "ElGamalMultiRecipientCiphertext{" + "gamma=" + gamma + ", phis=" + simplePhis + '}';
 	}
 

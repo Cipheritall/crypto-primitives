@@ -100,7 +100,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		expected.add(validGamma);
 		expected.addAll(validPhis);
 
-		assertEquals(expected, ciphertext.stream().collect(toList()));
+		assertEquals(expected, ciphertext.stream().toList());
 	}
 
 	// Provides parameters for the withInvalidParameters test.
@@ -175,9 +175,9 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertext.neutralElement(n, gqGroup);
 
 		GqElement one = gqGroup.getIdentity();
-		List<GqElement> ones = Stream.generate(() -> one).limit(n + 1).collect(toList());
+		List<GqElement> ones = Stream.generate(() -> one).limit(n + 1).toList();
 
-		assertEquals(ones, neutralElement.stream().collect(toList()));
+		assertEquals(ones, neutralElement.stream().toList());
 		assertEquals(n, neutralElement.size());
 	}
 
@@ -251,21 +251,21 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 
 				final GqElement gammaA = GqElementFactory.fromValue(upperCa.get("gamma", BigInteger.class), group);
 				final BigInteger[] phisAArray = upperCa.get("phis", BigInteger[].class);
-				final List<GqElement> phisA = Arrays.stream(phisAArray).map(phiA -> GqElementFactory.fromValue(phiA, group)).collect(toList());
+				final List<GqElement> phisA = Arrays.stream(phisAArray).map(phiA -> GqElementFactory.fromValue(phiA, group)).toList();
 
 				// Parse second ciphertext parameters.
 				final JsonData upperCb = testParameters.getInput().getJsonData("upper_c_b");
 
 				final GqElement gammaB = GqElementFactory.fromValue(upperCb.get("gamma", BigInteger.class), group);
 				final BigInteger[] phisBArray = upperCb.get("phis", BigInteger[].class);
-				final List<GqElement> phisB = Arrays.stream(phisBArray).map(phi -> GqElementFactory.fromValue(phi, group)).collect(toList());
+				final List<GqElement> phisB = Arrays.stream(phisBArray).map(phi -> GqElementFactory.fromValue(phi, group)).toList();
 
 				// Parse multiplication result parameters.
 				final JsonData outputJsonData = testParameters.getOutput();
 
 				final GqElement gammaRes = GqElementFactory.fromValue(outputJsonData.get("gamma", BigInteger.class), group);
 				final BigInteger[] phisOutput = outputJsonData.get("phis", BigInteger[].class);
-				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElementFactory.fromValue(phi, group)).collect(toList());
+				final List<GqElement> phisRes = Arrays.stream(phisOutput).map(phi -> GqElementFactory.fromValue(phi, group)).toList();
 
 				return Arguments.of(gammaA, phisA, gammaB, phisB, gammaRes, phisRes, testParameters.getDescription());
 			}
@@ -386,7 +386,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 
 		List<GqElement> exponentiatedOriginalMessageElements = originalMessage.stream()
 				.map(e -> e.exponentiate(exponent))
-				.collect(toList());
+				.toList();
 
 		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = new ElGamalMultiRecipientMessage(exponentiatedOriginalMessageElements);
 
@@ -424,8 +424,8 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		List<List<GqElement>> exponentiatedOriginalMessageElements = IntStream.range(0, originalMessages.size())
 				.mapToObj(i -> originalMessages.get(i).stream()
 						.map(m -> m.exponentiate(exponents.get(i)))
-						.collect(toList()))
-				.collect(toList());
+						.toList())
+				.toList();
 
 		GroupMatrix<GqElement, GqGroup> matrix = GroupMatrix.fromRows(exponentiatedOriginalMessageElements);
 
@@ -459,7 +459,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		List<ElGamalMultiRecipientMessage> originalMessages = Stream
 				.generate(() -> elGamalGenerator.genRandomMessage(noOfMessageElements))
 				.limit(noOfMessageElements)
-				.collect(toList());
+				.toList();
 
 		ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> fiveCipherTexts = originalMessages.stream()
