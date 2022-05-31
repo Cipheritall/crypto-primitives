@@ -24,7 +24,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -49,6 +51,9 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  */
 @SuppressWarnings({ "java:S117", "java:S1117" })
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
+
+	private static final boolean enableParallelStreams = Boolean.parseBoolean(
+			System.getProperty("enable.parallel.streams", Boolean.TRUE.toString()));
 
 	private final GqElement gamma;
 	private final GroupVector<GqElement, GqGroup> phis;
@@ -87,7 +92,13 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final int l = C_a.size();
 		final GroupVector<GqElement, GqGroup> phi_a = C_a.phis;
 		final GroupVector<GqElement, GqGroup> phi_b = C_b.phis;
-		final GroupVector<GqElement, GqGroup> phi = IntStream.range(0, l)
+
+		IntStream indices = IntStream.range(0, l);
+		if (enableParallelStreams) {
+			indices = indices.parallel();
+		}
+
+		final GroupVector<GqElement, GqGroup> phi = indices
 				.mapToObj(i -> phi_a.get(i).multiply(phi_b.get(i)))
 				.collect(toGroupVector());
 
@@ -112,7 +123,15 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final ZqElement a = exponent;
 
 		final GqElement gamma = this.gamma.exponentiate(a);
-		final GroupVector<GqElement, GqGroup> phi = this.phis.stream()
+
+		Stream<GqElement> elementStream;
+
+		if (enableParallelStreams) {
+			elementStream = this.phis.parallelStream();
+		} else {
+			elementStream = this.phis.stream();
+		}
+		GroupVector<GqElement, GqGroup> phi = elementStream
 				.map(phi_i -> phi_i.exponentiate(a))
 				.collect(toGroupVector());
 
@@ -155,7 +174,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		// Algorithm.
 		final GqElement gamma = g.exponentiate(r);
 
-		final LinkedList<GqElement> phis = IntStream.range(0, l)
+		IntStream indices = IntStream.range(0, l);
+		if (enableParallelStreams) {
+			indices = indices.parallel();
+		}
+		final LinkedList<GqElement> phis = indices
 				.mapToObj(i -> pk.get(i).exponentiate(r).multiply(m.get(i)))
 				.collect(Collectors.toCollection(LinkedList::new));
 
@@ -231,7 +254,11 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final int n = a.size();
 
 		final ElGamalMultiRecipientCiphertext neutralElement = neutralElement(l, C.getGroup());
-		return IntStream.range(0, n)
+		IntStream indices = IntStream.range(0, n);
+		if (enableParallelStreams) {
+			indices = indices.parallel();
+		}
+		return indices
 				.mapToObj(i -> C.get(i).exponentiate(a.get(i)))
 				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
 	}
