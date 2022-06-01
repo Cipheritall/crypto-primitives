@@ -16,7 +16,6 @@
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
-import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -67,7 +66,7 @@ class TestContextParser {
 		final BigInteger[] pkValues = context.get("pk", BigInteger[].class);
 		final List<GqElement> keyElements = Arrays.stream(pkValues)
 				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
-				.collect(toList());
+				.toList();
 
 		return new ElGamalMultiRecipientPublicKey(keyElements);
 	}
@@ -78,7 +77,7 @@ class TestContextParser {
 		final GqElement h = GqElementFactory.fromValue(hValue, gqGroup);
 		final List<GqElement> gElements = Arrays.stream(gValues)
 				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
-				.collect(toList());
+				.toList();
 
 		return new CommitmentKey(h, gElements);
 	}

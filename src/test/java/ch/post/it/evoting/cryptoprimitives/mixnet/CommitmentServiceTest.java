@@ -147,7 +147,7 @@ class CommitmentServiceTest {
 		void getCommitmentWithLongerCommitmentKeyYieldsSameResult() {
 			final CommitmentKey longerCommitmentKey = ckGenerator.genCommitmentKey(2 * KEY_LENGTH);
 			final CommitmentKey exactCommitmentKey =
-					new CommitmentKey(longerCommitmentKey.stream().limit(1).collect(Collectors.toList()).get(0),
+					new CommitmentKey(longerCommitmentKey.stream().limit(1).toList().get(0),
 							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
 			final GqElement commitmentExactCK = CommitmentService.getCommitment(validElements, randomValue, exactCommitmentKey);
 			final GqElement commitmentLongerCK = CommitmentService.getCommitment(validElements, randomValue, longerCommitmentKey);
@@ -253,7 +253,7 @@ class CommitmentServiceTest {
 		void getCommitmentMatrixWithLongerCommitmentKeyYieldsSameResult() {
 			final CommitmentKey longerCommitmentKey = ckGenerator.genCommitmentKey(2 * n);
 			final CommitmentKey exactCommitmentKey =
-					new CommitmentKey(longerCommitmentKey.stream().limit(1).collect(Collectors.toList()).get(0),
+					new CommitmentKey(longerCommitmentKey.stream().limit(1).toList().get(0),
 							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
 			final GroupVector<GqElement, GqGroup> commitmentExactCK = CommitmentService
 					.getCommitmentMatrix(validMatrix, validRandomValues, exactCommitmentKey);
@@ -359,7 +359,7 @@ class CommitmentServiceTest {
 		void getCommitmentVectorWithLongerCommitmentKeyYieldsSameResult() {
 			final CommitmentKey longerCommitmentKey = ckGenerator.genCommitmentKey(2 * KEY_LENGTH);
 			final CommitmentKey exactCommitmentKey =
-					new CommitmentKey(longerCommitmentKey.stream().limit(1).collect(Collectors.toList()).get(0),
+					new CommitmentKey(longerCommitmentKey.stream().limit(1).toList().get(0),
 							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
 			final GroupVector<GqElement, GqGroup> commitmentExactCK = CommitmentService
 					.getCommitmentVector(validElements, validRandomElements, exactCommitmentKey);

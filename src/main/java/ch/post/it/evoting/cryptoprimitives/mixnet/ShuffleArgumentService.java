@@ -147,10 +147,10 @@ class ShuffleArgumentService {
 		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessage.ones(gqGroup, l);
 		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = rho_vector.stream()
 				.map(rho_i -> getCiphertext(one, rho_i, pk))
-				.collect(toList());
+				.toList();
 		final List<ElGamalMultiRecipientCiphertext> C_pi = pi.stream()
 				.map(C_vector::get)
-				.collect(toList());
+				.toList();
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computed_C_prime = IntStream.range(0, N)
 				.mapToObj(i -> encryptedOnes.get(i).multiply(C_pi.get(i)))
 				.collect(toGroupVector());
@@ -235,7 +235,7 @@ class ShuffleArgumentService {
 
 		// Compute matrix D.
 		final GroupMatrix<ZqElement, ZqGroup> yTimesA = A.rowStream()
-				.map(row -> row.stream().map(y::multiply).collect(toList()))
+				.map(row -> row.stream().map(y::multiply).toList())
 				.collect(collectingAndThen(toList(), GroupMatrix::fromRows));
 		final GroupMatrix<ZqElement, ZqGroup> D = matrixSum(yTimesA, B);
 
@@ -475,7 +475,7 @@ class ShuffleArgumentService {
 		return IntStream.range(0, first.numRows())
 				.mapToObj(i -> IntStream.range(0, first.numColumns())
 						.mapToObj(j -> first.get(i, j).add(second.get(i, j)))
-						.collect(toList()))
+						.toList())
 				.collect(collectingAndThen(toList(), GroupMatrix::fromRows));
 	}
 

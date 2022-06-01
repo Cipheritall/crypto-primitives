@@ -92,7 +92,7 @@ class ProductWitnessTest {
 		ProductWitness witness2 = new ProductWitness(matrix, exponents);
 
 		ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
-		List<ZqElement> exponentsValues = exponents.stream().collect(Collectors.toCollection(ArrayList::new));
+		List<ZqElement> exponentsValues = new ArrayList<>(exponents);
 		ZqElement first = exponentsValues.get(0);
 		first = first.add(one);
 		exponentsValues.set(0, first);
@@ -100,7 +100,7 @@ class ProductWitnessTest {
 		ProductWitness witness3 = new ProductWitness(matrix, differentExponents);
 
 		List<List<ZqElement>> matrixValues = IntStream.range(0, m)
-				.mapToObj(j -> matrix.getColumn(j).stream().collect(Collectors.toCollection(ArrayList::new)))
+				.mapToObj(j -> new ArrayList<>(matrix.getColumn(j)))
 				.collect(Collectors.toCollection(ArrayList::new));
 		first = matrixValues.get(0).get(0);
 		first = first.add(one);

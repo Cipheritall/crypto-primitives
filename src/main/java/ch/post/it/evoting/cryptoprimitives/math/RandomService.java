@@ -34,7 +34,7 @@ import com.google.common.io.BaseEncoding;
 /**
  * This class is thread safe.
  */
-public class RandomService {
+public class RandomService implements Random {
 
 	private final SecureRandom secureRandom;
 
@@ -46,7 +46,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomInteger(BigInteger)
+	 * @see Random#genRandomInteger(BigInteger)
 	 */
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
 		checkNotNull(upperBound);
@@ -65,7 +65,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase16String(int)
+	 * @see Random#genRandomBase16String(int)
 	 */
 	public String genRandomBase16String(final int length) {
 		checkArgument(length > 0);
@@ -85,7 +85,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase32String(int)
+	 * @see Random#genRandomBase32String(int)
 	 */
 	public String genRandomBase32String(final int length) {
 		checkArgument(length > 0);
@@ -105,7 +105,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genRandomBase64String(int)
+	 * @see Random#genRandomBase64String(int)
 	 */
 	public String genRandomBase64String(final int length) {
 		checkArgument(length > 0);
@@ -125,7 +125,7 @@ public class RandomService {
 	}
 
 	/**
-	 * @see ch.post.it.evoting.cryptoprimitives.CryptoPrimitives#genUniqueDecimalStrings(int, int)
+	 * @see Random#genUniqueDecimalStrings(int, int)
 	 */
 	public List<String> genUniqueDecimalStrings(final int desiredCodeLength, final int numberOfUniqueCodes) {
 		final int l = desiredCodeLength;

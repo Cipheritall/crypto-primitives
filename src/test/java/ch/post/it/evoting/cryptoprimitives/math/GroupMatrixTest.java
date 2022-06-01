@@ -194,8 +194,8 @@ class GroupMatrixTest {
 						.mapToObj(column ->
 								rows.stream()
 										.map(row -> row.get(column))
-										.collect(Collectors.toList())
-						).collect(Collectors.toList());
+										.toList()
+						).toList();
 		GroupMatrix<TestGroupElement, TestGroup> actual = GroupMatrix.fromColumns(columns);
 
 		assertEquals(expected, actual);
@@ -210,7 +210,7 @@ class GroupMatrixTest {
 		assertAll(
 				() -> assertEquals(matrix.numColumns(), transposedMatrix.numRows()),
 				() -> assertEquals(matrix.numRows(), transposedMatrix.numColumns()),
-				() -> assertEquals(matrix.rowStream().collect(Collectors.toList()), transposedMatrix.columnStream().collect(Collectors.toList()))
+				() -> assertEquals(matrix.rowStream().collect(Collectors.toList()), transposedMatrix.columnStream().toList())
 		);
 	}
 
@@ -254,7 +254,7 @@ class GroupMatrixTest {
 		final int totalElements = numRows * numColumns;
 		assertEquals(totalElements, matrix.flatStream().count());
 
-		final List<TestGroupElement> flatMatrix = matrix.flatStream().collect(Collectors.toList());
+		final List<TestGroupElement> flatMatrix = matrix.flatStream().toList();
 		final int i = numRows - 1;
 		final int j = numColumns - 1;
 		// Index in new list is: i * numColumns + j
@@ -287,8 +287,7 @@ class GroupMatrixTest {
 		assertEquals(numColumns, matrix.columnStream().count());
 
 		final List<List<TestGroupElement>> columnMatrixElements = IntStream.range(0, matrix.numColumns())
-				.mapToObj(i -> matrixElements.stream().map(row -> row.get(i)).collect(Collectors.toList()))
-				.collect(Collectors.toList());
+				.mapToObj(i -> matrixElements.stream().map(row -> row.get(i)).collect(Collectors.toList())).toList();
 		assertEquals(columnMatrixElements.stream().map(GroupVector::from).collect(Collectors.toList()),
 				matrix.columnStream().collect(Collectors.toList()));
 	}

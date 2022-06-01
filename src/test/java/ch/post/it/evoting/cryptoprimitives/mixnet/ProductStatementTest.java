@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,7 +79,7 @@ class ProductStatementTest {
 		final ProductStatement statement1 = new ProductStatement(commitments, product);
 		final ProductStatement statement2 = new ProductStatement(commitments, product);
 
-		final List<GqElement> commitmentValues = commitments.stream().collect(Collectors.toList());
+		final List<GqElement> commitmentValues = new ArrayList<>(commitments);
 		commitmentValues.add(commitments.getGroup().getIdentity());
 		final GroupVector<GqElement, GqGroup> differentCommitments = GroupVector.from(commitmentValues);
 		final ProductStatement statement3 = new ProductStatement(differentCommitments, product);
