@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
-import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -54,7 +53,7 @@ public class TestParser {
 		final BigInteger gamma = ciphertextData.get("gamma", BigInteger.class);
 		final GqElement gammaElement = GqElementFactory.fromValue(gamma, group);
 		final BigInteger[] phis = ciphertextData.get("phis", BigInteger[].class);
-		final List<GqElement> phiElements = Arrays.stream(phis).map(value -> GqElementFactory.fromValue(value, group)).collect(toList());
+		final List<GqElement> phiElements = Arrays.stream(phis).map(value -> GqElementFactory.fromValue(value, group)).toList();
 		return ElGamalMultiRecipientCiphertext.create(gammaElement, phiElements);
 	}
 }

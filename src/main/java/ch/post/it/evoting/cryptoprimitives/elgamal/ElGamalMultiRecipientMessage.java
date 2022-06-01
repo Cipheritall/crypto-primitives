@@ -45,6 +45,8 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 @SuppressWarnings({ "java:S117" })
 public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
+	private static final boolean enableParallelStreams = Boolean.parseBoolean(
+			System.getProperty("enable.parallel.streams", Boolean.TRUE.toString()));
 	private final GroupVector<GqElement, GqGroup> messageElements;
 
 	public ElGamalMultiRecipientMessage(final List<GqElement> messageElements) {
@@ -107,8 +109,13 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 		final int l = c.size();
 		final GqElement gamma = c.getGamma();
 
+		IntStream indices = IntStream.range(0, l);
+		if (enableParallelStreams) {
+			indices = indices.parallel();
+		}
+
 		// Algorithm.
-		final LinkedList<GqElement> messageElements = IntStream.range(0, l)
+		final LinkedList<GqElement> messageElements = indices
 				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk.get(i).negate())))
 				.collect(Collectors.toCollection(LinkedList::new));
 

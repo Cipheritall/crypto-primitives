@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -152,7 +153,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 		//With a exponent of one and message of ones, the ciphertext phis is just the public key
 		assertEquals(validPK.stream().limit(nMessages).collect(Collectors.toList()),
-				ciphertext.getPhi().stream().collect(Collectors.toList()));
+				new ArrayList<>(ciphertext.getPhi()));
 	}
 
 	@Test

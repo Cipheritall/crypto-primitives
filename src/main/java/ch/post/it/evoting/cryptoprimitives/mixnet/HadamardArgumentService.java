@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -169,7 +168,7 @@ public class HadamardArgumentService {
 		c_B_mutable.add(0, c_A.get(0));
 		c_B_mutable.addAll(1, IntStream.range(1, m - 1)
 				.mapToObj(j -> CommitmentService.getCommitment(b_vectors.get(j), s_vector.get(j), ck))
-				.collect(Collectors.toList()));
+				.toList());
 		c_B_mutable.add(m - 1, c_b);
 		final GroupVector<GqElement, GqGroup> c_B = GroupVector.from(c_B_mutable);
 

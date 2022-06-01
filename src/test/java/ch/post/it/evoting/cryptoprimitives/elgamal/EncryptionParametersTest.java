@@ -34,9 +34,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-import ch.post.it.evoting.cryptoprimitives.CryptoPrimitives;
-import ch.post.it.evoting.cryptoprimitives.CryptoPrimitivesService;
+import ch.post.it.evoting.cryptoprimitives.math.Random;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -50,7 +50,7 @@ class EncryptionParametersTest {
 
 	private static EncryptionParameters encryptionParameters;
 
-	private final CryptoPrimitives cryptoPrimitivesService = CryptoPrimitivesService.get();
+	private final Random random = new RandomService();
 	private final SecureRandom secureRandom = new SecureRandom();
 
 	@BeforeAll
@@ -80,7 +80,7 @@ class EncryptionParametersTest {
 	@DisplayName("calling getEncryptionParameters with random seed does not throw")
 	void getEncryptionParametersRandomSeed() {
 		final int electionNameLength = secureRandom.nextInt(NAME_MAX_LENGTH) + 1;
-		final String randomSeed = cryptoPrimitivesService.genRandomBase64String(electionNameLength);
+		final String randomSeed = random.genRandomBase64String(electionNameLength);
 
 		assertDoesNotThrow(() -> encryptionParameters.getEncryptionParameters(randomSeed));
 	}
