@@ -19,7 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactor
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.PlaintextEqualityProofService.computePhiPlaintextEquality;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -526,8 +525,7 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 					// Parse firstCiphertext (upper_c) parameters
 					final BigInteger[] upperCArray = input.get("upper_c", BigInteger[].class);
 					final List<GqElement> upperCElements = Arrays.stream(upperCArray)
-							.map(upperCA -> GqElementFactory.fromValue(upperCA, gqGroup))
-							.collect(toList());
+							.map(upperCA -> GqElementFactory.fromValue(upperCA, gqGroup)).toList();
 
 					final GqElement firstGamma = upperCElements.get(0);
 					final List<GqElement> firstPhi = Collections.singletonList(upperCElements.get(1));
@@ -537,8 +535,7 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 					// Parse secondCiphertext (upper_c_prime) parameters
 					final BigInteger[] upperCPrimeArray = input.get("upper_c_prime", BigInteger[].class);
 					final List<GqElement> upperCPrimeElements = Arrays.stream(upperCPrimeArray)
-							.map(upperCPrimeA -> GqElementFactory.fromValue(upperCPrimeA, gqGroup))
-							.collect(toList());
+							.map(upperCPrimeA -> GqElementFactory.fromValue(upperCPrimeA, gqGroup)).toList();
 
 					final GqElement secondGamma = upperCPrimeElements.get(0);
 					final List<GqElement> secondPhi = Collections.singletonList(upperCPrimeElements.get(1));

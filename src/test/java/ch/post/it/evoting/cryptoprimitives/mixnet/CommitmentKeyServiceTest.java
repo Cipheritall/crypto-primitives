@@ -76,7 +76,7 @@ class CommitmentKeyServiceTest {
 	void constructionTest() {
 		final CommitmentKey commitmentKey = new CommitmentKey(h, gs);
 
-		assertEquals(h, commitmentKey.stream().limit(1).collect(Collectors.toList()).get(0));
+		assertEquals(h, commitmentKey.stream().limit(1).toList().get(0));
 		assertEquals(gs, commitmentKey.stream().skip(1).collect(Collectors.toList()));
 	}
 
