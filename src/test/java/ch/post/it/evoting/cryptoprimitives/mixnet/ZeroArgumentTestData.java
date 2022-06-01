@@ -115,9 +115,9 @@ public class ZeroArgumentTestData {
 
 		// Replace B_(n,m) by the value satisfying the ensure equation.
 		final List<List<ZqElement>> rows = matrixB.rowStream()
-				.map(sgv -> sgv.stream().collect(Collectors.toList()))
+				.map(sgv -> new ArrayList<>(sgv))
 				.collect(Collectors.toCollection(ArrayList::new));
-		final List<ZqElement> lastRow = matrixB.getRow(n - 1).stream().collect(Collectors.toCollection(ArrayList::new));
+		final List<ZqElement> lastRow = new ArrayList<>(matrixB.getRow(n - 1));
 		lastRow.set(m - 1, matrixBLastElem.get());
 		rows.set(n - 1, lastRow);
 		GroupMatrix<ZqElement, ZqGroup> updatedMatrixB = GroupMatrix.fromRows(rows);

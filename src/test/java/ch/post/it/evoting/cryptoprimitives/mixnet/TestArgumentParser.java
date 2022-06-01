@@ -186,7 +186,7 @@ class TestArgumentParser {
 		final GqElement gamma = GqElementFactory.fromValue(gammaValue, gqGroup);
 		final List<GqElement> phis = Arrays.stream(phisValues)
 				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
-				.collect(toList());
+				.toList();
 
 		return ElGamalMultiRecipientCiphertext.create(gamma, phis);
 	}

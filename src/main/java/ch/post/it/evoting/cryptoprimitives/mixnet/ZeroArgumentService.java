@@ -369,7 +369,7 @@ final class ZeroArgumentService {
 
 		final List<ZqElement> xPowers = IntStream.range(0, (2 * m) + 1)
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
-				.collect(Collectors.toList());
+				.toList();
 
 		final GqElement identity = c_A.getGroup().getIdentity();
 

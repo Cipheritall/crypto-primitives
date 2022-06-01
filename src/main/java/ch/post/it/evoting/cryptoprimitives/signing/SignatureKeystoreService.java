@@ -27,6 +27,7 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -70,6 +71,7 @@ public class SignatureKeystoreService<T extends Supplier<String>> {
 		try {
 			final KeyStore keyStore = KeyStore.getInstance(keystoreType);
 			keyStore.load(keyStoreStream, password);
+			Arrays.fill(password, '0');
 			if (!keystoreValidator.test(keyStore)) {
 				throw new IllegalArgumentException("The validation of keystore failed");
 			}

@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -635,17 +634,17 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 					final GqElement gamma = GqElementFactory.fromValue(ciphertextData.get("gamma", BigInteger.class), gqGroup);
 					final BigInteger[] phisAArray = ciphertextData.get("phis", BigInteger[].class);
-					final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElementFactory.fromValue(phiA, gqGroup)).collect(toList());
+					final List<GqElement> phi = Arrays.stream(phisAArray).map(phiA -> GqElementFactory.fromValue(phiA, gqGroup)).toList();
 					final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gamma, phi);
 
 					// Parse key pair parameters
 					final BigInteger[] pkArray = input.get("public_key", BigInteger[].class);
-					final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElementFactory.fromValue(skA, gqGroup)).collect(toList());
+					final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElementFactory.fromValue(skA, gqGroup)).toList();
 					final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 					// Parse message parameters
 					final BigInteger[] messageArray = input.get("message", BigInteger[].class);
-					final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElementFactory.fromValue(mA, gqGroup)).collect(toList());
+					final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElementFactory.fromValue(mA, gqGroup)).toList();
 					final ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(messageElements);
 
 					// Parse decryption proof parameters

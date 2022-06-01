@@ -24,7 +24,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -118,7 +117,7 @@ class SingleValueProductArgumentService {
 		// Calculate b_0, ..., b_(n-1)
 		final List<ZqElement> b_vector = IntStream.range(0, n)
 				.mapToObj(k -> a.stream().limit(k + 1L).reduce(one, ZqElement::multiply))
-				.collect(Collectors.toList());
+				.toList();
 
 		// Calculate d and r_d
 		final GroupVector<ZqElement, ZqGroup> d = randomService.genRandomVector(q, n);
