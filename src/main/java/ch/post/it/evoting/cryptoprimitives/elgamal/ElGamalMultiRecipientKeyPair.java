@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.math.Random;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
@@ -54,14 +54,14 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 	/**
 	 * Generates a key pair in the specified group and with the specified number of elements.
 	 *
-	 * @param group         The {@link GqGroup} in which to generate the public keys. Not null.
-	 * @param numElements,  N, the number of elements that each key (the public key and the private key) should be composed of. This value must be
-	 *                      greater than 0.
-	 * @param randomService a service providing randomness. Not null.
+	 * @param numElements, N, the number of elements that each key (the public key and the private key) should be composed of. This value must be
+	 *                     greater than 0.
+	 * @param group        The {@link GqGroup} in which to generate the public keys. Not null.
+	 * @param random       a service providing randomness. Not null.
 	 * @return the generated key pair.
 	 */
-	public static ElGamalMultiRecipientKeyPair genKeyPair(final GqGroup group, final int numElements, final RandomService randomService) {
-		checkNotNull(randomService);
+	public static ElGamalMultiRecipientKeyPair genKeyPair(final GqGroup group, final int numElements, final Random random) {
+		checkNotNull(random);
 		checkNotNull(group);
 		checkArgument(numElements > 0, "Cannot generate a ElGamalMultiRecipient key pair with %s elements.", numElements);
 		final int N = numElements;
@@ -72,7 +72,7 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 
 		// Generate the private key as a list of random exponents
 		final List<ZqElement> privateKeyElements =
-				Stream.generate(() -> randomService.genRandomInteger(q))
+				Stream.generate(() -> random.genRandomInteger(q))
 						.map(value -> ZqElement.create(value, privateKeyGroup))
 						.limit(N)
 						.collect(Collectors.toList());
