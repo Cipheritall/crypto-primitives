@@ -41,8 +41,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -52,7 +50,7 @@ class KDFServiceTest {
 
 	public static final int DEFAULT_HASH_LENGTH_BYTES = 32;
 	private static final Random random = new Random();
-	private static final ImmutableList<String> emptyInfo = ImmutableList.of();
+	private static final List<String> emptyInfo = List.of();
 	private KDFService kdfService;
 	private byte[] PRK;
 	private int requiredLength;
@@ -77,7 +75,7 @@ class KDFServiceTest {
 
 	@Test
 	void testNoInfoDoesntThrow() {
-		assertDoesNotThrow(() -> kdfService.KDF(PRK, ImmutableList.of(), requiredLength));
+		assertDoesNotThrow(() -> kdfService.KDF(PRK, List.of(), requiredLength));
 	}
 
 	@Test
@@ -108,7 +106,7 @@ class KDFServiceTest {
 			// Inputs.
 			final JsonData input = testParameters.getInput();
 			final byte[] PRK = input.get("prk", byte[].class);
-			final ImmutableList<String> infos = ImmutableList.copyOf(input.get("info", String[].class));
+			final List<String> infos = List.of(input.get("info", String[].class));
 			final Integer requiredByteLength = input.get("length", Integer.class);
 
 			// Output.
@@ -122,7 +120,7 @@ class KDFServiceTest {
 	@ParameterizedTest(name = "{5}")
 	@MethodSource("KDFRealValuesProvider")
 	@DisplayName("KDF returns expected output")
-	void testKDFWithRealValues(final Supplier<Digest> hashSupplier, final byte[] PRK, final ImmutableList<String> infos, final int requiredByteLength,
+	void testKDFWithRealValues(final Supplier<Digest> hashSupplier, final byte[] PRK, final List<String> infos, final int requiredByteLength,
 			final byte[] OKM, final String description) {
 		KDFService kdfService = KDFService.testService(hashSupplier);
 		final byte[] actualResult = kdfService.KDF(PRK, infos, requiredByteLength);
@@ -140,9 +138,8 @@ class KDFServiceTest {
 
 	@Test
 	void testKDFToZqNoInfoDoesntThrow() {
-		assertDoesNotThrow(() -> kdfService.KDFToZq(PRK, ImmutableList.of(), requestedUpperBound));
+		assertDoesNotThrow(() -> kdfService.KDFToZq(PRK, List.of(), requestedUpperBound));
 	}
-
 
 	@Test
 	void testtKDFToZqTooSmallRequiredUpperBoundThrows() {
@@ -168,7 +165,7 @@ class KDFServiceTest {
 			// Inputs.
 			final JsonData input = testParameters.getInput();
 			final byte[] PRK = input.get("prk", byte[].class);
-			final ImmutableList<String> infos = ImmutableList.copyOf(input.get("info", String[].class));
+			final List<String> infos = List.of(input.get("info", String[].class));
 			final BigInteger q = input.get("q", BigInteger.class);
 
 			// Output.
@@ -182,7 +179,7 @@ class KDFServiceTest {
 	@ParameterizedTest(name = "{5}")
 	@MethodSource("KDFToZqRealValuesProvider")
 	@DisplayName("KDFToZq returns expected output")
-	void testKDFToZqWithRealValues(final Supplier<Digest> hashSupplier, final byte[] PRK, final ImmutableList<String> infos, final BigInteger q,
+	void testKDFToZqWithRealValues(final Supplier<Digest> hashSupplier, final byte[] PRK, final List<String> infos, final BigInteger q,
 			final ZqElement u, final String description) {
 		KDFService kdfService = KDFService.testService(hashSupplier);
 		final ZqElement actualResult = kdfService.KDFToZq(PRK, infos, q);

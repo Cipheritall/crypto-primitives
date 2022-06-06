@@ -34,7 +34,6 @@ import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -79,7 +78,7 @@ public class KDFService {
 		final int L = this.hashSupplier.get().getDigestSize();
 		final byte[] PRK = pseudoRandomKey;
 		final int l_straight = PRK.length;
-		final ImmutableList<String> info_vector = ImmutableList.copyOf(contextInformation);
+		final List<String> info_vector = List.copyOf(contextInformation);
 		final int l_curved = requiredByteLength;
 
 		checkArgument(l_curved > 0, "Requested byte length must be greater than 0. ");
@@ -131,7 +130,7 @@ public class KDFService {
 		final int L = this.hashSupplier.get().getDigestSize();
 		final byte[] PRK = pseudoRandomKey;
 		final int l_straight = PRK.length;
-		final ImmutableList<String> info = ImmutableList.copyOf(contextInformation);
+		final List<String> info = List.copyOf(contextInformation);
 		final BigInteger q = exclusiveUpperBound;
 
 		checkArgument(l_straight >= L, "The pseudo random key length must be greater than the hash function output length.");

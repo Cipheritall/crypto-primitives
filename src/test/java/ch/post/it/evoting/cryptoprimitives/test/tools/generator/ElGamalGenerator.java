@@ -19,7 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVect
 import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVectorElementGenerator.generateElementMatrix;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -95,7 +94,7 @@ public class ElGamalGenerator {
 		final ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 
 		return Stream.generate(() -> ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, publicKey))
-				.limit(numCiphertexts).collect(Collectors.toList());
+				.limit(numCiphertexts).toList();
 	}
 
 	public static ElGamalMultiRecipientCiphertext encryptMessage(

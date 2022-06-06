@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
@@ -116,7 +115,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 
 		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "Auxiliary information cannot contain null elements.");
 
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
 		final ElGamalMultiRecipientPublicKey pk = publicKey;
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = verifiableDecryptions.getCiphertexts();

@@ -21,10 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -75,7 +72,7 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 				Stream.generate(() -> random.genRandomInteger(q))
 						.map(value -> ZqElement.create(value, privateKeyGroup))
 						.limit(N)
-						.collect(Collectors.toList());
+						.toList();
 
 		final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
 		final ElGamalMultiRecipientPublicKey pk = sk.derivePublicKey(g);
@@ -143,7 +140,7 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(publicKey, privateKey);
+	public List<? extends Hashable> toHashableForm() {
+		return List.of(publicKey, privateKey);
 	}
 }

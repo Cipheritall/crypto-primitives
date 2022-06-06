@@ -18,15 +18,12 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext.getCiphertext;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -89,13 +86,13 @@ public class ShuffleService {
 		final Permutation pi = this.permutationService.genPermutation(N);
 		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessage.ones(group, l);
 
-		final ImmutableList<ZqElement> r =
+		final List<ZqElement> r =
 				Stream.generate(() -> randomService.genRandomInteger(q))
 						.map(value -> ZqElement.create(value, exponentGroup))
 						.limit(N)
-						.collect(toImmutableList());
+						.toList();
 
-		final ImmutableList<ElGamalMultiRecipientCiphertext> C_prime =
+		final List<ElGamalMultiRecipientCiphertext> C_prime =
 				IntStream.range(0, N)
 						.boxed()
 						.flatMap(i -> Stream.of(i)
@@ -106,7 +103,7 @@ public class ShuffleService {
 									final ElGamalMultiRecipientCiphertext C_pi_i = C.get(pi_i);
 									return e.multiply(C_pi_i);
 								})
-						).collect(toImmutableList());
+						).toList();
 
 		return new Shuffle(C_prime, pi, r);
 	}

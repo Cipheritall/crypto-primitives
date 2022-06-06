@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -104,5 +105,17 @@ class PermutationTest {
 				.collect(Collectors.toList());
 
 		assertEquals(expectedMapping, permutation.stream().collect(Collectors.toList()));
+	}
+
+	@Test
+	void immutableValueMapping() {
+		final List<Integer> valueMapping = new ArrayList<>();
+		valueMapping.add(10);
+		valueMapping.add(11);
+
+		final Permutation permutation = new Permutation(valueMapping);
+		valueMapping.remove(0);
+
+		assertEquals(2, permutation.size());
 	}
 }

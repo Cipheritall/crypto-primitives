@@ -23,10 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
@@ -93,7 +90,7 @@ public class ExponentiationProofService {
 
 		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null objects.");
 
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final GroupVector<GqElement, GqGroup> g = bases;
 		final ZqElement x = exponent;
 		final GroupVector<GqElement, GqGroup> y = exponentiations;
@@ -127,7 +124,7 @@ public class ExponentiationProofService {
 			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF),
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF));
 		}
@@ -150,7 +147,7 @@ public class ExponentiationProofService {
 
 		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null elements.");
 
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final GroupVector<GqElement, GqGroup> g = bases;
 		final GroupVector<GqElement, GqGroup> y = exponentiations;
 		final ZqElement e = proof.get_e();
@@ -183,7 +180,7 @@ public class ExponentiationProofService {
 			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF),
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(EXPONENTIATION_PROOF));
 		}

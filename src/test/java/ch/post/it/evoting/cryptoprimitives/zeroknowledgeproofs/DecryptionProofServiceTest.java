@@ -48,8 +48,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -118,10 +116,8 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		private final ZqElement zTwo = ZqElement.create(TWO, zqGroup);
 		private final ZqElement zThree = ZqElement.create(THREE, zqGroup);
 		private final ZqElement zFive = ZqElement.create(FIVE, zqGroup);
-		private final ZqElement zSix = ZqElement.create(SIX, zqGroup);
 		private final ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
 		private final ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
-		private final ZqElement zTen = ZqElement.create(TEN, zqGroup);
 
 		// Create input arguments
 		// c = {9, (18, 9, 13)}
@@ -220,7 +216,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			ZqElement zqElement15 = ZqElement.create(BigInteger.valueOf(15), zqGroup);
 			ZqElement zqElement8 = ZqElement.create(BigInteger.valueOf(8), zqGroup);
 
-			ImmutableList<ZqElement> preImageZqElements = ImmutableList.of(zqElement9, zqElement15, zqElement8);
+			List<ZqElement> preImageZqElements = List.of(zqElement9, zqElement15, zqElement8);
 
 			GroupVector<ZqElement, ZqGroup> preImage = GroupVector.from(preImageZqElements);
 
@@ -282,7 +278,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 		@Test
 		@DisplayName("with valid arguments does not throw")
 		void genDecryptionProofWithValidArguments() {
-			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, ImmutableList.of()));
+			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, List.of()));
 			assertDoesNotThrow(() -> decryptionProofService.genDecryptionProof(ciphertext, keyPair, message, auxiliaryInformation));
 		}
 

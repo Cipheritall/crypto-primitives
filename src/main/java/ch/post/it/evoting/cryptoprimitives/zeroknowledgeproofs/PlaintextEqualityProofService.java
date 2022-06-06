@@ -28,9 +28,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
@@ -136,7 +133,7 @@ public class PlaintextEqualityProofService {
 		final GqElement c_1 = firstCiphertext.get(0);
 		final GqElement c_0_prime = secondCiphertext.getGamma();
 		final GqElement c_1_prime = secondCiphertext.get(0);
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 
 		// Operation.
 		final GroupVector<ZqElement, ZqGroup> b = randomService.genRandomVector(q, 2);
@@ -151,7 +148,7 @@ public class PlaintextEqualityProofService {
 					c_1_prime,
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(PLAINTEXT_EQUALITY_PROOF), c_1, c_1_prime);
 		}
@@ -205,7 +202,7 @@ public class PlaintextEqualityProofService {
 		final GqElement h = firstPublicKey;
 		final GqElement h_prime = secondPublicKey;
 		final PlaintextEqualityProof ez = plaintextEqualityProof;
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final GroupVector<ZqElement, ZqGroup> z = ez.get_z();
 		final ZqElement e = ez.get_e();
 
@@ -224,7 +221,7 @@ public class PlaintextEqualityProofService {
 					c_1_prime,
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(PLAINTEXT_EQUALITY_PROOF), c_1, c_1_prime);
 		}

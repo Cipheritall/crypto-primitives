@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -99,6 +100,19 @@ class ShuffleServiceTest {
 		final List<ElGamalMultiRecipientCiphertext> ciphertexts = elGamalGenerator.genRandomCiphertexts(publicKey, NUM_ELEMENTS, NUM_CIPHERTEXTS);
 		final Shuffle shuffle = shuffleService.genShuffle(ciphertexts, publicKey);
 		assertNotEquals(ciphertexts, shuffle.getCiphertexts());
+	}
+
+	@Test
+	void immutableShuffle() {
+		final List<ElGamalMultiRecipientCiphertext> ciphertexts = new ArrayList<>();
+		final List<ZqElement> reEncryptionExponents = new ArrayList<>();
+
+		final Shuffle shuffle = new Shuffle(ciphertexts, Permutation.EMPTY, reEncryptionExponents);
+		ciphertexts.add(null);
+		reEncryptionExponents.add(null);
+
+		assertEquals(0, shuffle.getCiphertexts().size());
+		assertEquals(0, shuffle.getReEncryptionExponents().size());
 	}
 
 	@Test

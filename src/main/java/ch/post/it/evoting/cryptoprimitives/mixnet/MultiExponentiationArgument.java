@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -142,8 +140,8 @@ public class MultiExponentiationArgument implements HashableList {
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(c_A_0, c_B, E, a, r, b, s, tau);
+	public List<? extends Hashable> toHashableForm() {
+		return List.of(c_A_0, c_B, E, a, r, b, s, tau);
 	}
 
 	public static class Builder {
