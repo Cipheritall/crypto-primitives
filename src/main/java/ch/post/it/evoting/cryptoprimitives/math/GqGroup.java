@@ -20,9 +20,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
@@ -73,18 +72,13 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 		final String securityLevelCheckMessage = "The given p does not correspond to the given security level.";
 
 		switch (securityLevel) {
-		case EXTENDED:
-			checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-			break;
-		case DEFAULT:
+		case EXTENDED -> checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
+		case DEFAULT -> {
 			checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
 			checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-			break;
-		case TESTING_ONLY:
-			checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-			break;
-		default:
-			throw new IllegalArgumentException("Unsupported security level!");
+		}
+		case TESTING_ONLY -> checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
+		default -> throw new IllegalArgumentException("Unsupported security level!");
 		}
 
 		//Validate p
@@ -167,7 +161,7 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), generator);
+	public List<? extends Hashable> toHashableForm() {
+		return List.of(HashableBigInteger.from(p), HashableBigInteger.from(q), generator);
 	}
 }

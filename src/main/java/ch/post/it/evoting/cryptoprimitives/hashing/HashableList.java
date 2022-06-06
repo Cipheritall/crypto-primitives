@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.hashing;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,15 +24,13 @@ import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
-
 /**
  * Interface to be implemented by classes whose hashable form is an immutable list of {@link Hashable} objects.
  */
 public interface HashableList extends Hashable {
 
 	@Override
-	ImmutableList<? extends Hashable> toHashableForm();
+	List<? extends Hashable> toHashableForm();
 
 	/**
 	 * Creates a HashableList whose hashable form is the provided list.
@@ -45,14 +42,14 @@ public interface HashableList extends Hashable {
 		checkNotNull(list);
 
 		// The copy has to be done outside of the lambda, otherwise it will be made only when #toHashableForm is called.
-		final ImmutableList<? extends Hashable> immutableList = ImmutableList.copyOf(list);
+		final List<? extends Hashable> immutableList = List.copyOf(list);
 		checkArgument(!immutableList.isEmpty(), "The list must not be empty.");
 
 		return () -> immutableList;
 	}
 
 	/**
-	 * Creates a HashableList whose hashable form is an ImmutableList containing the provided elements.
+	 * Creates a HashableList whose hashable form is an unmodifiable List containing the provided elements.
 	 *
 	 * @param elements the hashable elements to construct a HashableList from. Non null and must not contain nulls.
 	 * @param <E>      the type of the elements
@@ -72,6 +69,6 @@ public interface HashableList extends Hashable {
 	 * @return a {@link Collector} for accumulating the input elements into a HashableList
 	 */
 	static Collector<Hashable, ?, HashableList> toHashableList() {
-		return Collectors.collectingAndThen(toImmutableList(), HashableList::from);
+		return Collectors.collectingAndThen(Collectors.toList(), HashableList::from);
 	}
 }

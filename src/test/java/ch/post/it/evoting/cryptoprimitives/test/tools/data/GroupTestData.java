@@ -25,8 +25,6 @@ import java.util.List;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
@@ -39,7 +37,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 public class GroupTestData {
 
 	private static final SecureRandom random = new SecureRandom();
-	private static final ImmutableList<GqGroup> smallTestGroups;
+	private static final List<GqGroup> smallTestGroups;
 
 	static {
 		// More groups can be added to this class as needed.
@@ -65,7 +63,7 @@ public class GroupTestData {
 			final BigInteger g4 = BigInteger.valueOf(3);
 			final GqGroup group4 = new GqGroup(p4, q4, g4);
 
-			smallTestGroups = ImmutableList.of(group1, group2, group3, group4);
+			smallTestGroups = List.of(group1, group2, group3, group4);
 		}
 	}
 

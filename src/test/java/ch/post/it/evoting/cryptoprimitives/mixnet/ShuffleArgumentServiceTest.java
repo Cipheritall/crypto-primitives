@@ -52,8 +52,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
@@ -200,7 +198,6 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		ZqElement zThree = ZqElement.create(THREE, zqGroup);
 		ZqElement zFour = ZqElement.create(FOUR, zqGroup);
 		ZqElement zFive = ZqElement.create(FIVE, zqGroup);
-		ZqElement zSix = ZqElement.create(SIX, zqGroup);
 		ZqElement zSeven = ZqElement.create(SEVEN, zqGroup);
 		ZqElement zEight = ZqElement.create(EIGHT, zqGroup);
 		ZqElement zNine = ZqElement.create(NINE, zqGroup);
@@ -210,10 +207,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gEight, gThirteen, gFour));
 
 		// Create the ciphertexts
-		ElGamalMultiRecipientMessage m0 = new ElGamalMultiRecipientMessage(ImmutableList.of(gFour, gEight, gThree));
-		ElGamalMultiRecipientMessage m1 = new ElGamalMultiRecipientMessage(ImmutableList.of(gSixteen, gTwo, gNine));
-		ElGamalMultiRecipientMessage m2 = new ElGamalMultiRecipientMessage(ImmutableList.of(gThree, gSix, gFour));
-		ElGamalMultiRecipientMessage m3 = new ElGamalMultiRecipientMessage(ImmutableList.of(gThirteen, gFour, gEighteen));
+		ElGamalMultiRecipientMessage m0 = new ElGamalMultiRecipientMessage(List.of(gFour, gEight, gThree));
+		ElGamalMultiRecipientMessage m1 = new ElGamalMultiRecipientMessage(List.of(gSixteen, gTwo, gNine));
+		ElGamalMultiRecipientMessage m2 = new ElGamalMultiRecipientMessage(List.of(gThree, gSix, gFour));
+		ElGamalMultiRecipientMessage m3 = new ElGamalMultiRecipientMessage(List.of(gThirteen, gFour, gEighteen));
 
 		ElGamalMultiRecipientCiphertext c0 = ElGamalMultiRecipientCiphertext.getCiphertext(m0, zFive, publicKey);
 		ElGamalMultiRecipientCiphertext c1 = ElGamalMultiRecipientCiphertext.getCiphertext(m1, zTen, publicKey);
@@ -224,7 +221,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> c = GroupVector.of(c0, c1, c2, c3);
 
 		// Create the permutation: pi = [1, 3, 2, 0]
-		Permutation permutation = new Permutation(ImmutableList.of(1, 3, 2, 0));
+		Permutation permutation = new Permutation(List.of(1, 3, 2, 0));
 		// Create the randomness: rho = (3, 9, 4, 2)
 		GroupVector<ZqElement, ZqGroup> rho = GroupVector.of(zThree, zNine, zFour, zTwo);
 
@@ -237,7 +234,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 
 		// Create the ShuffleArgumentService
 		// Create the commitment key: ck = {3, (6, 13, 12)}
-		CommitmentKey commitmentKey = new CommitmentKey(gThree, ImmutableList.of(gSix, gThirteen, gTwelve));
+		CommitmentKey commitmentKey = new CommitmentKey(gThree, List.of(gSix, gThirteen, gTwelve));
 		// Shuffle: r = (9, 2), s = (10, 8)
 		// Product: s = 10
 		// Zero: a0 = (2, 5), bm = (1, 4), r0 = 7, sm = 3, t = (6, 2, 4, 5, 8)
@@ -494,7 +491,6 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 					exception.getMessage());
 		}
 
-
 		@Test
 		@DisplayName("specific values returns the expected result")
 		void getShuffleArgumentWithSpecificValues() {
@@ -646,8 +642,10 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(ciphertextToChangeIdx);
 			GroupVector<GqElement, GqGroup> phis = shuffledCiphertext.getPhi();
 			int ciphertextElementToChangeIdx = 1;
-			GroupVector<GqElement, GqGroup> differentPhis = GroupVectors.set(phis, ciphertextElementToChangeIdx, specificValues.gThirteen); //Was 4 originally
-			final ElGamalMultiRecipientCiphertext differentCiphertext = ElGamalMultiRecipientCiphertext.create(shuffledCiphertext.getGamma(), differentPhis);
+			GroupVector<GqElement, GqGroup> differentPhis = GroupVectors.set(phis, ciphertextElementToChangeIdx,
+					specificValues.gThirteen); //Was 4 originally
+			final ElGamalMultiRecipientCiphertext differentCiphertext = ElGamalMultiRecipientCiphertext.create(shuffledCiphertext.getGamma(),
+					differentPhis);
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> differentShuffleCiphertexts =
 					GroupVectors.set(shuffledCiphertexts, ciphertextToChangeIdx, differentCiphertext);
 

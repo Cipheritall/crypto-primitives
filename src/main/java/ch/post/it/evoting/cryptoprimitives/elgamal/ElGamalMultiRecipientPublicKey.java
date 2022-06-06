@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -109,12 +107,12 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
+	public List<? extends Hashable> toHashableForm() {
 		return this.publicKeyElements.toHashableForm();
 	}
 
 	/**
-	 * @see	ElGamal#combinePublicKeys(GroupVector)
+	 * @see ElGamal#combinePublicKeys(GroupVector)
 	 */
 	static ElGamalMultiRecipientPublicKey combinePublicKeys(final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> publicKeyList) {
 		checkNotNull(publicKeyList);
