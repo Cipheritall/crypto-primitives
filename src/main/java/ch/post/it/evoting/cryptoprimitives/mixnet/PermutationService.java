@@ -20,9 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 
@@ -58,7 +57,7 @@ class PermutationService {
 			pi.set(i + offset, tmp);
 		}
 
-		return new Permutation(ImmutableList.copyOf(pi));
+		return new Permutation(List.copyOf(pi));
 	}
 
 	/*

@@ -26,11 +26,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
@@ -120,7 +117,7 @@ public class DecryptionProofService {
 
 		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null elements.");
 
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final ElGamalMultiRecipientCiphertext C = ciphertext;
 		final ElGamalMultiRecipientPrivateKey sk = keyPair.getPrivateKey();
 		final ElGamalMultiRecipientPublicKey pk = keyPair.getPublicKey();
@@ -160,7 +157,7 @@ public class DecryptionProofService {
 					m,
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(DECRYPTION_PROOF), phi, m);
 		}
@@ -199,7 +196,7 @@ public class DecryptionProofService {
 		checkNotNull(auxiliaryInformation);
 		checkArgument(auxiliaryInformation.stream().allMatch(Objects::nonNull), "The auxiliary information must not contain null elements.");
 
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final ElGamalMultiRecipientCiphertext C = ciphertext;
 		final ElGamalMultiRecipientPublicKey pk = publicKey;
 		final ElGamalMultiRecipientMessage m = message;
@@ -246,7 +243,7 @@ public class DecryptionProofService {
 					m,
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(DECRYPTION_PROOF), phi, m);
 		}

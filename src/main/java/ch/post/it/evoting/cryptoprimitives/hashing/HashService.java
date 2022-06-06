@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -36,7 +37,6 @@ import org.bouncycastle.crypto.digests.SHAKEDigest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -98,24 +98,24 @@ public class HashService {
 		checkArgument(values.length != 0, NO_VALUES);
 
 		if (values.length > 1) {
-			final HashableList v = HashableList.from(ImmutableList.copyOf(values));
+			final HashableList v = HashableList.from(List.of(values));
 			return recursiveHash(v);
 		} else {
 			final Hashable value = values[0];
 
 			final MessageDigest messageDigest = digestSupplier.get();
-			if (value instanceof HashableByteArray) {
-				final byte[] w = ((HashableByteArray) value).toHashableForm();
+			if (value instanceof HashableByteArray hashableByteArray) {
+				final byte[] w = hashableByteArray.toHashableForm();
 				return messageDigest.digest(concat(BYTE_ARRAY_PREFIX, w));
-			} else if (value instanceof HashableBigInteger) {
-				final BigInteger w = ((HashableBigInteger) value).toHashableForm();
+			} else if (value instanceof HashableBigInteger hashableBigInteger) {
+				final BigInteger w = hashableBigInteger.toHashableForm();
 				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
 				return messageDigest.digest(concat(BIG_INTEGER_PREFIX, integerToByteArray(w)));
-			} else if (value instanceof HashableString) {
-				final String w = ((HashableString) value).toHashableForm();
+			} else if (value instanceof HashableString hashableString) {
+				final String w = hashableString.toHashableForm();
 				return messageDigest.digest(concat(STRING_PREFIX, stringToByteArray(w)));
-			} else if (value instanceof HashableList) {
-				final ImmutableList<? extends Hashable> w = ((HashableList) value).toHashableForm();
+			} else if (value instanceof HashableList hashableList) {
+				final List<? extends Hashable> w = hashableList.toHashableForm();
 
 				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 
@@ -225,18 +225,18 @@ public class HashService {
 		} else {
 			final Hashable value = values[0];
 
-			if (value instanceof HashableByteArray) {
-				final byte[] w = ((HashableByteArray) value).toHashableForm();
+			if (value instanceof HashableByteArray hashableByteArray) {
+				final byte[] w = hashableByteArray.toHashableForm();
 				return ByteArrays.cutToBitLength(shake256(L, concat(BYTE_ARRAY_PREFIX, w)), l);
-			} else if (value instanceof HashableBigInteger) {
-				final BigInteger w = ((HashableBigInteger) value).toHashableForm();
+			} else if (value instanceof HashableBigInteger hashableBigInteger) {
+				final BigInteger w = hashableBigInteger.toHashableForm();
 				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
 				return ByteArrays.cutToBitLength(shake256(L, concat(BIG_INTEGER_PREFIX, integerToByteArray(w))), l);
-			} else if (value instanceof HashableString) {
-				final String w = ((HashableString) value).toHashableForm();
+			} else if (value instanceof HashableString hashableString) {
+				final String w = hashableString.toHashableForm();
 				return ByteArrays.cutToBitLength(shake256(L, concat(STRING_PREFIX, stringToByteArray(w))), l);
-			} else if (value instanceof HashableList) {
-				final ImmutableList<? extends Hashable> w = ((HashableList) value).toHashableForm();
+			} else if (value instanceof HashableList hashableList) {
+				final List<? extends Hashable> w = hashableList.toHashableForm();
 
 				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 

@@ -45,8 +45,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
@@ -65,7 +63,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParamete
 @DisplayName("A ciphertext")
 class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 
-	private static ImmutableList<GqElement> validPhis;
+	private static List<GqElement> validPhis;
 	private static GqElement validGamma;
 	private static ElGamalGenerator elGamalGenerator;
 
@@ -83,7 +81,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		final GqElement ge1 = gqGroupGenerator.genMember();
 		final GqElement ge2 = gqGroupGenerator.genMember();
 
-		validPhis = ImmutableList.of(ge1, ge2);
+		validPhis = List.of(ge1, ge2);
 
 		// Generate a valid gamma.
 		do {
@@ -363,7 +361,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 	void multiplyWithDifferentSizePhisShouldThrow() {
 		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
 
-		final ImmutableList<GqElement> differentSizePhis = ImmutableList.of(validPhis.get(0));
+		final List<GqElement> differentSizePhis = List.of(validPhis.get(0));
 		final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(validGamma, differentSizePhis);
 
 		assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));

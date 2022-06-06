@@ -25,7 +25,6 @@ import static ch.post.it.evoting.cryptoprimitives.utils.ConversionService.byteAr
 import static ch.post.it.evoting.cryptoprimitives.utils.Verifiable.create;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.MoreCollectors.onlyElement;
 
 import java.math.BigInteger;
@@ -40,7 +39,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
@@ -221,10 +219,10 @@ final class MultiExponentiationArgumentService {
 		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
 		//Compute as, r, b, s, tau
-		final ImmutableList<ZqElement> xPowers = LongStream.range(0, 2L * m)
+		final List<ZqElement> xPowers = LongStream.range(0, 2L * m)
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
-				.collect(toImmutableList());
+				.toList();
 
 		//For all the next computations we include the first element in the sum by starting at the index 0 instead of 1. This is possible since x^0
 		// is 1.

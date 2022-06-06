@@ -23,7 +23,6 @@ import java.math.BigInteger;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
@@ -111,7 +110,9 @@ public class CommitmentKeyService {
 
 		}
 
-		final List<GqElement> v_elements = v.stream().map(e -> GqElementFactory.fromValue(e, gqGroup)).collect(Collectors.toList());
+		final List<GqElement> v_elements = v.stream()
+				.map(e -> GqElementFactory.fromValue(e, gqGroup))
+				.toList();
 
 		final GqElement h = v_elements.get(0);
 		final List<GqElement> g_vector = v_elements.subList(1, v_elements.size());
