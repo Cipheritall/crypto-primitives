@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -57,7 +55,8 @@ public class ProductArgument implements HashableList {
 	 * @param hadamardArgument           the Hadamard argument. Non-null.
 	 * @param singleValueProductArgument the Single Value Product argument. Non-null.
 	 */
-	public ProductArgument(final GqElement c_b, final HadamardArgument hadamardArgument, final SingleValueProductArgument singleValueProductArgument){
+	public ProductArgument(final GqElement c_b, final HadamardArgument hadamardArgument,
+			final SingleValueProductArgument singleValueProductArgument) {
 
 		// Null checking.
 		checkNotNull(c_b);
@@ -139,10 +138,10 @@ public class ProductArgument implements HashableList {
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
+	public List<? extends Hashable> toHashableForm() {
 		if (c_b == null) {
-			return ImmutableList.of(singleValueProductArgument);
+			return List.of(singleValueProductArgument);
 		}
-		return ImmutableList.of(c_b, hadamardArgument, singleValueProductArgument);
+		return List.of(c_b, hadamardArgument, singleValueProductArgument);
 	}
 }

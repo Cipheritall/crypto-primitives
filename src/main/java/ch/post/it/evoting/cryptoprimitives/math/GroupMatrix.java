@@ -1,13 +1,13 @@
 /*
  *
  *  Copyright 2022 Post CH Ltd
- * 
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,22 +21,20 @@ import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector
 import static ch.post.it.evoting.cryptoprimitives.utils.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 
 /**
- * Represents a matrix of {@link GroupVectorElement} elements belonging to the same {@link MathematicalGroup} and having the same size.
- * This implementation does not support empty matrices.
+ * Represents a matrix of {@link GroupVectorElement} elements belonging to the same {@link MathematicalGroup} and having the same size. This
+ * implementation does not support empty matrices.
  *
  * <p>Instances of this class are immutable. </p>
  *
@@ -48,12 +46,12 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	private static final String OUT_OF_BOUNDS_MESSAGE = "Trying to access index out of bound.";
 
 	private final G group;
-	private final ImmutableList<GroupVector<E, G>> rows;
+	private final List<GroupVector<E, G>> rows;
 	private final int numRows;
 	private final int numColumns;
 	private final int elementSize;
 
-	private GroupMatrix(final ImmutableList<GroupVector<E, G>> rows) {
+	private GroupMatrix(final List<GroupVector<E, G>> rows) {
 		// Null checking.
 		checkNotNull(rows);
 		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
@@ -91,9 +89,9 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 		checkNotNull(rows);
 		checkArgument(rows.stream().allMatch(Objects::nonNull), "A matrix cannot contain a null row.");
 
-		final ImmutableList<GroupVector<E, G>> rowVectors = rows.stream()
+		final List<GroupVector<E, G>> rowVectors = rows.stream()
 				.map(GroupVector::from)
-				.collect(toImmutableList());
+				.toList();
 
 		return new GroupMatrix<>(rowVectors);
 	}
@@ -116,7 +114,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	private static <E extends GroupVectorElement<G> & Hashable, G extends MathematicalGroup<G>> GroupMatrix<E, G> fromColumnVector(
-			final ImmutableList<GroupVector<E, G>> columns) {
+			final List<GroupVector<E, G>> columns) {
 		return new GroupMatrix<>(columns).transpose();
 	}
 
@@ -133,7 +131,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 		return new GroupMatrix<>(
 				IntStream.range(0, n)
 						.mapToObj(this::getColumn)
-						.collect(toImmutableList())
+						.toList()
 		);
 	}
 
@@ -220,7 +218,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
 		}
 
-		final ImmutableList<GroupVector<E, G>> newColumns = Streams.concat(this.columnStream(), Stream.of(column)).collect(toImmutableList());
+		final List<GroupVector<E, G>> newColumns = Streams.concat(this.columnStream(), Stream.of(column)).toList();
 		return GroupMatrix.fromColumnVector(newColumns);
 	}
 
@@ -244,7 +242,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 			checkArgument(column.getGroup().equals(this.getGroup()), "The group of the new column must be equal to the matrix' group");
 		}
 
-		final ImmutableList<GroupVector<E, G>> newColumns = Streams.concat(Stream.of(column), this.columnStream()).collect(toImmutableList());
+		final List<GroupVector<E, G>> newColumns = Streams.concat(Stream.of(column), this.columnStream()).toList();
 		return GroupMatrix.fromColumnVector(newColumns);
 	}
 
@@ -293,7 +291,7 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
+	public List<? extends Hashable> toHashableForm() {
 		return this.rows;
 	}
 }

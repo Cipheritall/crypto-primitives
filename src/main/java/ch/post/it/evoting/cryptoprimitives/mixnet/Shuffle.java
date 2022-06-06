@@ -17,8 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
@@ -29,17 +27,16 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * Instances of this class are immutable.
  */
 public class Shuffle {
-	static final Shuffle EMPTY = new Shuffle(ImmutableList.of(), Permutation.EMPTY, ImmutableList.of());
+	static final Shuffle EMPTY = new Shuffle(List.of(), Permutation.EMPTY, List.of());
 
-	private final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts;
+	private final List<ElGamalMultiRecipientCiphertext> ciphertexts;
 	private final Permutation permutation;
-	private final ImmutableList<ZqElement> reEncryptionExponents;
+	private final List<ZqElement> reEncryptionExponents;
 
-	Shuffle(final ImmutableList<ElGamalMultiRecipientCiphertext> ciphertexts, final Permutation permutation,
-			final ImmutableList<ZqElement> reEncryptionExponents) {
-		this.ciphertexts = ciphertexts;
+	Shuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final Permutation permutation, final List<ZqElement> reEncryptionExponents) {
+		this.ciphertexts = List.copyOf(ciphertexts);
 		this.permutation = permutation;
-		this.reEncryptionExponents = reEncryptionExponents;
+		this.reEncryptionExponents = List.copyOf(reEncryptionExponents);
 	}
 
 	List<ElGamalMultiRecipientCiphertext> getCiphertexts() {
@@ -50,7 +47,7 @@ public class Shuffle {
 		return permutation;
 	}
 
-	ImmutableList<ZqElement> getReEncryptionExponents() {
+	List<ZqElement> getReEncryptionExponents() {
 		return reEncryptionExponents;
 	}
 }

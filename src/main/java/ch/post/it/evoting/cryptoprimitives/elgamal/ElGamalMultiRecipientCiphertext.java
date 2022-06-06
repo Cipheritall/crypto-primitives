@@ -19,19 +19,14 @@ import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientM
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -52,7 +47,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 @SuppressWarnings({ "java:S117", "java:S1117" })
 public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
-	private static final boolean enableParallelStreams = Boolean.parseBoolean(
+	private static final boolean ENABLE_PARALLEL_STREAMS = Boolean.parseBoolean(
 			System.getProperty("enable.parallel.streams", Boolean.TRUE.toString()));
 
 	private final GqElement gamma;
@@ -94,7 +89,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final GroupVector<GqElement, GqGroup> phi_b = C_b.phis;
 
 		IntStream indices = IntStream.range(0, l);
-		if (enableParallelStreams) {
+		if (ENABLE_PARALLEL_STREAMS) {
 			indices = indices.parallel();
 		}
 
@@ -126,7 +121,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 		Stream<GqElement> elementStream;
 
-		if (enableParallelStreams) {
+		if (ENABLE_PARALLEL_STREAMS) {
 			elementStream = this.phis.parallelStream();
 		} else {
 			elementStream = this.phis.stream();
@@ -175,7 +170,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		final GqElement gamma = g.exponentiate(r);
 
 		IntStream indices = IntStream.range(0, l);
-		if (enableParallelStreams) {
+		if (ENABLE_PARALLEL_STREAMS) {
 			indices = indices.parallel();
 		}
 		final LinkedList<GqElement> phis = indices
@@ -255,7 +250,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 
 		final ElGamalMultiRecipientCiphertext neutralElement = neutralElement(l, C.getGroup());
 		IntStream indices = IntStream.range(0, n);
-		if (enableParallelStreams) {
+		if (ENABLE_PARALLEL_STREAMS) {
 			indices = indices.parallel();
 		}
 		return indices
@@ -356,8 +351,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	}
 
 	@Override
-	public ImmutableList<Hashable> toHashableForm() {
-		return this.stream().collect(toImmutableList());
+	public List<? extends Hashable> toHashableForm() {
+		return this.stream().toList();
 	}
 }
 

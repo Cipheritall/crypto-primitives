@@ -18,10 +18,9 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Represents a permutation of integers in the range [0, N).
@@ -30,17 +29,15 @@ import com.google.common.collect.ImmutableList;
  */
 class Permutation {
 
-	static final Permutation EMPTY = new Permutation(ImmutableList.of());
+	static final Permutation EMPTY = new Permutation(List.of());
 
 	//valueMapping[i] represents the permutation of value i
-	private final ImmutableList<Integer> valueMapping;
-	private final int size;
+	private final List<Integer> valueMapping;
 
-	Permutation(final ImmutableList<Integer> valueMapping) {
+	Permutation(final List<Integer> valueMapping) {
 		checkNotNull(valueMapping);
 
-		this.size = valueMapping.size();
-		this.valueMapping = valueMapping;
+		this.valueMapping = List.copyOf(valueMapping);
 	}
 
 	/**
@@ -58,7 +55,7 @@ class Permutation {
 	 */
 	int get(final int i) {
 		checkArgument(i >= 0);
-		checkArgument(i < size);
+		checkArgument(i < valueMapping.size());
 
 		return this.valueMapping.get(i);
 	}
@@ -67,7 +64,7 @@ class Permutation {
 	 * @return the size of this permutation, i.e. the upperbound of values represented in this permutation.
 	 */
 	int size() {
-		return this.size;
+		return this.valueMapping.size();
 	}
 
 	@Override

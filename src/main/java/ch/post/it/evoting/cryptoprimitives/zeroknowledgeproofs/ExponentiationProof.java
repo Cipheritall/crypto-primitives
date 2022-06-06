@@ -18,9 +18,8 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
 import java.util.Objects;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -85,7 +84,7 @@ public class ExponentiationProof implements GroupVectorElement<ZqGroup>, Hashabl
 	}
 
 	@Override
-	public ImmutableList<Hashable> toHashableForm() {
-		return ImmutableList.of(e, z);
+	public List<Hashable> toHashableForm() {
+		return List.of(e, z);
 	}
 }

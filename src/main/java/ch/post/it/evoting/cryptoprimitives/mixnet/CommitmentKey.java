@@ -17,14 +17,11 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -40,7 +37,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable. </p>
  */
 class CommitmentKey implements HashableList {
-	
+
 	private final GqGroup group;
 	private final GqElement h;
 	private final GroupVector<GqElement, GqGroup> gElements;
@@ -139,8 +136,8 @@ class CommitmentKey implements HashableList {
 	}
 
 	@Override
-	public ImmutableList<Hashable> toHashableForm() {
-		return this.stream().collect(toImmutableList());
+	public List<? extends Hashable> toHashableForm() {
+		return this.stream().toList();
 	}
-	
+
 }
