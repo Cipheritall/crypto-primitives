@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -55,7 +53,7 @@ public class ShuffleArgument implements GroupVectorElement<GqGroup>, HashableLis
 			final int l, final GqGroup group) {
 		this.c_A = c_A;
 		this.c_B = c_B;
-		this.productArgument =  productArgument;
+		this.productArgument = productArgument;
 		this.multiExponentiationArgument = multiExponentiationArgument;
 		this.m = m;
 		this.n = n;
@@ -120,8 +118,8 @@ public class ShuffleArgument implements GroupVectorElement<GqGroup>, HashableLis
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(c_A, c_B, productArgument, multiExponentiationArgument);
+	public List<? extends Hashable> toHashableForm() {
+		return List.of(c_A, c_B, productArgument, multiExponentiationArgument);
 	}
 
 	public static class Builder {

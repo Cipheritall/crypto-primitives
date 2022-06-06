@@ -15,7 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.test.tools;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -43,7 +43,7 @@ public class TestSizedElement implements GroupVectorElement<TestGroup>, Hashable
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
+	public List<? extends Hashable> toHashableForm() {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -43,8 +43,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
@@ -164,7 +162,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		// Public key values:
 		// pk = (8, 13, 4)
 		List<GqElement> keyElements = Arrays.asList(gEight, gThirteen, gFour);
-		ImmutableList<GqElement> gs = ImmutableList.of(gSix, gThirteen, gTwelve);
+		List<GqElement> gs = List.of(gSix, gThirteen, gTwelve);
 		ElGamalMultiRecipientCiphertext c3 = ElGamalMultiRecipientCiphertext.create(gThirteen, Arrays.asList(gTwo, gThree, gOne));
 		// Create the ciphertext: C = {9, (4, 13, 1)}
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(gNine, Arrays.asList(gFour, gThirteen, gOne));

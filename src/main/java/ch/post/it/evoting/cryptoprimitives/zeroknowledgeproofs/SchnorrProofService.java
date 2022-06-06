@@ -22,9 +22,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
@@ -93,7 +90,7 @@ public class SchnorrProofService {
 		final BigInteger p = gqGroup.getP();
 
 		// Variables.
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final GqElement y = statement;
 		final ZqElement x = witness;
 
@@ -107,7 +104,7 @@ public class SchnorrProofService {
 			h_aux = HashableList.of(HashableString.from(GEN_SCHNORR_PROOF_SERVICE),
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(GEN_SCHNORR_PROOF_SERVICE));
 		}
@@ -142,7 +139,7 @@ public class SchnorrProofService {
 		final GqElement g = gqGroup.getGenerator();
 
 		// Variables.
-		final ImmutableList<String> i_aux = ImmutableList.copyOf(auxiliaryInformation);
+		final List<String> i_aux = List.copyOf(auxiliaryInformation);
 		final ZqElement e = proof.get_e();
 		final ZqElement z = proof.get_z();
 		final GqElement y = statement;
@@ -159,7 +156,7 @@ public class SchnorrProofService {
 			h_aux = HashableList.of(HashableString.from(GEN_SCHNORR_PROOF_SERVICE),
 					HashableList.from(i_aux.stream()
 							.map(HashableString::from)
-							.collect(Collectors.toList())));
+							.toList()));
 		} else {
 			h_aux = HashableList.of(HashableString.from(GEN_SCHNORR_PROOF_SERVICE));
 		}

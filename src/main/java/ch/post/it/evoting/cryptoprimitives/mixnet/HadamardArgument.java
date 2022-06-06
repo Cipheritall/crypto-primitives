@@ -18,9 +18,8 @@ package ch.post.it.evoting.cryptoprimitives.mixnet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
 import java.util.Objects;
-
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -31,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 /**
  * <p>Instances of this class are immutable. </p>
  */
-@SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+@SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
 public class HadamardArgument implements HashableList {
 
 	private final GroupVector<GqElement, GqGroup> c_b;
@@ -50,7 +49,7 @@ public class HadamardArgument implements HashableList {
 	 *     <li>the commitments and zero argument must belong to the same group</li>
 	 * </ul>
 	 *
-	 * @param c_b a {@link GroupVector} of {@link GqElement}s. Non-null.
+	 * @param c_b          a {@link GroupVector} of {@link GqElement}s. Non-null.
 	 * @param zeroArgument a {@link ZeroArgument}. Non-null.
 	 */
 	public HadamardArgument(final GroupVector<GqElement, GqGroup> c_b, final ZeroArgument zeroArgument) {
@@ -107,7 +106,7 @@ public class HadamardArgument implements HashableList {
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
-		return ImmutableList.of(c_b, zeroArgument);
+	public List<? extends Hashable> toHashableForm() {
+		return List.of(c_b, zeroArgument);
 	}
 }

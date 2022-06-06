@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -45,8 +43,9 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 @SuppressWarnings({ "java:S117" })
 public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
-	private static final boolean enableParallelStreams = Boolean.parseBoolean(
+	private static final boolean ENABLE_PARALLEL_STREAMS = Boolean.parseBoolean(
 			System.getProperty("enable.parallel.streams", Boolean.TRUE.toString()));
+
 	private final GroupVector<GqElement, GqGroup> messageElements;
 
 	public ElGamalMultiRecipientMessage(final List<GqElement> messageElements) {
@@ -110,7 +109,7 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 		final GqElement gamma = c.getGamma();
 
 		IntStream indices = IntStream.range(0, l);
-		if (enableParallelStreams) {
+		if (ENABLE_PARALLEL_STREAMS) {
 			indices = indices.parallel();
 		}
 
@@ -168,7 +167,7 @@ public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
+	public List<? extends Hashable> toHashableForm() {
 		return this.messageElements.toHashableForm();
 	}
 }

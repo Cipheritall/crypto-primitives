@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -118,7 +116,7 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	}
 
 	@Override
-	public ImmutableList<? extends Hashable> toHashableForm() {
+	public List<? extends Hashable> toHashableForm() {
 		return privateKeyElements.toHashableForm();
 	}
 }

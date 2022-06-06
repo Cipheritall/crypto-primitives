@@ -51,7 +51,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.collect.ImmutableList;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.RandomService;
@@ -100,7 +99,7 @@ class HashServiceTest {
 		});
 	}
 
-	private static ImmutableList<Hashable> readInput(final JsonData data) {
+	private static List<Hashable> readInput(final JsonData data) {
 		final List<Hashable> values = new ArrayList<>();
 		if (data.getJsonNode().isArray()) {
 			final ArrayNode nodes = (ArrayNode) data.getJsonNode();
@@ -116,21 +115,17 @@ class HashServiceTest {
 			values.add(readValue(data));
 		}
 
-		return ImmutableList.copyOf(values);
+		return List.copyOf(values);
 	}
 
 	private static Hashable readValue(final JsonData data) {
 		final String type = data.getJsonData("type").getJsonNode().asText();
-		switch (type) {
-		case "string":
-			return HashableString.from(data.get("value", String.class));
-		case "integer":
-			return HashableBigInteger.from(data.get("value", BigInteger.class));
-		case "bytes":
-			return HashableByteArray.from(data.get("value", byte[].class));
-		default:
-			throw new IllegalArgumentException(String.format("Unknown type: %s", type));
-		}
+		return switch (type) {
+			case "string" -> HashableString.from(data.get("value", String.class));
+			case "integer" -> HashableBigInteger.from(data.get("value", BigInteger.class));
+			case "bytes" -> HashableByteArray.from(data.get("value", byte[].class));
+			default -> throw new IllegalArgumentException(String.format("Unknown type: %s", type));
+		};
 	}
 
 	@ParameterizedTest
@@ -183,7 +178,7 @@ class HashServiceTest {
 		final byte[] bytes = new byte[TEST_INPUT_LENGTH];
 		secureRandom.nextBytes(bytes);
 		final HashableByteArray byteArray = HashableByteArray.from(bytes);
-		final ImmutableList<Hashable> list = ImmutableList.of(byteArray);
+		final List<Hashable> list = List.of(byteArray);
 		final byte[] expected = hashService.recursiveHash(byteArray);
 		final byte[] hash = hashService.recursiveHash(HashableList.from(list));
 		assertArrayEquals(expected, hash);
@@ -240,13 +235,13 @@ class HashServiceTest {
 
 	@Test
 	void testRecursiveHashOfEmptyListThrows() {
-		final HashableList list = ImmutableList::of;
+		final HashableList list = List::of;
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
 
 	@Test
 	void testRecursiveHashOfNestedEmptyListThrows() {
-		final HashableList emptyList = ImmutableList::of;
+		final HashableList emptyList = List::of;
 		final HashableList list = HashableList.of(HashableBigInteger.from(BigInteger.ONE), emptyList);
 		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
@@ -271,7 +266,7 @@ class HashServiceTest {
 		final List<Hashable> subSubList = new LinkedList<>();
 		subSubList.add(first);
 		subSubList.add(second);
-		final HashableList hashableSubSubList = HashableList.from(ImmutableList.copyOf(subSubList));
+		final HashableList hashableSubSubList = HashableList.from(List.copyOf(subSubList));
 		final HashableList subList = HashableList.of(third, hashableSubSubList);
 		final HashableList input = HashableList.of(first, second, subList);
 

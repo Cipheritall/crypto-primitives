@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import com.google.common.collect.ImmutableList;
-
 public interface BigIntegerOperations {
 
 	String MODULUS_CHECK_MESSAGE = "The modulus must be greater than 1";
@@ -61,12 +59,12 @@ public interface BigIntegerOperations {
 	default BigInteger multiModExp(final List<BigInteger> bases, final List<BigInteger> exponents, final BigInteger modulus) {
 		checkNotNull(bases);
 		checkArgument(bases.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
-		final ImmutableList<BigInteger> basesCopy = ImmutableList.copyOf(bases);
+		final List<BigInteger> basesCopy = List.copyOf(bases);
 		checkArgument(!basesCopy.isEmpty(), "Bases must be non empty.");
 
 		checkNotNull(exponents);
 		checkArgument(exponents.stream().allMatch(Objects::nonNull), "Elements must not contain nulls");
-		final ImmutableList<BigInteger> exponentsCopy = ImmutableList.copyOf(exponents);
+		final List<BigInteger> exponentsCopy = List.copyOf(exponents);
 
 		// The next check assures also that exponentsCopy is not empty
 		checkArgument(basesCopy.size() == exponentsCopy.size(), "Bases and exponents must have the same size");
@@ -102,9 +100,9 @@ public interface BigIntegerOperations {
 	 *
 	 * @param number n, the number to be tested. Must be non-null and strictly positive.
 	 * @return true if n is prime, false otherwise.
-	 * @throws NullPointerException if n is null.
+	 * @throws NullPointerException     if n is null.
 	 * @throws IllegalArgumentException if n is not strictly positive.
-	 * @throws ArithmeticException if n does not fit in an int (max is {@value Integer#MAX_VALUE}).
+	 * @throws ArithmeticException      if n does not fit in an int (max is {@value Integer#MAX_VALUE}).
 	 */
 	default boolean isSmallPrime(final BigInteger number) {
 		checkNotNull(number);
