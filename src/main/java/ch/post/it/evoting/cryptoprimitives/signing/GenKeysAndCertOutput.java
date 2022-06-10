@@ -23,10 +23,7 @@ import java.security.cert.X509Certificate;
 /**
  * Contains a private key and a self sign certificate for the matching public key.
  */
-public class GenKeysAndCertOutput {
-
-	private final PrivateKey privateKey;
-	private final X509Certificate certificate;
+public record GenKeysAndCertOutput(PrivateKey privateKey, X509Certificate certificate) {
 
 	/**
 	 * @param privateKey  - privKey, the private key which the authority will keep secret and use for signing.
@@ -34,16 +31,9 @@ public class GenKeysAndCertOutput {
 	 *                    authority.
 	 * @throws NullPointerException if any argument is null
 	 */
-	public GenKeysAndCertOutput(final PrivateKey privateKey, final X509Certificate certificate) {
-		this.privateKey = checkNotNull(privateKey);
-		this.certificate = checkNotNull(certificate);
+	public GenKeysAndCertOutput {
+		checkNotNull(privateKey);
+		checkNotNull(certificate);
 	}
 
-	public PrivateKey getPrivateKey() {
-		return privateKey;
-	}
-
-	public X509Certificate getCertificate() {
-		return certificate;
-	}
 }

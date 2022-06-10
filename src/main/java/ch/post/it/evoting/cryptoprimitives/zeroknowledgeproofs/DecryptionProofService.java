@@ -208,8 +208,8 @@ public class DecryptionProofService {
 		final BigInteger q = gqGroup.getQ();
 
 		final GqElement g = gqGroup.getGenerator();
-		final ZqElement e = ez.getE();
-		final GroupVector<ZqElement, ZqGroup> z = ez.getZ();
+		final ZqElement e = ez.e();
+		final GroupVector<ZqElement, ZqGroup> z = ez.z();
 		final GqElement gamma = C.getGamma();
 		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
 		final int l = C.size();

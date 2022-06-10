@@ -172,8 +172,8 @@ class SignatureKeystoreServiceTest {
 
 		final KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(null, EMPTY_KEY_ENTRY_PASSWORD.toCharArray());
-		final KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keysAndCert.getPrivateKey(),
-				new X509Certificate[] { keysAndCert.getCertificate() });
+		final KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keysAndCert.privateKey(),
+				new X509Certificate[] { keysAndCert.certificate() });
 		keyStore.setEntry(alias, privateKeyEntry, new KeyStore.PasswordProtection("".toCharArray()));
 
 		return keyStore;
