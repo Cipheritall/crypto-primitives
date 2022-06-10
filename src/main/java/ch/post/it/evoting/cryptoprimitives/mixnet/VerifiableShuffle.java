@@ -19,7 +19,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
@@ -29,13 +28,10 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 
 /**
  * A verifiable shuffle consisting of shuffled votes and an argument for the correctness of the shuffle.
- * <p>
- * Instances of this class are immutable.
  */
-public class VerifiableShuffle implements HashableList {
-
-	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts;
-	private final ShuffleArgument shuffleArgument;
+public record VerifiableShuffle(
+		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts,
+		ShuffleArgument shuffleArgument) implements HashableList {
 
 	/**
 	 * Instantiates a verifiable shuffle from the given shuffled ciphertexts and shuffle proof.
@@ -50,9 +46,7 @@ public class VerifiableShuffle implements HashableList {
 	 * @param shuffledCiphertexts a vector of shuffled ciphertexts. Must be non-null.
 	 * @param shuffleArgument     a shuffle argument proving the correctness of the shuffle. Must be non-null.
 	 */
-	public VerifiableShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts,
-			final ShuffleArgument shuffleArgument) {
-
+	public VerifiableShuffle {
 		checkNotNull(shuffledCiphertexts);
 		checkNotNull(shuffleArgument);
 
@@ -62,39 +56,10 @@ public class VerifiableShuffle implements HashableList {
 				"Shuffled ciphertexts elements size must be dimension l of shuffle argument.");
 		checkArgument(shuffledCiphertexts.getGroup().equals(shuffleArgument.getGroup()),
 				"Shuffled ciphertext vector and shuffle argument must have the same group.");
-
-		this.shuffledCiphertexts = shuffledCiphertexts;
-		this.shuffleArgument = shuffleArgument;
-	}
-
-	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> getShuffledCiphertexts() {
-		return shuffledCiphertexts;
-	}
-
-	public ShuffleArgument getShuffleArgument() {
-		return shuffleArgument;
 	}
 
 	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		final VerifiableShuffle that = (VerifiableShuffle) o;
-		return Objects.equals(shuffledCiphertexts, that.shuffledCiphertexts) && Objects
-				.equals(shuffleArgument, that.shuffleArgument);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(shuffledCiphertexts, shuffleArgument);
-	}
-
-	@Override
-	public List<? extends Hashable> toHashableForm() {
+	public List<Hashable> toHashableForm() {
 		return List.of(shuffledCiphertexts, shuffleArgument);
 	}
 }

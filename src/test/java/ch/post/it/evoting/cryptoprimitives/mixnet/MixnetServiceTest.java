@@ -141,8 +141,8 @@ class MixnetServiceTest extends TestGroupSetup {
 			final VerifiableShuffle verifiableShuffle = mixnet.genVerifiableShuffle(inputCiphertextList, publicKey);
 
 			assertNotNull(verifiableShuffle);
-			assertNotNull(verifiableShuffle.getShuffleArgument());
-			assertEquals(inputCiphertextList.size(), verifiableShuffle.getShuffledCiphertexts().size());
+			assertNotNull(verifiableShuffle.shuffleArgument());
+			assertEquals(inputCiphertextList.size(), verifiableShuffle.shuffledCiphertexts().size());
 
 		}
 
@@ -177,8 +177,8 @@ class MixnetServiceTest extends TestGroupSetup {
 					.genRandomCiphertextVector(2, keySize);
 			final ElGamalMultiRecipientPublicKey publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(keySize);
 			final VerifiableShuffle verifiableShuffle = mixnet.genVerifiableShuffle(ciphertexts, publicKey);
-			final ShuffleArgument shuffleArgument = verifiableShuffle.getShuffleArgument();
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = verifiableShuffle.getShuffledCiphertexts();
+			final ShuffleArgument shuffleArgument = verifiableShuffle.shuffleArgument();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = verifiableShuffle.shuffledCiphertexts();
 
 			assertThrows(NullPointerException.class, () -> mixnet.verifyShuffle(null, shuffledCiphertexts, shuffleArgument, publicKey));
 			assertThrows(NullPointerException.class, () -> mixnet.verifyShuffle(ciphertexts, null, shuffleArgument, publicKey));
@@ -366,8 +366,8 @@ class MixnetServiceTest extends TestGroupSetup {
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts = new ElGamalGenerator(gqGroup).genRandomCiphertextVector(Nc, l);
 			final ElGamalMultiRecipientPublicKey publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(keySize);
 			final VerifiableShuffle verifiableShuffle = mixnet.genVerifiableShuffle(ciphertexts, publicKey);
-			final ShuffleArgument shuffleArgument = verifiableShuffle.getShuffleArgument();
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = verifiableShuffle.getShuffledCiphertexts();
+			final ShuffleArgument shuffleArgument = verifiableShuffle.shuffleArgument();
+			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = verifiableShuffle.shuffledCiphertexts();
 
 			assertTrue(() -> mixnet.verifyShuffle(ciphertexts, shuffledCiphertexts, shuffleArgument, publicKey).isVerified());
 		}
