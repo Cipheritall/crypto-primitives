@@ -99,7 +99,7 @@ class GenKeysAndCertServiceTest {
 		final LocalDate invalidUntil = validUntil.plusDays(1);
 
 		// when
-		final X509Certificate certificate = keysAndCertService.genKeysAndCert(validFrom, validUntil).getCertificate();
+		final X509Certificate certificate = keysAndCertService.genKeysAndCert(validFrom, validUntil).certificate();
 
 		// then
 		assertAll("Validity dates represent same time independently of object used to represent them.",
@@ -133,7 +133,7 @@ class GenKeysAndCertServiceTest {
 		final String expectedFormattedInfo = "ST=dummy-St,L=dummy-L,O=dummy-O,C=dummy-C,CN=dummy-Cn";
 
 		// when
-		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).getCertificate();
+		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).certificate();
 
 		// then
 		assertEquals(expectedFormattedInfo, certificate.getSubjectX500Principal().getName());
@@ -146,7 +146,7 @@ class GenKeysAndCertServiceTest {
 		final PublicKey publicKey = genKeyPair.getDummyPublicKey();
 
 		// when
-		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).getCertificate();
+		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).certificate();
 
 		// then
 		assertDoesNotThrow(() -> certificate.verify(publicKey));
@@ -162,7 +162,7 @@ class GenKeysAndCertServiceTest {
 		final boolean[] expectedKeyUsage = new boolean[] { true, false, false, false, false, true, false, false, false };
 
 		// when
-		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).getCertificate();
+		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).certificate();
 		final boolean[] actualKeyUsage = certificate.getKeyUsage();
 		final List<String> extendedKeyUsage = certificate.getExtendedKeyUsage();
 
@@ -175,8 +175,8 @@ class GenKeysAndCertServiceTest {
 	void signPayloadWithKey_certificatePublicKeyValidThePayload() throws Exception {
 		// given
 		final GenKeysAndCertOutput output = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil);
-		final Certificate certificate = output.getCertificate();
-		final PrivateKey privateKey = output.getPrivateKey();
+		final Certificate certificate = output.certificate();
+		final PrivateKey privateKey = output.privateKey();
 
 		final byte[] payload = createRandomPayload();
 
