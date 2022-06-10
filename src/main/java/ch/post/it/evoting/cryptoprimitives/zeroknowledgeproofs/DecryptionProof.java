@@ -19,7 +19,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
@@ -30,29 +29,13 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * A decryption proof (e, z) composed of a hash value e and a vector of proof elements z.
- *
- * <p>Instances of this class are immutable.</p>
  */
-public class DecryptionProof implements GroupVectorElement<ZqGroup>, HashableList {
+public record DecryptionProof(ZqElement e, GroupVector<ZqElement, ZqGroup> z) implements GroupVectorElement<ZqGroup>, HashableList {
 
-	private final ZqElement e;
-	private final GroupVector<ZqElement, ZqGroup> z;
-
-	public DecryptionProof(final ZqElement e, final GroupVector<ZqElement, ZqGroup> z) {
+	public DecryptionProof {
 		checkNotNull(e);
 		checkNotNull(z);
 		checkArgument(e.getGroup().equals(z.getGroup()), "e and z must have the same group.");
-
-		this.e = e;
-		this.z = z;
-	}
-
-	public ZqElement getE() {
-		return e;
-	}
-
-	public GroupVector<ZqElement, ZqGroup> getZ() {
-		return z;
 	}
 
 	@Override
@@ -66,24 +49,7 @@ public class DecryptionProof implements GroupVectorElement<ZqGroup>, HashableLis
 	}
 
 	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		final DecryptionProof that = (DecryptionProof) o;
-		return e.equals(that.e) && z.equals(that.z);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(e, z);
-	}
-
-	@Override
-	public List<? extends Hashable> toHashableForm() {
+	public List<Hashable> toHashableForm() {
 		return List.of(e, z);
 	}
 }
