@@ -13,7 +13,7 @@
 	<properties>
 		<!-- Dependencies versions -->
 		<guava.version>31.1-jre</guava.version>
-		<bouncycastle.version>1.70</bouncycastle.version>
+		<bouncycastle.version>1.71</bouncycastle.version>
 		<jackson.version>2.13.3</jackson.version>
 		<jmh.version>1.35</jmh.version>
 		<junit-jupiter.version>5.9.0-M1</junit-jupiter.version>
@@ -66,12 +66,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
+				<artifactId>bcprov-jdk18on</artifactId>
 				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
+				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
@@ -147,11 +147,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
+			<artifactId>bcprov-jdk18on</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
+			<artifactId>bcpkix-jdk18on</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.jnagmp</groupId>
