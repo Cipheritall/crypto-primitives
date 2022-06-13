@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.14.3.0</version>
+	<version>0.14.3.1</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -13,7 +13,7 @@
 	<properties>
 		<!-- Dependencies versions -->
 		<guava.version>31.1-jre</guava.version>
-		<bouncycastle.version>1.70</bouncycastle.version>
+		<bouncycastle.version>1.71</bouncycastle.version>
 		<jackson.version>2.13.3</jackson.version>
 		<jmh.version>1.35</jmh.version>
 		<junit-jupiter.version>5.9.0-M1</junit-jupiter.version>
@@ -42,7 +42,7 @@
 		<maven-enforcer-plugin.requiredJavaVersion>[17.0.3]</maven-enforcer-plugin.requiredJavaVersion>
 		<maven-enforcer-plugin.requiredMavenVersion>3.8.5</maven-enforcer-plugin.requiredMavenVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.build.outputTimestamp>2022-06-10T11:39:26+02:00</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2022-06-13T09:31:34+02:00</project.build.outputTimestamp>
 
 		<!--  Sonar  -->
 		<sonar.scm.disabled>true</sonar.scm.disabled>
@@ -66,12 +66,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
+				<artifactId>bcprov-jdk18on</artifactId>
 				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
+				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
@@ -147,11 +147,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
+			<artifactId>bcprov-jdk18on</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
+			<artifactId>bcpkix-jdk18on</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.jnagmp</groupId>
