@@ -200,7 +200,7 @@ final class MultiExponentiationArgumentService {
 								.map(b_vector::get)
 								.map(gqGroup.getGenerator()::exponentiate)
 								.map(g_b_k -> constantMessage(g_b_k, l))
-								.map(g_b_k_vector -> getCiphertext(g_b_k_vector, tau_vector.get(k), pk).multiply(D.get(k))))
+								.map(g_b_k_vector -> getCiphertext(g_b_k_vector, tau_vector.get(k), pk).getCiphertextProduct(D.get(k))))
 						.collect(toGroupVector());
 
 		//Compute challenge hash
@@ -276,11 +276,11 @@ final class MultiExponentiationArgumentService {
 					final GroupVector<ZqElement, ZqGroup> a_i_plus_1 = AMatrix.getColumn(i);
 					return getCiphertextVectorExponentiation(C_i, a_i_plus_1);
 				})
-				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
+				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::getCiphertextProduct);
 
 		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessage.ones(gqGroup, l);
 		final ElGamalMultiRecipientCiphertext oneCiphertext = getCiphertext(one, rho, pk);
-		return oneCiphertext.multiply(multiExponentiationProduct);
+		return oneCiphertext.getCiphertextProduct(multiExponentiationProduct);
 	}
 
 	/**
@@ -350,7 +350,7 @@ final class MultiExponentiationArgumentService {
 								final GroupVector<ZqElement, ZqGroup> a_j = A.getColumn(j);
 								return getCiphertextVectorExponentiation(C_i, a_j);
 							})
-							.reduce(d_k, ElGamalMultiRecipientCiphertext::multiply);
+							.reduce(d_k, ElGamalMultiRecipientCiphertext::getCiphertextProduct);
 				})
 				.collect(toGroupVector());
 	}
@@ -426,8 +426,8 @@ final class MultiExponentiationArgumentService {
 				.boxed()
 				.flatMap(i -> Stream.of(i)
 						.map(E::get)
-						.map(E_k -> E_k.exponentiate(xPowers.apply(i))))
-				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
+						.map(E_k -> E_k.getCiphertextExponentiation(xPowers.apply(i))))
+				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::getCiphertextProduct);
 		final ElGamalMultiRecipientCiphertext encryptedGb = Stream.of(b)
 				.map(gqGroup.getGenerator()::exponentiate)
 				.map(g_b -> constantMessage(g_b, l))
@@ -439,8 +439,8 @@ final class MultiExponentiationArgumentService {
 						.map(__ -> xPowers.apply(m - i - 1))
 						.map(x_m_minus_i_minus_1 -> vectorScalarMultiplication(x_m_minus_i_minus_1, a))
 						.map(powers -> getCiphertextVectorExponentiation(C_matrix.getRow(i), powers)))
-				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::multiply);
-		final Verifiable verifEC = create(() -> prodE.equals(encryptedGb.multiply(prodC)),
+				.reduce(ElGamalMultiRecipientCiphertext.neutralElement(l, gqGroup), ElGamalMultiRecipientCiphertext::getCiphertextProduct);
+		final Verifiable verifEC = create(() -> prodE.equals(encryptedGb.getCiphertextProduct(prodC)),
 				"product E must equal ciphertext product of Gb and product C.");
 
 		return verifCbm.and(verifEm).and(verifA).and(verifB).and(verifEC);

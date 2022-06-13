@@ -101,7 +101,7 @@ public class ShuffleService {
 								.map(e -> {
 									final int pi_i = pi.get(i);
 									final ElGamalMultiRecipientCiphertext C_pi_i = C.get(pi_i);
-									return e.multiply(C_pi_i);
+									return e.getCiphertextProduct(C_pi_i);
 								})
 						).toList();
 
