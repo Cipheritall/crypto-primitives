@@ -74,7 +74,7 @@ class TestShuffleArgumentGenerator {
 		final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 				.mapToObj(i -> getCiphertext(ones, randomness.get(i), publicKey)
-						.multiply(ciphertexts.get(permutation.get(i))))
+						.getCiphertextProduct(ciphertexts.get(permutation.get(i))))
 				.collect(toGroupVector());
 
 		final ShuffleStatement shuffleStatement = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
