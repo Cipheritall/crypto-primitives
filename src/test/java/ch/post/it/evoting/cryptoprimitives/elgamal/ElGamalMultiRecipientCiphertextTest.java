@@ -285,7 +285,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		// Expected multiplication result.
 		final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
 
-		assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB), String.format("assertion failed for: %s", description));
+		assertEquals(ciphertextRes, ciphertextA.getCiphertextProduct(ciphertextB), String.format("assertion failed for: %s", description));
 	}
 
 	@Test
@@ -312,7 +312,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 						group));
 		final ElGamalMultiRecipientCiphertext ciphertextRes = ElGamalMultiRecipientCiphertext.create(gammaRes, phisRes);
 
-		assertEquals(ciphertextRes, ciphertextA.multiply(ciphertextB));
+		assertEquals(ciphertextRes, ciphertextA.getCiphertextProduct(ciphertextB));
 	}
 
 	@Test
@@ -332,7 +332,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		// Create identity ciphertext.
 		final ElGamalMultiRecipientCiphertext ciphertextIdentity = ElGamalMultiRecipientCiphertext.neutralElement(2, group);
 
-		assertEquals(ciphertextA, ciphertextA.multiply(ciphertextIdentity));
+		assertEquals(ciphertextA, ciphertextA.getCiphertextProduct(ciphertextIdentity));
 	}
 
 	@Test
@@ -340,7 +340,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 	void multiplyWithNullOtherShouldThrow() {
 		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.create(validGamma, validPhis);
 
-		assertThrows(NullPointerException.class, () -> ciphertext.multiply(null));
+		assertThrows(NullPointerException.class, () -> ciphertext.getCiphertextProduct(null));
 	}
 
 	@Test
@@ -353,7 +353,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		final List<GqElement> otherGroupPhis = genOtherGroupPhis(otherGroup);
 		final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(otherGroupGamma, otherGroupPhis);
 
-		assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));
+		assertThrows(IllegalArgumentException.class, () -> ciphertext.getCiphertextProduct(other));
 	}
 
 	@Test
@@ -364,7 +364,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		final List<GqElement> differentSizePhis = List.of(validPhis.get(0));
 		final ElGamalMultiRecipientCiphertext other = ElGamalMultiRecipientCiphertext.create(validGamma, differentSizePhis);
 
-		assertThrows(IllegalArgumentException.class, () -> ciphertext.multiply(other));
+		assertThrows(IllegalArgumentException.class, () -> ciphertext.getCiphertextProduct(other));
 	}
 
 	@Test
@@ -378,7 +378,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, noOfMessageElements, randomService);
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalGenerator.encryptMessage(originalMessage, keyPair, zqGroup);
 
-		ElGamalMultiRecipientCiphertext exponentiatedCiphertext = ciphertext.exponentiate(exponent);
+		ElGamalMultiRecipientCiphertext exponentiatedCiphertext = ciphertext.getCiphertextExponentiation(exponent);
 		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText = ElGamalMultiRecipientMessage
 				.getMessage(exponentiatedCiphertext, keyPair.getPrivateKey());
 
