@@ -229,7 +229,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 		// Create the vector of shuffled ciphertexts:
 		// C' = ({4, (12, 16, 6)}, {1, (13, 4, 18)}, {1, (3, 6, 4)}, {13, (2, 3, 1)})
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> cPrime = IntStream.range(0, 4)
-				.mapToObj(i -> ElGamalMultiRecipientCiphertext.getCiphertext(ones, rho.get(i), publicKey).multiply(c.get(permutation.get(i))))
+				.mapToObj(i -> ElGamalMultiRecipientCiphertext.getCiphertext(ones, rho.get(i), publicKey).getCiphertextProduct(c.get(permutation.get(i))))
 				.collect(toGroupVector());
 
 		// Create the ShuffleArgumentService
@@ -375,7 +375,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, l);
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 					.mapToObj(i -> getCiphertext(ones, randomness.get(i), publicKey)
-							.multiply(ciphertexts.get(permutation.get(i))))
+							.getCiphertextProduct(ciphertexts.get(permutation.get(i))))
 					.collect(collectingAndThen(toList(), GroupVector::from));
 
 			shuffleStatement = new ShuffleStatement(ciphertexts, shuffledCiphertexts);
@@ -450,7 +450,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final ElGamalMultiRecipientMessage ones = ElGamalMultiRecipientMessage.ones(gqGroup, biggerL);
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = IntStream.range(0, N)
 					.mapToObj(i -> getCiphertext(ones, shuffleWitness.get_rho().get(i), longerPublicKey)
-							.multiply(longerCiphertexts.get(shuffleWitness.get_pi().get(i))))
+							.getCiphertextProduct(longerCiphertexts.get(shuffleWitness.get_pi().get(i))))
 					.collect(collectingAndThen(toList(), GroupVector::from));
 
 			final ShuffleStatement longerCiphertextsStatement = new ShuffleStatement(longerCiphertexts, shuffledCiphertexts);

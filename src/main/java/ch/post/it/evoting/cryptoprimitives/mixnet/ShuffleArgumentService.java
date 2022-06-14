@@ -152,7 +152,7 @@ class ShuffleArgumentService {
 				.map(C_vector::get)
 				.toList();
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computed_C_prime = IntStream.range(0, N)
-				.mapToObj(i -> encryptedOnes.get(i).multiply(C_pi.get(i)))
+				.mapToObj(i -> encryptedOnes.get(i).getCiphertextProduct(C_pi.get(i)))
 				.collect(toGroupVector());
 		checkArgument(C_prime.equals(computed_C_prime),
 				"The shuffled ciphertexts provided in the statement do not correspond to the re-encryption and shuffle of C under pi and rho.");
