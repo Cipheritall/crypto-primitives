@@ -73,7 +73,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @param other c_b, the ciphertext to be multiplied by {@code this}. Must be non null.
 	 * @return a ciphertext whose value is {@code this * other}.
 	 */
-	public ElGamalMultiRecipientCiphertext multiply(final ElGamalMultiRecipientCiphertext other) {
+	public ElGamalMultiRecipientCiphertext getCiphertextProduct(final ElGamalMultiRecipientCiphertext other) {
 		checkNotNull(other);
 		checkArgument(this.size() == other.size(), "Cannot multiply ciphertexts of different size.");
 		checkArgument(this.group.equals(other.group), "Cannot multiply ciphertexts of different groups.");
@@ -112,7 +112,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	 * @param exponent a, a {@code ZqElement}. Must be non null.
 	 * @return a ciphertext whose gamma and phis values are exponentiated with {@code exponent}.
 	 */
-	public ElGamalMultiRecipientCiphertext exponentiate(final ZqElement exponent) {
+	public ElGamalMultiRecipientCiphertext getCiphertextExponentiation(final ZqElement exponent) {
 		checkNotNull(exponent);
 		checkArgument(this.group.hasSameOrderAs(exponent.getGroup()));
 		final ZqElement a = exponent;
@@ -254,8 +254,8 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 			indices = indices.parallel();
 		}
 		return indices
-				.mapToObj(i -> C.get(i).exponentiate(a.get(i)))
-				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::multiply);
+				.mapToObj(i -> C.get(i).getCiphertextExponentiation(a.get(i)))
+				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::getCiphertextProduct);
 	}
 
 	/**
