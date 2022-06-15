@@ -23,16 +23,13 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Streams;
 
-import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 
 @DisplayName("A multi-recipient key pair")
 class ElGamalMultiRecipientKeyPairTest {
@@ -113,46 +110,5 @@ class ElGamalMultiRecipientKeyPairTest {
 			assertTrue(sk.getValue().compareTo(BigInteger.ZERO) >= 0);
 			assertTrue(sk.getValue().compareTo(q) < 0);
 		});
-	}
-
-	@Nested
-	@DisplayName("retrieved from a static call to from method")
-	class FromTest {
-		private final ElGamalMultiRecipientPrivateKey privateKey = keyPair.getPrivateKey();
-		private final GqElement generator = publicKeyGroup.getGenerator();
-
-		@Test
-		@DisplayName("with a null private key or a null generator throws a NullPointerException.")
-		void nullChecksTest() {
-			assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientKeyPair.from(null, generator));
-			assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientKeyPair.from(privateKey, null));
-		}
-
-		@Test
-		@DisplayName("with a private key and a generator of different group order throws an IllegalArgumentException.")
-		void differentGroupOrderTest() {
-			final GqElement generatorFromDifferentGroup = GroupTestData.getDifferentGqGroup(publicKeyGroup).getGenerator();
-
-			final IllegalArgumentException illegalArgumentException =
-					assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientKeyPair.from(privateKey, generatorFromDifferentGroup));
-
-			assertEquals("The private key and the generator must belong to groups of the same order.", illegalArgumentException.getMessage());
-		}
-
-		@Test
-		@DisplayName("with a private key and a generator returns a key pair whose private key is the one given as parameter.")
-		void keyPairHasExpectedPrivateKeyTest() {
-			final ElGamalMultiRecipientKeyPair elGamalMultiRecipientKeyPair = ElGamalMultiRecipientKeyPair.from(privateKey, generator);
-
-			assertEquals(privateKey, elGamalMultiRecipientKeyPair.getPrivateKey());
-		}
-
-		@Test
-		@DisplayName("with a private key and a generator returns a key pair whose public key is as expected.")
-		void keyPairHasExpectedPublicKeyTest() {
-			final ElGamalMultiRecipientKeyPair elGamalMultiRecipientKeyPair = ElGamalMultiRecipientKeyPair.from(privateKey, generator);
-
-			assertEquals(keyPair.getPublicKey(), elGamalMultiRecipientKeyPair.getPublicKey());
-		}
 	}
 }

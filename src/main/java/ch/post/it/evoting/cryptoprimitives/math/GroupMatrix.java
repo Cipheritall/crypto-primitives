@@ -31,6 +31,7 @@ import com.google.common.collect.Streams;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 
 /**
  * Represents a matrix of {@link GroupVectorElement} elements belonging to the same {@link MathematicalGroup} and having the same size. This

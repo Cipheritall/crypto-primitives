@@ -15,7 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.securitylevel;
 
-import static ch.post.it.evoting.cryptoprimitives.securitylevel.SigningParameters.RSASSA_PSS;
+import static ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SigningParameters.RSASSA_PSS;
+
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SigningParameters;
 
 /**
  * Represents the possible security levels.

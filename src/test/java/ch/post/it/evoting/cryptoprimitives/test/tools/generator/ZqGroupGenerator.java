@@ -23,7 +23,7 @@ import java.math.BigInteger;
 
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 

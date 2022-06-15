@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -31,6 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
+public
 class ZeroStatement {
 
 	private final GroupVector<GqElement, GqGroup> c_A;
@@ -53,7 +55,7 @@ class ZeroStatement {
 	 * @param c_B c<sub>B</sub>, a non-empty list of {@link GqElement}s.
 	 * @param y   The value defining the bilinear mapping.
 	 */
-	ZeroStatement(final GroupVector<GqElement, GqGroup> c_A, final GroupVector<GqElement, GqGroup> c_B, final ZqElement y) {
+	public ZeroStatement(final GroupVector<GqElement, GqGroup> c_A, final GroupVector<GqElement, GqGroup> c_B, final ZqElement y) {
 		// Null checking.
 		this.c_A = checkNotNull(c_A);
 		this.c_B = checkNotNull(c_B);
@@ -70,23 +72,23 @@ class ZeroStatement {
 		checkArgument(group.hasSameOrderAs(this.y.getGroup()), "The y value group must be of the same order as the group of the commitments.");
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_A() {
+	public GroupVector<GqElement, GqGroup> get_c_A() {
 		return c_A;
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_B() {
+	public GroupVector<GqElement, GqGroup> get_c_B() {
 		return c_B;
 	}
 
-	ZqElement get_y() {
+	public ZqElement get_y() {
 		return y;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return m;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

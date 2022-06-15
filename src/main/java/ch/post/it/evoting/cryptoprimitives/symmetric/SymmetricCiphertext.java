@@ -28,7 +28,7 @@ public class SymmetricCiphertext {
 	private final byte[] ciphertext;
 	private final byte[] nonce;
 
-	SymmetricCiphertext(final byte[] ciphertext, final byte[] nonce) {
+	public SymmetricCiphertext(final byte[] ciphertext, final byte[] nonce) {
 		checkNotNull(ciphertext);
 		checkNotNull(nonce);
 		this.ciphertext = Arrays.copyOf(ciphertext, ciphertext.length);

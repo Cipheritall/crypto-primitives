@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -26,6 +27,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+public
 class HadamardStatement {
 
 	private final GroupVector<GqElement, GqGroup> c_A;
@@ -45,7 +47,7 @@ class HadamardStatement {
 	 * @param c_A c<sub>A</sub>, the vectors of commitments to a matrix A
 	 * @param c_b  c<sub>b</sub>, the commitment to a vector b.
 	 */
-	HadamardStatement(final GroupVector<GqElement, GqGroup> c_A, final GqElement c_b) {
+	public HadamardStatement(final GroupVector<GqElement, GqGroup> c_A, final GqElement c_b) {
 		checkNotNull(c_A);
 		checkNotNull(c_b);
 
@@ -58,19 +60,19 @@ class HadamardStatement {
 				"The commitments A and commitment b must have the same group.");
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_A() {
+	public GroupVector<GqElement, GqGroup> get_c_A() {
 		return c_A;
 	}
 
-	GqElement get_c_b() {
+	public GqElement get_c_b() {
 		return c_b;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return m;
 	}
 }

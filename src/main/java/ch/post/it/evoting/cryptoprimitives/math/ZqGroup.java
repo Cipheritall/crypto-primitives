@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
+
 /**
  * Group of integers modulo q.
  *
