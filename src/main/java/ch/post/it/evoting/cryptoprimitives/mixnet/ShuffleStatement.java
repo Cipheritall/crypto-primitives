@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -31,6 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
+public
 class ShuffleStatement {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C;
@@ -54,7 +56,7 @@ class ShuffleStatement {
 	 * @param C_prime <b>C'</b>, the shuffled and re-encrypted ciphertexts as a {@link GroupVector}. All shuffled ciphertexts must
 	 *                have the same size.
 	 */
-	ShuffleStatement(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C,
+	public ShuffleStatement(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C,
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime) {
 
 		checkNotNull(C);
@@ -77,19 +79,19 @@ class ShuffleStatement {
 		this.group = C.getGroup();
 	}
 
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_C() {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_C() {
 		return C;
 	}
 
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_C_prime() {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_C_prime() {
 		return C_prime;
 	}
 
-	int get_N() {
+	public int get_N() {
 		return N;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

@@ -30,6 +30,8 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
+
 @State(Scope.Benchmark)
 public class ConversionServiceBenchmark {
 
@@ -43,7 +45,7 @@ public class ConversionServiceBenchmark {
 	@Fork(value = 1)
 	@Measurement(iterations = 4, time = 5)
 	public byte[] bigIntegerToByteArrayUsingJdk(final MyState state) {
-		return ConversionService.integerToByteArray(state.randomBigInteger);
+		return ConversionsInternal.integerToByteArray(state.randomBigInteger);
 	}
 
 	@Benchmark
@@ -51,7 +53,7 @@ public class ConversionServiceBenchmark {
 	@Fork(value = 1)
 	@Measurement(iterations = 4, time = 5)
 	public byte[] bigIntegerToByteArray(final MyState state) {
-		return ConversionServiceEquivalenceTest.integerToByteArraySpec(state.randomBigInteger);
+		return ConversionsEquivalenceTest.integerToByteArraySpec(state.randomBigInteger);
 	}
 
 	@State(Scope.Thread)

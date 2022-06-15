@@ -35,6 +35,7 @@ import com.google.common.collect.ForwardingList;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 import ch.post.it.evoting.cryptoprimitives.utils.Validations;
 
 /**

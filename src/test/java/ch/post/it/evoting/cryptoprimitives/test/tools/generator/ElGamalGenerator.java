@@ -21,20 +21,24 @@ import static ch.post.it.evoting.cryptoprimitives.test.tools.generator.GroupVect
 import java.util.List;
 import java.util.stream.Stream;
 
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamal;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 public class ElGamalGenerator {
+
+	private static final ElGamal elGamal = new ElGamalService();
 
 	private static final RandomService randomService = new RandomService();
 
@@ -55,21 +59,21 @@ public class ElGamalGenerator {
 	}
 
 	public ElGamalMultiRecipientPublicKey genRandomPublicKey(final int size) {
-		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPublicKey();
+		return elGamal.genKeyPair(group, size, randomService).getPublicKey();
 	}
 
 	public ElGamalMultiRecipientPrivateKey genRandomPrivateKey(final int size) {
-		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService).getPrivateKey();
+		return elGamal.genKeyPair(group, size, randomService).getPrivateKey();
 	}
 
 	public ElGamalMultiRecipientKeyPair genRandomKeyPair(final int size) {
-		return ElGamalMultiRecipientKeyPair.genKeyPair(group, size, randomService);
+		return elGamal.genKeyPair(group, size, randomService);
 	}
 
 	public ElGamalMultiRecipientCiphertext genRandomCiphertext(final int ciphertextSize) {
 		final ElGamalMultiRecipientMessage randomMessage = genRandomMessage(ciphertextSize);
 		final ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
-		return ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, genRandomPublicKey(ciphertextSize));
+		return elGamal.getCiphertext(randomMessage, randomExponent, genRandomPublicKey(ciphertextSize));
 	}
 
 	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> genRandomCiphertextVector(final int size, final int ciphertextSize) {
@@ -93,7 +97,7 @@ public class ElGamalGenerator {
 		final ElGamalMultiRecipientMessage randomMessage = genRandomMessage(numElements);
 		final ZqElement randomExponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 
-		return Stream.generate(() -> ElGamalMultiRecipientCiphertext.getCiphertext(randomMessage, randomExponent, publicKey))
+		return Stream.generate(() -> elGamal.getCiphertext(randomMessage, randomExponent, publicKey))
 				.limit(numCiphertexts).toList();
 	}
 
@@ -102,7 +106,7 @@ public class ElGamalGenerator {
 			final ZqGroup zqGroup) {
 		final RandomService randomService = new RandomService();
 		final ZqElement exponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
-		return ElGamalMultiRecipientCiphertext.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
+		return elGamal.getCiphertext(originalMessage, exponent, keyPair.getPublicKey());
 	}
 
 	public ElGamalMultiRecipientCiphertext otherCiphertext(final ElGamalMultiRecipientCiphertext element) {

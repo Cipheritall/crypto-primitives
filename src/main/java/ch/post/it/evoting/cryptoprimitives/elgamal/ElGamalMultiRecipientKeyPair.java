@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientKeyPairs;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.Random;
@@ -49,13 +50,7 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 	}
 
 	/**
-	 * Generates a key pair in the specified group and with the specified number of elements.
-	 *
-	 * @param numElements, N, the number of elements that each key (the public key and the private key) should be composed of. This value must be
-	 *                     greater than 0.
-	 * @param group        The {@link GqGroup} in which to generate the public keys. Not null.
-	 * @param random       a service providing randomness. Not null.
-	 * @return the generated key pair.
+	 * See {@link ElGamal#genKeyPair}
 	 */
 	public static ElGamalMultiRecipientKeyPair genKeyPair(final GqGroup group, final int numElements, final Random random) {
 		checkNotNull(random);
@@ -75,9 +70,23 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 						.toList();
 
 		final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
-		final ElGamalMultiRecipientPublicKey pk = sk.derivePublicKey(g);
+		final ElGamalMultiRecipientPublicKey pk = ElGamalMultiRecipientKeyPairs.derivePublicKey(sk, g);
 
 		return new ElGamalMultiRecipientKeyPair(sk, pk);
+	}
+
+	/**
+	 * See {@link ElGamal#from}
+	 */
+	public static ElGamalMultiRecipientKeyPair from(final ElGamalMultiRecipientPrivateKey privateKey, final GqElement generator) {
+		checkNotNull(privateKey);
+		checkNotNull(generator);
+		checkArgument(generator.getGroup().hasSameOrderAs(privateKey.getGroup()),
+				"The private key and the generator must belong to groups of the same order.");
+
+		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
+
+		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
 
 	public ElGamalMultiRecipientPublicKey getPublicKey() {
@@ -93,29 +102,6 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 	 */
 	public int size() {
 		return this.numElements;
-	}
-
-	/**
-	 * Returns a key pair containing the {@code private key} and its derived public key with the given {@code generator}.
-	 * <p>
-	 * The private key and the generator must comply with the following:
-	 *  <ul>
-	 *      <li>Must belong to groups of the same order.</li>
-	 * </ul>
-	 *
-	 * @param privateKey the private key from which the public key must be derived. Must be non-null and non-empty.
-	 * @param generator  the group generator to be used for the public key derivation. Must be non-null.
-	 * @return a key pair containing the private key and the derived public key.
-	 */
-	public static ElGamalMultiRecipientKeyPair from(final ElGamalMultiRecipientPrivateKey privateKey, final GqElement generator) {
-		checkNotNull(privateKey);
-		checkNotNull(generator);
-		checkArgument(generator.getGroup().hasSameOrderAs(privateKey.getGroup()),
-				"The private key and the generator must belong to groups of the same order.");
-
-		final ElGamalMultiRecipientPublicKey publicKey = privateKey.derivePublicKey(generator);
-
-		return new ElGamalMultiRecipientKeyPair(privateKey, publicKey);
 	}
 
 	public GqGroup getGroup() {

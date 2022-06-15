@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -57,39 +58,39 @@ public class ZeroArgument implements HashableList {
 		// Intentionally left blank.
 	}
 
-	GqElement get_c_A_0() {
+	public GqElement get_c_A_0() {
 		return c_A_0;
 	}
 
-	GqElement get_c_B_m() {
+	public GqElement get_c_B_m() {
 		return c_B_m;
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_d() {
+	public GroupVector<GqElement, GqGroup> get_c_d() {
 		return c_d;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_a_prime() {
+	public GroupVector<ZqElement, ZqGroup> get_a_prime() {
 		return a_prime;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_b_prime() {
+	public GroupVector<ZqElement, ZqGroup> get_b_prime() {
 		return b_prime;
 	}
 
-	ZqElement get_r_prime() {
+	public ZqElement get_r_prime() {
 		return r_prime;
 	}
 
-	ZqElement get_s_prime() {
+	public ZqElement get_s_prime() {
 		return s_prime;
 	}
 
-	ZqElement get_t_prime() {
+	public ZqElement get_t_prime() {
 		return t_prime;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return m;
 	}
 
@@ -97,7 +98,7 @@ public class ZeroArgument implements HashableList {
 		return n;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

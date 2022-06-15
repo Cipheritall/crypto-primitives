@@ -17,10 +17,10 @@ package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
-import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorAddition;
-import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorExponentiation;
-import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorMultiplication;
-import static ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.VectorUtils.vectorScalarMultiplication;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorAddition;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorExponentiation;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorMultiplication;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorScalarMultiplication;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;

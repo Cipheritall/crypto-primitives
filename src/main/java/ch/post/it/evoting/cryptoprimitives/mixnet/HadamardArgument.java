@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -68,15 +69,15 @@ public class HadamardArgument implements HashableList {
 		this.group = c_b.getGroup();
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_B() {
+	public GroupVector<GqElement, GqGroup> get_c_B() {
 		return c_b;
 	}
 
-	ZeroArgument get_zeroArgument() {
+	public ZeroArgument get_zeroArgument() {
 		return zeroArgument;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return m;
 	}
 
@@ -84,7 +85,7 @@ public class HadamardArgument implements HashableList {
 		return n;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

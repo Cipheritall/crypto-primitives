@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -31,6 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+public
 class ProductStatement {
 
 	private final GroupVector<GqElement, GqGroup> c_A;
@@ -46,7 +48,7 @@ class ProductStatement {
 	 * @param c_A <b><i>c</i></b><sub>A</sub>, a vector of {@link GqElement}s
 	 * @param b     <i>b</i>, a {@link ZqElement}
 	 */
-	ProductStatement(final GroupVector<GqElement, GqGroup> c_A, final ZqElement b) {
+	public ProductStatement(final GroupVector<GqElement, GqGroup> c_A, final ZqElement b) {
 		checkNotNull(c_A);
 		checkNotNull(b);
 		checkArgument(c_A.getGroup().hasSameOrderAs(b.getGroup()),
@@ -58,19 +60,19 @@ class ProductStatement {
 		this.group = c_A.getGroup();
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_A() {
+	public GroupVector<GqElement, GqGroup> get_c_A() {
 		return c_A;
 	}
 
-	ZqElement get_b() {
+	public ZqElement get_b() {
 		return b;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return this.m;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

@@ -28,6 +28,9 @@ import java.util.LinkedList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.internal.utils.VerificationFailure;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.VerificationSuccess;
+
 @DisplayName("A VerificationResult")
 class VerificationResultTest {
 

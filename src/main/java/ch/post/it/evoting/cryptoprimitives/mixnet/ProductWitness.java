@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -31,6 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
+public
 class ProductWitness {
 
 	private final GroupMatrix<ZqElement, ZqGroup> A;
@@ -49,7 +51,7 @@ class ProductWitness {
 	 * @param A A, a {@link GroupMatrix} of {@code ZqElements}
 	 * @param r <b><i>r</i></b>, a {@link GroupVector} of {@code ZqElements}
 	 */
-	ProductWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupVector<ZqElement, ZqGroup> r) {
+	public ProductWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupVector<ZqElement, ZqGroup> r) {
 		checkNotNull(A);
 		checkNotNull(r);
 		checkArgument(A.numColumns() == r.size(),
@@ -61,11 +63,11 @@ class ProductWitness {
 		this.r = r;
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> get_A() {
+	public GroupMatrix<ZqElement, ZqGroup> get_A() {
 		return A;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_r() {
+	public GroupVector<ZqElement, ZqGroup> get_r() {
 		return r;
 	}
 
