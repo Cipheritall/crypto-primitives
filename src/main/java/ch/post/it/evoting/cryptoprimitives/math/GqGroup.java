@@ -26,6 +26,8 @@ import java.util.Objects;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.internal.math.BigIntegerOperationsService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 

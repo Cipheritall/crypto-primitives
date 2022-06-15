@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -65,31 +66,31 @@ public class SingleValueProductArgument implements HashableList {
 		this.group = group;
 	}
 
-	GqElement get_c_d() {
+	public GqElement get_c_d() {
 		return c_d;
 	}
 
-	GqElement get_c_delta() {
+	public GqElement get_c_delta() {
 		return c_delta;
 	}
 
-	GqElement get_c_Delta() {
+	public GqElement get_c_Delta() {
 		return c_Delta;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_a_tilde() {
+	public GroupVector<ZqElement, ZqGroup> get_a_tilde() {
 		return a_tilde;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_b_tilde() {
+	public GroupVector<ZqElement, ZqGroup> get_b_tilde() {
 		return b_tilde;
 	}
 
-	ZqElement get_r_tilde() {
+	public ZqElement get_r_tilde() {
 		return r_tilde;
 	}
 
-	ZqElement get_s_tilde() {
+	public ZqElement get_s_tilde() {
 		return s_tilde;
 	}
 
@@ -97,7 +98,7 @@ public class SingleValueProductArgument implements HashableList {
 		return n;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

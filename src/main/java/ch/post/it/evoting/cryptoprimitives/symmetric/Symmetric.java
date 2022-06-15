@@ -17,6 +17,8 @@ package ch.post.it.evoting.cryptoprimitives.symmetric;
 
 import java.util.List;
 
+import ch.post.it.evoting.cryptoprimitives.internal.symmetric.SymmetricAuthenticatedEncryptionService;
+
 /**
  * Provides methods for symmetric encryption/decryption.
  */

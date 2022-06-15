@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -30,6 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
+public
 class SingleValueProductWitness {
 
 	private final GroupVector<ZqElement, ZqGroup> a;
@@ -44,7 +46,7 @@ class SingleValueProductWitness {
 	 * @param a (a<sub>0</sub>, ..., a<sub>n-1</sub>), the vector of elements
 	 * @param r r, the randomness
 	 */
-	SingleValueProductWitness(final GroupVector<ZqElement, ZqGroup> a, final ZqElement r) {
+	public SingleValueProductWitness(final GroupVector<ZqElement, ZqGroup> a, final ZqElement r) {
 		this.a = checkNotNull(a);
 		this.r = checkNotNull(r);
 
@@ -52,11 +54,11 @@ class SingleValueProductWitness {
 				"All elements must belong to the same group as the randomness");
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_a() {
+	public GroupVector<ZqElement, ZqGroup> get_a() {
 		return a;
 	}
 
-	ZqElement get_r() {
+	public ZqElement get_r() {
 		return r;
 	}
 

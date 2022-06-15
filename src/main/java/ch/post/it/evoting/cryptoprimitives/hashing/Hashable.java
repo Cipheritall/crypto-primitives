@@ -15,6 +15,8 @@
  */
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
+import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
+
 /**
  * Represents an object which can by hashed by the recursive hash algorithm {@link HashService#recursiveHash(Hashable...)}. This interface must NOT be
  * implemented directly. Instead classes should implement one of the sub-interfaces representing the particular hashable type. The collection of

@@ -15,26 +15,23 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import static ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientMessage.getMessage;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientObject;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
-import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 
 /**
  * An ElGamal multi-recipient ciphertext composed of a gamma and a list of phi (γ, 𝜙₀,..., 𝜙ₗ₋₁). The gamma is the left-hand side of a standard
@@ -53,6 +50,30 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 	private final GqElement gamma;
 	private final GroupVector<GqElement, GqGroup> phis;
 	private final GqGroup group;
+
+	/**
+	 * Creates a {@code ElGamalMultiRecipientCiphertext} using the specified gamma and phi values.
+	 *
+	 * @param gamma The gamma (i.e. first) element of the ciphertext. {@code gamma} must be a valid GqElement different from the GqGroup generator.
+	 * @param phis  The phi elements of the ciphertext, which must satisfy the following:
+	 *              <ul>
+	 *              <li>The list must be non-null.</li>
+	 *              <li>The list must not be empty.</li>
+	 *              <li>The list must not contain any null.</li>
+	 *              <li>All elements must be from the same Gq group as gamma.</li>
+	 *              </ul>
+	 * @return A new ElGamalMultiRecipientCiphertext with the specified gamma and phis
+	 */
+	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
+		checkNotNull(gamma);
+
+		final GroupVector<GqElement, GqGroup> phisVector = GroupVector.from(phis);
+
+		checkArgument(!phisVector.isEmpty(), "An ElGamalMultiRecipientCiphertext phis must be non empty.");
+		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");
+
+		return new ElGamalMultiRecipientCiphertext(gamma, phisVector);
+	}
 
 	// Private constructor without input validation. Used only to internally construct new ciphertext whose elements have already been validated.
 	private ElGamalMultiRecipientCiphertext(final GqElement gamma, final GroupVector<GqElement, GqGroup> phis) {
@@ -131,161 +152,6 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 				.collect(toGroupVector());
 
 		return new ElGamalMultiRecipientCiphertext(gamma, phi);
-	}
-
-	/**
-	 * Encrypts a message with the given public key and provided randomness.
-	 * <p>
-	 * The {@code message}, {@code exponent} and {@code publicKey} parameters must comply with the following:
-	 * <ul>
-	 *     <li>the message size must be at most the public key size.</li>
-	 *     <li>the message and the public key groups must be the same.</li>
-	 *     <li>the message and the exponent must belong to groups of same order.</li>
-	 * </ul>
-	 *
-	 * @param message   m, the plaintext message. Must be non null and not empty.
-	 * @param exponent  r, a random exponent. Must be non null.
-	 * @param publicKey pk, the public key to use to encrypt the message. Must be non null.
-	 * @return A ciphertext containing the encrypted message.
-	 */
-	public static ElGamalMultiRecipientCiphertext getCiphertext(final ElGamalMultiRecipientMessage message, final ZqElement exponent,
-			final ElGamalMultiRecipientPublicKey publicKey) {
-
-		checkNotNull(message);
-		checkNotNull(exponent);
-		checkNotNull(publicKey);
-		checkArgument(message.getGroup().hasSameOrderAs(exponent.getGroup()), "Exponent and message groups must be of the same order.");
-		checkArgument(message.getGroup().equals(publicKey.getGroup()), "Message and public key must belong to the same group. ");
-		checkArgument(0 < message.size(), "The message must contain at least one element.");
-		checkArgument(message.size() <= publicKey.size(), "There cannot be more message elements than public key elements.");
-
-		final ElGamalMultiRecipientMessage m = message;
-		final ZqElement r = exponent;
-		final ElGamalMultiRecipientPublicKey pk = publicKey;
-
-		final int l = m.size();
-		final GqElement g = pk.getGroup().getGenerator();
-
-		// Algorithm.
-		final GqElement gamma = g.exponentiate(r);
-
-		IntStream indices = IntStream.range(0, l);
-		if (ENABLE_PARALLEL_STREAMS) {
-			indices = indices.parallel();
-		}
-		final LinkedList<GqElement> phis = indices
-				.mapToObj(i -> pk.get(i).exponentiate(r).multiply(m.get(i)))
-				.collect(Collectors.toCollection(LinkedList::new));
-
-		return new ElGamalMultiRecipientCiphertext(gamma, GroupVector.from(phis));
-	}
-
-	/**
-	 * Creates a {@code ElGamalMultiRecipientCiphertext} using the specified gamma and phi values.
-	 *
-	 * @param gamma The gamma (i.e. first) element of the ciphertext. {@code gamma} must be a valid GqElement different from the GqGroup generator.
-	 * @param phis  The phi elements of the ciphertext, which must satisfy the following:
-	 *              <ul>
-	 *              <li>The list must be non-null.</li>
-	 *              <li>The list must not be empty.</li>
-	 *              <li>The list must not contain any null.</li>
-	 *              <li>All elements must be from the same Gq group as gamma.</li>
-	 *              </ul>
-	 * @return A new ElGamalMultiRecipientCiphertext with the specified gamma and phis
-	 */
-	public static ElGamalMultiRecipientCiphertext create(final GqElement gamma, final List<GqElement> phis) {
-		checkNotNull(gamma);
-
-		final GroupVector<GqElement, GqGroup> phisVector = GroupVector.from(phis);
-
-		checkArgument(!phisVector.isEmpty(), "An ElGamalMultiRecipientCiphertext phis must be non empty.");
-		checkArgument(gamma.getGroup().equals(phisVector.getGroup()), "Gamma and phis must belong to the same GqGroup.");
-
-		return new ElGamalMultiRecipientCiphertext(gamma, phisVector);
-	}
-
-	/**
-	 * Creates a neutral element for ciphertext multiplication.
-	 * <p>
-	 * The neutral element for ciphertext multiplication is (γ, 𝜙₀,..., 𝜙ₗ₋₁) = (1, 1, ..., 1).
-	 *
-	 * @param numPhi The number of phis in the neutral element.
-	 * @param group  The {@link GqGroup} of the neutral element.
-	 * @return A new {@link ElGamalMultiRecipientCiphertext} filled with ones.
-	 */
-	public static ElGamalMultiRecipientCiphertext neutralElement(final int numPhi, final GqGroup group) {
-		checkNotNull(group);
-		checkArgument(numPhi > 0, "The neutral ciphertext must have at least one phi.");
-
-		return create(group.getIdentity(), Stream.generate(group::getIdentity).limit(numPhi).toList());
-	}
-
-	/**
-	 * Takes a vector of ciphertexts, exponentiates them using the supplied exponents and returns the product of the exponentiated ciphertexts.
-	 * <p>
-	 * The {@code ciphertexts} and {@code exponents} parameters must comply with the following:
-	 * <ul>
-	 *     <li>the ciphertexts size must be equal to the exponents size.</li>
-	 *     <li>the ciphertexts and the exponents must belong to groups of same order.</li>
-	 * </ul>
-	 *
-	 * @param ciphertexts A List of {@code ElGamalMultiRecipientCiphertext}s, each element containing the same number of phis. Must be non null and
-	 *                    not empty.
-	 * @param exponents   A List of {@code ZqElement}s, of the same size as the ciphertexts list. Must be non null and not empty.
-	 * @return the product of the exponentiated ciphertexts.
-	 */
-	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(
-			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final GroupVector<ZqElement, ZqGroup> exponents) {
-
-		checkNotNull(ciphertexts);
-		checkNotNull(exponents);
-		checkArgument(!ciphertexts.isEmpty(), "Ciphertexts should not be empty");
-		checkArgument(ciphertexts.size() == exponents.size(), "There should be a matching ciphertext for every exponent.");
-		checkArgument(ciphertexts.getGroup().hasSameOrderAs(exponents.getGroup()), "Ciphertexts and exponents must be of the same group.");
-
-		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
-		final GroupVector<ZqElement, ZqGroup> a = exponents;
-		final int l = C.getElementSize();
-		final int n = a.size();
-
-		final ElGamalMultiRecipientCiphertext neutralElement = neutralElement(l, C.getGroup());
-		IntStream indices = IntStream.range(0, n);
-		if (ENABLE_PARALLEL_STREAMS) {
-			indices = indices.parallel();
-		}
-		return indices
-				.mapToObj(i -> C.get(i).getCiphertextExponentiation(a.get(i)))
-				.reduce(neutralElement, ElGamalMultiRecipientCiphertext::getCiphertextProduct);
-	}
-
-	/**
-	 * Partially decrypts the ciphertext.
-	 * <p>
-	 * The {@code secretKey} parameter must comply with the following:
-	 * <ul>
-	 *     <li>the secret key and the ciphertext belong to groups of same order.</li>
-	 *     <li>the secret key size is at least the size of the ciphertext size.</li>
-	 * </ul>
-	 *
-	 * @param secretKey sk, the secret key to be used for decrypting. Must be not null.
-	 * @return a new ciphertext with the partially decrypted plaintext message.
-	 */
-	public ElGamalMultiRecipientCiphertext getPartialDecryption(final ElGamalMultiRecipientPrivateKey secretKey) {
-
-		checkNotNull(secretKey);
-		checkArgument(this.getGroup().hasSameOrderAs(secretKey.getGroup()), "Ciphertext and secret key must belong to groups of same order.");
-		final int l = this.size();
-		final int k = secretKey.size();
-		checkArgument(0 < l, "The ciphertext must not be empty.");
-		checkArgument(l <= k, "There cannot be more message elements than private key elements.");
-
-		final ElGamalMultiRecipientCiphertext c = this;
-		final ElGamalMultiRecipientPrivateKey sk = secretKey;
-
-		final GqElement gamma = c.getGamma();
-		final GroupVector<GqElement, GqGroup> m = getMessage(c, sk).getElements();
-
-		return new ElGamalMultiRecipientCiphertext(gamma, m);
 	}
 
 	public GqElement getGamma() {

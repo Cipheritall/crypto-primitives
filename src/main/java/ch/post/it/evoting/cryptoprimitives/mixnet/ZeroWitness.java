@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -31,6 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
+public
 class ZeroWitness {
 
 	private final GroupMatrix<ZqElement, ZqGroup> A;
@@ -56,7 +58,7 @@ class ZeroWitness {
 	 * @param r    a non-empty vector of {@link ZqElement}s.
 	 * @param s    a non-empty vector of {@link ZqElement}s.
 	 */
-	ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupMatrix<ZqElement, ZqGroup> B,
+	public ZeroWitness(final GroupMatrix<ZqElement, ZqGroup> A, final GroupMatrix<ZqElement, ZqGroup> B,
 			final GroupVector<ZqElement, ZqGroup> r, final GroupVector<ZqElement, ZqGroup> s) {
 
 		// Null checking.
@@ -80,19 +82,19 @@ class ZeroWitness {
 		checkArgument(this.r.getGroup().equals(group), "The matrices and exponents are not from the same group.");
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> get_A() {
+	public GroupMatrix<ZqElement, ZqGroup> get_A() {
 		return A;
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> get_B() {
+	public GroupMatrix<ZqElement, ZqGroup> get_B() {
 		return B;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_r() {
+	public GroupVector<ZqElement, ZqGroup> get_r() {
 		return r;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_s() {
+	public GroupVector<ZqElement, ZqGroup> get_s() {
 		return s;
 	}
 

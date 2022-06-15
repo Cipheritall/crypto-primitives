@@ -21,6 +21,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import ch.post.it.evoting.cryptoprimitives.internal.math.BigIntegerOperationsService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.PrimesInternal;
+
 /**
  * Defines a Gq group element, ie elements of the quadratic residue group of order q and mod p.
  *
@@ -142,7 +145,7 @@ public final class GqElement extends GroupElement<GqGroup> {
 			final ArrayList<GqElement> p_vector = new ArrayList<>(r);
 			int count = 0;
 			while (count < r && current.compareTo(gqGroup.getP()) < 0) {
-				if (gqGroup.isGroupMember(current) && BigIntegerOperationsService.isSmallPrime(current)) {
+				if (gqGroup.isGroupMember(current) && PrimesInternal.isSmallPrime(current)) {
 					p_vector.add(new GqElement(current, gqGroup));
 					count++;
 				}
