@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
 
+import ch.post.it.evoting.cryptoprimitives.internal.math.BigIntegerOperationsService;
+
 /**
  * Element of the group of integers modulo q.
  *

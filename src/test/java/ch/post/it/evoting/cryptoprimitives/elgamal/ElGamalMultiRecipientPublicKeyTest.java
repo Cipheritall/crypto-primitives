@@ -33,6 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientPublicKeys;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
@@ -83,7 +84,7 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 	@Test
 	@DisplayName("obtained by combining null public keys")
 	void combinePublicKeysWithNullArgument() {
-		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientPublicKey.combinePublicKeys(null));
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(null));
 	}
 
 	@RepeatedTest(10)
@@ -92,7 +93,7 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 		final ElGamalMultiRecipientPublicKey pk1 = elGamalGenerator.genRandomPublicKey(2);
 		final ElGamalMultiRecipientPublicKey pk2 = elGamalGenerator.genRandomPublicKey(2);
 		final ElGamalMultiRecipientPublicKey resultingCombinedKey = assertDoesNotThrow(
-				() -> ElGamalMultiRecipientPublicKey.combinePublicKeys(GroupVector.of(pk1, pk2)));
+				() -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(GroupVector.of(pk1, pk2)));
 
 		final GqElement expectedPKElement1 = pk1.get(0).multiply(pk2.get(0));
 		final GqElement expectedPKElement2 = pk1.get(1).multiply(pk2.get(1));

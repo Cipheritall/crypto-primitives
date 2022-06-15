@@ -28,9 +28,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientCiphertexts;
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientMessages;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
@@ -65,8 +67,8 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	void testEncryptAndDecryptGivesOriginalMessage() {
 		final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		final ZqElement exponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
-		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
-		final ElGamalMultiRecipientMessage decryptedMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, keyPair.getPrivateKey());
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, keyPair.getPublicKey());
+		final ElGamalMultiRecipientMessage decryptedMessage = ElGamalMultiRecipientMessages.getMessage(ciphertext, keyPair.getPrivateKey());
 
 		assertEquals(message, decryptedMessage);
 	}
@@ -75,8 +77,8 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	void testEncryptAndDecryptWithLongerKeysGivesOriginalMessage() {
 		final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS + 1, randomService);
 		final ZqElement exponent = ZqElement.create(randomService.genRandomInteger(zqGroup.getQ()), zqGroup);
-		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
-		final ElGamalMultiRecipientMessage decryptedMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, keyPair.getPrivateKey());
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, keyPair.getPublicKey());
+		final ElGamalMultiRecipientMessage decryptedMessage = ElGamalMultiRecipientMessages.getMessage(ciphertext, keyPair.getPrivateKey());
 
 		assertEquals(message, decryptedMessage);
 	}
@@ -85,12 +87,12 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	void testEncryptAndDecryptWithDifferentKeysGivesDifferentMessage() {
 		final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		final ZqElement exponent = genNonZeroExponent(gqGroup.getQ());
-		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientKeyPair differentKeyPair;
 		do {
 			differentKeyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		} while (differentKeyPair.equals(keyPair));
-		final ElGamalMultiRecipientMessage differentMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, differentKeyPair.getPrivateKey());
+		final ElGamalMultiRecipientMessage differentMessage = ElGamalMultiRecipientMessages.getMessage(ciphertext, differentKeyPair.getPrivateKey());
 
 		assertNotEquals(message, differentMessage);
 	}
@@ -99,12 +101,12 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 	void testEncryptAndDecryptWithDifferentLongerKeysGivesDifferentMessage() {
 		final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS + 1, randomService);
 		final ZqElement exponent = genNonZeroExponent(gqGroup.getQ());
-		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, keyPair.getPublicKey());
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, keyPair.getPublicKey());
 		ElGamalMultiRecipientKeyPair differentKeyPair;
 		do {
 			differentKeyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS + 1, randomService);
 		} while (differentKeyPair.equals(keyPair));
-		final ElGamalMultiRecipientMessage differentMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, differentKeyPair.getPrivateKey());
+		final ElGamalMultiRecipientMessage differentMessage = ElGamalMultiRecipientMessages.getMessage(ciphertext, differentKeyPair.getPrivateKey());
 
 		assertNotEquals(message, differentMessage);
 	}
@@ -114,11 +116,11 @@ class ElGamalMultiRecipientEncryptionDecryptionTest {
 		final ElGamalMultiRecipientKeyPair keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, NUM_ELEMENTS, randomService);
 		final ZqElement exponent = genNonZeroExponent(gqGroup.getQ());
 		final ElGamalMultiRecipientPublicKey publicKey = keyPair.getPublicKey();
-		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
+		final ElGamalMultiRecipientCiphertext ciphertext = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, publicKey);
 		final List<ZqElement> privateKeyElements = keyPair.getPrivateKey().stream().collect(Collectors.toList());
 		privateKeyElements.add(genNonZeroExponent(gqGroup.getQ()));
 		final ElGamalMultiRecipientPrivateKey longerPrivateKey = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
-		final ElGamalMultiRecipientMessage otherMessage = ElGamalMultiRecipientMessage.getMessage(ciphertext, longerPrivateKey);
+		final ElGamalMultiRecipientMessage otherMessage = ElGamalMultiRecipientMessages.getMessage(ciphertext, longerPrivateKey);
 
 		assertEquals(message, otherMessage);
 	}

@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
+import static ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientCiphertexts.getPartialDecryption;
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -45,11 +46,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientCiphertexts;
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientMessages;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
@@ -170,7 +173,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 	@DisplayName("as neutral element contains only 1s")
 	void neutralElementTest() {
 		int n = new SecureRandom().nextInt(10) + 1;
-		ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertext.neutralElement(n, gqGroup);
+		ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertexts.neutralElement(n, gqGroup);
 
 		GqElement one = gqGroup.getIdentity();
 		List<GqElement> ones = Stream.generate(() -> one).limit(n + 1).toList();
@@ -182,14 +185,14 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 	@Test
 	@DisplayName("as neutral element with size 0 throws an IllegalArgumentException")
 	void neutralElementWithSizeZero() {
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientCiphertext.neutralElement(0, gqGroup));
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientCiphertexts.neutralElement(0, gqGroup));
 		assertEquals("The neutral ciphertext must have at least one phi.", exception.getMessage());
 	}
 
 	@Test
 	@DisplayName("as neutral element with null group throws a NullPointerException")
 	void neutralElementWithNullGroupTest() {
-		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertext.neutralElement(1, null));
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertexts.neutralElement(1, null));
 	}
 
 	private static GqElement genOtherGroupGamma(final GqGroup otherGroup) {
@@ -327,10 +330,10 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
 		ZqElement exponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 		ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
-		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertext.getCiphertext(message, exponent, publicKey);
+		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, publicKey);
 
 		// Create identity ciphertext.
-		final ElGamalMultiRecipientCiphertext ciphertextIdentity = ElGamalMultiRecipientCiphertext.neutralElement(2, group);
+		final ElGamalMultiRecipientCiphertext ciphertextIdentity = ElGamalMultiRecipientCiphertexts.neutralElement(2, group);
 
 		assertEquals(ciphertextA, ciphertextA.getCiphertextProduct(ciphertextIdentity));
 	}
@@ -379,7 +382,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		ElGamalMultiRecipientCiphertext ciphertext = ElGamalGenerator.encryptMessage(originalMessage, keyPair, zqGroup);
 
 		ElGamalMultiRecipientCiphertext exponentiatedCiphertext = ciphertext.getCiphertextExponentiation(exponent);
-		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText = ElGamalMultiRecipientMessage
+		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText = ElGamalMultiRecipientMessages
 				.getMessage(exponentiatedCiphertext, keyPair.getPrivateKey());
 
 		List<GqElement> exponentiatedOriginalMessageElements = originalMessage.stream()
@@ -413,11 +416,11 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 				.limit(elGamalMultiRecipientCiphertexts.size())
 				.collect(toGroupVector());
 
-		ElGamalMultiRecipientCiphertext ciphertextVectorExponentiation = ElGamalMultiRecipientCiphertext
+		ElGamalMultiRecipientCiphertext ciphertextVectorExponentiation = ElGamalMultiRecipientCiphertexts
 				.getCiphertextVectorExponentiation(elGamalMultiRecipientCiphertexts, exponents);
 
 		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText =
-				ElGamalMultiRecipientMessage.getMessage(ciphertextVectorExponentiation, keyPair.getPrivateKey());
+				ElGamalMultiRecipientMessages.getMessage(ciphertextVectorExponentiation, keyPair.getPrivateKey());
 
 		List<List<GqElement>> exponentiatedOriginalMessageElements = IntStream.range(0, originalMessages.size())
 				.mapToObj(i -> originalMessages.get(i).stream()
@@ -441,11 +444,11 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> emptyCipherTexts = GroupVector.of();
 		GroupVector<ZqElement, ZqGroup> emptyExponents = GroupVector.of();
 
-		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(null, emptyExponents));
-		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(emptyCipherTexts, null));
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertexts.getCiphertextVectorExponentiation(null, emptyExponents));
+		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientCiphertexts.getCiphertextVectorExponentiation(emptyCipherTexts, null));
 
 		IllegalArgumentException emptyIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(emptyCipherTexts, emptyExponents));
+				() -> ElGamalMultiRecipientCiphertexts.getCiphertextVectorExponentiation(emptyCipherTexts, emptyExponents));
 
 		assertEquals("Ciphertexts should not be empty", emptyIllegalArgumentException.getMessage());
 	}
@@ -472,7 +475,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 				.collect(toGroupVector());
 
 		IllegalArgumentException sizeIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(fiveCipherTexts, fourExponents));
+				() -> ElGamalMultiRecipientCiphertexts.getCiphertextVectorExponentiation(fiveCipherTexts, fourExponents));
 
 		assertEquals("There should be a matching ciphertext for every exponent.", sizeIllegalArgumentException.getMessage());
 
@@ -484,7 +487,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 				.collect(toGroupVector());
 
 		IllegalArgumentException differentQIllegalArgumentException = assertThrows(IllegalArgumentException.class,
-				() -> ElGamalMultiRecipientCiphertext.getCiphertextVectorExponentiation(fiveCipherTexts, fiveExponents));
+				() -> ElGamalMultiRecipientCiphertexts.getCiphertextVectorExponentiation(fiveCipherTexts, fiveExponents));
 		assertEquals("Ciphertexts and exponents must be of the same group.", differentQIllegalArgumentException.getMessage());
 	}
 
@@ -507,7 +510,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		@Test
 		@DisplayName("a null secret key parameter throws a NullPointerException.")
 		void getPartialDecryptionParametersShouldBeNotNull() {
-			assertThrows(NullPointerException.class, () -> ciphertext.getPartialDecryption(null));
+			assertThrows(NullPointerException.class, () -> getPartialDecryption(ciphertext, null));
 		}
 
 		@Test
@@ -518,7 +521,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 					new ElGamalGenerator(GroupTestData.getDifferentGqGroup(gqGroup)).genRandomPrivateKey(secretKeySize);
 
 			final IllegalArgumentException illegalArgumentException =
-					assertThrows(IllegalArgumentException.class, () -> ciphertext.getPartialDecryption(secretKey));
+					assertThrows(IllegalArgumentException.class, () -> getPartialDecryption(ciphertext, secretKey));
 
 			assertEquals("Ciphertext and secret key must belong to groups of same order.", illegalArgumentException.getMessage());
 		}
@@ -530,7 +533,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 			final ElGamalMultiRecipientPrivateKey secretKey = elGamalGenerator.genRandomPrivateKey(ciphertext.size() - 1);
 
 			final IllegalArgumentException illegalArgumentException =
-					assertThrows(IllegalArgumentException.class, () -> ciphertext.getPartialDecryption(secretKey));
+					assertThrows(IllegalArgumentException.class, () -> getPartialDecryption(ciphertext, secretKey));
 
 			assertEquals("There cannot be more message elements than private key elements.", illegalArgumentException.getMessage());
 		}
@@ -539,7 +542,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		@DisplayName("with correct parameters returns the expected result.")
 		void getPartialDecryptionReturnsExpectedResult() {
 
-			final ElGamalMultiRecipientCiphertext partialDecryption = assertDoesNotThrow(() -> ciphertext.getPartialDecryption(secretKey));
+			final ElGamalMultiRecipientCiphertext partialDecryption = assertDoesNotThrow(() -> getPartialDecryption(ciphertext, secretKey));
 
 			assertAll(
 					() -> assertEquals(ciphertext.getGamma(), partialDecryption.getGamma()),

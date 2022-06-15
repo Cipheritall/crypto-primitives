@@ -34,16 +34,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamal;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientKeyPair;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateKey;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.hashing.TestHashService;
+import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalService;
+import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.internal.hashing.TestHashService;
+import ch.post.it.evoting.cryptoprimitives.internal.zeroknowledgeproofs.ZeroKnowledgeProofService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
@@ -51,6 +54,7 @@ import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator
 
 class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 
+	private static final ElGamal elGamal = new ElGamalService();
 	private static final SecureRandom random = new SecureRandom();
 	private static final RandomService randomService = new RandomService();
 
@@ -75,7 +79,7 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		keyLength = random.nextInt(maxLength) + 1;
 		ciphertextLength = random.nextInt(keyLength) + 1;
 		ciphertexts = elGamalGenerator.genRandomCiphertextVector(numCiphertexts, ciphertextLength);
-		keyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, keyLength, randomService);
+		keyPair = elGamal.genKeyPair(gqGroup, keyLength, randomService);
 		auxiliaryInformation = Arrays.asList("a", "b");
 	}
 
@@ -278,7 +282,7 @@ class ZeroKnowledgeProofServiceTest extends TestGroupSetup {
 		void verifyDecryptionsWithDifferentNumberPublicKeyElements() {
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> otherCiphertexts = elGamalGenerator
 					.genRandomCiphertextVector(numCiphertexts, keyLength + 1);
-			final ElGamalMultiRecipientKeyPair otherKeyPair = ElGamalMultiRecipientKeyPair.genKeyPair(gqGroup, keyLength + 1, randomService);
+			final ElGamalMultiRecipientKeyPair otherKeyPair = elGamal.genKeyPair(gqGroup, keyLength + 1, randomService);
 			final VerifiableDecryptions otherVerifiableDecryptions = zeroKnowledgeProofservice
 					.genVerifiableDecryptions(otherCiphertexts, otherKeyPair, auxiliaryInformation);
 

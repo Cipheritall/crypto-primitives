@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -72,51 +73,51 @@ public class MultiExponentiationArgument implements HashableList {
 		this.group = group;
 	}
 
-	GqElement getc_A_0() {
+	public GqElement getc_A_0() {
 		return c_A_0;
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_B() {
+	public GroupVector<GqElement, GqGroup> get_c_B() {
 		return c_B;
 	}
 
-	GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_E() {
+	public GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> get_E() {
 		return E;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_a() {
+	public GroupVector<ZqElement, ZqGroup> get_a() {
 		return a;
 	}
 
-	ZqElement get_r() {
+	public ZqElement get_r() {
 		return r;
 	}
 
-	ZqElement get_b() {
+	public ZqElement get_b() {
 		return b;
 	}
 
-	ZqElement get_s() {
+	public ZqElement get_s() {
 		return s;
 	}
 
-	ZqElement get_tau() {
+	public ZqElement get_tau() {
 		return tau;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return m;
 	}
 
-	int get_n() {
+	public int get_n() {
 		return n;
 	}
 
-	int get_l() {
+	public int get_l() {
 		return l;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 

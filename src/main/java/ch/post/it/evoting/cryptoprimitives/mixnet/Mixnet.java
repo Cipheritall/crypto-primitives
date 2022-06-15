@@ -53,10 +53,8 @@ public interface Mixnet {
 	 *     <li>The ciphertext vector size must be 2 or greater and not bigger than q - 3</li>
 	 * </ul>
 	 *
-	 * @param ciphertexts         C, the un-shuffled ciphertexts. Must not be null and not contain null elements.
-	 * @param shuffledCiphertexts C', the shuffled and re-encrypted ciphertexts. Must not be null and not contain null elements.
-	 * @param shuffleArgument     the argument for the correctness of the re-encrypting shuffle. Must be non null.
-	 * @param publicKey           pk, the public key used for the re-encryption. Must be non null.
+	 * @param ciphertexts       C, the un-shuffled ciphertexts. Must not be null and not contain null elements.
+	 * @param publicKey         pk, the public key used for the re-encryption. Must be non null.
 	 * @return the result of the verification.
 	 */
 	VerificationResult verifyShuffle(final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts,

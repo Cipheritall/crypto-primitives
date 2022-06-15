@@ -20,7 +20,6 @@ package ch.post.it.evoting.cryptoprimitives.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Deque;
-import java.util.LinkedList;
 
 /**
  * Represents the result of a verification. Contains a list of errors in case of failure.
@@ -41,78 +40,5 @@ public interface VerificationResult {
 	 * error.
 	 */
 	Deque<String> getErrorMessages();
-}
-
-/**
- * Represents a successful verification.
- * <p>
- * This class is immutable.
- */
-class VerificationSuccess implements VerificationResult {
-
-	static final VerificationSuccess INSTANCE = new VerificationSuccess();
-
-	private VerificationSuccess() {
-		//Intentionally left blank
-	}
-
-	@Override
-	public boolean isVerified() {
-		return true;
-	}
-
-	@Override
-	public Deque<String> getErrorMessages() {
-		throw new UnsupportedOperationException();
-	}
-}
-
-/**
- * Represents a verification failure. Contains a collection of error messages.
- * <p>
- * This class is immutable.
- */
-class VerificationFailure implements VerificationResult {
-
-	private final Deque<String> errorMessages = new LinkedList<>();
-
-	private VerificationFailure(final LinkedList<String> errorMessages) {
-		this.errorMessages.addAll(errorMessages);
-	}
-
-	/**
-	 * Constructs a VerificationFailure with the given {@code initialErrorMessage}.
-	 *
-	 * @param initialErrorMessage the error message describing the failure. Not null.
-	 */
-	VerificationFailure(final String initialErrorMessage) {
-		checkNotNull(initialErrorMessage);
-		this.errorMessages.push(initialErrorMessage);
-	}
-
-	@Override
-	public boolean isVerified() {
-		return false;
-	}
-
-	@Override
-	public Deque<String> getErrorMessages() {
-		return new LinkedList<>(this.errorMessages);
-	}
-
-	/**
-	 * Creates a new VerificationFailure with an additional error message.
-	 *
-	 * @param errorMessage the error message to add. Must be not null.
-	 * @return a new VerificationResult containing the newly added {@code errorMessage}.
-	 */
-	VerificationFailure addErrorMessage(final String errorMessage) {
-		checkNotNull(errorMessage);
-
-		final LinkedList<String> copy = new LinkedList<>(errorMessages);
-		copy.push(errorMessage);
-
-		return new VerificationFailure(copy);
-	}
 }
 

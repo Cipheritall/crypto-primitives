@@ -250,6 +250,7 @@
 						<environmentVariables>
 							<SECURITY_LEVEL>TESTING_ONLY</SECURITY_LEVEL>
 						</environmentVariables>
+						<useModulePath>false</useModulePath>
 					</configuration>
 				</plugin>
 				<plugin>
