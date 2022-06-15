@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -27,6 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116"})
+public
 class HadamardWitness {
 
 	private final GroupMatrix<ZqElement, ZqGroup> A;
@@ -50,7 +52,7 @@ class HadamardWitness {
 	 * @param exponents  r, a vector of {@code ZqElements} of size <i>m</i>
 	 * @param randomness s, a {@code ZqElement}
 	 */
-	HadamardWitness(final GroupMatrix<ZqElement, ZqGroup> matrix, final GroupVector<ZqElement, ZqGroup> vector,
+	public HadamardWitness(final GroupMatrix<ZqElement, ZqGroup> matrix, final GroupVector<ZqElement, ZqGroup> vector,
 			final GroupVector<ZqElement, ZqGroup> exponents, final ZqElement randomness) {
 		checkNotNull(matrix);
 		checkNotNull(vector);
@@ -77,19 +79,19 @@ class HadamardWitness {
 				"The exponents r and the exponent s must have the same group.");
 	}
 
-	GroupMatrix<ZqElement, ZqGroup> get_A() {
+	public GroupMatrix<ZqElement, ZqGroup> get_A() {
 		return A;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_b() {
+	public GroupVector<ZqElement, ZqGroup> get_b() {
 		return b;
 	}
 
-	GroupVector<ZqElement, ZqGroup> get_r() {
+	public GroupVector<ZqElement, ZqGroup> get_r() {
 		return r;
 	}
 
-	ZqElement get_s() {
+	public ZqElement get_s() {
 		return s;
 	}
 }

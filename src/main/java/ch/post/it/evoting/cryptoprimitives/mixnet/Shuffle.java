@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -27,27 +28,28 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * Instances of this class are immutable.
  */
 public class Shuffle {
-	static final Shuffle EMPTY = new Shuffle(List.of(), Permutation.EMPTY, List.of());
+	public static final Shuffle EMPTY = new Shuffle(List.of(), Permutation.EMPTY, List.of());
 
 	private final List<ElGamalMultiRecipientCiphertext> ciphertexts;
 	private final Permutation permutation;
 	private final List<ZqElement> reEncryptionExponents;
 
-	Shuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final Permutation permutation, final List<ZqElement> reEncryptionExponents) {
+	public Shuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final Permutation permutation,
+			final List<ZqElement> reEncryptionExponents) {
 		this.ciphertexts = List.copyOf(ciphertexts);
 		this.permutation = permutation;
 		this.reEncryptionExponents = List.copyOf(reEncryptionExponents);
 	}
 
-	List<ElGamalMultiRecipientCiphertext> getCiphertexts() {
+	public List<ElGamalMultiRecipientCiphertext> getCiphertexts() {
 		return this.ciphertexts;
 	}
 
-	Permutation getPermutation() {
+	public Permutation getPermutation() {
 		return permutation;
 	}
 
-	List<ZqElement> getReEncryptionExponents() {
+	public List<ZqElement> getReEncryptionExponents() {
 		return reEncryptionExponents;
 	}
 }

@@ -5,13 +5,14 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 package ch.post.it.evoting.cryptoprimitives.mixnet;
 
@@ -32,7 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * Instances of this class are immutable.
  */
 @SuppressWarnings({"java:S100", "java:S116"})
-final class MultiExponentiationStatement {
+public final class MultiExponentiationStatement {
 
 	private final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> C_matrix;
 	private final ElGamalMultiRecipientCiphertext C;
@@ -57,7 +58,7 @@ final class MultiExponentiationStatement {
 	 * @param ciphertextC      C, the re-encrypted multi exponentiation product
 	 * @param commitmentA      c<sub>A</sub>, the commitment to the matrix A of size m
 	 */
-	MultiExponentiationStatement(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix,
+	public MultiExponentiationStatement(final GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> ciphertextMatrix,
 			final ElGamalMultiRecipientCiphertext ciphertextC, final GroupVector<GqElement, GqGroup> commitmentA) {
 
 		//Null checking
@@ -86,31 +87,31 @@ final class MultiExponentiationStatement {
 		this.l = ciphertextMatrix.getElementSize();
 	}
 
-	GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> get_C_matrix() {
+	public GroupMatrix<ElGamalMultiRecipientCiphertext, GqGroup> get_C_matrix() {
 		return C_matrix;
 	}
 
-	ElGamalMultiRecipientCiphertext get_C() {
+	public ElGamalMultiRecipientCiphertext get_C() {
 		return C;
 	}
 
-	GroupVector<GqElement, GqGroup> get_c_A() {
+	public GroupVector<GqElement, GqGroup> get_c_A() {
 		return c_A;
 	}
 
-	GqGroup getGroup() {
+	public GqGroup getGroup() {
 		return group;
 	}
 
-	int get_m() {
+	public int get_m() {
 		return m;
 	}
 
-	int get_n() {
+	public int get_n() {
 		return n;
 	}
 
-	int get_l() {
+	public int get_l() {
 		return l;
 	}
 

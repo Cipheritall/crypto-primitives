@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 
 /**
  * Representation of a mathematical group element.
