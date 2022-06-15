@@ -136,7 +136,6 @@ public final class MixnetService implements Mixnet {
 		checkNotNull(shuffledCiphertexts);
 		checkNotNull(shuffleArgument);
 		checkNotNull(publicKey);
-		checkArgument(shuffleArgument instanceof ShuffleArgument);
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = shuffledCiphertexts;
@@ -172,7 +171,7 @@ public final class MixnetService implements Mixnet {
 
 		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(pk, ck, randomService, shuffleHashService);
 
-		return shuffleArgumentService.verifyShuffleArgument(shuffleStatement, (ShuffleArgument) shuffleArgument, m, n);
+		return shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n);
 	}
 
 }
