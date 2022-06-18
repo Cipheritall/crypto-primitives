@@ -15,7 +15,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
@@ -53,20 +52,19 @@ public interface ElGamal {
 	 */
 	ElGamalMultiRecipientCiphertext neutralElement(final int numPhi, final GqGroup group);
 
-
-		/**
-		 * Decrypts a ciphertext to obtain the plaintext message.
-		 * <p>
-		 * The {@code ciphertext} and {@code secretKey} parameters must comply with the following:
-		 * <ul>
-		 *     <li>the ciphertext and the secret key must belong to groups of same order.</li>
-		 *     <li>the ciphertext size must be at most the secret key size.</li>
-		 * </ul>
-		 *
-		 * @param ciphertext c,	the ciphertext to be decrypted. Must be non null.
-		 * @param secretKey  sk, the secret key to be used for decrypting. Must be non null and not empty.
-		 * @return the decrypted plaintext message
-		 */
+	/**
+	 * Decrypts a ciphertext to obtain the plaintext message.
+	 * <p>
+	 * The {@code ciphertext} and {@code secretKey} parameters must comply with the following:
+	 * <ul>
+	 *     <li>the ciphertext and the secret key must belong to groups of same order.</li>
+	 *     <li>the ciphertext size must be at most the secret key size.</li>
+	 * </ul>
+	 *
+	 * @param ciphertext c,	the ciphertext to be decrypted. Must be non null.
+	 * @param secretKey  sk, the secret key to be used for decrypting. Must be non null and not empty.
+	 * @return the decrypted plaintext message
+	 */
 	ElGamalMultiRecipientMessage getMessage(final ElGamalMultiRecipientCiphertext ciphertext, final ElGamalMultiRecipientPrivateKey secretKey);
 
 	/**
@@ -89,10 +87,10 @@ public interface ElGamal {
 	/**
 	 * Generates a key pair in the specified group and with the specified number of elements.
 	 *
-	 * @param group         The {@link GqGroup} in which to generate the public keys. Not null.
-	 * @param numElements,  N, the number of elements that each key (the public key and the private key) should be composed of. This value must be
-	 *                      greater than 0.
-	 * @param random a service providing randomness. Not null.
+	 * @param group        The {@link GqGroup} in which to generate the public keys. Not null.
+	 * @param numElements, N, the number of elements that each key (the public key and the private key) should be composed of. This value must be
+	 *                     greater than 0.
+	 * @param random       a service providing randomness. Not null.
 	 * @return the generated key pair.
 	 */
 	ElGamalMultiRecipientKeyPair genKeyPair(final GqGroup group, final int numElements, final Random random);

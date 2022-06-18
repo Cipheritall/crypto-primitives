@@ -20,14 +20,14 @@ import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector
 import java.math.BigInteger;
 import java.util.stream.IntStream;
 
-import ch.post.it.evoting.cryptoprimitives.mixnet.HadamardStatement;
-import ch.post.it.evoting.cryptoprimitives.mixnet.HadamardWitness;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.mixnet.HadamardStatement;
+import ch.post.it.evoting.cryptoprimitives.mixnet.HadamardWitness;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
 class TestHadamardGenerators {

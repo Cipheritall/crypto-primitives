@@ -45,10 +45,10 @@ import org.mockito.MockedStatic;
 
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.TestHashService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
@@ -84,33 +84,28 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		private final BigInteger q = BigInteger.valueOf(5);
 		private final BigInteger g = BigInteger.valueOf(3);
 		private final GqGroup gqGroup = new GqGroup(p, q, g);
-		private final ZqGroup zqGroup = new ZqGroup(q);
-
 		private final GqElement gThree = GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup);
 		private final GqElement gFour = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
-		private final GqElement gFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
-		private final GqElement gNine = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
-
-		private final ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
-		private final ZqElement zTwo = ZqElement.create(BigInteger.valueOf(2), zqGroup);
-		private final ZqElement zThree = ZqElement.create(BigInteger.valueOf(3), zqGroup);
-
 		// Input arguments:
 		// bases = (4, 3)
 		// exponent = 3
 		// exponentiations = (9, 5)
 		// auxiliaryInformation = ("specific", "test", "values")
 		private final GroupVector<GqElement, GqGroup> bases = GroupVector.of(gFour, gThree);
-		private final ZqElement exponent = zThree;
+		private final GqElement gFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
+		private final GqElement gNine = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
 		private final GroupVector<GqElement, GqGroup> exponentiations = GroupVector.of(gNine, gFive);
-		private final List<String> auxiliaryInformation = Arrays.asList("specific", "test", "values");
-
+		private final ZqGroup zqGroup = new ZqGroup(q);
+		private final ZqElement zOne = ZqElement.create(BigInteger.ONE, zqGroup);
+		private final ZqElement zTwo = ZqElement.create(BigInteger.valueOf(2), zqGroup);
 		// Output:
 		// e = 2
 		// z = 3
 		private final ZqElement e = zTwo;
+		private final ZqElement zThree = ZqElement.create(BigInteger.valueOf(3), zqGroup);
+		private final ZqElement exponent = zThree;
 		private final ZqElement z = zThree;
-
+		private final List<String> auxiliaryInformation = Arrays.asList("specific", "test", "values");
 		private final List<BigInteger> randomValues = Collections.singletonList(BigInteger.valueOf(2));
 
 		private RandomService getSpecificRandomService() {
@@ -118,7 +113,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 				final Iterator<BigInteger> values = randomValues.iterator();
 
 				@Override
-				public BigInteger genRandomInteger(BigInteger upperBound) {
+				public BigInteger genRandomInteger(final BigInteger upperBound) {
 					return values.next();
 				}
 			};
@@ -240,7 +235,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		@Test
 		void basesNotEmptyCheck() {
 			final GroupVector<GqElement, GqGroup> emptyBases = GroupVector.of();
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 					() -> proofService.genExponentiationProof(emptyBases, exponent, exponentiations, auxiliaryInformation));
 			assertEquals("The bases must contain at least 1 element.", exception.getMessage());
 		}
@@ -380,7 +375,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void differentAuxiliaryInformationReturnsFalse() {
-			TestValues testValues = new TestValues();
+			final TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
 			final GroupVector<GqElement, GqGroup> exponentiations = testValues.exponentiations;
 			final List<String> auxiliaryInformation = testValues.auxiliaryInformation;
@@ -392,7 +387,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void invalidProofReturnsFalse() {
-			TestValues testValues = new TestValues();
+			final TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
 			final GroupVector<GqElement, GqGroup> exponentiations = testValues.exponentiations;
 			final List<String> auxiliaryInformation = testValues.auxiliaryInformation;
@@ -405,7 +400,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void differentEponentiationsReturnsFalse() {
-			TestValues testValues = new TestValues();
+			final TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
 			final GroupVector<GqElement, GqGroup> exponentiations = testValues.exponentiations;
 			final GroupVector<GqElement, GqGroup> differentExponentiations = exponentiations.stream().map(y -> y.multiply(testValues.gNine))
@@ -418,7 +413,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 
 		@Test
 		void differentBasesReturnsFalse() {
-			TestValues testValues = new TestValues();
+			final TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
 			final GroupVector<GqElement, GqGroup> differentBases = bases.stream().map(g -> g.multiply(testValues.gFour))
 					.collect(GroupVector.toGroupVector());
@@ -439,7 +434,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 				final BigInteger q = context.get("q", BigInteger.class);
 				final BigInteger g = context.get("g", BigInteger.class);
 
-				try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
+				try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
 					mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(testParameters.getSecurityLevel());
 					final GqGroup gqGroup = new GqGroup(p, q, g);
 					final ZqGroup zqGroup = new ZqGroup(q);
