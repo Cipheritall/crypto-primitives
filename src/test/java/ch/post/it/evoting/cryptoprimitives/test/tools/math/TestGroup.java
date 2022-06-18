@@ -17,8 +17,8 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.math;
 
 import java.math.BigInteger;
 
-import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 
 public class TestGroup implements MathematicalGroup<TestGroup> {
 	@Override

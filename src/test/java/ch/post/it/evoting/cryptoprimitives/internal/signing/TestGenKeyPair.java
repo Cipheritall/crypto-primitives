@@ -23,7 +23,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import ch.post.it.evoting.cryptoprimitives.internal.signing.GenKeyPair;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 
 /**

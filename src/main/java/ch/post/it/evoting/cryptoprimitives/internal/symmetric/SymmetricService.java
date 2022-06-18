@@ -20,7 +20,6 @@ import java.util.List;
 import com.google.common.annotations.VisibleForTesting;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.internal.symmetric.SymmetricAuthenticatedEncryptionService;
 import ch.post.it.evoting.cryptoprimitives.symmetric.Symmetric;
 import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricCiphertext;
 

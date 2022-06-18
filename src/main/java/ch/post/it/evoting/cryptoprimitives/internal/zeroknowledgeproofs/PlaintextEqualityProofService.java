@@ -16,11 +16,11 @@
 package ch.post.it.evoting.cryptoprimitives.internal.zeroknowledgeproofs;
 
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.utils.Validations.allEqual;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorAddition;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorExponentiation;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorMultiplication;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorScalarMultiplication;
+import static ch.post.it.evoting.cryptoprimitives.utils.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,15 +30,15 @@ import java.util.List;
 import java.util.Objects;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
-import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
+import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs.PlaintextEqualityProof;

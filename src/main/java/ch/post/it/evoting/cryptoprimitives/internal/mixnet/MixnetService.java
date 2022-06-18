@@ -26,9 +26,9 @@ import com.google.common.annotations.VisibleForTesting;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.mixnet.Mixnet;
@@ -136,7 +136,6 @@ public final class MixnetService implements Mixnet {
 		checkNotNull(shuffledCiphertexts);
 		checkNotNull(shuffleArgument);
 		checkNotNull(publicKey);
-		checkArgument(shuffleArgument instanceof ShuffleArgument);
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C = ciphertexts;
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = shuffledCiphertexts;
@@ -172,7 +171,7 @@ public final class MixnetService implements Mixnet {
 
 		final ShuffleArgumentService shuffleArgumentService = new ShuffleArgumentService(pk, ck, randomService, shuffleHashService);
 
-		return shuffleArgumentService.verifyShuffleArgument(shuffleStatement, (ShuffleArgument) shuffleArgument, m, n);
+		return shuffleArgumentService.verifyShuffleArgument(shuffleStatement, shuffleArgument, m, n);
 	}
 
 }
