@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.15.0.0</version>
+	<version>0.15.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -21,6 +21,7 @@
 		<jnagmp.version>3.0.0</jnagmp.version>
 		<mockito.version>4.6.0</mockito.version>
 		<slf4j.version>1.7.36</slf4j.version>
+		<reproducible-build-maven-plugin.version>0.15</reproducible-build-maven-plugin.version>
 
 		<!-- Plugins versions -->
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
@@ -42,7 +43,7 @@
 		<maven-enforcer-plugin.requiredJavaVersion>[17.0.3]</maven-enforcer-plugin.requiredJavaVersion>
 		<maven-enforcer-plugin.requiredMavenVersion>3.8.5</maven-enforcer-plugin.requiredMavenVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.build.outputTimestamp>2022-06-18T08:21:54+02:00</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2022-06-18T14:44:10+02:00</project.build.outputTimestamp>
 
 		<!--  Sonar  -->
 		<sonar.scm.disabled>true</sonar.scm.disabled>
@@ -307,6 +308,19 @@
 						</execution>
 					</executions>
 				</plugin>
+				<plugin>
+					<groupId>io.github.zlika</groupId>
+					<artifactId>reproducible-build-maven-plugin</artifactId>
+					<version>${reproducible-build-maven-plugin.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>strip-jar</goal>
+								<goal>strip-jaxb</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -388,6 +402,10 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.github.zlika</groupId>
+				<artifactId>reproducible-build-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
