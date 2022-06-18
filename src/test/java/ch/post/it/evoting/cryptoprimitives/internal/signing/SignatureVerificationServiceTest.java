@@ -59,25 +59,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
+import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
 
 @DisplayName("SignatureService calling")
 class SignatureVerificationServiceTest {
 
+	private static final Hashable message = HashableString.from("message");
+	private static final byte[] signature = "signature".getBytes();
+	private static final Hashable additionalContextData = HashableList.of(HashableString.from("context"), HashableBigInteger.from(BigInteger.ONE),
+			HashableString.from("1234"));
 	private static String authorityId;
 	private static KeyStore trustStore;
 	private static HashService hashService;
 	private static SignatureGenerationService signatureGenerationService;
 	private static SignatureVerificationService signatureVerificationService;
-	private static final Hashable message = HashableString.from("message");
-	private static final byte[] signature = "signature".getBytes();
-	private static final Hashable additionalContextData = HashableList.of(HashableString.from("context"), HashableBigInteger.from(BigInteger.ONE),
-			HashableString.from("1234"));
 
 	@BeforeAll
 	static void init() throws NoSuchAlgorithmException, CertificateException, IOException, OperatorCreationException, KeyStoreException {

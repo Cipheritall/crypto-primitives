@@ -31,11 +31,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.mixnet.ProductWitness;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.mixnet.ProductWitness;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
@@ -71,43 +71,43 @@ class ProductWitnessTest {
 	@Test
 	@DisplayName("Instantiating a ProductWitness with exponents longer than the number of matrix columns throws an IllegalArgumentException")
 	void constructProductWitnessWithTooLongExponents() {
-		GroupVector<ZqElement, ZqGroup> tooLongExponents = generator.genRandomZqElementVector(m + 1);
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, tooLongExponents));
+		final GroupVector<ZqElement, ZqGroup> tooLongExponents = generator.genRandomZqElementVector(m + 1);
+		final Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, tooLongExponents));
 		assertEquals("The number of columns in the matrix must be equal to the number of exponents.", exception.getMessage());
 	}
 
 	@Test
 	@DisplayName("Instantiating a ProductWitness with the matrix and the exponents from different groups throws an IllegalArgumentException")
 	void constructProductWitnessWithMatrixAndExponentsFromDifferentGroup() {
-		ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
-		ZqGroupGenerator differentGenerator = new ZqGroupGenerator(differentZqGroup);
-		GroupVector<ZqElement, ZqGroup> differentExponents = differentGenerator.genRandomZqElementVector(m);
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, differentExponents));
+		final ZqGroup differentZqGroup = GroupTestData.getDifferentZqGroup(zqGroup);
+		final ZqGroupGenerator differentGenerator = new ZqGroupGenerator(differentZqGroup);
+		final GroupVector<ZqElement, ZqGroup> differentExponents = differentGenerator.genRandomZqElementVector(m);
+		final Exception exception = assertThrows(IllegalArgumentException.class, () -> new ProductWitness(matrix, differentExponents));
 		assertEquals("The matrix and the exponents must belong to the same group.", exception.getMessage());
 	}
 
 	@Test
 	@DisplayName("The equals method returns true if and only if the matrix and exponents are the same")
 	void testEquals() {
-		ProductWitness witness1 = new ProductWitness(matrix, exponents);
-		ProductWitness witness2 = new ProductWitness(matrix, exponents);
+		final ProductWitness witness1 = new ProductWitness(matrix, exponents);
+		final ProductWitness witness2 = new ProductWitness(matrix, exponents);
 
-		ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
-		List<ZqElement> exponentsValues = new ArrayList<>(exponents);
+		final ZqElement one = ZqElement.create(BigInteger.ONE, zqGroup);
+		final List<ZqElement> exponentsValues = new ArrayList<>(exponents);
 		ZqElement first = exponentsValues.get(0);
 		first = first.add(one);
 		exponentsValues.set(0, first);
-		GroupVector<ZqElement, ZqGroup> differentExponents = GroupVector.from(exponentsValues);
-		ProductWitness witness3 = new ProductWitness(matrix, differentExponents);
+		final GroupVector<ZqElement, ZqGroup> differentExponents = GroupVector.from(exponentsValues);
+		final ProductWitness witness3 = new ProductWitness(matrix, differentExponents);
 
-		List<List<ZqElement>> matrixValues = IntStream.range(0, m)
+		final List<List<ZqElement>> matrixValues = IntStream.range(0, m)
 				.mapToObj(j -> new ArrayList<>(matrix.getColumn(j)))
 				.collect(Collectors.toCollection(ArrayList::new));
 		first = matrixValues.get(0).get(0);
 		first = first.add(one);
 		matrixValues.get(0).set(0, first);
-		GroupMatrix<ZqElement, ZqGroup> differentMatrix = GroupMatrix.fromColumns(matrixValues);
-		ProductWitness witness4 = new ProductWitness(differentMatrix, exponents);
+		final GroupMatrix<ZqElement, ZqGroup> differentMatrix = GroupMatrix.fromColumns(matrixValues);
+		final ProductWitness witness4 = new ProductWitness(differentMatrix, exponents);
 
 		assertAll(
 				() -> assertEquals(witness1, witness2),

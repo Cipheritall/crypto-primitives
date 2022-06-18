@@ -17,8 +17,6 @@
  */
 package ch.post.it.evoting.cryptoprimitives.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Deque;
 
 /**

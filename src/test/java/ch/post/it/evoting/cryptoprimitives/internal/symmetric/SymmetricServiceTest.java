@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import com.google.common.base.Throwables;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.internal.symmetric.SymmetricService;
 import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricCiphertext;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 
