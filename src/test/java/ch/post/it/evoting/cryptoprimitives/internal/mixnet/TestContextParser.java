@@ -25,7 +25,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.internal.mixnet.CommitmentKey;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;

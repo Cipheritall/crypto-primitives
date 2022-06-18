@@ -18,10 +18,10 @@ package ch.post.it.evoting.cryptoprimitives.test.tools.generator;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
 import ch.post.it.evoting.cryptoprimitives.internal.mixnet.MatrixUtils;
-import ch.post.it.evoting.cryptoprimitives.mixnet.ShuffleArgument;
 import ch.post.it.evoting.cryptoprimitives.internal.mixnet.TestArgumentGenerator;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
+import ch.post.it.evoting.cryptoprimitives.mixnet.ShuffleArgument;
 import ch.post.it.evoting.cryptoprimitives.mixnet.VerifiableShuffle;
 
 public class VerifiableShuffleGenerator {

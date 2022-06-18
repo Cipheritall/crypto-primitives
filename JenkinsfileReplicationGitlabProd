@@ -1,4 +1,4 @@
-#!/bin/bash +x
+#!groovy
 /*
 * Copyright 2022 Post CH Ltd
 *

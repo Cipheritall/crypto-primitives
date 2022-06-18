@@ -17,12 +17,12 @@ package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 
 import java.math.BigInteger;
 
-import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductStatement;
-import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductWitness;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductStatement;
+import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductWitness;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 

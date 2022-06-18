@@ -3,7 +3,6 @@
 * Copyright 2022 Post CH Ltd
 *
 */
-
 @Library('pipeline-library@master') _
 
 def BUILD_INFO = Artifactory.newBuildInfo()
@@ -34,14 +33,14 @@ pipeline {
 	}
 
 	tools {
-        jdk "${JDK}"
+		jdk "${JDK}"
 		maven "${MAVEN}"
 	}
 
-    environment {
-        MAVEN_OPTS = '-Xms512m -Xmx768m -Djava.awt.headless=true'
-        //workaround for https://gitit.post.ch/projects/JENKINS/repos/jenkins-slave-selenium/browse/Dockerfile#15
-    }
+	environment {
+		MAVEN_OPTS = '-Xms512m -Xmx768m -Djava.awt.headless=true'
+		//workaround for https://gitit.post.ch/projects/JENKINS/repos/jenkins-slave-selenium/browse/Dockerfile#15
+	}
 
 	stages {
 
@@ -76,7 +75,7 @@ pipeline {
 					anyOf {
 						branch 'develop'
 						branch 'master'
-                        branch 'hotfix/*'
+						branch 'hotfix/*'
 					}
 				}
 			}
@@ -95,7 +94,7 @@ pipeline {
 				anyOf {
 					branch 'develop'
 					branch 'master'
-                    branch 'hotfix/*'
+					branch 'hotfix/*'
 				}
 			}
 			steps {
@@ -126,7 +125,7 @@ pipeline {
 				anyOf {
 					branch 'master'
 					branch 'develop'
-                    branch 'hotfix/*'
+					branch 'hotfix/*'
 				}
 			}
 			environment {
@@ -144,7 +143,7 @@ pipeline {
 					anyOf {
 						branch 'master'
 						branch 'develop'
-                        branch 'hotfix/*'
+						branch 'hotfix/*'
 					}
 				}
 			}

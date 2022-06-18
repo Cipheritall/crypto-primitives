@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.security.KeyPair;
 import java.util.function.Supplier;
 
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SigningParameters;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 
 public class GenKeyPair implements Supplier<KeyPair> {
 

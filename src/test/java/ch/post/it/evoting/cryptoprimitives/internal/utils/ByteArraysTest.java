@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.base.Throwables;
 
-import ch.post.it.evoting.cryptoprimitives.internal.utils.ByteArrays;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 

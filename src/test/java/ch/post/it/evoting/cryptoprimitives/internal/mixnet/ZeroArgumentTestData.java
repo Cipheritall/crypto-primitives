@@ -23,15 +23,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroStatement;
-import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroWitness;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroStatement;
+import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroWitness;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 
