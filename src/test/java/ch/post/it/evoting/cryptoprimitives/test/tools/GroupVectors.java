@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 
 public class GroupVectors {
 

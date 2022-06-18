@@ -15,10 +15,10 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.elgamal;
 
-import static ch.post.it.evoting.cryptoprimitives.math.GqGroup.isGroupMember;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.byteArrayToInteger;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.integerToByteArray;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.stringToByteArray;
+import static ch.post.it.evoting.cryptoprimitives.math.GqGroup.isGroupMember;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;

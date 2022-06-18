@@ -39,10 +39,8 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.internal.signing.CertificateInfo;
-import ch.post.it.evoting.cryptoprimitives.math.Random;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SigningParameters;
+import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 
 class GetCertificate implements BiFunction<KeyPair, CertificateInfo, X509Certificate> {
 

@@ -17,9 +17,9 @@ package ch.post.it.evoting.cryptoprimitives.internal.elgamal;
 
 import java.util.stream.Stream;
 
+import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupElement;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVectorElement;
-import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 
 /**
  * Defines a common API for El Gamal multi-recipient objects.

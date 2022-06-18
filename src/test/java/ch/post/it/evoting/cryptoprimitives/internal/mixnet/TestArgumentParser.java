@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
-import ch.post.it.evoting.cryptoprimitives.mixnet.HadamardArgument;
-import ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationArgument;
-import ch.post.it.evoting.cryptoprimitives.mixnet.ProductArgument;
-import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductArgument;
-import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroArgument;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.mixnet.HadamardArgument;
+import ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationArgument;
+import ch.post.it.evoting.cryptoprimitives.mixnet.ProductArgument;
+import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductArgument;
+import ch.post.it.evoting.cryptoprimitives.mixnet.ZeroArgument;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 
 class TestArgumentParser {

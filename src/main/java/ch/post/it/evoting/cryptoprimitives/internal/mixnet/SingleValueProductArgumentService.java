@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 
-import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.internal.mixnet.CommitmentService.getCommitment;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.Verifiable.create;
+import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,19 +27,19 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
-import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
+import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
+import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductArgument;
 import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductStatement;
 import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductWitness;
-import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
-import ch.post.it.evoting.cryptoprimitives.internal.utils.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
 
 /**

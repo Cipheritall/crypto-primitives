@@ -37,9 +37,9 @@ import javax.crypto.spec.SecretKeySpec;
 import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 import ch.post.it.evoting.cryptoprimitives.symmetric.Symmetric;
 import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricCiphertext;
-import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 
 @SuppressWarnings({ "java:S116", "java:S117" })
 public class SymmetricAuthenticatedEncryptionService {
@@ -119,7 +119,7 @@ public class SymmetricAuthenticatedEncryptionService {
 		final Cipher cipher;
 		try {
 			cipher = getCipher(encryptionKey, nonce, Cipher.ENCRYPT_MODE);
-		} catch (InvalidAlgorithmParameterException e) {
+		} catch (final InvalidAlgorithmParameterException e) {
 			throw new IllegalStateException("Configured algorithm parameters are invalid or inappropriate.", e);
 		}
 
@@ -127,9 +127,9 @@ public class SymmetricAuthenticatedEncryptionService {
 
 		try {
 			return cipher.doFinal(plaintext);
-		} catch (BadPaddingException e) {
+		} catch (final BadPaddingException e) {
 			throw new IllegalStateException("We should never get this exception since it is only thrown in decryption mode.");
-		} catch (IllegalBlockSizeException e) {
+		} catch (final IllegalBlockSizeException e) {
 			throw new IllegalStateException("We should never get this exception since our algorithm is not a block cipher.");
 		}
 	}
@@ -139,7 +139,7 @@ public class SymmetricAuthenticatedEncryptionService {
 		final Cipher cipher;
 		try {
 			cipher = getCipher(encryptionKey, nonce, Cipher.DECRYPT_MODE);
-		} catch (InvalidAlgorithmParameterException e) {
+		} catch (final InvalidAlgorithmParameterException e) {
 			throw new IllegalArgumentException("Error with the given nonce during Cipher initialization", e);
 		}
 
@@ -147,9 +147,9 @@ public class SymmetricAuthenticatedEncryptionService {
 
 		try {
 			return cipher.doFinal(ciphertext);
-		} catch (BadPaddingException e) {
+		} catch (final BadPaddingException e) {
 			throw new IllegalStateException("We should never get this exception since no padding is needed for the configured algorithm.", e);
-		} catch (IllegalBlockSizeException e) {
+		} catch (final IllegalBlockSizeException e) {
 			throw new IllegalStateException("We should never get this exception since our algorithm is not a block cipher.", e);
 		}
 	}
@@ -160,7 +160,7 @@ public class SymmetricAuthenticatedEncryptionService {
 		final Cipher cipher;
 		try {
 			cipher = Cipher.getInstance(this.algorithm.getAlgorithmName());
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+		} catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw new IllegalStateException("Requested cryptographic algorithm or padding in the algorithm is not available in the environment.", e);
 		}
 
@@ -173,7 +173,7 @@ public class SymmetricAuthenticatedEncryptionService {
 		// Initialize Cipher for the authentication
 		try {
 			cipher.init(opmode, key, params);
-		} catch (InvalidKeyException e) {
+		} catch (final InvalidKeyException e) {
 			throw new IllegalArgumentException("Error with the given encryptionKey during Cipher initialization", e);
 		}
 
