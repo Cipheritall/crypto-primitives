@@ -127,43 +127,4 @@ class GqElementFactoryTest {
 		assertEquals(GqElementFactory.fromSquareRoot(two, group), resultFour);
 		assertEquals(GqElementFactory.fromSquareRoot(five, group), resultTwo);
 	}
-
-	@Test
-	void testGetSmallGroupMembersOk() {
-		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
-		final GroupVector<GqElement, GqGroup> primes = GqElementFactory.getSmallPrimeGroupMembers(gqGroup, 3);
-		assertEquals(3, primes.size());
-		assertEquals(BigInteger.valueOf(7), primes.get(0).getValue());
-		assertEquals(BigInteger.valueOf(17), primes.get(1).getValue());
-		assertEquals(BigInteger.valueOf(37), primes.get(2).getValue());
-	}
-
-	@Test
-	void testGetSmallGroupMembersTooSmallRThrows() {
-		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> GqElementFactory.getSmallPrimeGroupMembers(gqGroup, 0));
-		assertEquals("The desired number of primes must be strictly positive", exception.getMessage());
-	}
-
-	@Test
-	void testGetSmallGroupMembersTooBigRThrows() {
-		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> GqElementFactory.getSmallPrimeGroupMembers(gqGroup, 23));
-		assertEquals("The number of desired primes must be smaller than the number of elements in the GqGroup by at least 4", exception.getMessage());
-
-		final GqGroup bigGqGroup = new GqGroup(BigInteger.valueOf(20123), BigInteger.valueOf(10061), BigInteger.valueOf(3));
-		exception = assertThrows(IllegalArgumentException.class,
-				() -> GqElementFactory.getSmallPrimeGroupMembers(bigGqGroup, 10000));
-		assertEquals("The number of desired primes must be smaller than 10000", exception.getMessage());
-	}
-
-	@Test
-	void testGetSmallGroupMembersNotEnoughPrimesThrows() {
-		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));
-		final IllegalStateException exception = assertThrows(IllegalStateException.class,
-				() -> GqElementFactory.getSmallPrimeGroupMembers(gqGroup, 4));
-		assertEquals("The number of primes found does not correspond to the number of desired primes.", exception.getMessage());
-	}
 }

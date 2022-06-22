@@ -24,7 +24,7 @@ import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
 /**
  * Representation of a mathematical group element.
  *
- * <p>GroupElements are immutable.
+ * <p>Classes extending GroupElement should be made immutable.
  *
  * @param <G> the type of the mathematical group this group element belongs to.
  */
