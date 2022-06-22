@@ -24,7 +24,7 @@ import java.math.BigInteger;
 
 public class PrimesInternal {
 	private PrimesInternal() {
-		//Intentionally left lank
+		//Intentionally left blank
 	}
 
 	/**

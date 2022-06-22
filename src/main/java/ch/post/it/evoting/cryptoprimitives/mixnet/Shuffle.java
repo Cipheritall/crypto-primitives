@@ -27,12 +27,9 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * <p>
  * Instances of this class are immutable.
  */
-public class Shuffle {
+public record Shuffle(List<ElGamalMultiRecipientCiphertext> ciphertexts,
+					  Permutation permutation, List<ZqElement> reEncryptionExponents) {
 	public static final Shuffle EMPTY = new Shuffle(List.of(), Permutation.EMPTY, List.of());
-
-	private final List<ElGamalMultiRecipientCiphertext> ciphertexts;
-	private final Permutation permutation;
-	private final List<ZqElement> reEncryptionExponents;
 
 	public Shuffle(final List<ElGamalMultiRecipientCiphertext> ciphertexts, final Permutation permutation,
 			final List<ZqElement> reEncryptionExponents) {
