@@ -30,7 +30,7 @@ public interface Symmetric {
 	 * @param encryptionKey  K ∈ B<sup>k</sup>. Not null.
 	 * @param plaintext      P ∈ B<sup>p</sup>. Not null.
 	 * @param associatedData (associated<sub>0</sub>,....,associated<sub>n-1</sub>) ∈ A<sub>UCS</sub><sup>*</sup>)<sup>n</sup>, s.t. n ∈ N. Not null.
-	 * @return The authenticated plaintext P ∈ B<sup>p</sup>. Throws an exception if the ciphertext does not authenticate.
+	 * @return The authenticated ciphertext C ∈ B<sup>c</sup> and the nonce ∈ B<sup>n</sup>.
 	 * @throws IllegalArgumentException if the given encryptionKey is invalid for this underlying algorithm.
 	 */
 	SymmetricCiphertext genCiphertextSymmetric(final byte[] encryptionKey, final byte[] plaintext, final List<String> associatedData);
@@ -42,7 +42,7 @@ public interface Symmetric {
 	 * @param ciphertext     C ∈ B<sup>c</sup>. Not null.
 	 * @param nonce          nonce ∈ B<sup>n</sup>. Not null.
 	 * @param associatedData (associated<sub>0</sub>,....,associated<sub>n-1</sub>) ∈ A<sub>UCS</sub><sup>*</sup>)<sup>n</sup>, s.t. n ∈ N. Not null.
-	 * @return plaintextSymmetric - AuthenticatedDecryption(K, nonce, associated, C)
+	 * @return The authenticated plaintext P ∈ B<sup>p</sup>. Throws an exception if the ciphertext does not authenticate.
 	 * @throws IllegalArgumentException if
 	 *                                  <ul>
 	 *                                      <li>the given encryptionKey is invalid for this underlying algorithm.</li>
