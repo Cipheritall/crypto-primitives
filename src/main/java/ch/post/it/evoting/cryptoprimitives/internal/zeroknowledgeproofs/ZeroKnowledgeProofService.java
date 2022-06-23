@@ -104,7 +104,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		final GroupVector<DecryptionProof, ZqGroup> pi_dec = IntStream.range(0, C.size())
 				.mapToObj(i -> {
 					final ElGamalMultiRecipientCiphertext c_i = C.get(i);
-					final ElGamalMultiRecipientMessage phi_prime = new ElGamalMultiRecipientMessage(C_prime.get(i).getPhi());
+					final ElGamalMultiRecipientMessage phi_prime = new ElGamalMultiRecipientMessage(C_prime.get(i).getPhis());
 					return decryptionProofService.genDecryptionProof(c_i, keyPair, phi_prime, i_aux);
 				})
 				.collect(toGroupVector());
@@ -148,7 +148,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 			final DecryptionProof pi_dec_i = pi_dec.get(i);
 
 			final ElGamalMultiRecipientCiphertext c_i_prime = C_prime.get(i);
-			final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(c_i_prime.getPhi());
+			final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(c_i_prime.getPhis());
 			return decryptionProofService.verifyDecryption(c_i, pk, m, pi_dec_i, i_aux);
 		}).reduce(Verifiable.create(() -> true, "This state is impossible to reach and indicates a bug."), Verifiable::and);
 

@@ -653,7 +653,7 @@ class ShuffleArgumentServiceTest extends TestGroupSetup {
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> shuffledCiphertexts = specificValues.statement.get_C_prime();
 			final int ciphertextToChangeIdx = 1;
 			final ElGamalMultiRecipientCiphertext shuffledCiphertext = shuffledCiphertexts.get(ciphertextToChangeIdx);
-			GroupVector<GqElement, GqGroup> phis = shuffledCiphertext.getPhi();
+			GroupVector<GqElement, GqGroup> phis = shuffledCiphertext.getPhis();
 			int ciphertextElementToChangeIdx = 1;
 			GroupVector<GqElement, GqGroup> differentPhis = GroupVectors.set(phis, ciphertextElementToChangeIdx,
 					specificValues.gThirteen); //Was 4 originally

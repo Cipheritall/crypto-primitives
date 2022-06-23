@@ -154,7 +154,7 @@ class ElGamalMultiRecipientCiphertextCreationTest {
 
 		//With a exponent of one and message of ones, the ciphertext phis is just the public key
 		assertEquals(validPK.stream().limit(nMessages).collect(Collectors.toList()),
-				new ArrayList<>(ciphertext.getPhi()));
+				new ArrayList<>(ciphertext.getPhis()));
 	}
 
 	@Test
