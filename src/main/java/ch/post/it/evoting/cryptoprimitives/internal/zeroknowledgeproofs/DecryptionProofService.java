@@ -146,7 +146,7 @@ public class DecryptionProofService {
 		final GroupVector<GqElement, GqGroup> c = computePhiDecryption(b, gamma);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
 
-		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
+		final GroupVector<GqElement, GqGroup> phi = C.getPhis();
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
 						pk.stream().limit(l),
 						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
@@ -212,7 +212,7 @@ public class DecryptionProofService {
 		final ZqElement e = ez.e();
 		final GroupVector<ZqElement, ZqGroup> z = ez.z();
 		final GqElement gamma = C.getGamma();
-		final GroupVector<GqElement, GqGroup> phi = C.getPhi();
+		final GroupVector<GqElement, GqGroup> phi = C.getPhis();
 		final int l = C.size();
 
 		checkArgument(hashService.getHashLength() * Byte.SIZE < q.bitLength(),

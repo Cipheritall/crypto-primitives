@@ -511,7 +511,7 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 			final DecryptionProof proof1 = service1.genDecryptionProof(c, keyPair, m, iAux);
 			final DecryptionProof proof2 = service2.genDecryptionProof(c, keyPair, m, Collections.emptyList());
 
-			final ElGamalMultiRecipientCiphertext cPrime = ElGamalMultiRecipientCiphertext.create(values.gEight, c.getPhi());
+			final ElGamalMultiRecipientCiphertext cPrime = ElGamalMultiRecipientCiphertext.create(values.gEight, c.getPhis());
 
 			final VerificationResult result1 = service1.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof1, iAux).verify();
 			final VerificationResult result2 = service1.verifyDecryption(cPrime, keyPair.getPublicKey(), m, proof2, Collections.emptyList()).verify();

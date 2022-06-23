@@ -158,7 +158,7 @@ public final class ElGamalMultiRecipientCiphertext implements ElGamalMultiRecipi
 		return this.gamma;
 	}
 
-	public GroupVector<GqElement, GqGroup> getPhi() {
+	public GroupVector<GqElement, GqGroup> getPhis() {
 		return this.phis;
 	}
 
