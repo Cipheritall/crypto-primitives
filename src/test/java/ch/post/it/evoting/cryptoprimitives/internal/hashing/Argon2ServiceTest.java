@@ -30,9 +30,10 @@ import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 
 @DisplayName("Argon2id")
 class Argon2ServiceTest {
+
 	@Test
 	@DisplayName("called with known values yield the expected result")
-	public void knownValues() {
+	void knownValues() {
 		// Given
 		final RandomService randomService = Mockito.mock(RandomService.class);
 		when(randomService.randomBytes(Argon2Service.SALT_LENGTH))
@@ -49,7 +50,7 @@ class Argon2ServiceTest {
 
 	@Test
 	@DisplayName("accepts the empty byte array")
-	public void emptyInput() {
+	void emptyInput() {
 		// Given
 		final RandomService randomService = Mockito.mock(RandomService.class);
 		when(randomService.randomBytes(Argon2Service.SALT_LENGTH))
