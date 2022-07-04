@@ -16,11 +16,23 @@
 package ch.post.it.evoting.cryptoprimitives.hashing;
 
 public interface Argon2 {
+
 	/**
-	 * Computes the Argon2id tag of the input keying material
+	 * Computes the Argon2id tag of the input keying material.
 	 *
-	 * @param k <b>input keying material</b>
-	 * @return the tag <pre>t</pre>
+	 * @param inputKeyingMaterial k ∈ B<sup>*</sup>.
+	 * @return The tag and the salt represented as a {@link Argon2Hash} (t,s) ∈ B<sup>32</sup> × B<sup>16</sup>.
+	 * @throws NullPointerException if the input keying material is null.
 	 */
-	byte[] argon2id(byte[] k);
+	Argon2Hash genArgon2id(byte[] inputKeyingMaterial);
+
+	/**
+	 * Computes the Argon2id tag of the input keying material and the given salt.
+	 *
+	 * @param inputKeyingMaterial k ∈ B<sup>*</sup>.
+	 * @param salt                s k ∈ B<sup>16</sup>.
+	 * @return The tag t ∈ B<sup>32</sup>.
+	 * @throws NullPointerException if any input is null.
+	 */
+	byte[] getArgon2id(byte[] inputKeyingMaterial, byte[] salt);
 }

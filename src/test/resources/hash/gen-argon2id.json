@@ -1,0 +1,56 @@
+[
+	{
+		"description": "createArgon2id-0",
+		"context": {
+			"m": 14,
+			"p": 1,
+			"i": 2
+		},
+		"input": {
+			"k": "dGVzdCBwYXNzd29yZA=="
+		},
+		"mocked": {
+			"s": "1YBBD3ZMrqhZr5bLsddvSA=="
+		},
+		"output": {
+			"t": "AOyPXvrh96nuaPEYZxSDIpyX40FTvw5IUKWVkI6asWE=",
+			"s": "1YBBD3ZMrqhZr5bLsddvSA=="
+		}
+	},
+	{
+		"description": "createArgon2id-1",
+		"context": {
+			"m": 14,
+			"p": 1,
+			"i": 2
+		},
+		"input": {
+			"k": "AQIDBAUGBwgJCgsMDQ4P"
+		},
+		"mocked": {
+			"s": "O8S5yOiqoVogtM1uFZrZiA=="
+		},
+		"output": {
+			"t": "ntJ2V/05Njfw9oLYghAqHSWMU0y9n1rNIWdM2adfzTY=",
+			"s": "O8S5yOiqoVogtM1uFZrZiA=="
+		}
+	},
+	{
+		"description": "createArgon2id-2",
+		"context": {
+			"m": 14,
+			"p": 1,
+			"i": 2
+		},
+		"input": {
+			"k": "QFJlYUxMeVN0cjBuNlBhJCRXMHJkLW9yLWlzLWl0Pw=="
+		},
+		"mocked": {
+			"s": "XaSBXQKboGg7T5UTGym6RA=="
+		},
+		"output": {
+			"t": "CjXxJ/fuv0VLmn1N91LlTMqY91OyUd9OlU4634fOFOM=",
+			"s": "XaSBXQKboGg7T5UTGym6RA=="
+		}
+	}
+]
