@@ -100,6 +100,10 @@ public final class TestParameters {
 		return description;
 	}
 
+	public JsonData getMocked() {
+		return mocked;
+	}
+
 	private static final class JsonDataDeserializer extends JsonDeserializer<JsonData> {
 		private final ObjectMapper mapper;
 
