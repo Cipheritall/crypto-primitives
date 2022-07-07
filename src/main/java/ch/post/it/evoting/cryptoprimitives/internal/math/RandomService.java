@@ -138,7 +138,7 @@ public class RandomService implements Random {
 		checkArgument(l > 0, "The desired length of the unique codes must be strictly positive.");
 		checkArgument(n > 0, "The number of unique codes must be strictly positive.");
 
-		checkArgument(n <= 10 * l, "There cannot be more codes than 10 times the desired code length.");
+		checkArgument(n <= Math.pow(10, l), "There cannot be more than 10^l codes.");
 
 		final List<String> codes = new ArrayList<>(n);
 		final BigInteger m = BigInteger.valueOf(10).pow(l);
