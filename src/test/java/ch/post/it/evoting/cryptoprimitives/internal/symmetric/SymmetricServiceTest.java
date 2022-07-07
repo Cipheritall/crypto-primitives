@@ -15,14 +15,19 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.symmetric;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.crypto.KeyGenerator;
 
@@ -31,12 +36,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.base.Throwables;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricCiphertext;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
 @DisplayName("SymmetricService calling")
 class SymmetricServiceTest extends TestGroupSetup {
@@ -147,6 +157,40 @@ class SymmetricServiceTest extends TestGroupSetup {
 							associatedData));
 			assertEquals("The associated data must not contain null objects.", exception.getMessage());
 		}
+
+		static Stream<Arguments> genCiphertextSymmetricProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/symmetric/gen-ciphertext-symmetric.json");
+
+			return parametersList.stream().map(testParameters -> {
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				final byte[] encryptionKey = input.get("encryption_key", byte[].class);
+				final byte[] plaintext = input.get("plaintext", byte[].class);
+				final List<String> associatedData = List.of(input.get("associated_data", String[].class));
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final byte[] ciphertext = output.get("ciphertext", byte[].class);
+				final byte[] nonce = output.get("nonce", byte[].class);
+				final SymmetricCiphertext symmetricCiphertext = new SymmetricCiphertext(ciphertext, nonce);
+
+				return Arguments.of(encryptionKey, plaintext, associatedData, symmetricCiphertext, testParameters.getDescription());
+			});
+		}
+
+		@ParameterizedTest()
+		@MethodSource("genCiphertextSymmetricProvider")
+		@DisplayName("genCiphertextSymmetric returns expected output")
+		void testGenCiphertextSymmetricWithRealValues(final byte[] encryptionKey, final byte[] plaintext, final List<String> associatedData,
+				final SymmetricCiphertext expectedResult, final String description) {
+			// mock RandomService to use the same nonce as in the test file.
+			final RandomService mockRandomService = spy(RandomService.class);
+			when(mockRandomService.randomBytes(anyInt())).thenReturn(expectedResult.getNonce());
+			final SymmetricService symmetricService = new SymmetricService(mockRandomService);
+
+			final SymmetricCiphertext actualResult = symmetricService.genCiphertextSymmetric(encryptionKey, plaintext, associatedData);
+			assertEquals(expectedResult, actualResult, String.format("assertion failed for: %s", description));
+		}
 	}
 
 	@Nested
@@ -180,6 +224,33 @@ class SymmetricServiceTest extends TestGroupSetup {
 					() -> symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, new byte[] {}, new byte[] {}, associatedData));
 
 			assertEquals("The associated data must not contain null objects.", exception.getMessage());
+		}
+
+		static Stream<Arguments> getPlaintextSymmetricProvider() {
+			final List<TestParameters> parametersList = TestParameters.fromResource("/symmetric/get-plaintext-symmetric.json");
+
+			return parametersList.stream().map(testParameters -> {
+				// Inputs.
+				final JsonData input = testParameters.getInput();
+				final byte[] encryptionKey = input.get("encryption_key", byte[].class);
+				final byte[] ciphertext = input.get("ciphertext", byte[].class);
+				final byte[] nonce = input.get("nonce", byte[].class);
+				final List<String> associatedData = List.of(input.get("associated_data", String[].class));
+
+				// Output.
+				final JsonData output = testParameters.getOutput();
+				final byte[] plaintext = output.get("plaintext", byte[].class);
+				return Arguments.of(encryptionKey, ciphertext, nonce, associatedData, plaintext, testParameters.getDescription());
+			});
+		}
+
+		@ParameterizedTest()
+		@MethodSource("getPlaintextSymmetricProvider")
+		@DisplayName("getPlaintextSymmetric returns expected output")
+		void testGetPlaintextSymmetricWithRealValues(final byte[] encryptionKey, final byte[] ciphertext, final byte[] nonce, final List<String> associatedData,
+				final byte[] expectedResult, final String description) {
+			final byte[] actualResult = symmetricEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, associatedData);
+			assertArrayEquals(expectedResult, actualResult, String.format("assertion failed for: %s", description));
 		}
 	}
 
