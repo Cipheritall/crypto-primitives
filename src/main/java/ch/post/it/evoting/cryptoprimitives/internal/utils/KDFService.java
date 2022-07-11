@@ -19,6 +19,7 @@ package ch.post.it.evoting.cryptoprimitives.internal.utils;
 
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ByteArrays.cutToBitLength;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.byteArrayToInteger;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.stringToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,6 +38,7 @@ import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.utils.Conversions;
 import ch.post.it.evoting.cryptoprimitives.utils.KeyDerivation;
 
 /**
@@ -78,11 +80,14 @@ public class KDFService implements KeyDerivation {
 		checkArgument(L > 0, "Requested KeyDerivation byte length is smaller or equal to 0.");
 		checkArgument(l_straight >= L, "The pseudo random key length must be greater than the hash function output length.");
 		checkArgument(l_curved <= 255 * L, "The required byte length must me smaller than 255 times the hash function output length.");
+		info_vector.forEach(info_i -> checkArgument(stringToByteArray(info_i).length <= 255,
+				"The required length of each additional context information must be smaller or equal to 255."));
 
 		final byte[] info =
 				Bytes.concat(
 						info_vector.stream()
-								.map(ConversionsInternal::stringToByteArray)
+								.map(Conversions::stringToByteArray)
+								.map(info_i_bytes -> Bytes.concat(new byte[] { (byte) info_i_bytes.length }, info_i_bytes))
 								.toArray(byte[][]::new)
 				);
 

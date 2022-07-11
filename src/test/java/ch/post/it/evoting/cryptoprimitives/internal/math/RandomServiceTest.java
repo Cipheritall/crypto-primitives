@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.base.Throwables;
+
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 class RandomServiceTest {
@@ -209,8 +211,11 @@ class RandomServiceTest {
 
 	@RepeatedTest(10)
 	void genUniqueDecimalStringsWithTooManyCodesThrows() {
-		final int desiredCodesLength = secureRandom.nextInt(10) + 1;
-		assertThrows(IllegalArgumentException.class, () -> randomService.genUniqueDecimalStrings(desiredCodesLength, 10 * desiredCodesLength + 1));
+		final int desiredCodesLength = secureRandom.nextInt(9) + 1;
+		final int tooBigNumberOfUniqueCodes = (int) Math.pow(10, desiredCodesLength) + 1;
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> randomService.genUniqueDecimalStrings(desiredCodesLength, tooBigNumberOfUniqueCodes));
+		assertEquals("There cannot be more than 10^l codes.", Throwables.getRootCause(exception).getMessage());
 	}
 
 	@Test
