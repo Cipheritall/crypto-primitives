@@ -15,6 +15,7 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.symmetric;
 
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.stringToByteArray;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,9 +38,9 @@ import javax.crypto.spec.SecretKeySpec;
 import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 import ch.post.it.evoting.cryptoprimitives.symmetric.Symmetric;
 import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricCiphertext;
+import ch.post.it.evoting.cryptoprimitives.utils.Conversions;
 
 @SuppressWarnings({ "java:S116", "java:S117" })
 public class SymmetricAuthenticatedEncryptionService {
@@ -69,6 +70,10 @@ public class SymmetricAuthenticatedEncryptionService {
 		checkNotNull(associatedData);
 		checkArgument(associatedData.stream().allMatch(Objects::nonNull), "The associated data must not contain null objects.");
 
+		final List<String> associated_vector = List.copyOf(associatedData);
+		associated_vector.forEach(associated_i -> checkArgument(stringToByteArray(associated_i).length <= 255,
+				"The required length of each associated data must be smaller or equal to 255."));
+
 		// Context.
 		final byte[] K = encryptionKey;
 		final byte[] P = plaintext;
@@ -77,8 +82,9 @@ public class SymmetricAuthenticatedEncryptionService {
 		final byte[] nonce = randomService.randomBytes(this.algorithm.nonceLength);
 		final byte[] associated =
 				Bytes.concat(
-						associatedData.stream()
-								.map(ConversionsInternal::stringToByteArray)
+						associated_vector.stream()
+								.map(Conversions::stringToByteArray)
+								.map(associated_i_bytes -> Bytes.concat(new byte[] { (byte) associated_i_bytes.length }, associated_i_bytes))
 								.toArray(byte[][]::new)
 				);
 		final byte[] C = authenticatedEncryption(K, nonce, P, associated);
@@ -98,6 +104,10 @@ public class SymmetricAuthenticatedEncryptionService {
 		checkNotNull(associatedData);
 		checkArgument(associatedData.stream().allMatch(Objects::nonNull), "The associated data must not contain null objects.");
 
+		final List<String> associated_vector = List.copyOf(associatedData);
+		associated_vector.forEach(associated_i -> checkArgument(stringToByteArray(associated_i).length <= 255,
+				"The required length of each associated data must be smaller or equal to 255."));
+
 		// Context.
 		final byte[] K = encryptionKey;
 		final byte[] C = ciphertext;
@@ -106,7 +116,8 @@ public class SymmetricAuthenticatedEncryptionService {
 		final byte[] associated =
 				Bytes.concat(
 						associatedData.stream()
-								.map(ConversionsInternal::stringToByteArray)
+								.map(Conversions::stringToByteArray)
+								.map(associated_i_bytes -> Bytes.concat(new byte[] { (byte) associated_i_bytes.length }, associated_i_bytes))
 								.toArray(byte[][]::new)
 				);
 
