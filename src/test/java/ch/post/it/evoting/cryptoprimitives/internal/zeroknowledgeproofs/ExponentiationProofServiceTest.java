@@ -415,7 +415,7 @@ class ExponentiationProofServiceTest extends TestGroupSetup {
 		void differentBasesReturnsFalse() {
 			final TestValues testValues = new TestValues();
 			final GroupVector<GqElement, GqGroup> bases = testValues.bases;
-			final GroupVector<GqElement, GqGroup> differentBases = bases.stream().map(g -> g.multiply(testValues.gFour))
+			final GroupVector<GqElement, GqGroup> differentBases = bases.stream().map(g -> g.multiply(testValues.gFive))
 					.collect(GroupVector.toGroupVector());
 			final GroupVector<GqElement, GqGroup> exponentiations = testValues.exponentiations;
 			final List<String> auxiliaryInformation = testValues.auxiliaryInformation;

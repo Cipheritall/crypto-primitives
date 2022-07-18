@@ -314,49 +314,6 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 							auxiliaryInformation));
 			assertEquals("The randomness and ciphertexts and public keys must have the same group order.", exception.getMessage());
 		}
-
-		@Test
-		@DisplayName("specific values gives expected proof")
-		void specificValues() {
-			final BigInteger p = BigInteger.valueOf(11);
-			final BigInteger q = BigInteger.valueOf(5);
-			final BigInteger g = BigInteger.valueOf(3);
-			final GqGroup gqGroup = new GqGroup(p, q, g);
-			final ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
-
-			final ZqElement zqZero = ZqElement.create(0, zqGroup);
-			final ZqElement zqTwo = ZqElement.create(2, zqGroup);
-			final ZqElement zqTree = ZqElement.create(3, zqGroup);
-
-			final GqElement gqOne = GqElementFactory.fromValue(BigInteger.valueOf(1), gqGroup);
-			final GqElement gqThree = GqElementFactory.fromValue(BigInteger.valueOf(3), gqGroup);
-			final GqElement gqFive = GqElementFactory.fromValue(BigInteger.valueOf(5), gqGroup);
-
-			// Inputs.
-			final ElGamalMultiRecipientCiphertext firstCiphertext = ElGamalMultiRecipientCiphertext.create(gqThree, singletonList(gqOne));
-			final ElGamalMultiRecipientCiphertext secondCiphertext = ElGamalMultiRecipientCiphertext.create(gqThree, singletonList(gqFive));
-			final GqElement firstPublicKey = GqElementFactory.fromValue(BigInteger.valueOf(4), gqGroup);
-			final GqElement secondPublicKey = GqElementFactory.fromValue(BigInteger.valueOf(9), gqGroup);
-			final GroupVector<ZqElement, ZqGroup> randomness = GroupVector.of(zqTwo, zqTwo);
-			final List<String> iAux = Arrays.asList("aux", "info");
-
-			// Service creation.
-			final RandomService mockRandomService = mock(RandomService.class);
-			when(mockRandomService.genRandomVector(q, 2)).thenReturn(GroupVector.of(zqZero, zqTwo));
-
-			final HashService hashService = TestHashService.create(gqGroup.getQ());
-
-			final PlaintextEqualityProofService plaintextEqualityProofService = new PlaintextEqualityProofService(mockRandomService, hashService);
-
-			// Expected proof.
-			final ZqElement e = ZqElement.create(4, zqGroup);
-			final GroupVector<ZqElement, ZqGroup> z = GroupVector.of(zqTree, zqZero);
-			final PlaintextEqualityProof expectedProof = new PlaintextEqualityProof(e, z);
-
-			assertEquals(expectedProof, plaintextEqualityProofService
-					.genPlaintextEqualityProof(firstCiphertext, secondCiphertext, firstPublicKey, secondPublicKey, randomness, iAux));
-		}
-
 	}
 
 	@Nested
@@ -527,22 +484,16 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 					final JsonData input = testParameters.getInput();
 
 					// Parse firstCiphertext (upper_c) parameters
-					final BigInteger[] upperCArray = input.get("upper_c", BigInteger[].class);
-					final List<GqElement> upperCElements = Arrays.stream(upperCArray)
+					final GqElement firstGamma = GqElementFactory.fromValue(input.getJsonData("upper_c").get("gamma", BigInteger.class), gqGroup);
+					final List<GqElement> firstPhi = Arrays.stream(input.getJsonData("upper_c").get("phis", BigInteger[].class))
 							.map(upperCA -> GqElementFactory.fromValue(upperCA, gqGroup)).toList();
-
-					final GqElement firstGamma = upperCElements.get(0);
-					final List<GqElement> firstPhi = Collections.singletonList(upperCElements.get(1));
 
 					final ElGamalMultiRecipientCiphertext firstCiphertext = ElGamalMultiRecipientCiphertext.create(firstGamma, firstPhi);
 
 					// Parse secondCiphertext (upper_c_prime) parameters
-					final BigInteger[] upperCPrimeArray = input.get("upper_c_prime", BigInteger[].class);
-					final List<GqElement> upperCPrimeElements = Arrays.stream(upperCPrimeArray)
-							.map(upperCPrimeA -> GqElementFactory.fromValue(upperCPrimeA, gqGroup)).toList();
-
-					final GqElement secondGamma = upperCPrimeElements.get(0);
-					final List<GqElement> secondPhi = Collections.singletonList(upperCPrimeElements.get(1));
+					final GqElement secondGamma = GqElementFactory.fromValue(input.getJsonData("upper_c_prime").get("gamma", BigInteger.class), gqGroup);;
+					final List<GqElement> secondPhi = Arrays.stream(input.getJsonData("upper_c_prime").get("phis", BigInteger[].class))
+							.map(upperCA -> GqElementFactory.fromValue(upperCA, gqGroup)).toList();
 
 					final ElGamalMultiRecipientCiphertext secondCiphertext = ElGamalMultiRecipientCiphertext.create(secondGamma, secondPhi);
 

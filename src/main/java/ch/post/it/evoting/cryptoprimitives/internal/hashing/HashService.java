@@ -66,6 +66,8 @@ public class HashService implements Hash {
 	private static final byte[] BIG_INTEGER_PREFIX = new byte[] { 0x01 };
 	private static final byte[] STRING_PREFIX = new byte[] { 0x02 };
 
+	private static final byte[] ARRAY_PREFIX = new byte[] { 0x03 };
+
 	private static final String VALUES_CONTAIN_NULL = "Values contain a null value which cannot be hashed.";
 	private static final String NO_VALUES = "Cannot hash no values.";
 
@@ -117,10 +119,7 @@ public class HashService implements Hash {
 
 				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 
-				if (w.size() == 1) {
-					return recursiveHash(w.get(0));
-				}
-
+				messageDigest.update(ARRAY_PREFIX);
 				w.stream().map(this::recursiveHash).forEachOrdered(messageDigest::update);
 
 				return messageDigest.digest();
@@ -223,15 +222,8 @@ public class HashService implements Hash {
 
 				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 
-				final int j = w.size() - 1;
-				if (j == 0) {
-					return recursiveHashOfLength(l, w.get(0));
-				} else {
-					final byte[] h = w.stream().map(w_i -> recursiveHashOfLength(l, w_i)).reduce(new byte[] {}, Bytes::concat);
-
-					return ByteArrays.cutToBitLength(shake256(L, h), l);
-				}
-
+				final byte[] h = w.stream().map(w_i -> recursiveHashOfLength(l, w_i)).reduce(ARRAY_PREFIX, Bytes::concat);
+				return ByteArrays.cutToBitLength(shake256(L, h), l);
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}
