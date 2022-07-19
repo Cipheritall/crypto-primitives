@@ -185,39 +185,6 @@ class SchnorrProofServiceTest extends TestGroupSetup {
 					.genSchnorrProof(witness, statement, auxiliaryInformation));
 			assertEquals("The auxiliary information must not contain null objects.", exception.getMessage());
 		}
-
-		@Test
-		@DisplayName("specific values gives expected proof")
-		void specificValues() {
-
-			// Inputs.
-			final BigInteger p = BigInteger.valueOf(47);
-			final BigInteger q = BigInteger.valueOf(23);
-			final BigInteger g = BigInteger.valueOf(2);
-
-			final GqGroup gqGroup = new GqGroup(p, q, g);
-			final ZqGroup zqGroup = ZqGroup.sameOrderAs(gqGroup);
-
-			auxiliaryInformation = Arrays.asList("aux", "info");
-			statement = GqElementFactory.fromValue(BigInteger.valueOf(32), gqGroup);
-			witness = ZqElement.create(5, zqGroup);
-
-			// Service creation.
-			final RandomService mockRandomService = mock(RandomService.class);
-			when(mockRandomService.genRandomInteger(q)).thenReturn(BigInteger.valueOf(2));
-
-			final HashService hashService = TestHashService.create(gqGroup.getQ());
-			final SchnorrProofService SchnorrProofService = new SchnorrProofService(mockRandomService, hashService);
-
-			// Expected proof.
-			final ZqElement e = ZqElement.create(11, zqGroup);
-			final ZqElement z = ZqElement.create(11, zqGroup);
-
-			final SchnorrProof expectedProof = new SchnorrProof(e, z);
-
-			assertEquals(expectedProof, SchnorrProofService
-					.genSchnorrProof(witness, statement, auxiliaryInformation));
-		}
 	}
 
 	@Nested

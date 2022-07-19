@@ -180,17 +180,6 @@ class HashServiceTest {
 	}
 
 	@Test
-	void testRecursiveHashOfListOfOneElementReturnsHashOfElement() {
-		final byte[] bytes = new byte[TEST_INPUT_LENGTH];
-		secureRandom.nextBytes(bytes);
-		final HashableByteArray byteArray = HashableByteArray.from(bytes);
-		final List<Hashable> list = List.of(byteArray);
-		final byte[] expected = hashService.recursiveHash(byteArray);
-		final byte[] hash = hashService.recursiveHash(HashableList.from(list));
-		assertArrayEquals(expected, hash);
-	}
-
-	@Test
 	void testRecursiveHashOfTwoByteArraysReturnsHashOfConcatenatedIndividualHashes() {
 		final byte[] bytes1 = new byte[TEST_INPUT_LENGTH];
 		final byte[] bytes2 = new byte[TEST_INPUT_LENGTH];
@@ -203,9 +192,10 @@ class HashServiceTest {
 
 		final byte[] hash = hashService.recursiveHash(list);
 
-		final byte[] concatenation = new byte[hashLength * 2];
-		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes1)), 0, concatenation, 0, hashLength);
-		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes2)), 0, concatenation, hashLength, hashLength);
+		final byte[] concatenation = new byte[hashLength * 2 + 1];
+		concatenation[0] = 0x03;
+		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes1)), 0, concatenation, 1, hashLength);
+		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes2)), 0, concatenation, hashLength+1, hashLength);
 		final byte[] expected = messageDigest.digest(concatenation);
 
 		assertArrayEquals(expected, hash);
@@ -227,13 +217,15 @@ class HashServiceTest {
 
 		final byte[] hash = hashService.recursiveHash(input);
 
-		final byte[] subConcatenation = new byte[hashLength * 2];
-		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes2)), 0, subConcatenation, 0, hashLength);
-		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes3)), 0, subConcatenation, hashLength, hashLength);
+		final byte[] subConcatenation = new byte[hashLength * 2 + 1];
+		subConcatenation[0] = 0x03;
+		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes2)), 0, subConcatenation, 1, hashLength);
+		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes3)), 0, subConcatenation, hashLength+1, hashLength);
 		final byte[] subHash = messageDigest.digest(subConcatenation);
-		final byte[] concatenation = new byte[hashLength * 2];
-		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes1)), 0, concatenation, 0, hashLength);
-		System.arraycopy(subHash, 0, concatenation, hashLength, hashLength);
+		final byte[] concatenation = new byte[hashLength * 2+1];
+		concatenation[0] = 0x03;
+		System.arraycopy(messageDigest.digest(concat(new byte[] { 0x00 }, bytes1)), 0, concatenation, 1, hashLength);
+		System.arraycopy(subHash, 0, concatenation, hashLength+1, hashLength);
 		final byte[] expected = messageDigest.digest(concatenation);
 
 		assertArrayEquals(expected, hash);
@@ -277,18 +269,21 @@ class HashServiceTest {
 		final HashableList input = HashableList.of(first, second, subList);
 
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(0x03);
 		outputStream.write(messageDigest.digest(concat(new byte[] { 0x01 }, integerToByteArray(first.toHashableForm()))));
 		outputStream.write(messageDigest.digest(concat(new byte[] { 0x00 }, second.toHashableForm())));
 		final byte[] expectedSubSubListHash = messageDigest.digest(outputStream.toByteArray());
 		outputStream.close();
 
 		final ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
+		outputStream1.write(0x03);
 		outputStream1.write(messageDigest.digest(concat(new byte[] { 0x02 }, stringToByteArray(third.toHashableForm()))));
 		outputStream1.write(expectedSubSubListHash);
 		final byte[] expectedSubListHash = messageDigest.digest(outputStream1.toByteArray());
 		outputStream1.close();
 
 		final ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
+		outputStream2.write(0x03);
 		outputStream2.write(messageDigest.digest(concat(new byte[] { 0x01 }, integerToByteArray(first.toHashableForm()))));
 		outputStream2.write(messageDigest.digest(concat(new byte[] { 0x00 }, second.toHashableForm())));
 		outputStream2.write(expectedSubListHash);
@@ -429,14 +424,14 @@ class HashServiceTest {
 			final BigInteger resultValue = output.get("result", BigInteger.class);
 			final ZqElement result = ZqElement.create(resultValue, new ZqGroup(q));
 
-			return Arguments.of(q, values, result, testParameters.getDescription());
+			return Arguments.of(testParameters.getDescription(), q, values, result);
 		});
 	}
 
 	@ParameterizedTest
 	@MethodSource("jsonFileRecursiveHashToZqArgumentProvider")
 	@DisplayName("recursiveHashToZq of specific input returns expected output")
-	void testRecursiveHashToZqWithRealValues(final BigInteger q, final Hashable[] input, final ZqElement output, final String description) {
+	void testRecursiveHashToZqWithRealValues(final String description, final BigInteger q, final Hashable[] input, final ZqElement output) {
 		final HashService testHashService = HashService.getInstance();
 		final ZqElement actual = testHashService.recursiveHashToZq(q, input);
 		assertEquals(output, actual, String.format("assertion failed for: %s", description));

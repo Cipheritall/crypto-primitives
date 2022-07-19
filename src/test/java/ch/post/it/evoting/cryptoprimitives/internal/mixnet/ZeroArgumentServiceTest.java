@@ -534,95 +534,6 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 					() -> zeroArgumentService.getZeroArgument(otherStatement, otherWitness));
 			assertEquals("The sum of the starMap operations between the witness's matrices columns is not equal to 0.", exception.getMessage());
 		}
-
-		@Test
-		@DisplayName("with simple values gives expected result")
-		void getZeroArgSimpleValues() {
-			// Groups.
-			final GqGroup simpleGqGroup = new GqGroup(ELEVEN, FIVE, THREE);
-			final ZqGroup simpleZqGroup = ZqGroup.sameOrderAs(simpleGqGroup);
-
-			// Statement.
-			final GroupVector<GqElement, GqGroup> commitmentsA = GroupVector.of(
-					GqElementFactory.fromValue(FIVE, simpleGqGroup), GqElementFactory.fromValue(THREE, simpleGqGroup),
-					GqElementFactory.fromValue(FOUR, simpleGqGroup));
-			final GroupVector<GqElement, GqGroup> commitmentsB = GroupVector.of(
-					GqElementFactory.fromValue(FOUR, simpleGqGroup), GqElementFactory.fromValue(NINE, simpleGqGroup),
-					GqElementFactory.fromValue(NINE, simpleGqGroup));
-			final ZqElement y = ZqElement.create(TWO, simpleZqGroup);
-
-			final ZeroStatement simpleZeroStatement = new ZeroStatement(commitmentsA, commitmentsB, y);
-
-			// Witness.
-			final GroupMatrix<ZqElement, ZqGroup> simpleMatrixA = GroupMatrix.fromRows(asList(
-					asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup)),
-					asList(ZqElement.create(TWO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup))));
-			final GroupMatrix<ZqElement, ZqGroup> simpleMatrixB = GroupMatrix.fromRows(asList(
-					asList(ZqElement.create(THREE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup)),
-					asList(ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup))));
-			final GroupVector<ZqElement, ZqGroup> simpleExponentsR = GroupVector.of(
-					ZqElement.create(THREE, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
-			final GroupVector<ZqElement, ZqGroup> simpleExponentsS = GroupVector.of(
-					ZqElement.create(ONE, simpleZqGroup), ZqElement.create(TWO, simpleZqGroup), ZqElement.create(FOUR, simpleZqGroup));
-
-			final ZeroWitness simpleZeroWitness = new ZeroWitness(simpleMatrixA, simpleMatrixB, simpleExponentsR, simpleExponentsS);
-
-			// Argument.
-			final GqElement cA0 = GqElementFactory.fromValue(FIVE, simpleGqGroup);
-			final GqElement cBm = GqElementFactory.fromValue(ONE, simpleGqGroup);
-			final GroupVector<GqElement, GqGroup> cd = GroupVector.of(
-					GqElementFactory.fromValue(FOUR, simpleGqGroup), GqElementFactory.fromValue(FOUR, simpleGqGroup),
-					GqElementFactory.fromValue(NINE, simpleGqGroup),
-					GqElementFactory.fromValue(NINE, simpleGqGroup), GqElementFactory.fromValue(ONE, simpleGqGroup),
-					GqElementFactory.fromValue(THREE, simpleGqGroup),
-					GqElementFactory.fromValue(ONE, simpleGqGroup));
-			final GroupVector<ZqElement, ZqGroup> aPrime = GroupVector.of(
-					ZqElement.create(TWO, simpleZqGroup), ZqElement.create(ZERO, simpleZqGroup));
-			final GroupVector<ZqElement, ZqGroup> bPrime = GroupVector.of(
-					ZqElement.create(ONE, simpleZqGroup), ZqElement.create(ONE, simpleZqGroup));
-			final ZqElement rPrime = ZqElement.create(ONE, simpleZqGroup);
-			final ZqElement sPrime = ZqElement.create(FOUR, simpleZqGroup);
-			final ZqElement tPrime = ZqElement.create(ONE, simpleZqGroup);
-
-			final ZeroArgument.Builder zeroArgumentBuilder = new ZeroArgument.Builder();
-			zeroArgumentBuilder
-					.with_c_A_0(cA0)
-					.with_c_B_m(cBm)
-					.with_c_d(cd)
-					.with_a_prime(aPrime)
-					.with_b_prime(bPrime)
-					.with_r_prime(rPrime)
-					.with_s_prime(sPrime)
-					.with_t_prime(tPrime);
-			final ZeroArgument simpleZeroArgument = zeroArgumentBuilder.build();
-
-			// PublicKey and commitmentKey.
-			final GqElement h = GqElementFactory.fromValue(NINE, simpleGqGroup);
-			final List<GqElement> g = asList(GqElementFactory.fromValue(FOUR, simpleGqGroup), GqElementFactory.fromValue(NINE, simpleGqGroup));
-			final CommitmentKey simpleCommitmentKey = new CommitmentKey(h, g);
-
-			final List<GqElement> pkElements = asList(GqElementFactory.fromValue(FOUR, simpleGqGroup),
-					GqElementFactory.fromValue(FOUR, simpleGqGroup));
-			final ElGamalMultiRecipientPublicKey simplePublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
-
-			// Mock random elements. There are 13 values to mock:
-			// a0=(1,3) bm=(2,1) r0=4 sm=0 t=(0,1,3,4,2,1,2)
-			final RandomService randomServiceMock = spy(randomService);
-			doReturn(ONE, THREE, TWO, ONE, FOUR, ZERO, ZERO, ONE, THREE, FOUR, TWO, ONE, TWO).when(randomServiceMock)
-					.genRandomInteger(simpleZqGroup.getQ());
-
-			// Mock the hashService.
-			final HashService hashService = TestHashService.create(simpleGqGroup.getQ());
-
-			final ZeroArgumentService simpleZeroArgumentService = new ZeroArgumentService(simplePublicKey, simpleCommitmentKey, randomServiceMock,
-					hashService);
-
-			// Verification.
-			final ZeroArgument zeroArgument = simpleZeroArgumentService.getZeroArgument(simpleZeroStatement, simpleZeroWitness);
-			verify(randomServiceMock, times(13)).genRandomInteger(simpleZqGroup.getQ());
-
-			assertEquals(simpleZeroArgument, zeroArgument);
-		}
 	}
 
 	@Nested
@@ -716,7 +627,7 @@ class ZeroArgumentServiceTest extends TestGroupSetup {
 
 				// Output.
 				final JsonData output = testParameters.getOutput();
-				final boolean outputValue = Boolean.parseBoolean(output.toString());
+				final boolean outputValue = Boolean.parseBoolean(output.getJsonData("result").toString());
 
 				return Arguments.of(publicKey, commitmentKey, zeroStatement, zeroArgument, outputValue, testParameters.getDescription());
 			});
