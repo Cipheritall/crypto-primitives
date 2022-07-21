@@ -427,7 +427,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testArgumentWithModified_r_DoesNotVerify() {
-			argumentBuilder.with_r(validArgument.get_r().exponentiate(BigInteger.TWO));
+			argumentBuilder.with_r(validArgument.get_r().add(zqOne));
 			final VerificationResult verificationResult = argumentService
 					.verifyMultiExponentiationArgument(validStatement, argumentBuilder.build())
 					.verify();

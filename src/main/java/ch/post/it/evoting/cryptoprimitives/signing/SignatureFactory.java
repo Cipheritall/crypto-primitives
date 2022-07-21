@@ -20,16 +20,19 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.internal.signing.GenKeysAndCertService;
 import ch.post.it.evoting.cryptoprimitives.internal.signing.SignatureGenerationService;
 import ch.post.it.evoting.cryptoprimitives.internal.signing.SignatureVerificationService;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SignatureSupportingAlgorithm;
 
 public class SignatureFactory {
 
+	private static final SecurityLevelInternal SECURITY_LEVEL = SecurityLevelConfig.getSystemSecurityLevel();
 	private static final SignatureFactory INSTANCE = new SignatureFactory();
 	private final HashService hashService;
-	private final RandomService randomService;
+	private final SignatureSupportingAlgorithm signatureSupportingAlgorithm;
 
 	public static SignatureFactory getInstance() {
 		return INSTANCE;
@@ -40,7 +43,7 @@ public class SignatureFactory {
 	 */
 	private SignatureFactory() {
 		hashService = HashService.getInstance();
-		randomService = new RandomService();
+		signatureSupportingAlgorithm = SECURITY_LEVEL.getSignatureAlgorithm();
 	}
 
 	/**
@@ -48,7 +51,7 @@ public class SignatureFactory {
 	 * @return a new GenKeysAndCertService.
 	 */
 	public GenKeysAndCert createGenKeysAndCert(final AuthorityInformation authorityInformation) {
-		return new GenKeysAndCertService(randomService, authorityInformation);
+		return new GenKeysAndCertService(authorityInformation, signatureSupportingAlgorithm);
 	}
 
 	/**
@@ -57,7 +60,7 @@ public class SignatureFactory {
 	 * @return a new SignatureGenerationService.
 	 */
 	public SignatureGeneration createSignatureGeneration(final PrivateKey privateKey, final X509Certificate certificate) {
-		return new SignatureGenerationService(privateKey, certificate, hashService);
+		return new SignatureGenerationService(privateKey, certificate, hashService, signatureSupportingAlgorithm);
 	}
 
 	/**
@@ -65,6 +68,6 @@ public class SignatureFactory {
 	 * @return a new SignatureVerificationService.
 	 */
 	public SignatureVerification createSignatureVerification(final KeyStore trustStore) {
-		return new SignatureVerificationService(trustStore, hashService);
+		return new SignatureVerificationService(trustStore, hashService, signatureSupportingAlgorithm);
 	}
 }

@@ -19,35 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.security.SignatureException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.X500NameBuilder;
-import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +36,8 @@ import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.signing.AuthorityInformation;
 
 @DisplayName("SignatureService calling")
 class SignatureGenerationServiceTest {
@@ -66,67 +47,31 @@ class SignatureGenerationServiceTest {
 	private static Hashable emptyContextData;
 
 	@BeforeAll
-	static void init() throws CertificateException, IOException, OperatorCreationException {
+	static void init() {
 		Security.addProvider(new BouncyCastleProvider());
-		final KeyPair keyPair = genKeyPair();
-		final Date from = Date.from(LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant());
-		final Date until = Date.from(LocalDate.of(2035, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant());
+		final KeyPair keyPair = SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm().genKeyPair();
+		final LocalDate from = LocalDate.of(2000, 1, 1);
+		final LocalDate until = LocalDate.of(2035, 1, 1);
 		final X509Certificate certificate = getCertificate(from, until, keyPair);
 		hashService = HashService.getInstance();
-		signatureGenerationService = new SignatureGenerationService(keyPair.getPrivate(), certificate, hashService);
+		signatureGenerationService = new SignatureGenerationService(keyPair.getPrivate(), certificate, hashService,
+				SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm());
 		emptyContextData = HashableString.from("");
 	}
 
-	private static KeyPair genKeyPair() {
-		final KeyPairGenerator rsa = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getKeyPairGenerator();
-		return rsa.genKeyPair();
-	}
-
-	private static X509Certificate getCertificate(final Date from, final Date until, final KeyPair keyPair) throws
-			CertificateException, IOException, OperatorCreationException {
-		final SecureRandom random = new SecureRandom();
-
-		// fill in certificate fields
-		final X500Name subject = new X500NameBuilder(BCStyle.INSTANCE)
-				.addRDN(BCStyle.CN, "it.post.ch")
+	private static X509Certificate getCertificate(final LocalDate from, final LocalDate until, final KeyPair keyPair) {
+		final AuthorityInformation authorityInformation = AuthorityInformation.builder()
+				.setCommonName("")
+				.setCountry("")
+				.setLocality("")
+				.setState("")
+				.setOrganisation("")
 				.build();
-		final byte[] id = new byte[20];
-		random.nextBytes(id);
-		final BigInteger serial = new BigInteger(160, random);
-		final X509v3CertificateBuilder certificate = new JcaX509v3CertificateBuilder(
-				subject,
-				serial,
-				from,
-				until,
-				subject,
-				keyPair.getPublic());
-		certificate.addExtension(Extension.subjectKeyIdentifier, false, id);
-		certificate.addExtension(Extension.authorityKeyIdentifier, false, id);
-		final BasicConstraints constraints = new BasicConstraints(true);
-		certificate.addExtension(
-				Extension.basicConstraints,
-				true,
-				constraints.getEncoded());
-		final KeyUsage usage = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.digitalSignature);
-		certificate.addExtension(Extension.keyUsage, false, usage.getEncoded());
-		final ExtendedKeyUsage usageEx = new ExtendedKeyUsage(new KeyPurposeId[] {
-				KeyPurposeId.id_kp_serverAuth,
-				KeyPurposeId.id_kp_clientAuth
-		});
-		certificate.addExtension(
-				Extension.extendedKeyUsage,
-				false,
-				usageEx.getEncoded());
-
-		// build BouncyCastle certificate
-		final ContentSigner signer = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getContentSigner()
-				.build(keyPair.getPrivate());
-		final X509CertificateHolder holder = certificate.build(signer);
-
-		// convert to JRE certificate
-		final JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
-		converter.setProvider(new BouncyCastleProvider());
-		return converter.getCertificate(holder);
+		CertificateInfo certificateInfo = new CertificateInfo(authorityInformation);
+		certificateInfo.setValidFrom(from);
+		certificateInfo.setValidUntil(until);
+		certificateInfo.setUsage(new KeyUsage(KeyUsage.keyCertSign | KeyUsage.digitalSignature));
+		return SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm().getCertificate(keyPair, certificateInfo);
 	}
 
 	@Test
@@ -139,15 +84,15 @@ class SignatureGenerationServiceTest {
 
 	@Test
 	@DisplayName("too early timestamp throws a SignatureException")
-	void genSignatureWithTooEarlyTimestamp() throws CertificateException, IOException, OperatorCreationException {
+	void genSignatureWithTooEarlyTimestamp() {
 		final Hashable message = HashableString.from("tooEarlyMessage");
 		final Hashable additionalContextData = HashableString.from("tooEarly");
-		final KeyPair keyPair = genKeyPair();
-		final Date from = Date.from(Instant.now().plusSeconds(3600));
-		final Date until = Date.from(from.toInstant().plusSeconds(315360000));
+		final KeyPair keyPair = SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm().genKeyPair();
+		final LocalDate from = LocalDate.now().plus(1, ChronoUnit.DAYS);
+		final LocalDate until = from.plus(365, ChronoUnit.DAYS);
 		final X509Certificate certificate = getCertificate(from, until, keyPair);
 		final SignatureGenerationService signatureGenerationServiceNotYetValid = new SignatureGenerationService(keyPair.getPrivate(), certificate,
-				hashService);
+				hashService, SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm());
 
 		final SignatureException exception = assertThrows(SignatureException.class,
 				() -> signatureGenerationServiceNotYetValid.genSignature(message, additionalContextData));
@@ -156,15 +101,16 @@ class SignatureGenerationServiceTest {
 
 	@Test
 	@DisplayName("too late timestamp throws a SignatureException")
-	void genSignatureWithTooLateTimestamp() throws CertificateException, IOException, OperatorCreationException {
+	void genSignatureWithTooLateTimestamp() {
 		final Hashable message = HashableString.from("tooEarlyMessage");
 		final Hashable context = HashableString.from("tooEarly");
-		final KeyPair keyPair = genKeyPair();
-		final Date until = Date.from(Instant.now().minusSeconds(3600));
-		final Date from = Date.from(until.toInstant().minusSeconds(315360000));
+		final KeyPair keyPair = SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm().genKeyPair();
+		final LocalDate now = LocalDate.now();
+		final LocalDate from = now.minus(365, ChronoUnit.DAYS);
+		final LocalDate until = now.minus(1, ChronoUnit.DAYS);
 		final X509Certificate certificate = getCertificate(from, until, keyPair);
 		final SignatureGenerationService signatureGenerationServiceNotValidAnymore = new SignatureGenerationService(keyPair.getPrivate(), certificate,
-				hashService);
+				hashService, SecurityLevelConfig.getSystemSecurityLevel().getSignatureAlgorithm());
 
 		final SignatureException exception = assertThrows(SignatureException.class,
 				() -> signatureGenerationServiceNotValidAnymore.genSignature(message, context));

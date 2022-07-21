@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.symmetric;
 
 import java.util.List;
 
-import ch.post.it.evoting.cryptoprimitives.internal.symmetric.SymmetricAuthenticatedEncryptionService;
 
 /**
  * Provides methods for symmetric encryption/decryption.
@@ -50,13 +49,5 @@ public interface Symmetric {
 	 *                                  </ul>
 	 */
 	byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] ciphertext, final byte[] nonce, final List<String> associatedData);
-
-	/**
-	 * Provides the nonce length of {@link SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm} algorithm used to initialize the
-	 * service.
-	 *
-	 * @return the nonce length value.
-	 */
-	int getNonceLength();
 
 }

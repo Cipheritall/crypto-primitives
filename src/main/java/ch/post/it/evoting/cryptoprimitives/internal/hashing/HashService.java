@@ -24,18 +24,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.primitives.Bytes.concat;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.bouncycastle.crypto.digests.SHAKEDigest;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Bytes;
@@ -51,6 +45,9 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.HashFunction;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.XOF;
 
 /**
  * Recursive hash service using a default SHA3-256 message digest.
@@ -60,7 +57,8 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class HashService implements Hash {
 
 	public static final int HASH_LENGTH_BYTES = 32;
-	private static final HashService INSTANCE = new HashService();
+	private static final HashService INSTANCE = new HashService(SecurityLevelConfig.getSystemSecurityLevel().getRecursiveHashHashFunction(),
+			SecurityLevelConfig.getSystemSecurityLevel().getRecursiveHashToZqXOF());
 
 	private static final byte[] BYTE_ARRAY_PREFIX = new byte[] { 0x00 };
 	private static final byte[] BIG_INTEGER_PREFIX = new byte[] { 0x01 };
@@ -70,18 +68,13 @@ public class HashService implements Hash {
 
 	private static final String VALUES_CONTAIN_NULL = "Values contain a null value which cannot be hashed.";
 	private static final String NO_VALUES = "Cannot hash no values.";
-
-	private static final Supplier<MessageDigest> digestSupplier = () -> {
-		try {
-			Security.addProvider(new BouncyCastleProvider());
-			return MessageDigest.getInstance("SHA3-256", BouncyCastleProvider.PROVIDER_NAME);
-		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-			throw new IllegalStateException("Failed to create the SHA3-256 message digest for the HashService instantiation.");
-		}
-	};
+	private final HashFunction hashFunction;
+	private final XOF xof;
 
 	@VisibleForTesting
-	HashService() {
+	HashService(final HashFunction hashFunction, final XOF xof) {
+		this.hashFunction = hashFunction;
+		this.xof = xof;
 	}
 
 	public static HashService getInstance() {
@@ -103,26 +96,30 @@ public class HashService implements Hash {
 		} else {
 			final Hashable value = values[0];
 
-			final MessageDigest messageDigest = digestSupplier.get();
 			if (value instanceof HashableByteArray hashableByteArray) {
 				final byte[] w = hashableByteArray.toHashableForm();
-				return messageDigest.digest(concat(BYTE_ARRAY_PREFIX, w));
+				return hashFunction.hash(concat(BYTE_ARRAY_PREFIX, w));
 			} else if (value instanceof HashableBigInteger hashableBigInteger) {
 				final BigInteger w = hashableBigInteger.toHashableForm();
 				checkArgument(w.compareTo(BigInteger.ZERO) >= 0);
-				return messageDigest.digest(concat(BIG_INTEGER_PREFIX, integerToByteArray(w)));
+				return hashFunction.hash(concat(BIG_INTEGER_PREFIX, integerToByteArray(w)));
 			} else if (value instanceof HashableString hashableString) {
 				final String w = hashableString.toHashableForm();
-				return messageDigest.digest(concat(STRING_PREFIX, stringToByteArray(w)));
+				return hashFunction.hash(concat(STRING_PREFIX, stringToByteArray(w)));
 			} else if (value instanceof HashableList hashableList) {
 				final List<? extends Hashable> w = hashableList.toHashableForm();
 
 				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 
-				messageDigest.update(ARRAY_PREFIX);
-				w.stream().map(this::recursiveHash).forEachOrdered(messageDigest::update);
+				return hashFunction.hash(
+						concat(
+							Stream.concat(
+								Stream.of(ARRAY_PREFIX),
+								w.stream().map(this::recursiveHash)
+							).toArray(byte[][]::new)
+						)
+				);
 
-				return messageDigest.digest();
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
 			}
@@ -198,7 +195,7 @@ public class HashService implements Hash {
 		final int k = values.length;
 		final int l = requestedBitLength;
 		checkArgument(k > 0, NO_VALUES);
-		checkArgument(l >= 512, "The requested bit length must be at least 512.");
+		checkArgument(l >= xof.getMinimumOutputLengthBits(), "The requested bit length must be at least %s.", xof.getMinimumOutputLengthBits());
 
 		final int L = (int) Math.ceil(l / 8.0);
 		if (k > 1) {
