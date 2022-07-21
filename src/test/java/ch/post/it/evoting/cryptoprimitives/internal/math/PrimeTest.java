@@ -21,51 +21,33 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigInteger;
-
 import org.junit.jupiter.api.Test;
 
 class PrimeTest {
-	private static final BigInteger ZERO = BigInteger.ZERO;
-	private static final BigInteger ONE = BigInteger.ONE;
-	private static final BigInteger TWO = BigInteger.valueOf(2L);
-	private static final BigInteger THREE = BigInteger.valueOf(3L);
-	private static final BigInteger FOUR = BigInteger.valueOf(4L);
-	private static final BigInteger FIVE = BigInteger.valueOf(5L);
-	private static final BigInteger SEVEN = BigInteger.valueOf(7L);
-	private static final BigInteger NINE = BigInteger.valueOf(9L);
 
 	@Test
 	void testIsSmallPrimeTrue() {
-		assertTrue(PrimesInternal.isSmallPrime(TWO));
-		assertTrue(PrimesInternal.isSmallPrime(THREE));
-		assertTrue(PrimesInternal.isSmallPrime(FIVE));
-		assertTrue(PrimesInternal.isSmallPrime(SEVEN));
-		assertTrue(PrimesInternal.isSmallPrime(BigInteger.valueOf(11L)));
-		assertTrue(PrimesInternal.isSmallPrime(BigInteger.valueOf(47L)));
+		assertTrue(PrimesInternal.isSmallPrime(2));
+		assertTrue(PrimesInternal.isSmallPrime(3));
+		assertTrue(PrimesInternal.isSmallPrime(5));
+		assertTrue(PrimesInternal.isSmallPrime(7));
+		assertTrue(PrimesInternal.isSmallPrime(11));
+		assertTrue(PrimesInternal.isSmallPrime(47));
 	}
 
 	@Test
 	void testIsSmallPrimeFalse() {
-		assertFalse(PrimesInternal.isSmallPrime(ONE));
-		assertFalse(PrimesInternal.isSmallPrime(FOUR));
-		assertFalse(PrimesInternal.isSmallPrime(NINE));
-		assertFalse(PrimesInternal.isSmallPrime(BigInteger.valueOf(35L)));
-		assertFalse(PrimesInternal.isSmallPrime(BigInteger.valueOf(77L)));
-		assertFalse(PrimesInternal.isSmallPrime(BigInteger.valueOf(143L)));
+		assertFalse(PrimesInternal.isSmallPrime(1));
+		assertFalse(PrimesInternal.isSmallPrime(4));
+		assertFalse(PrimesInternal.isSmallPrime(9));
+		assertFalse(PrimesInternal.isSmallPrime(35));
+		assertFalse(PrimesInternal.isSmallPrime(77));
+		assertFalse(PrimesInternal.isSmallPrime(143));
 	}
 
 	@Test
 	void testIsSmallPrimeTooSmallNThrows() {
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> PrimesInternal.isSmallPrime(ZERO));
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> PrimesInternal.isSmallPrime(0));
 		assertEquals("The number n must be strictly positive", exception.getMessage());
-	}
-
-	@Test
-	void testIsSmallPrimeTooBigNThrows() {
-		final BigInteger maxIntPlusOne = BigInteger.valueOf(Integer.MAX_VALUE).add(ONE);
-		final ArithmeticException exception = assertThrows(ArithmeticException.class,
-				() -> PrimesInternal.isSmallPrime(maxIntPlusOne));
-		assertEquals("BigInteger out of int range", exception.getMessage());
 	}
 }

@@ -32,7 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
-import ch.post.it.evoting.cryptoprimitives.math.PrimeGqElement;
+import ch.post.it.evoting.cryptoprimitives.math.SmallPrimeGqElement;
 
 /**
  * Brute force the generation of group members.
@@ -70,7 +70,7 @@ public class GqGroupGenerator {
 	 */
 	public Set<BigInteger> getPrimeMembers() {
 		final Set<BigInteger> members = getMembers();
-		members.removeIf(member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member));
+		members.removeIf(member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member.intValueExact()));
 		return members;
 	}
 
@@ -108,12 +108,12 @@ public class GqGroupGenerator {
 	}
 
 	/**
-	 * Generate a PrimeGqElement belonging to the group.
+	 * Generate a SmallPrimeGqElement belonging to the group.
 	 */
-	public PrimeGqElement genPrimeMember() {
+	public SmallPrimeGqElement genPrimeMember() {
 		final BigInteger primeMember = Generators.genWhile(this::genMemberValue,
-				member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member));
-		return PrimeGqElement.PrimeGqElementFactory.fromValue(primeMember, group);
+				member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member.intValueExact()));
+		return SmallPrimeGqElement.PrimeGqElementFactory.fromValue(primeMember.intValueExact(), group);
 	}
 
 	/**
