@@ -255,12 +255,6 @@ class SymmetricServiceTest extends TestGroupSetup {
 	}
 
 	@Test
-	@DisplayName("getNonceLength")
-	void nonceLength() {
-		assertEquals(NONCE_LENGTH, symmetricEncryptionService.getNonceLength());
-	}
-
-	@Test
 	@DisplayName("call default constructor")
 	void defaultConstructor() {
 		assertDoesNotThrow(() -> new SymmetricService());

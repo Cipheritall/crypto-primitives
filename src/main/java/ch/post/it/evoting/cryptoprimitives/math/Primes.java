@@ -26,13 +26,14 @@ public interface Primes {
 	/**
 	 * Checks if the given number is a prime number. This is efficient for small primes only.
 	 *
-	 * @param number n, the number to be tested. Must be non-null and strictly positive.
+	 * @param number n, the number to be tested. Must be non-null and strictly positive. Restricted to the range of an int to guarantee that the
+	 *                  algorithm runs efficiently.
 	 * @return true if n is prime, false otherwise.
 	 * @throws NullPointerException     if n is null.
 	 * @throws IllegalArgumentException if n is not strictly positive.
 	 * @throws ArithmeticException      if n does not fit in an int (max is {@value Integer#MAX_VALUE}).
 	 */
-	static boolean isSmallPrime(final BigInteger number) {
+	static boolean isSmallPrime(final int number) {
 		return PrimesInternal.isSmallPrime(number);
 	}
 }

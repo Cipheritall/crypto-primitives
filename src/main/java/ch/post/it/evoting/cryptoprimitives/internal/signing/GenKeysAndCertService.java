@@ -24,11 +24,7 @@ import java.time.LocalDate;
 
 import org.bouncycastle.asn1.x509.KeyUsage;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SignatureSupportingAlgorithm;
 import ch.post.it.evoting.cryptoprimitives.signing.AuthorityInformation;
 import ch.post.it.evoting.cryptoprimitives.signing.GenKeysAndCert;
 import ch.post.it.evoting.cryptoprimitives.signing.KeysAndCert;
@@ -37,30 +33,16 @@ import ch.post.it.evoting.cryptoprimitives.signing.KeysAndCert;
  * Implements the GenKeysAndCert algorithm.
  */
 public class GenKeysAndCertService implements GenKeysAndCert {
-
-	private final GenKeyPair genKeyPair;
-	private final GetCertificate getCertificate;
 	private final AuthorityInformation authorityInformation;
+	private final SignatureSupportingAlgorithm signatureSupportingAlgorithm;
 
 	/**
-	 * @param random               generator to be used. Must not be null.
 	 * @param authorityInformation used to generate the certificate. Must not be null.
 	 * @throws NullPointerException if any argument is null
 	 */
-
-	public GenKeysAndCertService(final RandomService random, AuthorityInformation authorityInformation) {
-		this(random, authorityInformation, SecurityLevelConfig.getSystemSecurityLevel());
-	}
-
-	private GenKeysAndCertService(final RandomService random, AuthorityInformation authorityInformation, SecurityLevel securityLevel) {
-		this(new GenKeyPair(securityLevel), new GetCertificate(random, securityLevel), authorityInformation);
-	}
-
-	@VisibleForTesting
-	GenKeysAndCertService(GenKeyPair genKeyPair, GetCertificate getCertificate, AuthorityInformation authorityInformation) {
-		this.genKeyPair = checkNotNull(genKeyPair);
-		this.getCertificate = checkNotNull(getCertificate);
+	public GenKeysAndCertService(final AuthorityInformation authorityInformation, final SignatureSupportingAlgorithm signatureSupportingAlgorithm) {
 		this.authorityInformation = checkNotNull(authorityInformation);
+		this.signatureSupportingAlgorithm = checkNotNull(signatureSupportingAlgorithm);
 	}
 
 	@Override
@@ -69,7 +51,7 @@ public class GenKeysAndCertService implements GenKeysAndCert {
 		checkNotNull(validUntil);
 		checkArgument(validUntil.isAfter(validFrom), "Date validFrom is after validUntil");
 
-		final KeyPair keyPair = genKeyPair.get();
+		final KeyPair keyPair = signatureSupportingAlgorithm.genKeyPair();
 
 		final CertificateInfo info = new CertificateInfo(authorityInformation);
 		info.setValidFrom(validFrom);
@@ -77,7 +59,7 @@ public class GenKeysAndCertService implements GenKeysAndCert {
 		final KeyUsage usage = new KeyUsage(KeyUsage.keyCertSign | KeyUsage.digitalSignature);
 		info.setUsage(usage);
 
-		final X509Certificate certificate = getCertificate.apply(keyPair, info);
+		final X509Certificate certificate = signatureSupportingAlgorithm.getCertificate(keyPair, info);
 
 		return new KeysAndCert(keyPair.getPrivate(), certificate);
 	}

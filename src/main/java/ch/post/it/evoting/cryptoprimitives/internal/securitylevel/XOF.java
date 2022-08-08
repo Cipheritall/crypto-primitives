@@ -15,13 +15,18 @@
  *
  */
 
-package ch.post.it.evoting.cryptoprimitives.securitylevel;
+package ch.post.it.evoting.cryptoprimitives.internal.securitylevel;
 
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+/**
+ * Extendable Output Function (XOF)
+ */
+public interface XOF {
 
-public interface SecurityLevel {
+	byte[] xof(final Integer outputLength, final byte[] message);
 
-	static SecurityLevel getSystemSecurityLevel() {
-		return SecurityLevelConfig.getSystemSecurityLevel();
-	}
+	/**
+	 * Returns the minimum output lengths in bits of this algorithm
+	 * @return
+	 */
+	int getMinimumOutputLengthBits();
 }

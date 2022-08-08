@@ -28,8 +28,8 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.internal.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 
 /**
  * Quadratic residues group of integers modulo p, such that p is a safe prime, i.e. p = 2q + 1. In this case q is the order of the group (ie the
@@ -70,25 +70,17 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 		checkNotNull(q, "Group Gq parameter q should not be null");
 		checkNotNull(g, "Group Gq parameter g should not be null");
 
-		final SecurityLevel securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
-		final String securityLevelCheckMessage = "The given p does not correspond to the given security level.";
-
-		switch (securityLevel) {
-		case EXTENDED -> checkArgument(securityLevel.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-		case DEFAULT -> {
-			checkArgument(SecurityLevel.EXTENDED.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-			checkArgument(SecurityLevel.DEFAULT.getBitLength() <= p.bitLength(), securityLevelCheckMessage);
-		}
-		case TESTING_ONLY -> checkArgument(SecurityLevel.DEFAULT.getBitLength() > p.bitLength(), securityLevelCheckMessage);
-		default -> throw new IllegalArgumentException("Unsupported security level!");
-		}
+		final SecurityLevelInternal securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
+		checkArgument(securityLevel == SecurityLevelInternal.TESTING_ONLY || securityLevel.getPBitLength() == p.bitLength(),
+				"The given p bit length does not correspond to the given security level. [|p|: got %s, expected %s]", p.bitLength(),
+				securityLevel.getPBitLength());
 
 		//Validate p
-		checkArgument(p.isProbablePrime(securityLevel.getStrength()), "Group Gq parameter p must be prime");
+		checkArgument(p.isProbablePrime(securityLevel.getSecurityLevelBits()), "Group Gq parameter p must be prime");
 		this.p = p;
 
 		//Validate q
-		checkArgument(q.isProbablePrime(securityLevel.getStrength()), "Group Gq parameter q must be prime");
+		checkArgument(q.isProbablePrime(securityLevel.getSecurityLevelBits()), "Group Gq parameter q must be prime");
 		checkArgument(q.compareTo(BigInteger.ZERO) > 0);
 		checkArgument(q.compareTo(p) < 0);
 		final BigInteger computedP = q.multiply(BigInteger.valueOf(2)).add(BigInteger.ONE);

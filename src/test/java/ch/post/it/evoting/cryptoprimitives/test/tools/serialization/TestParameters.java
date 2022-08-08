@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
 
 /**
  * General deserialization of json test files according to the schema defined in the specifications.
@@ -70,15 +70,15 @@ public final class TestParameters {
 		}
 	}
 
-	public SecurityLevel getSecurityLevel() {
+	public SecurityLevelInternal getSecurityLevel() {
 		final String size = this.description.substring(0, 4);
 		final int bitlength = Integer.parseInt(size);
 
 		switch (bitlength) {
 		case 3072:
-			return SecurityLevel.EXTENDED;
+			return SecurityLevelInternal.EXTENDED;
 		case 2048:
-			return SecurityLevel.DEFAULT;
+			return SecurityLevelInternal.DEFAULT;
 		default:
 			throw new IllegalArgumentException("Unexpected bit length of p");
 		}
