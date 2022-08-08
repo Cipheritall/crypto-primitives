@@ -27,11 +27,11 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 class GqGroupTest {
-	private static final SecurityLevel SECURITY_LEVEL_CONFIG = SecurityLevel.TESTING_ONLY;
+	private static final SecurityLevelInternal SECURITY_LEVEL_CONFIG = SecurityLevelInternal.TESTING_ONLY;
 
 	private static BigInteger p;
 	private static BigInteger q;

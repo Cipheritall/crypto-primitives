@@ -27,8 +27,8 @@ import org.mockito.Mockito;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
 
 /**
@@ -42,7 +42,7 @@ public class GroupTestData {
 	static {
 		// More groups can be added to this class as needed.
 		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
-			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
+			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.TESTING_ONLY);
 			final BigInteger p1 = BigInteger.valueOf(11);
 			final BigInteger q1 = BigInteger.valueOf(5);
 			final BigInteger g1 = BigInteger.valueOf(3);
@@ -131,7 +131,7 @@ public class GroupTestData {
 		final BigInteger g = BigInteger.valueOf(3);
 
 		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = Mockito.mockStatic(SecurityLevelConfig.class)) {
-			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
+			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.TESTING_ONLY);
 			return new GqGroup(p, q, g);
 		}
 	}

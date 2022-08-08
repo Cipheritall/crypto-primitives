@@ -401,7 +401,7 @@ class HashServiceTest {
 	@DisplayName("calling hashAndSquare on a valid gqElement with an hash call returning a specific mocked value returns the expected result.")
 	void onValidGqElementReturnsExpectedResultTest(final ZqElement mockedHash, final BigInteger expectedResult) {
 
-		final HashService hashService = spy(HashService.class);
+		final HashService hashService = spy(HashService.getInstance());
 		doReturn((mockedHash)).when(hashService).recursiveHashToZq(any(), any());
 
 		final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();

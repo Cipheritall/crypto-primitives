@@ -43,61 +43,56 @@ class PrimeGqElementFactoryTest {
 
 	@Test
 	void givenAValueWhenAPrimeGroupElementIsCreatedWithThatValueThenHasThatValue() {
-		final BigInteger value = BigInteger.valueOf(3);
+		final int value = 3;
 		final PrimeGqElement element = PrimeGqElement.PrimeGqElementFactory.fromValue(value, group);
-		assertEquals(value, element.getValue(), "The returned element value is not the expected one");
+		assertEquals(value, element.getValue().intValueExact(), "The returned element value is not the expected one");
 	}
 
 	@Test
 	void whenCreateAPrimeElementWithValueZeroThenError() {
-		final BigInteger value = BigInteger.ZERO;
+		final int value = 0;
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
 	}
 
 	@Test
 	void whenCreateAPrimeElementWithNegativeValueThenError() {
-		final BigInteger value = BigInteger.valueOf(-1);
+		final int value = -1;
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
 	}
 
 	@Test
 	void whenCreateAPrimeElementWithNotPrimeValueThenError() {
-		final BigInteger value = BigInteger.valueOf(4);
+		final int value = 4;
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
 	}
 
 	@Test
 	void whenCreateAPrimeElementWithValueGreaterThanPThenError() {
-		final BigInteger value = BigInteger.valueOf(27);
+		final int value = 27;
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
 	}
 
 	@Test
-	void whenCreateAPrimeElementWithNullValueThenError() {
-		assertThrows(NullPointerException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(null, group));
-	}
-
-	@Test
 	void whenCreateAPrimeElementWithNullGroupThenError() {
-		final BigInteger value = BigInteger.ONE;
+		final int value = 7;
 		assertThrows(NullPointerException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, null));
 	}
 
 	@Test
 	void whenCreateAPrimeElementEqualToGroupGeneratorError() {
-		final BigInteger groupGenerator = group.getGenerator().value;
+		final int groupGenerator = group.getGenerator().value.intValueExact();
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(groupGenerator, group));
 	}
 
 	@Test
 	void whenCreateAPrimeElementNotMemberOfTheGroupError() {
-		final BigInteger nonMemberValue = groupGenerator.genNonMemberValue();
+		final int nonMemberValue = groupGenerator.genNonMemberValue().intValueExact();
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(nonMemberValue, group));
 	}
 
 	@Test
 	void whenCreateAPrimeElementPrimeMemberOfTheGroupNoError() {
-		final BigInteger memberValue = BigInteger.valueOf(13);
+		final int memberValue = 13;
 		final PrimeGqElement groupMember = PrimeGqElement.PrimeGqElementFactory.fromValue(memberValue, group);
 		assertTrue(group.isGroupMember(groupMember.getValue()));
 	}

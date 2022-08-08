@@ -7,17 +7,18 @@
 
 def BUILD_INFO = Artifactory.newBuildInfo()
 def PROJECT_NAME = 'crypto-primitives'
+
 // Maven
 def MAVEN_RELEASE_REPO = 'libs-release-evoting-local'
 def MAVEN_SNAPSHOT_REPO = 'libs-snapshot-evoting-local'
 def MAVEN_RESOLVE_REPO = 'maven-evoting-virtual'
 def MAVEN_PARAMS = '-T 1.5C -U --settings .mvn/settings.xml --no-transfer-progress'
 
-def PR_ID = env.BRANCH_NAME.replace('PR-', '')
-
 // Tools
-def JDK = 'jdk-17'
-def MAVEN = 'maven-3'
+def JDK = 'jdk-17.0.3'
+def MAVEN = 'maven-3.8.6'
+
+def PR_ID = env.BRANCH_NAME.replace('PR-', '')
 
 pipeline {
 
@@ -76,6 +77,7 @@ pipeline {
 						branch 'develop'
 						branch 'master'
 						branch 'hotfix/*'
+						branch 'release/*'
 					}
 				}
 			}
@@ -95,11 +97,13 @@ pipeline {
 					branch 'develop'
 					branch 'master'
 					branch 'hotfix/*'
+					branch 'release/*'
 				}
 			}
 			steps {
 				withEnv(["EVOTING_HOME=${env.WORKSPACE}"]) {
 					mvnBuild(buildInfo: BUILD_INFO, mavenTool: MAVEN, mavenParams: MAVEN_PARAMS, releaseRepo: MAVEN_RELEASE_REPO, snapshotRepo: MAVEN_SNAPSHOT_REPO, resolveRepo: MAVEN_RESOLVE_REPO, deployArtifacts: 'true')
+					publishBuildInformation(buildName: BUILD_NAME, buildInfo: BUILD_INFO)
 				}
 			}
 		}
@@ -126,6 +130,7 @@ pipeline {
 					branch 'master'
 					branch 'develop'
 					branch 'hotfix/*'
+					branch 'release/*'
 				}
 			}
 			environment {
@@ -134,21 +139,6 @@ pipeline {
 			}
 			steps {
 				publishBuildInformation(buildName: BUILD_NAME, buildInfo: BUILD_INFO)
-			}
-		}
-
-		stage('Removal of .m2 directory on feature jobs') {
-			when {
-				not {
-					anyOf {
-						branch 'master'
-						branch 'develop'
-						branch 'hotfix/*'
-					}
-				}
-			}
-			steps {
-				sh "rm -rf .m2/repository/ch/post/"
 			}
 		}
 	}

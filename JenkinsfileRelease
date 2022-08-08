@@ -7,6 +7,7 @@
 
 def BUILD_INFO = Artifactory.newBuildInfo()
 def PROJECT_NAME = 'crypto-primitives'
+
 def SCM_URL = "https://gitit.post.ch/scm/evotingecosystem/crypto-primitives.git"
 def SCM_URL_ANON = "https://gitit.post.ch/scm/evoting-anonymized/crypto-primitives.git"
 
@@ -16,8 +17,8 @@ RTMAVEN.deployer releaseRepo: 'libs-release-evoting-local', snapshotRepo: 'libs-
 RTMAVEN.resolver releaseRepo: 'swisspost', snapshotRepo: 'swisspost', server: ARTIFACTORY_SERVER
 
 // Tools
-def JDK = 'jdk-17'
-def MAVEN = 'maven-3'
+def JDK = 'jdk-17.0.3'
+def MAVEN = 'maven-3.8.6'
 
 pipeline {
 

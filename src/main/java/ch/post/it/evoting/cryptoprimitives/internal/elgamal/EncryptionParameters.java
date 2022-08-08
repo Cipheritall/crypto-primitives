@@ -28,8 +28,8 @@ import org.bouncycastle.crypto.digests.SHAKEDigest;
 import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 
 /**
  * Provides functionality to create verifiable encryption parameters as a {@link GqGroup}.
@@ -41,10 +41,10 @@ public class EncryptionParameters {
 	private static final BigInteger ONE = BigInteger.ONE;
 	private static final BigInteger TWO = BigInteger.valueOf(2);
 
-	private final SecurityLevel lambda;
+	private final SecurityLevelInternal lambda;
 
 	/**
-	 * Constructs an instance with a {@link SecurityLevel}.
+	 * Constructs an instance with a {@link SecurityLevelInternal}.
 	 */
 	public EncryptionParameters() {
 		this.lambda = SecurityLevelConfig.getSystemSecurityLevel();
@@ -60,9 +60,9 @@ public class EncryptionParameters {
 	public GqGroup getEncryptionParameters(final String seed) {
 		checkNotNull(seed);
 
-		final int certaintyLevel = lambda.getStrength();
+		final int certaintyLevel = lambda.getSecurityLevelBits();
 		final byte[] seedBytes = stringToByteArray(seed);
-		final int pBitLength = lambda.getBitLength();
+		final int pBitLength = lambda.getPBitLength();
 
 		int i = 0;
 		BigInteger q;

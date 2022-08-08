@@ -121,7 +121,7 @@ class KDFServiceTest {
 	@DisplayName("KeyDerivation returns expected output")
 	void testKDFWithRealValues(final Supplier<Digest> hashSupplier, final byte[] PRK, final List<String> infos, final int requiredByteLength,
 			final byte[] OKM, final String description) {
-		KDFService kdfService = KDFService.testService(hashSupplier);
+		KDFService kdfService = new KDFService(hashSupplier);
 		final byte[] actualResult = kdfService.KDF(PRK, infos, requiredByteLength);
 		assertArrayEquals(OKM, actualResult, String.format("assertion failed for: %s", description));
 	}
@@ -180,7 +180,7 @@ class KDFServiceTest {
 	@DisplayName("KDFToZq returns expected output")
 	void testKDFToZqWithRealValues(final Supplier<Digest> hashSupplier, final byte[] PRK, final List<String> infos, final BigInteger q,
 			final ZqElement u, final String description) {
-		KDFService kdfService = KDFService.testService(hashSupplier);
+		KDFService kdfService = new KDFService(hashSupplier);
 		final ZqElement actualResult = kdfService.KDFToZq(PRK, infos, q);
 		assertEquals(u, actualResult, String.format("assertion failed for: %s", description));
 	}
