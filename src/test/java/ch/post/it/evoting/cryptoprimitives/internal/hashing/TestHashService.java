@@ -22,6 +22,7 @@ import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInte
 import java.math.BigInteger;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 
 /**
  * Custom hash service used for testing. The output value of this hash service can be bounded to cope with the small groups used in the tests.
@@ -34,7 +35,8 @@ public class TestHashService extends HashService {
 	private final BigInteger upperBound;
 
 	private TestHashService(final BigInteger lowerBound, final BigInteger upperBound) {
-		super();
+		super(SecurityLevelConfig.getSystemSecurityLevel().getRecursiveHashHashFunction(),
+				SecurityLevelConfig.getSystemSecurityLevel().getRecursiveHashToZqXOF());
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}

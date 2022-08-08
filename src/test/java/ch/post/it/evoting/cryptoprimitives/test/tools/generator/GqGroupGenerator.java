@@ -68,10 +68,11 @@ public class GqGroupGenerator {
 	/**
 	 * Get all prime members of the group different from the group generator.
 	 */
-	public Set<BigInteger> getPrimeMembers() {
+	public Set<Integer> getSmallPrimeMembers() {
 		final Set<BigInteger> members = getMembers();
-		members.removeIf(member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member));
-		return members;
+		final Set<Integer> smallMembers = members.stream().map(BigInteger::intValueExact).collect(Collectors.toSet());
+		smallMembers.removeIf(member -> member.equals(group.getGenerator().getValue().intValueExact()) || !PrimesInternal.isSmallPrime(member));
+		return smallMembers;
 	}
 
 	/**
@@ -110,10 +111,10 @@ public class GqGroupGenerator {
 	/**
 	 * Generate a PrimeGqElement belonging to the group.
 	 */
-	public PrimeGqElement genPrimeMember() {
+	public PrimeGqElement genSmallPrimeMember() {
 		final BigInteger primeMember = Generators.genWhile(this::genMemberValue,
-				member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member));
-		return PrimeGqElement.PrimeGqElementFactory.fromValue(primeMember, group);
+				member -> member.equals(group.getGenerator().getValue()) || !PrimesInternal.isSmallPrime(member.intValueExact()));
+		return PrimeGqElement.PrimeGqElementFactory.fromValue(primeMember.intValueExact(), group);
 	}
 
 	/**

@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
 
@@ -38,6 +37,7 @@ import com.google.common.primitives.Bytes;
 
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.utils.Conversions;
 import ch.post.it.evoting.cryptoprimitives.utils.KeyDerivation;
 
@@ -45,20 +45,16 @@ import ch.post.it.evoting.cryptoprimitives.utils.KeyDerivation;
  * Key derivation function (KeyDerivation) service.
  */
 public class KDFService implements KeyDerivation {
-	private static final KDFService instance = new KDFService(SHA256Digest::new);
+	private static final KDFService instance = new KDFService(SecurityLevelConfig.getSystemSecurityLevel().getKDFHashFunction());
 	private final Supplier<Digest> hashSupplier;
 
-	private KDFService(final Supplier<Digest> hashSupplier) {
+	@VisibleForTesting
+	KDFService(final Supplier<Digest> hashSupplier) {
 		this.hashSupplier = hashSupplier;
 	}
 
 	public static KDFService getInstance() {
 		return instance;
-	}
-
-	@VisibleForTesting
-	static KDFService testService(final Supplier<Digest> hashSupplier) {
-		return new KDFService(hashSupplier);
 	}
 
 	/**

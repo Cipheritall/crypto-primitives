@@ -17,9 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.internal.signing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
@@ -27,16 +24,10 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.ContentVerifier;
-import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
-
 import ch.post.it.evoting.cryptoprimitives.hashing.Hash;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SignatureSupportingAlgorithm;
 import ch.post.it.evoting.cryptoprimitives.signing.SignatureVerification;
 
 /**
@@ -46,10 +37,12 @@ public class SignatureVerificationService implements SignatureVerification {
 
 	private final KeyStore trustStore;
 	private final Hash hash;
+	private final SignatureSupportingAlgorithm signatureSupportingAlgorithm;
 
-	public SignatureVerificationService(final KeyStore trustStore, final Hash hash) {
+	public SignatureVerificationService(final KeyStore trustStore, final Hash hash, final SignatureSupportingAlgorithm signatureSupportingAlgorithm) {
 		this.trustStore = trustStore;
 		this.hash = hash;
+		this.signatureSupportingAlgorithm = signatureSupportingAlgorithm;
 	}
 
 	/**
@@ -83,7 +76,7 @@ public class SignatureVerificationService implements SignatureVerification {
 		final PublicKey pubKey = cert.getPublicKey();
 		final byte[] h = hash.recursiveHash(HashableList.of(m, c));
 
-		return verify(pubKey, h, s);
+		return signatureSupportingAlgorithm.verify(pubKey, h, s);
 	}
 
 	private Instant getTimeStamp() {
@@ -99,32 +92,5 @@ public class SignatureVerificationService implements SignatureVerification {
 		}
 	}
 
-	private boolean verify(final PublicKey publicKey, final byte[] hash, final byte[] signatureBytes) {
-		checkNotNull(publicKey);
-		checkNotNull(hash);
-		checkNotNull(signatureBytes);
 
-		final JcaContentVerifierProviderBuilder jcaContentVerifierProviderBuilder = new JcaContentVerifierProviderBuilder();
-		final ContentVerifierProvider contentVerifierProvider;
-		try {
-			contentVerifierProvider = jcaContentVerifierProviderBuilder.build(publicKey);
-		} catch (final OperatorCreationException e) {
-			throw new IllegalStateException("Could not build content verifier provider with public key.", e);
-		}
-		final AlgorithmIdentifier algorithmIdentifier = SecurityLevelConfig.getSystemSecurityLevel().getSigningParameters().getAlgorithmIdentifier();
-		final ContentVerifier contentVerifier;
-		try {
-			contentVerifier = contentVerifierProvider.get(algorithmIdentifier);
-		} catch (final OperatorCreationException e) {
-			throw new IllegalStateException("Could not get content verifier for algorithm identifier.", e);
-		}
-		final OutputStream outputStream = contentVerifier.getOutputStream();
-		try {
-			outputStream.write(hash);
-			outputStream.close();
-		} catch (final IOException e) {
-			throw new UncheckedIOException("Could not write hash to output stream.", e);
-		}
-		return contentVerifier.verify(signatureBytes);
-	}
 }

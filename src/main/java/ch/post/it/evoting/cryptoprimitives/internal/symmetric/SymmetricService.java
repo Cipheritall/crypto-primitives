@@ -20,10 +20,14 @@ import java.util.List;
 import com.google.common.annotations.VisibleForTesting;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.AEAD;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.symmetric.Symmetric;
 import ch.post.it.evoting.cryptoprimitives.symmetric.SymmetricCiphertext;
 
 public class SymmetricService implements Symmetric {
+
+	private static final AEAD aead = SecurityLevelConfig.getSystemSecurityLevel().getSymmetricAEAD();
 
 	private final SymmetricAuthenticatedEncryptionService symmetricAuthenticatedEncryptionService;
 
@@ -33,14 +37,12 @@ public class SymmetricService implements Symmetric {
 	public SymmetricService() {
 		final RandomService randomService = new RandomService();
 
-		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService,
-				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES256_GCM_NOPADDING);
+		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService, aead);
 	}
 
 	@VisibleForTesting
 	public SymmetricService(final RandomService randomService) {
-		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService,
-				SymmetricAuthenticatedEncryptionService.SymmetricEncryptionAlgorithm.AES256_GCM_NOPADDING);
+		symmetricAuthenticatedEncryptionService = new SymmetricAuthenticatedEncryptionService(randomService, aead);
 	}
 
 	@Override
@@ -55,6 +57,6 @@ public class SymmetricService implements Symmetric {
 
 	@Override
 	public int getNonceLength() {
-		return symmetricAuthenticatedEncryptionService.getNonceLength();
+		return aead.getNonceLengthBytes();
 	}
 }

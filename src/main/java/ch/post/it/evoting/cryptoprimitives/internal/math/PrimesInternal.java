@@ -30,11 +30,9 @@ public class PrimesInternal {
 	/**
 	 * See {@link ch.post.it.evoting.cryptoprimitives.math.Primes#isSmallPrime}
 	 */
-	public static boolean isSmallPrime(final BigInteger number) {
-		checkNotNull(number);
-		checkArgument(number.compareTo(BigInteger.ZERO) > 0, "The number n must be strictly positive");
-
-		final int n = number.intValueExact();
+	public static boolean isSmallPrime(final int number) {
+		checkArgument(number > 0, "The number n must be strictly positive");
+		final int n = number;
 
 		if (n == 1) {
 			return false;

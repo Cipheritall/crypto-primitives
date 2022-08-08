@@ -37,8 +37,8 @@ import org.mockito.MockedStatic;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.Random;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 
@@ -56,7 +56,7 @@ class EncryptionParametersTest {
 	@BeforeAll
 	static void setUpAll() {
 		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
-			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevel.TESTING_ONLY);
+			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.TESTING_ONLY);
 			encryptionParameters = new EncryptionParameters();
 		}
 	}
@@ -113,7 +113,7 @@ class EncryptionParametersTest {
 	@MethodSource("getEncryptionParametersProvider")
 	@DisplayName("calling getEncryptionParameters with fixed seed gives expected parameters")
 	void getEncryptionParameters(final String seed, final GqGroup expectedParameters,
-			final String description, final SecurityLevel securityLevel) {
+			final String description, final SecurityLevelInternal securityLevel) {
 
 		try (final MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
 			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(securityLevel);

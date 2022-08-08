@@ -42,14 +42,15 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableByteArray;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableString;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.TestSignatureSupportingAlgorithm;
 import ch.post.it.evoting.cryptoprimitives.signing.AuthorityInformation;
 import ch.post.it.evoting.cryptoprimitives.signing.KeysAndCert;
 
 class SignatureKeystoreServiceTest {
 
-	private static final SecurityLevel securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
+	private static final SecurityLevelInternal securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
 	private static final String EMPTY_KEY_ENTRY_PASSWORD = "";
 	private static final Hashable EMPTY_CONTEXT_DATA = HashableString.from("");
 	private static final String KEYSTORE_TYPE = "JKS";
@@ -60,9 +61,8 @@ class SignatureKeystoreServiceTest {
 
 	@BeforeAll
 	static void beforeAll() {
-		genKeysAndCertService = new GenKeysAndCertService(new TestGenKeyPair(securityLevel), new GetCertificate(new RandomService(), securityLevel),
-				AuthorityInformation.builder().setCountry("dummy-C").setCommonName("dummy-Cn").setOrganisation("dummy-O").setLocality("dummy-L")
-						.setState("dummy-St").build());
+		genKeysAndCertService = new GenKeysAndCertService(AuthorityInformation.builder().setCountry("dummy-C").setCommonName("dummy-Cn").setOrganisation("dummy-O").setLocality("dummy-L")
+						.setState("dummy-St").build(), new TestSignatureSupportingAlgorithm());
 
 		randomService = new RandomService();
 		hashService = HashService.getInstance();

@@ -34,7 +34,12 @@ import java.util.function.Supplier;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hash;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.signing.SignatureFactory;
+import ch.post.it.evoting.cryptoprimitives.signing.SignatureGeneration;
 import ch.post.it.evoting.cryptoprimitives.signing.SignatureKeystore;
+import ch.post.it.evoting.cryptoprimitives.signing.SignatureVerification;
 
 /**
  * Signs payload and verifies payload signature based on a trust store.
@@ -45,10 +50,12 @@ import ch.post.it.evoting.cryptoprimitives.signing.SignatureKeystore;
  */
 public class SignatureKeystoreService<T extends Supplier<String>> implements SignatureKeystore<T> {
 
+	private static final SecurityLevelInternal SECURITY_LEVEL = SecurityLevelConfig.getSystemSecurityLevel();
+
 	private static final String EMPTY_KEY_ENTRY_PASSWORD = "";
 
-	private final SignatureGenerationService signatureGenerationService;
-	private final SignatureVerificationService signatureVerificationService;
+	private final SignatureGeneration signatureGenerationService;
+	private final SignatureVerification signatureVerificationService;
 	private final T signingAlias;
 
 	/**
@@ -79,8 +86,8 @@ public class SignatureKeystoreService<T extends Supplier<String>> implements Sig
 			}
 			final PrivateKey key = (PrivateKey) keyStore.getKey(signingAlias.get(), EMPTY_KEY_ENTRY_PASSWORD.toCharArray());
 			final X509Certificate certificate = (X509Certificate) keyStore.getCertificate(signingAlias.get());
-			this.signatureGenerationService = new SignatureGenerationService(key, certificate, hash);
-			this.signatureVerificationService = new SignatureVerificationService(keyStore, hash);
+			this.signatureGenerationService = SignatureFactory.getInstance().createSignatureGeneration(key, certificate);
+			this.signatureVerificationService = SignatureFactory.getInstance().createSignatureVerification(keyStore);
 
 		} catch (final UnrecoverableKeyException | CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Impossible to initialize the KeystoreService. See nested exception.", e);

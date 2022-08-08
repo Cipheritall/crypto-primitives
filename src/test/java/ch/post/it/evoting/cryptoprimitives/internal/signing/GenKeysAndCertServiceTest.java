@@ -46,28 +46,29 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
-import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.TestSignatureSupportingAlgorithm;
 import ch.post.it.evoting.cryptoprimitives.signing.AuthorityInformation;
 import ch.post.it.evoting.cryptoprimitives.signing.KeysAndCert;
 
 class GenKeysAndCertServiceTest {
 
-	private static final SecurityLevel securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
+	private static final SecurityLevelInternal securityLevel = SecurityLevelConfig.getSystemSecurityLevel();
 
 	private static GenKeysAndCertService keysAndCertService;
-	private static TestGenKeyPair genKeyPair;
 	private static AuthorityInformation authorityInformation;
 	private static LocalDate defaultValidFrom;
 	private static LocalDate defaultValidUntil;
+	private static TestSignatureSupportingAlgorithm signatureAlgorithm;
 
 	@BeforeAll
 	static void beforeAll() {
-		genKeyPair = new TestGenKeyPair(securityLevel);
-		final GetCertificate getCertificate = new GetCertificate(new RandomService(), securityLevel);
+		signatureAlgorithm = new TestSignatureSupportingAlgorithm();
 		authorityInformation = AuthorityInformation.builder().setCountry("dummy-C").setCommonName("dummy-Cn").setOrganisation("dummy-O")
 				.setLocality("dummy-L").setState("dummy-St").build();
-		keysAndCertService = new GenKeysAndCertService(genKeyPair, getCertificate, authorityInformation);
+
+		keysAndCertService = new GenKeysAndCertService(authorityInformation, signatureAlgorithm);
 
 		defaultValidFrom = LocalDate.of(2022, 10, 20);
 		defaultValidUntil = LocalDate.of(2022, 12, 20);
@@ -79,8 +80,8 @@ class GenKeysAndCertServiceTest {
 		final RandomService randomService = new RandomService();
 
 		// when / then
-		assertThrows(NullPointerException.class, () -> new GenKeysAndCertService(null, authorityInformation));
-		assertThrows(NullPointerException.class, () -> new GenKeysAndCertService(randomService, null));
+		assertThrows(NullPointerException.class, () -> new GenKeysAndCertService(null, signatureAlgorithm));
+		assertThrows(NullPointerException.class, () -> new GenKeysAndCertService(authorityInformation, null));
 		assertThrows(NullPointerException.class, () -> keysAndCertService.genKeysAndCert(defaultValidFrom, null));
 		assertThrows(NullPointerException.class, () -> keysAndCertService.genKeysAndCert(null, defaultValidUntil));
 	}
@@ -145,7 +146,7 @@ class GenKeysAndCertServiceTest {
 	@Test
 	void createValidCertificate_validateSelfSignedSignature() {
 		// given
-		final PublicKey publicKey = genKeyPair.getDummyPublicKey();
+		final PublicKey publicKey = signatureAlgorithm.getDummyPublicKey();
 
 		// when
 		final X509Certificate certificate = keysAndCertService.genKeysAndCert(defaultValidFrom, defaultValidUntil).certificate();
