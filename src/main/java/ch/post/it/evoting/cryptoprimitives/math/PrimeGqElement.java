@@ -31,13 +31,13 @@ import ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
  *
  * <p>Instances of this class are immutable.
  */
-public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
+public final class PrimeGqElement extends MultiplicativeGroupElement {
 
 	private final GqElement delegate;
 
 	// Private constructor without input validation. Used only for operations that provide a mathematical guarantee that the element is a prime within
 	// the group and is different from the group generator.
-	private SmallPrimeGqElement(final int value, final GqGroup group) {
+	private PrimeGqElement(final int value, final GqGroup group) {
 		super(BigInteger.valueOf(value), group);
 		this.delegate = GqElementFactory.fromValue(BigInteger.valueOf(value), group);
 	}
@@ -52,6 +52,10 @@ public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
 		return delegate.exponentiate(exponent);
 	}
 
+	public Integer getValueAsInt() {
+		return this.delegate.getValue().intValueExact();
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
@@ -63,7 +67,7 @@ public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
 		if (!super.equals(o)) {
 			return false;
 		}
-		final SmallPrimeGqElement that = (SmallPrimeGqElement) o;
+		final PrimeGqElement that = (PrimeGqElement) o;
 		return delegate.equals(that.delegate);
 	}
 
@@ -79,7 +83,7 @@ public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
 		}
 
 		/**
-		 * Creates a {@code SmallPrimeGqElement}.
+		 * Creates a {@code PrimeGqElement}.
 		 * <p>
 		 * The {@code value} and {@code desiredNumberOfPrimes} parameters must comply with the following:
 		 * <ul>
@@ -91,15 +95,15 @@ public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
 		 *
 		 * @param value the value of the element. Must be not-null, a prime element of the group, and different from the group generator.
 		 * @param group the {@link GqGroup} to which this element belongs. Must be non-null.
-		 * @return a new SmallPrimeGqElement with the specified value in the given group.
+		 * @return a new PrimeGqElement with the specified value in the given group.
 		 */
-		public static SmallPrimeGqElement fromValue(final int value, final GqGroup group) {
+		public static PrimeGqElement fromValue(final int value, final GqGroup group) {
 			checkArgument(PrimesInternal.isSmallPrime(value),
-					"Cannot create a SmallPrimeGqElement with given value as it is not a prime element. [value: %s]", value);
+					"Cannot create a PrimeGqElement with given value as it is not a prime element. [value: %s]", value);
 			checkArgument(BigInteger.valueOf(value).compareTo(group.getGenerator().getValue()) != 0,
-					"Cannot create a SmallPrimeGqElement with given value as it is the generator of the group. [value :%, group: %s]", value, group);
+					"Cannot create a PrimeGqElement with given value as it is the generator of the group. [value :%, group: %s]", value, group);
 
-			return new SmallPrimeGqElement(value, group);
+			return new PrimeGqElement(value, group);
 		}
 
 		/**
@@ -119,7 +123,7 @@ public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
 		 * @throws IllegalStateException if the group does not contain the desired number of prime group members.
 		 */
 		@SuppressWarnings("java:S117")
-		public static GroupVector<SmallPrimeGqElement, GqGroup> getSmallPrimeGroupMembers(final GqGroup gqGroup, final int desiredNumberOfPrimes) {
+		public static GroupVector<PrimeGqElement, GqGroup> getSmallPrimeGroupMembers(final GqGroup gqGroup, final int desiredNumberOfPrimes) {
 			checkNotNull(gqGroup);
 
 			final int r = desiredNumberOfPrimes;
@@ -132,12 +136,12 @@ public final class SmallPrimeGqElement extends MultiplicativeGroupElement {
 			checkArgument(r < 10000, "The desired number of primes must be strictly smaller than 10000");
 
 			BigInteger current = BigInteger.valueOf(5);
-			final ArrayList<SmallPrimeGqElement> p_vector = new ArrayList<>(r);
+			final ArrayList<PrimeGqElement> p_vector = new ArrayList<>(r);
 			int count = 0;
 			while (count < r && current.compareTo(gqGroup.getP()) < 0 && current.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) < 0) {
 				if (gqGroup.isGroupMember(current) && PrimesInternal.isSmallPrime(current.intValueExact())
 						&& !current.equals(gqGroup.getGenerator().value)) {
-					p_vector.add(new SmallPrimeGqElement(current.intValueExact(), gqGroup));
+					p_vector.add(new PrimeGqElement(current.intValueExact(), gqGroup));
 					count++;
 				}
 				current = current.add(BigInteger.valueOf(2));

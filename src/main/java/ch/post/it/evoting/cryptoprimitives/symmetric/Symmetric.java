@@ -50,4 +50,9 @@ public interface Symmetric {
 	 */
 	byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] ciphertext, final byte[] nonce, final List<String> associatedData);
 
+
+	/**
+	 * Gets the byte length of the nonce for this algorithm
+	 */
+	int getNonceLength();
 }

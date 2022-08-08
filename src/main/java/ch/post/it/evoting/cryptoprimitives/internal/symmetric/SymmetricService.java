@@ -54,4 +54,9 @@ public class SymmetricService implements Symmetric {
 	public byte[] getPlaintextSymmetric(final byte[] encryptionKey, final byte[] ciphertext, final byte[] nonce, final List<String> associatedData) {
 		return symmetricAuthenticatedEncryptionService.getPlaintextSymmetric(encryptionKey, ciphertext, nonce, associatedData);
 	}
+
+	@Override
+	public int getNonceLength() {
+		return aead.getNonceLengthBytes();
+	}
 }
