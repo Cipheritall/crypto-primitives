@@ -99,9 +99,11 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		checkArgument(C.getGroup().equals(keyPair.getGroup()), "The ciphertexts and the key pair must have the same group.");
 
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime = C.stream()
+				.parallel()
 				.map(c_i -> getPartialDecryption(c_i, sk))
 				.collect(toGroupVector());
 		final GroupVector<DecryptionProof, ZqGroup> pi_dec = IntStream.range(0, C.size())
+				.parallel()
 				.mapToObj(i -> {
 					final ElGamalMultiRecipientCiphertext c_i = C.get(i);
 					final ElGamalMultiRecipientMessage phi_prime = new ElGamalMultiRecipientMessage(C_prime.get(i).getPhis());
@@ -143,14 +145,16 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		checkArgument(pk.getGroup().equals(gqGroup), "The public key must have the same group as the ciphertexts.");
 
 		// Algorithm
-		final Verifiable result = IntStream.range(0, N).mapToObj(i -> {
-			final ElGamalMultiRecipientCiphertext c_i = C.get(i);
-			final DecryptionProof pi_dec_i = pi_dec.get(i);
+		final Verifiable result = IntStream.range(0, N)
+				.parallel()
+				.mapToObj(i -> {
+					final ElGamalMultiRecipientCiphertext c_i = C.get(i);
+					final DecryptionProof pi_dec_i = pi_dec.get(i);
 
-			final ElGamalMultiRecipientCiphertext c_i_prime = C_prime.get(i);
-			final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(c_i_prime.getPhis());
-			return decryptionProofService.verifyDecryption(c_i, pk, m, pi_dec_i, i_aux);
-		}).reduce(Verifiable.create(() -> true, "This state is impossible to reach and indicates a bug."), Verifiable::and);
+					final ElGamalMultiRecipientCiphertext c_i_prime = C_prime.get(i);
+					final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(c_i_prime.getPhis());
+					return decryptionProofService.verifyDecryption(c_i, pk, m, pi_dec_i, i_aux);
+				}).reduce(Verifiable.create(() -> true, "This state is impossible to reach and indicates a bug."), Verifiable::and);
 
 		return result.verify();
 	}

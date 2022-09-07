@@ -145,6 +145,7 @@ final class ProductArgumentService {
 
 			final ZqElement s = ZqElement.create(randomService.genRandomInteger(q), zqGroup);
 			final GroupVector<ZqElement, ZqGroup> b_vector = IntStream.range(0, n)
+					.parallel()
 					.mapToObj(i -> IntStream.range(0, m)
 							.mapToObj(j -> A.get(i, j))
 							.reduce(one, ZqElement::multiply))

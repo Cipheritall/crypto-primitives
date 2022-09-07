@@ -43,7 +43,7 @@ We defined a single point of contact for all concerns of the participants. The [
 
 In the scope of the e-voting community programme are the source code, specifications, documentation and other materials that are available in the repositories under <https://gitlab.com/swisspost-evoting>.
 
-From 2022 onwards, Swiss Post will conduct annual public intrusion tests dedicated to the e-voting system of Swiss Post with a duration of 4-6 weeks each as part of the e-voting community programme bug bounty.
+From 2022 onwards, Swiss Post conducts periodical public intrusion tests dedicated to the e-voting system of Swiss Post with a duration of 4 weeks each as part of the e-voting community programme bug bounty.
 
 Everything that is not defined as in-scope, is out-of-scope. In case of doubt, please check with the [SPOC](https://evoting-community.post.ch/en/help-and-contact/support#contact) beforehand.
 
@@ -81,7 +81,7 @@ The e-voting community programme does not allow you to use any information gaine
 
 ## Legal safe harbour: consequences of complying with the Code of Conduct
 
-As soon as a public intrusion test is implemented as a new feature in the e-voting community programme, Swiss Post interprets activities by participants in such public intrusion tests that comply with the CoC as authorized access under the Swiss Penal Code and other anti-hacking and anti-circumvention laws. This includes Swiss Penal Code Articles 143, 143bis and 144bis. Swiss Post will only file a complaint about a violation of the CoC if the code or the other materials or parts thereof are used commercially or productively. If legal action is initiated by a third party against a participant and the participant has complied with the CoC as outlined in this document, Swiss Post will take the necessary measures to make it known to the authorities that such participant's actions have been conducted in compliance with this policy.
+Swiss Post interprets activities by participants in public intrusion tests that comply with the CoC as authorized access under the Swiss Penal Code and other anti-hacking and anti-circumvention laws. This includes Swiss Penal Code Articles 143, 143bis and 144bis. Swiss Post will only file a complaint about a violation of the CoC if the code or the other materials or parts thereof are used commercially or productively. If legal action is initiated by a third party against a participant and the participant has complied with the CoC as outlined in this document, Swiss Post will take the necessary measures to make it known to the authorities that such participant's actions have been conducted in compliance with this policy.
 
 Any non-compliance with the CoC may result in exclusion from the e-voting community programme.
 

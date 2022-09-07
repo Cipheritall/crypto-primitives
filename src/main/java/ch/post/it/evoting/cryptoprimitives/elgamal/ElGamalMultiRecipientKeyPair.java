@@ -65,6 +65,7 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 		// Generate the private key as a list of random exponents
 		final List<ZqElement> privateKeyElements =
 				Stream.generate(() -> random.genRandomInteger(q))
+						.parallel()
 						.map(value -> ZqElement.create(value, privateKeyGroup))
 						.limit(N)
 						.toList();
