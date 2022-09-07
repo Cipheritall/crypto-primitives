@@ -200,6 +200,7 @@ final class MultiExponentiationArgumentService {
 		//Compute re-encrypted diagonal products
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> E =
 				IntStream.range(0, 2 * m)
+						.parallel()
 						.boxed()
 						.flatMap(k -> Stream.of(k)
 								.map(b_vector::get)
@@ -235,23 +236,28 @@ final class MultiExponentiationArgumentService {
 				.limit(n)
 				.collect(toGroupVector());
 		final GroupVector<ZqElement, ZqGroup> a = IntStream.range(0, m + 1)
+				.parallel()
 				.mapToObj(i -> vectorScalarMultiplication(xPowers.get(i), A_prepended.getColumn(i)))
 				.reduce(neutralVector, MultiExponentiationArgumentService::vectorSum);
 
 		final GroupVector<ZqElement, ZqGroup> r_vector_prepended = r_vector.prepend(r_0);
 		final ZqElement r = IntStream.range(0, m + 1)
+				.parallel()
 				.mapToObj(i -> xPowers.get(i).multiply(r_vector_prepended.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement b = IntStream.range(0, 2 * m)
+				.parallel()
 				.mapToObj(k -> xPowers.get(k).multiply(b_vector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement s = IntStream.range(0, 2 * m)
+				.parallel()
 				.mapToObj(k -> xPowers.get(k).multiply(s_vector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
 		final ZqElement tau = IntStream.range(0, 2 * m)
+				.parallel()
 				.mapToObj(k -> xPowers.get(k).multiply(tau_vector.get(k)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
@@ -275,6 +281,7 @@ final class MultiExponentiationArgumentService {
 		final ElGamalMultiRecipientCiphertext neutralElement = ElGamalMultiRecipientCiphertexts.neutralElement(l, gqGroup);
 
 		final ElGamalMultiRecipientCiphertext multiExponentiationProduct = IntStream.range(0, m)
+				.parallel()
 				.mapToObj(i -> {
 					final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_i = C.getRow(i);
 					//Due to 0 indexing the index i+1 in the spec on the matrix A becomes index i here
@@ -337,6 +344,7 @@ final class MultiExponentiationArgumentService {
 
 		// Compute the diagonal products D.
 		return IntStream.range(0, 2 * m)
+				.parallel()
 				.mapToObj(k -> {
 					int lowerBound;
 					int upperBound;
@@ -428,6 +436,7 @@ final class MultiExponentiationArgumentService {
 		final Verifiable verifB = create(() -> prodCb.equals(commB), "product Cb must equal commitment B.");
 
 		final ElGamalMultiRecipientCiphertext prodE = IntStream.range(0, E.size())
+				.parallel()
 				.boxed()
 				.flatMap(i -> Stream.of(i)
 						.map(E::get)
@@ -439,6 +448,7 @@ final class MultiExponentiationArgumentService {
 				.map(g_b_vector -> getCiphertext(g_b_vector, tau, pk))
 				.collect(onlyElement());
 		final ElGamalMultiRecipientCiphertext prodC = IntStream.range(0, m)
+				.parallel()
 				.boxed()
 				.flatMap(i -> Stream.of(i)
 						.map(__ -> xPowers.apply(m - i - 1))
@@ -458,12 +468,13 @@ final class MultiExponentiationArgumentService {
 		checkArgument(first.size() == second.size(), "Cannot sum vectors of different dimensions.");
 		checkArgument(first.getGroup().equals(second.getGroup()), "Cannot sum vectors of different groups.");
 		return IntStream.range(0, first.size())
+				.parallel()
 				.mapToObj(i -> first.get(i).add(second.get(i)))
 				.collect(toGroupVector());
 	}
 
 	private static GroupVector<ZqElement, ZqGroup> vectorScalarMultiplication(final ZqElement value, final GroupVector<ZqElement, ZqGroup> vector) {
-		return vector.stream().map(element -> element.multiply(value)).collect(toGroupVector());
+		return vector.parallelStream().map(element -> element.multiply(value)).collect(toGroupVector());
 	}
 
 	/**
@@ -476,6 +487,7 @@ final class MultiExponentiationArgumentService {
 	private GqElement prodExp(final GroupVector<GqElement, GqGroup> bases, final IntFunction<ZqElement> powers) {
 		return IntStream.range(0, bases.size())
 				.boxed()
+				.parallel()
 				.flatMap(i -> Stream.of(i)
 						.map(bases::get)
 						.map(base -> base.exponentiate(powers.apply(i))))

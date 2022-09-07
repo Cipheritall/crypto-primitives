@@ -83,6 +83,7 @@ public class ElGamalMultiRecipientCiphertexts {
 			indices = indices.parallel();
 		}
 		final LinkedList<GqElement> phis = indices
+				.parallel()
 				.mapToObj(i -> pk.get(i).exponentiate(r).multiply(m.get(i)))
 				.collect(Collectors.toCollection(LinkedList::new));
 

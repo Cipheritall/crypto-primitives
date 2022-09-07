@@ -56,8 +56,10 @@ import ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationArgument;
 import ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationStatement;
 import ch.post.it.evoting.cryptoprimitives.mixnet.MultiExponentiationWitness;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.Generators;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
@@ -362,7 +364,8 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testStatementWithModified_C_DoesNotVerify() {
-			ElGamalMultiRecipientCiphertext modifiedC = validStatement.get_C().getCiphertextExponentiation(zqTwo);
+			ElGamalMultiRecipientCiphertext modifiedC = ElGamalMultiRecipientCiphertext.create(validStatement.get_C().getGamma(),
+					validStatement.get_C().stream().skip(1).map(gqGroupGenerator::otherElement).collect(Collectors.toList()));
 			final MultiExponentiationStatement modifiedStatement = new MultiExponentiationStatement(
 					validStatement.get_C_matrix(),
 					modifiedC,
@@ -376,19 +379,43 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testStatementWithModified_cA_ElementDoesNotVerify() {
-			final GroupVector<GqElement, GqGroup> modifiedC_a = validStatement.get_c_A().stream()
-					.map(GqElement::invert)
+			//Need large group, because in small group the probability of collision is very high and hence the probability of false positive is high
+			final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();
+			final GqGroupGenerator localGqGroupGenerator = new GqGroupGenerator(largeGqGroup);
+
+			final ElGamalGenerator localElGamalGenerator = new ElGamalGenerator(largeGqGroup);
+			final ElGamalMultiRecipientPublicKey localPublicKey = localElGamalGenerator.genRandomPublicKey(publicKeySize);
+
+			final TestCommitmentKeyGenerator commitmentKeyGenerator = new TestCommitmentKeyGenerator(largeGqGroup);
+			final CommitmentKey localCommitmentKey = commitmentKeyGenerator.genCommitmentKey(COMMITMENT_KEY_SIZE);
+			final HashService localHashService = HashService.getInstance();
+			final MultiExponentiationArgumentService multiExponentiationArgumentService =
+					new MultiExponentiationArgumentService(localPublicKey, localCommitmentKey, randomService, localHashService);
+
+			final MultiExponentiationArgumentService localArgumentService = new MultiExponentiationArgumentService(localPublicKey,
+					localCommitmentKey, randomService, localHashService);
+
+			final TestMultiExponentiationStatementWitnessPairGenerator localStatementWitnessPairGenerator = new TestMultiExponentiationStatementWitnessPairGenerator(
+					largeGqGroup, multiExponentiationArgumentService, localCommitmentKey);
+
+			final StatementWitnessPair localStatementWitnessPair = localStatementWitnessPairGenerator.genPair(n, m, l);
+			final MultiExponentiationStatement localValidStatement = localStatementWitnessPair.getStatement();
+			final MultiExponentiationArgument localValidArgument = localArgumentService.getMultiExponentiationArgument(localValidStatement,
+					localStatementWitnessPair.getWitness());
+
+			final GroupVector<GqElement, GqGroup> modifiedC_a = localValidStatement.get_c_A().stream()
+					.map(localGqGroupGenerator::otherElement)
 					.collect(toGroupVector());
-			final MultiExponentiationStatement modifiedStatement = new MultiExponentiationStatement(validStatement.get_C_matrix(),
-					validStatement.get_C(), modifiedC_a);
-			final VerificationResult verificationResult = argumentService
-					.verifyMultiExponentiationArgument(modifiedStatement, validArgument).verify();
+			final MultiExponentiationStatement modifiedStatement = new MultiExponentiationStatement(localValidStatement.get_C_matrix(),
+					localValidStatement.get_C(), modifiedC_a);
+			final VerificationResult verificationResult = localArgumentService
+					.verifyMultiExponentiationArgument(modifiedStatement, localValidArgument).verify();
 			assertFalse(verificationResult.isVerified());
 		}
 
 		@Test
 		void testArgumentWithModified_cA0_ElementDoesNotVerify() {
-			final GqElement modifiedC_A_0 = validArgument.getc_A_0().multiply(GqElementFactory.fromSquareRoot(BigInteger.TWO, gqGroup));
+			final GqElement modifiedC_A_0 = gqGroupGenerator.otherElement(validArgument.getc_A_0());
 			argumentBuilder.with_c_A_0(modifiedC_A_0);
 			final VerificationResult verificationResult = argumentService
 					.verifyMultiExponentiationArgument(validStatement, argumentBuilder.build())
@@ -399,7 +426,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 		@Test
 		void testArgumentWithModified_cB_ElementDoesNotVerify() {
 			argumentBuilder.with_c_B(
-					validArgument.get_c_B().stream().map(GqElement::invert).collect(toGroupVector()));
+					validArgument.get_c_B().stream().map(gqGroupGenerator::otherElement).collect(toGroupVector()));
 			final VerificationResult verificationResult = argumentService
 					.verifyMultiExponentiationArgument(validStatement, argumentBuilder.build())
 					.verify();
