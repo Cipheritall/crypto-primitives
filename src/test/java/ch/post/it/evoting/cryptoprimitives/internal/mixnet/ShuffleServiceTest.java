@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -130,8 +131,7 @@ class ShuffleServiceTest {
 		final int numCiphertexts = 3;
 
 		//Mock the permutation
-		final Permutation permutation = mock(Permutation.class);
-		when(permutation.get(anyInt())).thenReturn(1, 2, 0);
+		final Permutation permutation = new Permutation(List.of(1, 2, 0));
 		final PermutationService permutationService = mock(PermutationService.class);
 		when(permutationService.genPermutation(numCiphertexts)).thenReturn(permutation);
 

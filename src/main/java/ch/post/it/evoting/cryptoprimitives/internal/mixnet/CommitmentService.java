@@ -79,7 +79,7 @@ public class CommitmentService {
 		final GqElement h = ck.getH();
 		final GroupVector<GqElement, GqGroup> g = ck.getG();
 		// Due to 0 indexing of the gs, the indexes used deviate from the spec
-		return h.exponentiate(r).multiply(IntStream.range(0, l).mapToObj(i -> g.get(i).exponentiate(a.get(i)))
+		return h.exponentiate(r).multiply(IntStream.range(0, l).parallel().mapToObj(i -> g.get(i).exponentiate(a.get(i)))
 				.reduce(ck.getGroup().getIdentity(), GqElement::multiply));
 	}
 
@@ -126,6 +126,7 @@ public class CommitmentService {
 
 		// Algorithm.
 		return IntStream.range(0, m)
+				.parallel()
 				.mapToObj(i -> {
 					final GroupVector<ZqElement, ZqGroup> a_i = A.getColumn(i);
 					final ZqElement r_i = r.get(i);

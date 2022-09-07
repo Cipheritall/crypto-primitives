@@ -156,13 +156,14 @@ class ShuffleArgumentService {
 		checkArgument(l <= k, "The ciphertexts must be smaller than the public key.");
 
 		final ElGamalMultiRecipientMessage one = ElGamalMultiRecipientMessages.ones(gqGroup, l);
-		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = rho_vector.stream()
+		final List<ElGamalMultiRecipientCiphertext> encryptedOnes = rho_vector.parallelStream()
 				.map(rho_i -> getCiphertext(one, rho_i, pk))
 				.toList();
 		final List<ElGamalMultiRecipientCiphertext> C_pi = pi.stream()
 				.map(C_vector::get)
 				.toList();
 		final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> computed_C_prime = IntStream.range(0, N)
+				.parallel()
 				.mapToObj(i -> encryptedOnes.get(i).getCiphertextProduct(C_pi.get(i)))
 				.collect(toGroupVector());
 		checkArgument(C_prime.equals(computed_C_prime),
@@ -178,6 +179,7 @@ class ShuffleArgumentService {
 		// Compute vector r, matrix A and vector c_A
 		final GroupVector<ZqElement, ZqGroup> r = randomService.genRandomVector(q, m);
 		final GroupVector<ZqElement, ZqGroup> pi_vector = pi.stream()
+				.parallel()
 				.map(BigInteger::valueOf)
 				.map(value -> ZqElement.create(value, zqGroup))
 				.collect(toGroupVector());
@@ -199,6 +201,7 @@ class ShuffleArgumentService {
 		// Compute vector s, vector b, matrix B and vector c_B.
 		final GroupVector<ZqElement, ZqGroup> s = randomService.genRandomVector(q, m);
 		final GroupVector<ZqElement, ZqGroup> b_vector = pi.stream()
+				.parallel()
 				.map(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toGroupVector());
@@ -241,7 +244,7 @@ class ShuffleArgumentService {
 		final GroupVector<GqElement, GqGroup> c_minus_z = getCommitmentMatrix(negativeZ, zero, ck);
 
 		// Compute c_D.
-		final GroupVector<GqElement, GqGroup> c_A_y = c_A.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> c_A_y = c_A.parallelStream().map(element -> element.exponentiate(y)).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> c_D = vectorEntryWiseProduct(c_A_y, c_B);
 
 		// Compute matrix D.
@@ -252,6 +255,7 @@ class ShuffleArgumentService {
 
 		// Compute vector t.
 		final GroupVector<ZqElement, ZqGroup> t = IntStream.range(0, r.size())
+				.parallel()
 				.mapToObj(i -> y.multiply(r.get(i)).add(s.get(i)))
 				.collect(toGroupVector());
 
@@ -273,6 +277,7 @@ class ShuffleArgumentService {
 
 		// Compute rho.
 		final ZqElement rho = IntStream.range(0, rho_vector.size())
+				.parallel()
 				.mapToObj(i -> rho_vector.get(i).multiply(b_vector.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add)
 				.negate();
@@ -396,7 +401,7 @@ class ShuffleArgumentService {
 		final GroupVector<GqElement, GqGroup> c_minus_z = getCommitmentMatrix(Z_neg, zero, ck);
 
 		// Compute c_D.
-		final GroupVector<GqElement, GqGroup> c_A_y = c_A.stream().map(element -> element.exponentiate(y)).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> c_A_y = c_A.parallelStream().map(element -> element.exponentiate(y)).collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> c_D = vectorEntryWiseProduct(c_A_y, c_B);
 
 		// Pre-compute x^i for i=0..N used multiple times.
@@ -433,6 +438,7 @@ class ShuffleArgumentService {
 	 */
 	private GroupVector<ZqElement, ZqGroup> precomputeXPowers(final ZqElement x, final int N) {
 		return IntStream.range(0, N)
+				.parallel()
 				.mapToObj(BigInteger::valueOf)
 				.map(x::exponentiate)
 				.collect(toGroupVector());
@@ -446,6 +452,7 @@ class ShuffleArgumentService {
 
 		return IntStream.range(0, N)
 				.boxed()
+				.parallel()
 				.flatMap(i -> Stream.of(i)
 						.map(value -> ZqElement.create(value, zqGroup))
 						.map(y::multiply)
@@ -467,6 +474,7 @@ class ShuffleArgumentService {
 		checkArgument(first.getGroup().equals(second.getGroup()));
 
 		return IntStream.range(0, first.size())
+				.parallel()
 				.mapToObj(i -> first.get(i).multiply(second.get(i)))
 				.collect(toGroupVector());
 	}
@@ -484,6 +492,7 @@ class ShuffleArgumentService {
 		checkArgument(first.getGroup().equals(second.getGroup()));
 
 		return IntStream.range(0, first.numRows())
+				.parallel()
 				.mapToObj(i -> IntStream.range(0, first.numColumns())
 						.mapToObj(j -> first.get(i, j).add(second.get(i, j)))
 						.toList())
