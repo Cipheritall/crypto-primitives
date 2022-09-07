@@ -46,7 +46,7 @@ public class ElGamalMultiRecipientKeyPairs {
 		checkArgument(generator.getGroup().hasSameOrderAs(elGamalMultiRecipientPrivateKey.getGroup()),
 				"The private key and the generator must belong to groups of the same order.");
 
-		final GroupVector<GqElement, GqGroup> publicKeyElements = elGamalMultiRecipientPrivateKey.stream().map(generator::exponentiate).collect(toGroupVector());
+		final GroupVector<GqElement, GqGroup> publicKeyElements = elGamalMultiRecipientPrivateKey.stream().parallel().map(generator::exponentiate).collect(toGroupVector());
 
 		return new ElGamalMultiRecipientPublicKey(publicKeyElements);
 	}

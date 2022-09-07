@@ -173,6 +173,7 @@ public class HadamardArgumentService {
 		final List<GqElement> c_B_mutable = new ArrayList<>(m);
 		c_B_mutable.add(0, c_A.get(0));
 		c_B_mutable.addAll(1, IntStream.range(1, m - 1)
+				.parallel()
 				.mapToObj(j -> CommitmentService.getCommitment(b_vectors.get(j), s_vector.get(j), ck))
 				.toList());
 		c_B_mutable.add(m - 1, c_b);
@@ -197,11 +198,13 @@ public class HadamardArgumentService {
 
 		// To avoid computing multiple times the powers of x.
 		final GroupVector<ZqElement, ZqGroup> xPowers = IntStream.range(0, m)
+				.parallel()
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
 				.collect(toGroupVector());
 
 		// Calculate d_0, ..., d_(m-2)
 		final GroupVector<GroupVector<ZqElement, ZqGroup>, ZqGroup> d_matrix = IntStream.range(0, m - 1)
+				.parallel()
 				.mapToObj(i -> b_vectors.get(i).stream()
 						.map(element -> xPowers.get(i + 1).multiply(element))
 						.collect(toGroupVector()))
@@ -209,16 +212,19 @@ public class HadamardArgumentService {
 
 		// Calculate c_(D_0), ..., c_(D_(m-2))
 		final GroupVector<GqElement, GqGroup> c_D_vector = IntStream.range(0, m - 1)
+				.parallel()
 				.mapToObj(i -> c_B.get(i).exponentiate(xPowers.get(i + 1)))
 				.collect(toGroupVector());
 
 		// Calculate t_0, ..., t_(m-2)
 		final GroupVector<ZqElement, ZqGroup> t_vector = IntStream.range(0, m - 1)
+				.parallel()
 				.mapToObj(i -> xPowers.get(i + 1).multiply(s_vector.get(i)))
 				.collect(toGroupVector());
 
 		// Calculate d
 		final GroupVector<ZqElement, ZqGroup> d = IntStream.range(0, n)
+				.parallel()
 				.mapToObj(j ->
 						//Scalar multiplication
 						IntStream.range(1, m)
@@ -229,11 +235,13 @@ public class HadamardArgumentService {
 
 		// Calculate c_D
 		final GqElement c_D = IntStream.range(1, m)
+				.parallel()
 				.mapToObj(i -> c_B.get(i).exponentiate(xPowers.get(i)))
 				.reduce(gqGroup.getIdentity(), GqElement::multiply);
 
 		// Calculate t
 		final ZqElement t = IntStream.range(1, m)
+				.parallel()
 				.mapToObj(i -> xPowers.get(i).multiply(s_vector.get(i)))
 				.reduce(zqGroup.getIdentity(), ZqElement::add);
 
@@ -317,16 +325,19 @@ public class HadamardArgumentService {
 
 		// Pre-calculate the powers of x
 		final GroupVector<ZqElement, ZqGroup> xPowers = IntStream.range(0, m)
+				.parallel()
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
 				.collect(toGroupVector());
 
 		// Calculate c_(D_0), ..., c_(D_(m-2))
 		final GroupVector<GqElement, GqGroup> c_D_vector = IntStream.range(0, m - 1)
+				.parallel()
 				.mapToObj(i -> c_B.get(i).exponentiate(xPowers.get(i + 1)))
 				.collect(toGroupVector());
 
 		// Calculate c_D
 		final GqElement c_D = IntStream.range(1, m)
+				.parallel()
 				.mapToObj(i -> c_B.get(i).exponentiate(xPowers.get(i)))
 				.reduce(gqGroup.getIdentity(), GqElement::multiply);
 
@@ -365,6 +376,7 @@ public class HadamardArgumentService {
 		final ZqElement one = ZqElement.create(1, matrix.getGroup());
 		final int n = matrix.numRows();
 		return IntStream.range(0, n)
+				.parallel()
 				.mapToObj(i -> matrix.getRow(i).stream()
 						.limit(bound + 1L)
 						.reduce(one, ZqElement::multiply))

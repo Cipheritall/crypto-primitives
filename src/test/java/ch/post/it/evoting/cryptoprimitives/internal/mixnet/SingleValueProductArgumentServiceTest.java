@@ -39,7 +39,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -62,6 +61,9 @@ import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductArgument;
 import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductStatement;
 import ch.post.it.evoting.cryptoprimitives.mixnet.SingleValueProductWitness;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
+import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
+import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ZqGroupGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.TestParameters;
 import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
@@ -126,7 +128,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 	@DisplayName("getSingleValueProductArgument...")
 	class GetSingleValueProductArgumentTest {
 
-		@RepeatedTest(10)
+		@Test
 		void getSingleValueProductArgumentDoesNotThrow() {
 			assertDoesNotThrow(() -> argumentService.getSingleValueProductArgument(statement, witness));
 		}
@@ -299,16 +301,36 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			final VerificationResult verificationResult = argumentService.verifySingleValueProductArgument(statement, argument).verify();
 			assertTrue(verificationResult.isVerified());
 		}
-
+		
 		@Test
 		@DisplayName("with an incorrect statement returns false")
 		void verifySingleValueProductArgumentWithIncorrectStatement() {
-			GqElement commitment = statement.get_c_a();
-			commitment = commitment.multiply(gqGroup.getGenerator());
-			final ZqElement product = statement.get_b();
-			statement = new SingleValueProductStatement(commitment, product);
+			final GqGroup largeGqGroup = GroupTestData.getLargeGqGroup();
+			final GqGroupGenerator localGqGroupGenerator = new GqGroupGenerator(largeGqGroup);
+			final ZqGroup localZqGroup = ZqGroup.sameOrderAs(largeGqGroup);
+			final ZqGroupGenerator localZqGroupGenerator = new ZqGroupGenerator(localZqGroup);
 
-			final VerificationResult verificationResult = argumentService.verifySingleValueProductArgument(statement, argument).verify();
+			final TestCommitmentKeyGenerator ckGenerator = new TestCommitmentKeyGenerator(largeGqGroup);
+			final CommitmentKey localCommitmentKey = ckGenerator.genCommitmentKey(NUM_ELEMENTS);
+
+			final ElGamalMultiRecipientKeyPair keyPair = elGamal.genKeyPair(largeGqGroup, NUM_ELEMENTS, randomService);
+			final ElGamalMultiRecipientPublicKey localPublicKey = keyPair.getPublicKey();
+			// Need to remove 0 as this can lead to a valid proof even though we expect invalid.
+			final HashService localHashService = HashService.getInstance();
+			final SingleValueProductArgumentService localArgumentService = new SingleValueProductArgumentService(randomService,
+					localHashService, localPublicKey, localCommitmentKey);
+
+			final SingleValueProductWitness localWitness = genSingleValueProductWitness(localZqGroupGenerator, NUM_ELEMENTS);
+			SingleValueProductStatement localStatement = getSingleValueProductStatement(localWitness, localCommitmentKey);
+
+			final SingleValueProductArgument localArgument = localArgumentService.getSingleValueProductArgument(localStatement, localWitness);
+
+			GqElement commitment = localStatement.get_c_a();
+			commitment = localGqGroupGenerator.otherElement(commitment);
+			final ZqElement product = localStatement.get_b();
+			localStatement = new SingleValueProductStatement(commitment, product);
+
+			final VerificationResult verificationResult = localArgumentService.verifySingleValueProductArgument(localStatement, localArgument).verify();
 			assertFalse(verificationResult.isVerified());
 		}
 

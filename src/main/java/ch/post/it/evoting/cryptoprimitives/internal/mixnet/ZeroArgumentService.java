@@ -176,11 +176,13 @@ final class ZeroArgumentService {
 
 		// To avoid computing multiple times the powers of x.
 		final List<ZqElement> xPowers = IntStream.range(0, 2 * m + 1)
+				.parallel()
 				.mapToObj(i -> x.exponentiate(BigInteger.valueOf(i)))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		// Compute vectors a' and b'.
 		final GroupVector<ZqElement, ZqGroup> a_prime = IntStream.range(0, n)
+				.parallel()
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xPowers.get(i).multiply(A_prepended.get(j, i)))
@@ -188,6 +190,7 @@ final class ZeroArgumentService {
 				.collect(toGroupVector());
 
 		final GroupVector<ZqElement, ZqGroup> b_prime = IntStream.range(0, n)
+				.parallel()
 				.mapToObj(j ->
 						IntStream.range(0, m + 1)
 								.mapToObj(i -> xPowers.get(m - i).multiply(B_appended.get(j, i)))
@@ -315,6 +318,7 @@ final class ZeroArgumentService {
 		// StarMap computing.
 		final int n = firstVector.size();
 		return IntStream.range(0, n)
+				.parallel()
 				.mapToObj(j -> a.get(j)
 						.multiply(b.get(j))
 						.multiply(y.exponentiate(BigInteger.valueOf(j + 1L))))
@@ -401,6 +405,7 @@ final class ZeroArgumentService {
 		final Verifiable verifB = create(() -> prodCb.equals(commB), String.format("prodCb %s and commB %s are not equal", prodCb, commB));
 
 		final GqElement prodCd = IntStream.range(0, (2 * m) + 1)
+				.parallel()
 				.mapToObj(i -> c_d.get(i).exponentiate(xPowers.get(i)))
 				.reduce(identity, GqElement::multiply);
 

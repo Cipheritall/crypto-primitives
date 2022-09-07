@@ -98,6 +98,7 @@ public class ShuffleService {
 		final List<ElGamalMultiRecipientCiphertext> C_prime =
 				IntStream.range(0, N)
 						.boxed()
+						.parallel()
 						.flatMap(i -> Stream.of(i)
 								.map(__ -> r.get(i))
 								.map(r_i -> getCiphertext(one, r_i, pk))

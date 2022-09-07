@@ -115,7 +115,7 @@ public class HashService implements Hash {
 						concat(
 							Stream.concat(
 								Stream.of(ARRAY_PREFIX),
-								w.stream().map(this::recursiveHash)
+								w.stream().parallel().map(this::recursiveHash)
 							).toArray(byte[][]::new)
 						)
 				);
@@ -219,7 +219,8 @@ public class HashService implements Hash {
 
 				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
 
-				final byte[] h = w.stream().map(w_i -> recursiveHashOfLength(l, w_i)).reduce(ARRAY_PREFIX, Bytes::concat);
+				final byte[] h = Stream.concat(Stream.of(ARRAY_PREFIX), w.parallelStream().map(w_i -> recursiveHashOfLength(l, w_i)))
+						.reduce(new byte[]{}, Bytes::concat);
 				return ByteArrays.cutToBitLength(shake256(L, h), l);
 			} else {
 				throw new IllegalArgumentException(String.format("Object of type %s cannot be hashed.", value.getClass()));
