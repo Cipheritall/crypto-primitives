@@ -21,6 +21,7 @@ import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInte
 import static com.google.common.primitives.Bytes.concat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -180,6 +181,26 @@ class HashServiceTest {
 	}
 
 	@Test
+	void testRecursiveHashWithEmptyInnerList() {
+		final Hashable values1 = HashableList.of(
+				HashableString.from("test"),
+				HashableList.of(),
+				HashableList.of(HashableString.from("b"))
+		);
+
+		final Hashable values2 = HashableList.of(
+				HashableString.from("test"),
+				HashableList.of(HashableString.from("b")),
+				HashableList.of()
+		);
+
+		final byte[] bytes1 = hashService.recursiveHash(values1);
+		final byte[] bytes2 = hashService.recursiveHash(values2);
+
+		assertFalse(Arrays.equals(bytes1, bytes2), "the hashes should differ");
+	}
+
+	@Test
 	void testRecursiveHashOfTwoByteArraysReturnsHashOfConcatenatedIndividualHashes() {
 		final byte[] bytes1 = new byte[TEST_INPUT_LENGTH];
 		final byte[] bytes2 = new byte[TEST_INPUT_LENGTH];
@@ -229,19 +250,6 @@ class HashServiceTest {
 		final byte[] expected = messageDigest.digest(concatenation);
 
 		assertArrayEquals(expected, hash);
-	}
-
-	@Test
-	void testRecursiveHashOfEmptyListThrows() {
-		final HashableList list = List::of;
-		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
-	}
-
-	@Test
-	void testRecursiveHashOfNestedEmptyListThrows() {
-		final HashableList emptyList = List::of;
-		final HashableList list = HashableList.of(HashableBigInteger.from(BigInteger.ONE), emptyList);
-		assertThrows(IllegalArgumentException.class, () -> hashService.recursiveHash(list));
 	}
 
 	@Test
