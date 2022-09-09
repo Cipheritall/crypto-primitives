@@ -53,15 +53,6 @@ class HashableListTest {
 	}
 
 	@Test
-	@DisplayName("cannot be created from an empty list")
-	void hashableListFromEmptyListThrows() {
-		final List<HashableString> emptyList = Collections.emptyList();
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> HashableList.from(emptyList));
-		assertEquals("The list must not be empty.", exception.getMessage());
-	}
-
-	@Test
 	@DisplayName("correctly creates a list containing the elements")
 	void hashableListOfMakesCopy() {
 		final List<String> expected = new ArrayList<>();

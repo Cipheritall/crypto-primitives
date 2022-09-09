@@ -109,8 +109,6 @@ public class HashService implements Hash {
 			} else if (value instanceof HashableList hashableList) {
 				final List<? extends Hashable> w = hashableList.toHashableForm();
 
-				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
-
 				return hashFunction.hash(
 						concat(
 							Stream.concat(
@@ -216,9 +214,6 @@ public class HashService implements Hash {
 				return ByteArrays.cutToBitLength(shake256(L, concat(STRING_PREFIX, stringToByteArray(w))), l);
 			} else if (value instanceof HashableList hashableList) {
 				final List<? extends Hashable> w = hashableList.toHashableForm();
-
-				checkArgument(!w.isEmpty(), "Cannot hash an empty list.");
-
 				final byte[] h = Stream.concat(Stream.of(ARRAY_PREFIX), w.parallelStream().map(w_i -> recursiveHashOfLength(l, w_i)))
 						.reduce(new byte[]{}, Bytes::concat);
 				return ByteArrays.cutToBitLength(shake256(L, h), l);
