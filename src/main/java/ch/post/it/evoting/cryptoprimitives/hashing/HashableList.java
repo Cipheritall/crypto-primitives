@@ -43,8 +43,6 @@ public interface HashableList extends Hashable {
 
 		// The copy has to be done outside of the lambda, otherwise it will be made only when #toHashableForm is called.
 		final List<? extends Hashable> immutableList = List.copyOf(list);
-		checkArgument(!immutableList.isEmpty(), "The list must not be empty.");
-
 		return () -> immutableList;
 	}
 
