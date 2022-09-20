@@ -41,10 +41,7 @@ public class GqGroupLoader {
 		final BigInteger q = new BigInteger(jsonNode.get("q").asText(), 10);
 		final BigInteger g = new BigInteger(jsonNode.get("g").asText(), 10);
 
-		try (MockedStatic<SecurityLevelConfig> mockedSecurityLevel = mockStatic(SecurityLevelConfig.class)) {
-			mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.DEFAULT);
-			this.group = new GqGroup(p, q, g);
-		}
+		this.group = new GqGroup(p, q, g);
 	}
 
 	GqGroup getGroup() {
