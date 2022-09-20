@@ -30,7 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.securitylevel.SecurityLevel;
 public enum SecurityLevelInternal implements SecurityLevel {
 
 	TESTING_ONLY(16, 48, SHA3_256.getInstance(), SHAKE256.getInstance(), SHA256Digest::new, AES_GCM_256.getInstance(), RSASSA_PSS.getInstance()),
-	DEFAULT(112, 2048, SHA3_256.getInstance(), SHAKE256.getInstance(), SHA256Digest::new, AES_GCM_256.getInstance(), RSASSA_PSS.getInstance()),
+	LEGACY(112, 2048, SHA3_256.getInstance(), SHAKE256.getInstance(), SHA256Digest::new, AES_GCM_256.getInstance(), RSASSA_PSS.getInstance()),
 	EXTENDED(128, 3072, SHA3_256.getInstance(), SHAKE256.getInstance(), SHA256Digest::new, AES_GCM_256.getInstance(), RSASSA_PSS.getInstance());
 
 	private final int securityLevelBits;
