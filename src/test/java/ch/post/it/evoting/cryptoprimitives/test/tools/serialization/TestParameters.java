@@ -78,7 +78,7 @@ public final class TestParameters {
 		case 3072:
 			return SecurityLevelInternal.EXTENDED;
 		case 2048:
-			return SecurityLevelInternal.DEFAULT;
+			return SecurityLevelInternal.LEGACY;
 		default:
 			throw new IllegalArgumentException("Unexpected bit length of p");
 		}
