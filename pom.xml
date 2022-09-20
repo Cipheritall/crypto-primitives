@@ -5,7 +5,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>0.15.2.6-SNAPSHOT</version>
+	<version>0.15.2.7-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -43,7 +43,7 @@
 		<maven-enforcer-plugin.requiredJavaVersion>[17.0.3]</maven-enforcer-plugin.requiredJavaVersion>
 		<maven-enforcer-plugin.requiredMavenVersion>3.8.6</maven-enforcer-plugin.requiredMavenVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.build.outputTimestamp>2022-09-09T09:59:30+02:00</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2022-09-20T16:16:44+02:00</project.build.outputTimestamp>
 
 		<!--  Sonar  -->
 		<sonar.scm.disabled>true</sonar.scm.disabled>
