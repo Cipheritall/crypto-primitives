@@ -198,9 +198,9 @@ class GenKeysAndCertServiceTest {
 		return date.toInstant().atZone(ZoneId.of("Europe/Zurich")).toLocalDate();
 	}
 
-	private static byte[] createRandomPayload() throws Exception {
+	private static byte[] createRandomPayload() {
 		final byte[] payload = new byte[10];
-		SecureRandom.getInstanceStrong().nextBytes(payload);
+		new SecureRandom().nextBytes(payload);
 		return payload;
 	}
 }

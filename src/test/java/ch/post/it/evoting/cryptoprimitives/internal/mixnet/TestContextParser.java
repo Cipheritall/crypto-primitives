@@ -47,7 +47,7 @@ class TestContextParser {
 				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.EXTENDED);
 				break;
 			case 2048:
-				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.DEFAULT);
+				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.LEGACY);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected bit length of p");
