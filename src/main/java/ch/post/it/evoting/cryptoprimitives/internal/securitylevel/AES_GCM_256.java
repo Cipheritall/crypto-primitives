@@ -35,6 +35,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * This class is thread safe.
  */
+@SuppressWarnings("java:S101")
 public class AES_GCM_256 implements AEAD {
 
 	private static final AES_GCM_256 INSTANCE = new AES_GCM_256();

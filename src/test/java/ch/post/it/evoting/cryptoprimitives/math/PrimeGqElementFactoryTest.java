@@ -23,6 +23,8 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
@@ -48,27 +50,9 @@ class PrimeGqElementFactoryTest {
 		assertEquals(value, element.getValue().intValueExact(), "The returned element value is not the expected one");
 	}
 
-	@Test
-	void whenCreateAPrimeElementWithValueZeroThenError() {
-		final int value = 0;
-		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
-	}
-
-	@Test
-	void whenCreateAPrimeElementWithNegativeValueThenError() {
-		final int value = -1;
-		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
-	}
-
-	@Test
-	void whenCreateAPrimeElementWithNotPrimeValueThenError() {
-		final int value = 4;
-		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
-	}
-
-	@Test
-	void whenCreateAPrimeElementWithValueGreaterThanPThenError() {
-		final int value = 27;
+	@ParameterizedTest(name = "[{index}] - with value {0}")
+	@ValueSource(ints = { 0, -1, 4, 27 })
+	void whenCreateAPrimeElementWithInvalidValueThenError(final int value) {
 		assertThrows(IllegalArgumentException.class, () -> PrimeGqElement.PrimeGqElementFactory.fromValue(value, group));
 	}
 
@@ -96,7 +80,7 @@ class PrimeGqElementFactoryTest {
 		final PrimeGqElement groupMember = PrimeGqElement.PrimeGqElementFactory.fromValue(memberValue, group);
 		assertTrue(group.isGroupMember(groupMember.getValue()));
 	}
-	
+
 	@Test
 	void testGetSmallGroupMembersOk() {
 		final GqGroup gqGroup = new GqGroup(BigInteger.valueOf(47), BigInteger.valueOf(23), BigInteger.valueOf(2));

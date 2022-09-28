@@ -34,8 +34,6 @@ import java.util.function.Supplier;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hash;
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.signing.SignatureFactory;
 import ch.post.it.evoting.cryptoprimitives.signing.SignatureGeneration;
 import ch.post.it.evoting.cryptoprimitives.signing.SignatureKeystore;
@@ -50,8 +48,6 @@ import ch.post.it.evoting.cryptoprimitives.signing.SignatureVerification;
  */
 public class SignatureKeystoreService<T extends Supplier<String>> implements SignatureKeystore<T> {
 
-	private static final SecurityLevelInternal SECURITY_LEVEL = SecurityLevelConfig.getSystemSecurityLevel();
-
 	private static final String EMPTY_KEY_ENTRY_PASSWORD = "";
 
 	private final SignatureGeneration signatureGenerationService;
@@ -64,7 +60,7 @@ public class SignatureKeystoreService<T extends Supplier<String>> implements Sig
 	 * @param password          to unlock the keystore.
 	 * @param keystoreValidator to run custom check on the keystore.
 	 * @param signingAlias      providing the alias of the component using this service. Must be present in the keystore.
-	 * @param hash       service to generate the hash for signing and verification.
+	 * @param hash              service to generate the hash for signing and verification.
 	 */
 	public SignatureKeystoreService(final InputStream keyStoreStream, final String keystoreType, final char[] password,
 			final Predicate<KeyStore> keystoreValidator, final T signingAlias, final Hash hash) {
