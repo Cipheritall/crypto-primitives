@@ -55,7 +55,7 @@ public class ElGamalMultiRecipientCiphertexts {
 	}
 
 	/**
-	 See {@link ElGamalService#getMessage}
+	 * See {@link ElGamalService#getMessage}
 	 **/
 	public static ElGamalMultiRecipientCiphertext getCiphertext(final ElGamalMultiRecipientMessage message, final ZqElement exponent,
 			final ElGamalMultiRecipientPublicKey publicKey) {
@@ -104,6 +104,7 @@ public class ElGamalMultiRecipientCiphertexts {
 	 * @param exponents   A List of {@code ZqElement}s, of the same size as the ciphertexts list. Must be non null and not empty.
 	 * @return the product of the exponentiated ciphertexts.
 	 */
+	@SuppressWarnings("java:S117")
 	public static ElGamalMultiRecipientCiphertext getCiphertextVectorExponentiation(
 			final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts, final GroupVector<ZqElement, ZqGroup> exponents) {
 
