@@ -17,8 +17,6 @@
 
 package ch.post.it.evoting.cryptoprimitives.math;
 
-import java.math.BigInteger;
-
 import ch.post.it.evoting.cryptoprimitives.internal.math.PrimesInternal;
 
 public interface Primes {
@@ -27,7 +25,7 @@ public interface Primes {
 	 * Checks if the given number is a prime number. This is efficient for small primes only.
 	 *
 	 * @param number n, the number to be tested. Must be non-null and strictly positive. Restricted to the range of an int to guarantee that the
-	 *                  algorithm runs efficiently.
+	 *               algorithm runs efficiently.
 	 * @return true if n is prime, false otherwise.
 	 * @throws NullPointerException     if n is null.
 	 * @throws IllegalArgumentException if n is not strictly positive.

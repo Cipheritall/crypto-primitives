@@ -27,6 +27,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 /*
 	This class is thread safe.
  */
+@SuppressWarnings("java:S101")
 public class SHA3_256 implements HashFunction {
 
 	static {

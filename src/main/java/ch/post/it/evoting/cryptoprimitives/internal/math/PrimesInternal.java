@@ -18,11 +18,9 @@
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.math.BigInteger;
 
 public class PrimesInternal {
+
 	private PrimesInternal() {
 		//Intentionally left blank
 	}

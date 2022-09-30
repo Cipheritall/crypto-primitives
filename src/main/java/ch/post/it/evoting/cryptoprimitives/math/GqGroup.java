@@ -28,8 +28,8 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.internal.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
 import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
 
 /**
  * Quadratic residues group of integers modulo p, such that p is a safe prime, i.e. p = 2q + 1. In this case q is the order of the group (ie the
@@ -141,7 +141,7 @@ public final class GqGroup implements MathematicalGroup<GqGroup>, HashableList {
 			return false;
 		}
 		final GqGroup gqGroup = (GqGroup) o;
-		return p.equals(gqGroup.p) && q.equals(gqGroup.q) && generator.getValue().equals(gqGroup.generator.getValue());
+		return p.compareTo(gqGroup.p) == 0 && q.compareTo(gqGroup.q) == 0 && generator.getValue().compareTo(gqGroup.generator.getValue()) == 0;
 	}
 
 	@Override

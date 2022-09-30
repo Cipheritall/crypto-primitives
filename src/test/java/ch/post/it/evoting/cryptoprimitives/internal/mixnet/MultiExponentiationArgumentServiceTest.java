@@ -67,8 +67,9 @@ import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
 class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 	private static final int COMMITMENT_KEY_SIZE = 11;
-	public static final ZqElement zqTwo = ZqElement.create(2, zqGroup);
-	public static final ZqElement zqOne = ZqElement.create(1, zqGroup);
+	private static final ZqElement zqTwo = ZqElement.create(2, zqGroup);
+	private static final ZqElement zqOne = ZqElement.create(1, zqGroup);
+
 	private static MultiExponentiationArgumentService argumentService;
 	private static TestMultiExponentiationStatementGenerator statementGenerator;
 	private static TestMultiExponentiationWitnessGenerator witnessGenerator;
@@ -80,6 +81,7 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 	private static TestMultiExponentiationArgumentGenerator argumentGenerator;
 	private static HashService hashService;
 	private static int publicKeySize;
+
 	private int n;
 	private int m;
 	private int l;
@@ -303,11 +305,10 @@ class MultiExponentiationArgumentServiceTest extends TestGroupSetup {
 
 		@Test
 		void testNullValuesThrows() {
-			assertAll(
-					() -> assertThrows(NullPointerException.class, () -> argumentService.verifyMultiExponentiationArgument(null, randomArgument)),
-					() -> assertThrows(NullPointerException.class,
-							() -> argumentService.verifyMultiExponentiationArgument(statementGenerator.genRandomStatement(n, m, l), null))
-			);
+			assertThrows(NullPointerException.class, () -> argumentService.verifyMultiExponentiationArgument(null, randomArgument));
+
+			final MultiExponentiationStatement multiExponentiationStatement = statementGenerator.genRandomStatement(n, m, l);
+			assertThrows(NullPointerException.class, () -> argumentService.verifyMultiExponentiationArgument(multiExponentiationStatement, null));
 		}
 
 		@Test
