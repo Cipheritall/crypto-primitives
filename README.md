@@ -99,20 +99,16 @@ We aim for a mathematical naming convention that aligns with the following goals
 
 ![Mathematical Naming Convention Examples](naming_convention_examples.jpg)
 
+## Changelog
+
+An overview of all major changes within the published releases is available [here.](CHANGELOG.md)
+
 ## Future Work
 
 We plan for the following improvements to the crypto-primitives library:
 
 * Implementing methods for probabilistic primality testing.
 * Provide expanded information in test vectors (including the expected challenge).
-
-## Open Issues
-
-The current release has the following open issues:
-
-* Improve the RecursiveHash's collision-resistance for nested objects (refers to #YWH-PGM2323-69 mentionned in [GitLab issue #37](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/37)).
-* Ensure the injective encoding of the associated data in the GenCiphertextSymmetric method (refers to #YWH-PGM2323-70 mentionned in [GitLab issue #37](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/37)).
-* Ensure the injective encoding of the KDF's additional context information (refers to #YWH-PGM2323-71 mentionned in [GitLab issue #37](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/37)).
 
 ## Additional Documentation
 

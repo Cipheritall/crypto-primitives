@@ -1,5 +1,21 @@
 # Changelog
 
+## Release 1.0
+
+The following functionalities and improvements are included in release 1.0:
+
+* [Code, Specification] Improved the RecursiveHash's collision-resistance for nested objects (refers to #YWH-PGM2323-69 mentioned in [GitLab issue #37](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/37)).
+* [Code, Specification] Ensured the injective encoding of the associated data in the GenCiphertextSymmetric method (refers to #YWH-PGM2323-70 mentioned in [GitLab issue #37](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/37)).
+* [Code, Specification] Ensured the injective encoding of the KDF's additional context information (refers to #YWH-PGM2323-71 mentioned in [GitLab issue #37](https://gitlab.com/swisspost-evoting/e-voting/e-voting-documentation/-/issues/37)).
+* [Code, Specification] Split the algorithm Argon2id into two separate algorithm GenArgon2id and GetArgon2id.
+* [Code, Specification] Switched to the EXTENDED (128-bits) security level. Renamed the DEFAULT (112-bits) security level to LEGACY.
+* [Code, Specification] Fixed the incorrect Require Statement in the algorithm GenUniqueDecimalStrings.
+* [Code, Specification] Added an upper limit on the isSmallPrime algorithm.
+* [Code] Allowed hashing of empty lists (necessary for signing XML files).
+* [Code] Updated dependencies and third-party libraries.
+
+---
+
 ## Release 0.15
 
 Release 0.15 includes some feedback from the Federal Chancellery's mandated experts.
