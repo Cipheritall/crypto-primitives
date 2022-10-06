@@ -27,8 +27,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116", "java:S117"})
-public
-class HadamardStatement {
+public final class HadamardStatement {
 
 	private final GroupVector<GqElement, GqGroup> c_A;
 	private final GqElement c_b;

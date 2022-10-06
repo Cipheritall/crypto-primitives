@@ -32,8 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
-public
-class ZeroStatement {
+public final class ZeroStatement {
 
 	private final GroupVector<GqElement, GqGroup> c_A;
 	private final GroupVector<GqElement, GqGroup> c_B;

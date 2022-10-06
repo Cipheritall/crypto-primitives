@@ -31,8 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
-public
-class SingleValueProductWitness {
+public final class SingleValueProductWitness {
 
 	private final GroupVector<ZqElement, ZqGroup> a;
 	private final ZqElement r;

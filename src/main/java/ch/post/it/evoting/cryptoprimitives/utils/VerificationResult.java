@@ -19,12 +19,15 @@ package ch.post.it.evoting.cryptoprimitives.utils;
 
 import java.util.Deque;
 
+import ch.post.it.evoting.cryptoprimitives.internal.utils.VerificationFailure;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.VerificationSuccess;
+
 /**
  * Represents the result of a verification. Contains a list of errors in case of failure.
  *
  * <p>Instances of this class are immutable. </p>
  */
-public interface VerificationResult {
+public sealed interface VerificationResult permits VerificationFailure, VerificationSuccess {
 
 	/**
 	 * @return {@code true} iff this verification succeeded.

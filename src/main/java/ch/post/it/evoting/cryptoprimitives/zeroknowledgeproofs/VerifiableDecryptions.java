@@ -34,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * Instances of this class are immutable.
  */
 @SuppressWarnings({ "java:S116", "java:S100" })
-public class VerifiableDecryptions implements HashableList {
+public final class VerifiableDecryptions implements HashableList {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> ciphertexts;
 	private final GroupVector<DecryptionProof, ZqGroup> decryptionProofs;

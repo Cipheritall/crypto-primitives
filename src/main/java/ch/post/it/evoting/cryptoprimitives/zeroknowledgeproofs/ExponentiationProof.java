@@ -33,7 +33,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
-public class ExponentiationProof implements GroupVectorElement<ZqGroup>, HashableList {
+public final class ExponentiationProof implements GroupVectorElement<ZqGroup>, HashableList {
 
 	private final ZqElement e;
 	private final ZqElement z;

@@ -28,7 +28,7 @@ import java.util.stream.Stream;
  *
  * <p>Instances of this class are immutable.
  */
-public class Permutation {
+public final class Permutation {
 
 	public static final Permutation EMPTY = new Permutation(List.of());
 

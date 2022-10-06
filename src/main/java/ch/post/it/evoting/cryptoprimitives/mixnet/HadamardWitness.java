@@ -28,8 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({"java:S100", "java:S116"})
-public
-class HadamardWitness {
+public final class HadamardWitness {
 
 	private final GroupMatrix<ZqElement, ZqGroup> A;
 	private final GroupVector<ZqElement, ZqGroup> b;

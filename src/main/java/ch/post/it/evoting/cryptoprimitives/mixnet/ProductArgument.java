@@ -34,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
-public class ProductArgument implements HashableList {
+public final class ProductArgument implements HashableList {
 
 	private final SingleValueProductArgument singleValueProductArgument;
 	private final int m;
