@@ -87,7 +87,7 @@ final class CommitmentKey implements HashableList {
 	}
 
 	/**
-	 * @return the number of g elements
+	 * @return the number of g elements. Please note that the commitment key always has an additional element h.
 	 */
 	int size() {
 		return gElements.size();

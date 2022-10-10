@@ -69,12 +69,12 @@ public class CommitmentService {
 		final int l = a.size();
 		final int nu = ck.size();
 
-		// By construction, commitmentKey.size() > 1.
-		checkArgument(a.isEmpty() || a.getGroup().equals(r.getGroup()),
-				"The random value must belong to the same group as the values to be committed to");
+		// By construction, commitmentKey.size() >= 1.
+		checkArgument(l > 0, "There must be at least one value to commit to");
+		checkArgument(nu >= l, "The commitment key size must be equal to or greater than the size of the list of elements to commit to");
+		checkArgument(a.getGroup().equals(r.getGroup()), "The random value must belong to the same group as the values to be committed to");
 		checkArgument(r.getGroup().hasSameOrderAs(ck.getGroup()),
 				"The commitment key must have the same order (q) as the elements to be committed to and the random value");
-		checkArgument(nu >= l, "The commitment key must be equal to or longer than the list of elements to commit to");
 
 		final GqElement h = ck.getH();
 		final GroupVector<GqElement, GqGroup> g = ck.getG();
@@ -113,6 +113,8 @@ public class CommitmentService {
 		final int n = A.numRows();
 		final int m = A.numColumns();
 		final int nu = ck.size();
+
+		// By GroupMatrix construction, m,n > 0.
 
 		// Cross arguments dimension checking.
 		checkArgument(r.size() == m, "There must be as many random elements as there are columns in the element matrix");

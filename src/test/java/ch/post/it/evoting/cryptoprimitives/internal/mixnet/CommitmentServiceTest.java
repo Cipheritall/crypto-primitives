@@ -17,7 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -93,13 +92,15 @@ class CommitmentServiceTest {
 		@DisplayName("with empty list of values to commit to does not throw")
 		void getCommitmentOfEmptyList() {
 			final GroupVector<ZqElement, ZqGroup> values = GroupVector.of();
-			assertNotNull(CommitmentService.getCommitment(values, randomValue, validCommitmentKey));
+			assertThrows(IllegalArgumentException.class, () -> CommitmentService.getCommitment(values, randomValue, validCommitmentKey));
 		}
 
 		@RepeatedTest(10)
-		@DisplayName("with empty list result is multimodexp with padding")
+		@DisplayName("with list containing zeroes result is multimodexp with padding")
 		void withEmptyListResultIsMultiModExpWithPadding() {
-			final GroupVector<ZqElement, ZqGroup> values = GroupVector.of();
+			final GroupVector<ZqElement, ZqGroup> values = Stream.generate(() -> ZqElement.create(BigInteger.ZERO, zqGroup))
+					.limit(KEY_LENGTH)
+					.collect(GroupVector.toGroupVector());
 			final List<BigInteger> aPrime = Stream.generate(() -> BigInteger.ZERO).limit(KEY_LENGTH).collect(Collectors.toList());
 			aPrime.add(0, randomValue.getValue());
 			final BigInteger expected = BigIntegerOperationsService.multiModExp(
