@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 class HashableByteArrayTest {
 
 	@Test
-	@DisplayName("correctly makes a copy of the input byte array")
+	@DisplayName("correctly makes a copy of the input byte array and toHashableForm array")
 	void hashableByteArrayFromMakesCopy() {
 		final byte[] bytes = { 0b01, 0b10, 0b11 };
 		final byte[] expected = { 0b01, 0b10, 0b11 };
@@ -35,6 +35,11 @@ class HashableByteArrayTest {
 
 		// Modify original byte array.
 		bytes[0] = 0b11;
+
+		assertArrayEquals(expected, hashableByteArray.toHashableForm());
+
+		// Modify toHashableForm array.
+		hashableByteArray.toHashableForm()[0] = 0b11;
 
 		assertArrayEquals(expected, hashableByteArray.toHashableForm());
 	}

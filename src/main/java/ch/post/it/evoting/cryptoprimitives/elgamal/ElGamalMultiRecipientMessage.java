@@ -34,7 +34,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable.
  */
 @SuppressWarnings({ "java:S117" })
-public class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
+public final class ElGamalMultiRecipientMessage implements ElGamalMultiRecipientObject<GqElement, GqGroup>, HashableList {
 
 	private final GroupVector<GqElement, GqGroup> messageElements;
 

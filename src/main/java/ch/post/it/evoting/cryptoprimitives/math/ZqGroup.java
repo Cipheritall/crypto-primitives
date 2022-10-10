@@ -28,7 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.internal.math.MathematicalGroup;
  *
  * <p> Instances of this class are immutable.</p>
  */
-public class ZqGroup implements MathematicalGroup<ZqGroup> {
+public final class ZqGroup implements MathematicalGroup<ZqGroup> {
 	private final BigInteger q;
 	private final ZqElement identity;
 

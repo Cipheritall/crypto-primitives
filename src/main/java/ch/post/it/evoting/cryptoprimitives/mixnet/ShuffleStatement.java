@@ -32,8 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
-public
-class ShuffleStatement {
+public final class ShuffleStatement {
 
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C;
 	private final GroupVector<ElGamalMultiRecipientCiphertext, GqGroup> C_prime;

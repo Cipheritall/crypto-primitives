@@ -28,7 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
  * <p>
  * This class is immutable.
  */
-public class VerificationFailure implements VerificationResult {
+public final class VerificationFailure implements VerificationResult {
 
 	private final Deque<String> errorMessages = new LinkedList<>();
 

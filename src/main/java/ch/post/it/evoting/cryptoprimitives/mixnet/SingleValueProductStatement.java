@@ -31,8 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
-public
-class SingleValueProductStatement {
+public final class SingleValueProductStatement {
 
 	private final GqElement c_a;
 	private final ZqElement b;

@@ -32,7 +32,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  * <p>Instances of this class are immutable. </p>
  */
 @SuppressWarnings({ "java:S100", "java:S116", "java:S117" })
-public class HadamardArgument implements HashableList {
+public final class HadamardArgument implements HashableList {
 
 	private final GroupVector<GqElement, GqGroup> c_b;
 	private final ZeroArgument zeroArgument;

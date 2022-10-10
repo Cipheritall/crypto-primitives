@@ -36,7 +36,7 @@ import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
  *
  * <p>Instances of this class are immutable. </p>
  */
-class CommitmentKey implements HashableList {
+final class CommitmentKey implements HashableList {
 
 	private final GqGroup group;
 	private final GqElement h;
