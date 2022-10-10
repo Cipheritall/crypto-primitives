@@ -25,15 +25,15 @@ public class BaseEncodingFactory {
 		// Intentionally left blank
 	}
 
-	public static Base16 getBase16() {
+	public static Base16 createBase16() {
 		return new Base16Service();
 	}
 
-	public static Base32 getBase32() {
+	public static Base32 createBase32() {
 		return new Base32Service();
 	}
 
-	public static Base64 getBase64() {
+	public static Base64 createBase64() {
 		return new Base64Service();
 	}
 }
