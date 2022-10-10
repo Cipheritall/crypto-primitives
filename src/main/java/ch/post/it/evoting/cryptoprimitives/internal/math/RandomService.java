@@ -23,14 +23,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.io.BaseEncoding;
 
+import ch.post.it.evoting.cryptoprimitives.math.Base16;
+import ch.post.it.evoting.cryptoprimitives.math.Base32;
+import ch.post.it.evoting.cryptoprimitives.math.Base64;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.Random;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -42,12 +43,18 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 public class RandomService implements Random {
 
 	private final SecureRandom secureRandom;
+	private final Base16 base16;
+	private final Base32 base32;
+	private final Base64 base64;
 
 	/**
 	 * Constructs a RandomService with a {@link SecureRandom} as its randomness source.
 	 */
 	public RandomService() {
 		this.secureRandom = new SecureRandom();
+		this.base16 = new Base16Service();
+		this.base32 = new Base32Service();
+		this.base64 = new Base64Service();
 	}
 
 	/**
@@ -83,7 +90,7 @@ public class RandomService implements Random {
 		final byte[] b = randomBytes(l_bytes);
 
 		// Encode to a Base16 String.
-		final String S = BaseEncoding.base16().encode(b);
+		final String S = base16.base16Encode(b);
 
 		// Truncate to desired length.
 		return S.substring(0, l);
@@ -103,7 +110,7 @@ public class RandomService implements Random {
 		final byte[] b = randomBytes(l_bytes);
 
 		// Encode to a Base32 String.
-		final String S = BaseEncoding.base32().encode(b);
+		final String S = base32.base32Encode(b);
 
 		// Truncate to desired length.
 		return S.substring(0, l);
@@ -123,7 +130,7 @@ public class RandomService implements Random {
 		final byte[] b = randomBytes(l_bytes);
 
 		// Encode to a Base64 String
-		final String S = Base64.getEncoder().encodeToString(b);
+		final String S = base64.base64Encode(b);
 
 		// Truncate to desired length
 		return S.substring(0, l);

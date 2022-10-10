@@ -27,16 +27,16 @@ import org.bouncycastle.crypto.digests.SHAKEDigest;
 
 import com.google.common.primitives.Bytes;
 
-import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
 import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 
 /**
  * Provides functionality to create verifiable encryption parameters as a {@link GqGroup}.
  *
  * <p> This class is immutable and thread safe. </p>
  */
-public class EncryptionParameters {
+public final class EncryptionParameters {
 
 	private static final BigInteger ONE = BigInteger.ONE;
 	private static final BigInteger TWO = BigInteger.valueOf(2);

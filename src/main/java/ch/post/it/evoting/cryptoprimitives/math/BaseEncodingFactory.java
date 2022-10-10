@@ -13,33 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package ch.post.it.evoting.cryptoprimitives.math;
 
-package ch.post.it.evoting.cryptoprimitives.internal.utils;
+import ch.post.it.evoting.cryptoprimitives.internal.math.Base16Service;
+import ch.post.it.evoting.cryptoprimitives.internal.math.Base32Service;
+import ch.post.it.evoting.cryptoprimitives.internal.math.Base64Service;
 
-import java.util.Deque;
+public class BaseEncodingFactory {
 
-import ch.post.it.evoting.cryptoprimitives.utils.VerificationResult;
-
-/**
- * Represents a successful verification.
- * <p>
- * This class is immutable.
- */
-public final class VerificationSuccess implements VerificationResult {
-
-	public static final VerificationSuccess INSTANCE = new VerificationSuccess();
-
-	private VerificationSuccess() {
-		//Intentionally left blank
+	private BaseEncodingFactory() {
+		// Intentionally left blank
 	}
 
-	@Override
-	public boolean isVerified() {
-		return true;
+	public static Base16 createBase16() {
+		return new Base16Service();
 	}
 
-	@Override
-	public Deque<String> getErrorMessages() {
-		throw new UnsupportedOperationException();
+	public static Base32 createBase32() {
+		return new Base32Service();
+	}
+
+	public static Base64 createBase64() {
+		return new Base64Service();
 	}
 }

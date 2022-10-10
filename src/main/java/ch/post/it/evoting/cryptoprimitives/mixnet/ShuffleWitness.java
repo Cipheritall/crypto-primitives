@@ -31,8 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
  * <p>Instances of this class are immutable.</p>
  */
 @SuppressWarnings("java:S100")
-public
-class ShuffleWitness {
+public final class ShuffleWitness {
 
 	private final Permutation pi;
 	private final GroupVector<ZqElement, ZqGroup> rho;

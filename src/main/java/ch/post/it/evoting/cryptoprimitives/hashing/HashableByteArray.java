@@ -30,14 +30,15 @@ public interface HashableByteArray extends Hashable {
 	/**
 	 * Utility function which creates an immutable HashableByteArray whose hashable form is the provided byte array.
 	 *
-	 * @param byteArray the hashable form. Non null.
+	 * @param byteArray the hashable form. Non-null.
 	 * @return A new HashableByteArray whose hashable form is {@code byteArray}
 	 */
 	static HashableByteArray from(final byte[] byteArray) {
 		checkNotNull(byteArray);
 
-		// The copy has to be done outside of the lambda, otherwise it will be made only when #toHashableForm is called.
+		// The first copy is done to avoid modification of the input affecting the HashableByteArray.
+		// The second copy is done to avoid modification of the returned value to affect the HashableByteArray.
 		final byte[] copy = Arrays.copyOf(byteArray, byteArray.length);
-		return () -> copy;
+		return () ->  Arrays.copyOf(copy, copy.length);
 	}
 }

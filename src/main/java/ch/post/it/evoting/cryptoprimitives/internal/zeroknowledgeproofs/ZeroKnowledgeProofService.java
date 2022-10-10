@@ -133,7 +133,7 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 		final int N = C.size();
 		final int l = C.getElementSize();
 
-		checkArgument(1 <= N, "There must be at least one ciphertext.");
+		checkArgument(N > 0, "There must be at least one ciphertext.");
 		checkArgument(verifiableDecryptions.get_N() == N, "There must be as many verifiable decryptions as ciphertexts.");
 
 		checkArgument(0 < l, "The ciphertexts must have at least 1 element.");
@@ -149,9 +149,14 @@ public class ZeroKnowledgeProofService implements ZeroKnowledgeProof {
 				.parallel()
 				.mapToObj(i -> {
 					final ElGamalMultiRecipientCiphertext c_i = C.get(i);
-					final DecryptionProof pi_dec_i = pi_dec.get(i);
-
 					final ElGamalMultiRecipientCiphertext c_i_prime = C_prime.get(i);
+					final GqElement gamma = c_i.getGamma();
+					final GqElement gamma_prime = c_i_prime.getGamma();
+					if (!gamma.equals(gamma_prime)) {
+						return Verifiable.create(() -> false, "γ is different from γ'.");
+					}
+
+					final DecryptionProof pi_dec_i = pi_dec.get(i);
 					final ElGamalMultiRecipientMessage m = new ElGamalMultiRecipientMessage(c_i_prime.getPhis());
 					return decryptionProofService.verifyDecryption(c_i, pk, m, pi_dec_i, i_aux);
 				}).reduce(Verifiable.create(() -> true, "This state is impossible to reach and indicates a bug."), Verifiable::and);
