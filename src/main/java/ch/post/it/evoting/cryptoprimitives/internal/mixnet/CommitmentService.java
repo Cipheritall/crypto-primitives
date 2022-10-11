@@ -122,7 +122,7 @@ public class CommitmentService {
 
 		// Cross arguments group checking.
 		checkArgument(A.getGroup().equals(r.getGroup()),
-				"The elements to be committed to and the random elements must be in the same group.");
+				"The elements to be committed to and the random elements must be in the same group");
 		checkArgument(A.getGroup().hasSameOrderAs(ck.getGroup()),
 				"The commitment key must have the same order (q) than the elements to be committed to and the random values");
 
@@ -168,12 +168,12 @@ public class CommitmentService {
 		final GroupMatrix<ZqElement, ZqGroup> d_matrix = GroupMatrix.fromRows(Collections.singletonList(d));
 
 		// Cross dimension checking.
-		checkArgument(d_matrix.numColumns() == t.size(),
-				"The elements vector and the random elements must be of equal length");
+		checkArgument(d_matrix.numColumns() == t.size(), "The elements vector and the random elements must be of equal length");
+		checkArgument(d_matrix.numColumns() % 2 == 1, "The length of the elements vector and the random elements must be an odd number 2m+1");
 
 		// Cross group checking.
 		checkArgument(d_matrix.getGroup().equals(t.getGroup()),
-				"The elements to be committed to and the random elements must be in the same group.");
+				"The elements to be committed to and the random elements must be in the same group");
 		checkArgument(d_matrix.getGroup().hasSameOrderAs(ck.getGroup()),
 				"The commitment key must have the same order (q) than the elements to be committed to and the random values");
 
