@@ -26,9 +26,16 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.base.Throwables;
 
@@ -252,11 +259,104 @@ class RandomServiceTest {
 		final char paddingCharacter = '&';
 		final String paddedString = randomService.leftPad(string, desiredStringLength, paddingCharacter);
 
-		for (int i=0; i < paddingSize; i++) {
+		for (int i = 0; i < paddingSize; i++) {
 			assertEquals(paddingCharacter, paddedString.charAt(i));
 		}
 
 		assertTrue(paddedString.contains(string));
 		assertEquals(desiredStringLength, paddedString.length());
+	}
+
+	@Test
+	@DisplayName("truncate with a null input String throws a NullPointerException.")
+	void truncateNullInputThrows() {
+		final String string = null;
+		final int length = 1;
+
+		assertThrows(NullPointerException.class, () -> randomService.truncate(string, length));
+	}
+
+	@Test
+	@DisplayName("truncate with an empty input String throws an IllegalArgumentException.")
+	void truncateEmptyInputThrows() {
+		final String string = "";
+		final int length = 1;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input string must be non-empty. [u: %s]", string.length()),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("truncate with an input length of zero throws an IllegalArgumentException.")
+	void truncateZeroLengthThrows() {
+		final String string = "string";
+		final int length = 0;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input length must be strictly positive. [l: %s]", length),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("truncate with an input length negative throws an IllegalArgumentException.")
+	void truncateNegativeLengthThrows() {
+		final String string = "string";
+		final int length = -1;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input length must be strictly positive. [l: %s]", length),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("truncate with inputs unsatisfying the requirements throws an IllegalArgumentException.")
+	void truncateUnsatisfiedRequirementThrows() {
+		final String string = "string";
+		final int length = string.length() + 1;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input length must be smaller or equal to the input string length. [l: %s, u: %s]", length, string.length()),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@RepeatedTest(1000)
+	@DisplayName("truncate implementation is equivalent to specification.")
+	void truncateEnsureEqualityOfImplementation() {
+		final int stringLength = secureRandom.nextInt(1, 10000);
+		final String string = new String(randomService.randomBytes(stringLength));
+		final int length = stringLength == 1 ? 1 : secureRandom.nextInt(1, string.length());
+
+		assertEquals(truncateFromSpecification(string, length), randomService.truncate(string, length));
+	}
+
+	@ParameterizedTest
+	@MethodSource("happyPathArgumentProvider")
+	@DisplayName("truncate with valid inputs does not throw and behaves as expected.")
+	void truncateHappyPath(final String string, final int length, final String expectedTruncated) {
+
+		final String truncated = assertDoesNotThrow(() -> randomService.truncate(string, length));
+
+		assertEquals(expectedTruncated, truncated);
+	}
+
+	static Stream<Arguments> happyPathArgumentProvider() {
+
+		return Stream.of(
+				Arguments.of("string", 3, "str"),
+				Arguments.of("string", 1, "s"),
+				Arguments.of("string", 6, "string")
+		);
+	}
+
+	private String truncateFromSpecification(final String S, final int l) {
+		return IntStream.range(0, l)
+				.mapToObj(S::charAt)
+				.map(String::valueOf)
+				.collect(Collectors.joining());
 	}
 }
