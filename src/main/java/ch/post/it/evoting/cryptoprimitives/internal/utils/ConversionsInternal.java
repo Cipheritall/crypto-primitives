@@ -58,7 +58,10 @@ public final class ConversionsInternal {
 	}
 
 	/**
-	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#integerToByteArray}
+	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#integerToByteArray}.
+	 * <p>
+	 *     The implementation is equivalent to the specification.
+	 * </p>
 	 */
 	public static byte[] integerToByteArray(final BigInteger x) {
 		checkNotNull(x);
@@ -79,7 +82,10 @@ public final class ConversionsInternal {
 	}
 
 	/**
-	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#byteArrayToInteger}
+	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#byteArrayToInteger}.
+	 * <p>
+	 *     The implementation is equivalent to the specification.
+	 * </p>
 	 */
 	public static BigInteger byteArrayToInteger(final byte[] bytes) {
 		checkNotNull(bytes);

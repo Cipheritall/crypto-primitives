@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.google.common.base.Throwables;
 
@@ -79,5 +81,29 @@ class ByteArraysTest {
 	void testCutToBitLengthWithRealValues(final byte[] byteArray, final int requestedLength, final byte[] expectedResult, final String description) {
 		final byte[] actualResult = ByteArrays.cutToBitLength(byteArray, requestedLength);
 		assertArrayEquals(expectedResult, actualResult, String.format("assertion failed for: %s", description));
+	}
+
+	@Test
+	@DisplayName("byteLength with null argument throws NullPointerException")
+	void testByteLengthWithNullThrows() {
+		assertThrows(NullPointerException.class, () -> ByteArrays.byteLength(null));
+	}
+
+	static Stream<Arguments> byteLengthArgumentProvider() {
+		return Stream.of(
+				Arguments.of(BigInteger.ONE, 1),
+				Arguments.of(BigInteger.valueOf(255), 1),
+				Arguments.of(BigInteger.valueOf(256), 2),
+				Arguments.of(BigInteger.valueOf(Integer.MAX_VALUE), 4)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("byteLengthArgumentProvider")
+	@DisplayName("byteLength with valid input returns expected output")
+	void testByteLengthWithValidUInputReturnsExpectedOutput(final BigInteger input, final int expectedOutput) {
+		final int result = ByteArrays.byteLength(input);
+
+		assertEquals(expectedOutput, result);
 	}
 }

@@ -19,6 +19,8 @@ package ch.post.it.evoting.cryptoprimitives.internal.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.BigInteger;
+
 /**
  * Byte array utilities.
  */
@@ -60,5 +62,17 @@ public class ByteArrays {
 			B_prime[i] = B[offset + i];
 		}
 		return B_prime;
+	}
+
+	/**
+	 * Calculates the byte length of an integer.
+	 *
+	 * @param x the integer of which to calculate the byte length. Must be non-null.
+	 * @return the byte length of the given integer
+	 * @throws NullPointerException if the given x is null.
+	 */
+	public static int byteLength(final BigInteger x) {
+		checkNotNull(x);
+		return (int) Math.ceil(x.bitLength() / (double) Byte.SIZE);
 	}
 }
