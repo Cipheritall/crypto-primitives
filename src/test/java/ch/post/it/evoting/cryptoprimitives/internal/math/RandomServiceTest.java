@@ -15,15 +15,19 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doAnswer;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,12 +37,16 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.base.Throwables;
 
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ByteArrays;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 class RandomServiceTest {
@@ -65,6 +73,64 @@ class RandomServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(BigInteger.ZERO));
 		final BigInteger minusOne = BigInteger.ONE.negate();
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(minusOne));
+	}
+
+	@RepeatedTest(1000)
+	void genRandomIntegerIsEquivalentToSpecification() {
+		final BigInteger upperBound = BigInteger.valueOf(1_000_000);
+		final List<byte[]> randomBytesList = new ArrayList<>(3);
+		for (int i=0; i < 3; i++) {
+			randomBytesList.add(randomService.randomBytes(ByteArrays.byteLength(upperBound)));
+		}
+		try (MockedConstruction<SecureRandom> mockedSecureRandom = Mockito.mockConstruction(SecureRandom.class,
+				this.prepareSecureRandom(randomBytesList))) {
+			final SecureRandom secureRandom1 = new SecureRandom();
+			final RandomService randomService1 = new RandomService(secureRandom1);
+			final BigInteger result = randomService1.genRandomInteger(upperBound);
+
+			final SecureRandom secureRandom2 = new SecureRandom();
+			final RandomService randomService2 = new RandomService(secureRandom2);
+			final BigInteger expectedResult = genRandomIntegerSpec(upperBound, randomService2);
+
+			assertEquals(0, expectedResult.compareTo(result));
+			assertEquals(2, mockedSecureRandom.constructed().size());
+		}
+	}
+
+	private MockedConstruction.MockInitializer<SecureRandom> prepareSecureRandom(final List<byte[]> randomBytesList) {
+		checkArgument(randomBytesList.size() >= 3);
+		return (SecureRandom mockSecureRandom, MockedConstruction.Context context) -> {
+			doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(0), 0, byteArray, 0, byteArray.length);
+				return null;
+			}).doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(1), 0, byteArray, 0, byteArray.length);
+				return null;
+			}).doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(2), 0, byteArray, 0, byteArray.length);
+				return null;
+			}).doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(0), 1, byteArray, 1, byteArray.length - 1);
+				return null;
+			}).when(mockSecureRandom).nextBytes(Mockito.any());
+		};
+	}
+
+	private BigInteger genRandomIntegerSpec(final BigInteger upperBound, final RandomService randomService) {
+		final BigInteger m = checkNotNull(upperBound);
+		final BigInteger m_minus_one = upperBound.subtract(BigInteger.ONE);
+		final int length = ByteArrays.byteLength(m_minus_one);
+		final int bitLength = m_minus_one.bitLength();
+		BigInteger r;
+		do {
+			final byte[] rBytes = ByteArrays.cutToBitLength(randomService.randomBytes(length), bitLength);
+			r = ConversionsInternal.byteArrayToInteger(rBytes);
+		} while (r.compareTo(m) >= 0);
+		return r;
 	}
 
 	@Test

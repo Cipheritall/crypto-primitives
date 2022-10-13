@@ -57,8 +57,18 @@ public class RandomService implements Random {
 		this.base64 = new Base64Service();
 	}
 
+	@VisibleForTesting
+	RandomService(final SecureRandom secureRandom) {
+		this.secureRandom = secureRandom;
+		this.base16 = new Base16Service();
+		this.base32 = new Base32Service();
+		this.base64 = new Base64Service();
+	}
+
 	/**
 	 * @see Random#genRandomInteger(BigInteger)
+	 * This implementation yields the same result as the specification's pseudo-code and we have a
+	 * corresponding unit test that asserts the equivalence of the two implementations.
 	 */
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
 		checkNotNull(upperBound);
