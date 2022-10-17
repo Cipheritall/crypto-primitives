@@ -55,7 +55,7 @@ public class ElGamalGenerator {
 	}
 
 	public ElGamalMultiRecipientMessage genRandomMessage(final int size) {
-		return new ElGamalMultiRecipientMessage(genRandomMessageElements(size));
+		return new ElGamalMultiRecipientMessage(GroupVector.from(genRandomMessageElements(size)));
 	}
 
 	public ElGamalMultiRecipientPublicKey genRandomPublicKey(final int size) {

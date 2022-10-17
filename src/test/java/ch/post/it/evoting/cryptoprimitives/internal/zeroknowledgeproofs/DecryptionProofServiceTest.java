@@ -20,10 +20,8 @@ import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
 import java.math.BigInteger;
@@ -54,12 +52,12 @@ import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalService;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
@@ -538,12 +536,16 @@ class DecryptionProofServiceTest extends TestGroupSetup {
 
 					// Parse key pair parameters
 					final BigInteger[] pkArray = input.get("public_key", BigInteger[].class);
-					final List<GqElement> pkElements = Arrays.stream(pkArray).map(skA -> GqElementFactory.fromValue(skA, gqGroup)).toList();
+					final GroupVector<GqElement, GqGroup> pkElements = Arrays.stream(pkArray)
+							.map(skA -> GqElementFactory.fromValue(skA, gqGroup))
+							.collect(GroupVector.toGroupVector());
 					final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 					// Parse message parameters
 					final BigInteger[] messageArray = input.get("message", BigInteger[].class);
-					final List<GqElement> messageElements = Arrays.stream(messageArray).map(mA -> GqElementFactory.fromValue(mA, gqGroup)).toList();
+					final GroupVector<GqElement, GqGroup> messageElements = Arrays.stream(messageArray)
+							.map(mA -> GqElementFactory.fromValue(mA, gqGroup))
+							.collect(GroupVector.toGroupVector());
 					final ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(messageElements);
 
 					// Parse decryption proof parameters

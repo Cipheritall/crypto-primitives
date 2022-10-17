@@ -28,6 +28,7 @@ import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
 import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientKeyPairs;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.Random;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
@@ -62,13 +63,13 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 		final ZqGroup privateKeyGroup = ZqGroup.sameOrderAs(group);
 		final BigInteger q = group.getQ();
 
-		// Generate the private key as a list of random exponents
-		final List<ZqElement> privateKeyElements =
+		// Generate the private key as a group vector of random exponents
+		final GroupVector<ZqElement, ZqGroup> privateKeyElements =
 				Stream.generate(() -> random.genRandomInteger(q))
 						.parallel()
 						.map(value -> ZqElement.create(value, privateKeyGroup))
 						.limit(N)
-						.toList();
+						.collect(GroupVector.toGroupVector());
 
 		final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
 		final ElGamalMultiRecipientPublicKey pk = ElGamalMultiRecipientKeyPairs.derivePublicKey(sk, g);

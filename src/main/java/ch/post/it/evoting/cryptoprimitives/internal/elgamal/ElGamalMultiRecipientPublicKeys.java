@@ -48,6 +48,6 @@ public class ElGamalMultiRecipientPublicKeys {
 				.mapToObj(i -> IntStream.range(0, s)
 						.mapToObj(j -> pk.get(j).get(i))
 						.reduce(group.getIdentity(), GqElement::multiply))
-				.collect(Collectors.collectingAndThen(Collectors.toList(), ElGamalMultiRecipientPublicKey::new));
+				.collect(Collectors.collectingAndThen(GroupVector.toGroupVector(), ElGamalMultiRecipientPublicKey::new));
 	}
 }

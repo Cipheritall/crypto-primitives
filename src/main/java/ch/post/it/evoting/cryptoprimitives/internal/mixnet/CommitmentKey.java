@@ -56,17 +56,14 @@ final class CommitmentKey implements HashableList {
 	 * @param h         the h element of this commitment key
 	 * @param gElements the list of g elements contained by this commitment key
 	 */
-	CommitmentKey(GqElement h, List<GqElement> gElements) {
+	CommitmentKey(GqElement h, GroupVector<GqElement, GqGroup> gElements) {
 		//Validate h
 		checkNotNull(h);
 		checkArgument(!h.equals(h.getGroup().getIdentity()), "h cannot be 1");
 		checkArgument(!h.equals(h.getGroup().getGenerator()), "h cannot be equal to the group generator");
 
 		//Validate gElements
-		checkNotNull(gElements);
-		checkArgument(gElements.stream().noneMatch(Objects::isNull), "A commitment key cannot contain null elements");
-		final GroupVector<GqElement, GqGroup> gs = GroupVector.from(gElements);
-
+		final GroupVector<GqElement, GqGroup> gs = checkNotNull(gElements);
 		checkArgument(!gs.isEmpty(), "No g element provided");
 		checkArgument(gs.getGroup().equals(h.getGroup()), "All g elements must have the same group as h");
 		checkArgument(gs.stream().noneMatch(element -> element.equals(element.getGroup().getIdentity())),

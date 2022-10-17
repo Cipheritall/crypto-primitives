@@ -149,7 +149,7 @@ class CommitmentServiceTest {
 			final CommitmentKey longerCommitmentKey = ckGenerator.genCommitmentKey(2 * KEY_LENGTH);
 			final CommitmentKey exactCommitmentKey =
 					new CommitmentKey(longerCommitmentKey.stream().limit(1).toList().get(0),
-							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
+							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(GroupVector.toGroupVector()));
 			final GqElement commitmentExactCK = CommitmentService.getCommitment(validElements, randomValue, exactCommitmentKey);
 			final GqElement commitmentLongerCK = CommitmentService.getCommitment(validElements, randomValue, longerCommitmentKey);
 			assertEquals(commitmentExactCK, commitmentLongerCK);
@@ -172,7 +172,7 @@ class CommitmentServiceTest {
 			final GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
-			final CommitmentKey ck = new CommitmentKey(h, gElements);
+			final CommitmentKey ck = new CommitmentKey(h, GroupVector.from(gElements));
 			// c = 3
 			final GqElement expected = GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup);
 
@@ -255,7 +255,7 @@ class CommitmentServiceTest {
 			final CommitmentKey longerCommitmentKey = ckGenerator.genCommitmentKey(2 * n);
 			final CommitmentKey exactCommitmentKey =
 					new CommitmentKey(longerCommitmentKey.stream().limit(1).toList().get(0),
-							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
+							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(GroupVector.toGroupVector()));
 			final GroupVector<GqElement, GqGroup> commitmentExactCK = CommitmentService
 					.getCommitmentMatrix(validMatrix, validRandomValues, exactCommitmentKey);
 			final GroupVector<GqElement, GqGroup> commitmentLongerCK = CommitmentService
@@ -288,7 +288,7 @@ class CommitmentServiceTest {
 			final GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
-			final CommitmentKey ck = new CommitmentKey(h, gElements);
+			final CommitmentKey ck = new CommitmentKey(h, GroupVector.from(gElements));
 			// c = (3, 4)
 			final List<GqElement> expected = new ArrayList<>(2);
 			expected.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
@@ -371,7 +371,7 @@ class CommitmentServiceTest {
 			final CommitmentKey longerCommitmentKey = ckGenerator.genCommitmentKey(2 * KEY_LENGTH);
 			final CommitmentKey exactCommitmentKey =
 					new CommitmentKey(longerCommitmentKey.stream().limit(1).toList().get(0),
-							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(Collectors.toList()));
+							longerCommitmentKey.stream().skip(1).limit(KEY_LENGTH).collect(GroupVector.toGroupVector()));
 			final GroupVector<GqElement, GqGroup> commitmentExactCK = CommitmentService
 					.getCommitmentVector(validElements, validRandomElements, exactCommitmentKey);
 			final GroupVector<GqElement, GqGroup> commitmentLongerCK = CommitmentService
@@ -400,7 +400,7 @@ class CommitmentServiceTest {
 			final GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(8), specificGqGroup));
-			final CommitmentKey ck = new CommitmentKey(h, gElements);
+			final CommitmentKey ck = new CommitmentKey(h, GroupVector.from(gElements));
 			// c = (12, 1, 2)
 			final List<GqElement> expected = new ArrayList<>(3);
 			expected.add(GqElementFactory.fromValue(BigInteger.valueOf(12), specificGqGroup));

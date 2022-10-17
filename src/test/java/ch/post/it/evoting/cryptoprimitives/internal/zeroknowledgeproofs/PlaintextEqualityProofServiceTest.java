@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
 import java.math.BigInteger;
@@ -50,12 +49,12 @@ import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalService;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.TestHashService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
@@ -189,9 +188,9 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 			firstPublicKey = gqGroupGenerator.genMember();
 			secondPublicKey = gqGroupGenerator.genMember();
 			firstCiphertext = elGamal.getCiphertext(plaintext, randomness.get(0),
-					new ElGamalMultiRecipientPublicKey(Collections.singletonList(firstPublicKey)));
+					new ElGamalMultiRecipientPublicKey(GroupVector.of(firstPublicKey)));
 			secondCiphertext = elGamal.getCiphertext(plaintext, randomness.get(1),
-					new ElGamalMultiRecipientPublicKey(Collections.singletonList(secondPublicKey)));
+					new ElGamalMultiRecipientPublicKey(GroupVector.of(secondPublicKey)));
 
 			auxiliaryInformation = Arrays.asList(randomService.genRandomBase16String(STR_LEN), randomService.genRandomBase64String(STR_LEN));
 		}
@@ -337,9 +336,9 @@ class PlaintextEqualityProofServiceTest extends TestGroupSetup {
 			firstPublicKey = gqGroupGenerator.genMember();
 			secondPublicKey = gqGroupGenerator.genMember();
 			firstCiphertext = elGamal.getCiphertext(plaintext, randomness.get(0),
-					new ElGamalMultiRecipientPublicKey(Collections.singletonList(firstPublicKey)));
+					new ElGamalMultiRecipientPublicKey(GroupVector.of(firstPublicKey)));
 			secondCiphertext = elGamal.getCiphertext(plaintext, randomness.get(1),
-					new ElGamalMultiRecipientPublicKey(Collections.singletonList(secondPublicKey)));
+					new ElGamalMultiRecipientPublicKey(GroupVector.of(secondPublicKey)));
 
 			auxiliaryInformation = Arrays.asList(randomService.genRandomBase16String(STR_LEN), randomService.genRandomBase64String(STR_LEN));
 

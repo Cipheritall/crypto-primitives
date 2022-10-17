@@ -30,6 +30,7 @@ import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.BigIntegerOperationsService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 /**
@@ -115,7 +116,7 @@ public class CommitmentKeyService {
 				.toList();
 
 		final GqElement h = v_elements.get(0);
-		final List<GqElement> g_vector = v_elements.subList(1, v_elements.size());
+		final GroupVector<GqElement, GqGroup> g_vector = GroupVector.from(v_elements.subList(1, v_elements.size()));
 		return new CommitmentKey(h, g_vector);
 	}
 }

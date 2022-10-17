@@ -46,17 +46,12 @@ public final class ElGamalMultiRecipientPrivateKey implements ElGamalMultiRecipi
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPrivateKey} object.
 	 *
-	 * @param keyElements the list of private key Zq keyElements. Must respect the following:
-	 *                    <ul>
-	 *                    	<li>the list must be non-null.</li>
-	 *                    	<li>the list must be non-empty.</li>
-	 *                    	<li>the list must contain only non-null elements.</li>
-	 *                    	<li>all elements from the list must be from the same mathematical group.</li>
-	 *                    </ul>
+	 * @param keyElements the group vector of private key Zq keyElements. Must be non-null and non-empty and not contain null elements.
 	 */
-	public ElGamalMultiRecipientPrivateKey(final List<ZqElement> keyElements) {
-		this.privateKeyElements = GroupVector.from(keyElements);
+	public ElGamalMultiRecipientPrivateKey(final GroupVector<ZqElement, ZqGroup> keyElements) {
+		this.privateKeyElements = checkNotNull(keyElements);
 		checkArgument(!privateKeyElements.isEmpty(), "An ElGamal private key cannot be empty.");
+		checkArgument(privateKeyElements.stream().noneMatch(Objects::isNull), "An ElGamal private key cannot contain null elements");
 	}
 
 	/**

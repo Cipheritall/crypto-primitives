@@ -18,7 +18,6 @@ package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientCiphertext;
@@ -40,6 +38,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalUtils;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.mixnet.Permutation;
@@ -143,8 +142,10 @@ class ShuffleServiceTest {
 				.thenReturn(randomIntegers.get(0), randomIntegers.subList(1, randomIntegers.size()).toArray(new BigInteger[] {}));
 
 		//Create public key
-		final List<GqElement> pkElements =
-				Stream.of(6, 4, 3).map(pki -> GqElement.GqElementFactory.fromValue(BigInteger.valueOf(pki), localGroup)).collect(Collectors.toList());
+		final GroupVector<GqElement, GqGroup> pkElements =
+				Stream.of(6, 4, 3)
+						.map(pki -> GqElement.GqElementFactory.fromValue(BigInteger.valueOf(pki), localGroup))
+						.collect(GroupVector.toGroupVector());
 		final ElGamalMultiRecipientPublicKey publicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 
 		//Create ciphertexts
