@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,17 +48,12 @@ public final class ElGamalMultiRecipientPublicKey implements ElGamalMultiRecipie
 	/**
 	 * Creates an {@link ElGamalMultiRecipientPublicKey} object.
 	 *
-	 * @param keyElements <p>the list of public key Gq group publicKeyElements. Must respect the following:
-	 *                    <ul>
-	 *                    	<li>the list must be non-null.</li>
-	 *                    	<li>the list must be non-empty.</li>
-	 *                    	<li>the list must contain only non-null elements.</li>
-	 *                    	<li>all elements from the list must be from the same mathematical group.</li>
-	 *                    </ul>
+	 * @param keyElements <p>the group vector of public key Gq group publicKeyElements. Must be non-null and non-empty and not contain null elements.
 	 */
-	public ElGamalMultiRecipientPublicKey(final List<GqElement> keyElements) {
-		this.publicKeyElements = GroupVector.from(keyElements);
+	public ElGamalMultiRecipientPublicKey(final GroupVector<GqElement, GqGroup> keyElements) {
+		this.publicKeyElements = checkNotNull(keyElements);
 		checkArgument(!publicKeyElements.isEmpty(), "An ElGamal public key must not be empty.");
+		checkArgument(publicKeyElements.stream().noneMatch(Objects::isNull), "An ElGamal public key cannot contain null elements");
 	}
 
 	@Override

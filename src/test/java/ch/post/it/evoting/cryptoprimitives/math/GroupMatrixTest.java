@@ -90,6 +90,20 @@ class GroupMatrixTest {
 	}
 
 	@Test
+	void createGroupMatrixWithEmptyRows() {
+		final List<List<TestGroupElement>> emptyRows = generateElementMatrix(0, numColumns, () -> new TestGroupElement(group));
+		final IllegalArgumentException exceptionFirst = assertThrows(IllegalArgumentException.class, () -> GroupMatrix.fromRows(emptyRows));
+		assertEquals("Empty matrices are not supported.", exceptionFirst.getMessage());
+	}
+
+	@Test
+	void createGroupMatrixWithEmptyColumns() {
+		final List<List<TestGroupElement>> emptyColumns = generateElementMatrix(numRows, 0, () -> new TestGroupElement(group));
+		final IllegalArgumentException exceptionFirst = assertThrows(IllegalArgumentException.class, () -> GroupMatrix.fromRows(emptyColumns));
+		assertEquals("Empty matrices are not supported.", exceptionFirst.getMessage());
+	}
+
+	@Test
 	void createGroupMatrixWithDifferentColumnSize() {
 		// Add an additional line to the matrix with less elements in the column.
 		int numColumns = secureRandom.nextInt(this.numColumns);

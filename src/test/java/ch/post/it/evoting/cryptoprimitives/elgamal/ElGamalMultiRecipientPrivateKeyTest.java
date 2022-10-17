@@ -18,10 +18,7 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +33,9 @@ import org.junit.jupiter.params.provider.NullSource;
 
 import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientKeyPairs;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
+import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
@@ -53,24 +52,9 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createInvalidArgumentsProvider() {
-		final List<ZqElement> messageElementsFirstNull = new LinkedList<>();
-		messageElementsFirstNull.add(null);
-		messageElementsFirstNull.add(zqGroupGenerator.genRandomZqElementMember());
-
-		final List<ZqElement> messageElementsSecondNull = new LinkedList<>();
-		messageElementsSecondNull.add(zqGroupGenerator.genRandomZqElementMember());
-		messageElementsSecondNull.add(null);
-
-		final List<ZqElement> messageElementsDifferentGroups = new LinkedList<>();
-		messageElementsDifferentGroups.add(zqGroupGenerator.genRandomZqElementMember());
-		messageElementsDifferentGroups.add(otherZqGroupGenerator.genRandomZqElementMember());
-
 		return Stream.of(
 				Arguments.of(null, NullPointerException.class, null),
-				Arguments.of(Collections.EMPTY_LIST, IllegalArgumentException.class, "An ElGamal private key cannot be empty."),
-				Arguments.of(messageElementsFirstNull, IllegalArgumentException.class, "Elements must not contain nulls"),
-				Arguments.of(messageElementsSecondNull, IllegalArgumentException.class, "Elements must not contain nulls"),
-				Arguments.of(messageElementsDifferentGroups, IllegalArgumentException.class, "All elements must belong to the same group.")
+				Arguments.of(GroupVector.of(), IllegalArgumentException.class, "An ElGamal private key cannot be empty.")
 		);
 	}
 
@@ -78,7 +62,7 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 	@MethodSource("createInvalidArgumentsProvider")
 	@DisplayName("created with invalid parameters")
 	void constructionWithInvalidParametersTest(
-			final List<ZqElement> messageElements, final Class<? extends RuntimeException> exceptionClass, final String errorMsg) {
+			final GroupVector<ZqElement, ZqGroup> messageElements, final Class<? extends RuntimeException> exceptionClass, final String errorMsg) {
 		final Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientPrivateKey(messageElements));
 		assertEquals(errorMsg, exception.getMessage());
 	}
@@ -124,7 +108,9 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 
 			final ElGamalMultiRecipientPublicKey elGamalMultiRecipientPublicKey =
 					new ElGamalMultiRecipientPublicKey(
-							elGamalMultiRecipientPrivateKey.stream().map(generator::exponentiate).collect(Collectors.toList()));
+							elGamalMultiRecipientPrivateKey.stream()
+									.map(generator::exponentiate)
+									.collect(GroupVector.toGroupVector()));
 
 			assertEquals(elGamalMultiRecipientPublicKey, ElGamalMultiRecipientKeyPairs.derivePublicKey(elGamalMultiRecipientPrivateKey, generator));
 		}

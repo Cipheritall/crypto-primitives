@@ -300,7 +300,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			final int m = 3;
 			final ElGamalMultiRecipientKeyPair keyPair = new ElGamalService().genKeyPair(gqGroup, n, randomService);
 			final ElGamalMultiRecipientPublicKey productPublicKey = keyPair.getPublicKey();
-			final CommitmentKey productCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
+			final CommitmentKey productCommitmentKey = new CommitmentKey(gqNine, GroupVector.of(gqFour, gqNine));
 			final RandomService productRandomService = spy(RandomService.class);
 			final HashService productHashService = mock(HashService.class);
 

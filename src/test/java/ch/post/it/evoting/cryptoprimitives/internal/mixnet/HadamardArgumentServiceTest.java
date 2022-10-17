@@ -289,8 +289,8 @@ class HadamardArgumentServiceTest extends TestGroupSetup {
 
 			// Create HadamardArgumentService
 			int m = 3;
-			ElGamalMultiRecipientPublicKey hadamardPublicKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(gqNine, gqFour));
-			CommitmentKey hadamardCommitmentKey = new CommitmentKey(gqNine, Arrays.asList(gqFour, gqNine));
+			ElGamalMultiRecipientPublicKey hadamardPublicKey = new ElGamalMultiRecipientPublicKey(GroupVector.of(gqNine, gqFour));
+			CommitmentKey hadamardCommitmentKey = new CommitmentKey(gqNine, GroupVector.of(gqFour, gqNine));
 			RandomService hadamardRandomService = spy(RandomService.class);
 			HashService hadamardHashService = mock(HashService.class);
 

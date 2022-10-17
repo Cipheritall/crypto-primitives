@@ -19,16 +19,16 @@ import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactor
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKey;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelInternal;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.test.tools.serialization.JsonData;
 
 class TestContextParser {
@@ -43,14 +43,9 @@ class TestContextParser {
 			final BigInteger g = contextData.get("g", BigInteger.class);
 
 			switch (p.bitLength()) {
-			case 3072:
-				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.EXTENDED);
-				break;
-			case 2048:
-				mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.LEGACY);
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected bit length of p");
+			case 3072 -> mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.EXTENDED);
+			case 2048 -> mockedSecurityLevel.when(SecurityLevelConfig::getSystemSecurityLevel).thenReturn(SecurityLevelInternal.LEGACY);
+			default -> throw new IllegalArgumentException("Unexpected bit length of p");
 			}
 
 			this.gqGroup = new GqGroup(p, q, g);
@@ -64,9 +59,9 @@ class TestContextParser {
 
 	ElGamalMultiRecipientPublicKey parsePublicKey() {
 		final BigInteger[] pkValues = context.get("pk", BigInteger[].class);
-		final List<GqElement> keyElements = Arrays.stream(pkValues)
+		final GroupVector<GqElement, GqGroup> keyElements = Arrays.stream(pkValues)
 				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
-				.toList();
+				.collect(GroupVector.toGroupVector());
 
 		return new ElGamalMultiRecipientPublicKey(keyElements);
 	}
@@ -75,9 +70,9 @@ class TestContextParser {
 		final BigInteger hValue = context.getJsonData("ck").get("h", BigInteger.class);
 		final BigInteger[] gValues = context.getJsonData("ck").get("g", BigInteger[].class);
 		final GqElement h = GqElementFactory.fromValue(hValue, gqGroup);
-		final List<GqElement> gElements = Arrays.stream(gValues)
+		final GroupVector<GqElement, GqGroup> gElements = Arrays.stream(gValues)
 				.map(bi -> GqElementFactory.fromValue(bi, gqGroup))
-				.toList();
+				.collect(GroupVector.toGroupVector());
 
 		return new CommitmentKey(h, gElements);
 	}

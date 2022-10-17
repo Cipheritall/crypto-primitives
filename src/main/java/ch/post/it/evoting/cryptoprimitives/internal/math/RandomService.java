@@ -57,8 +57,18 @@ public class RandomService implements Random {
 		this.base64 = new Base64Service();
 	}
 
+	@VisibleForTesting
+	RandomService(final SecureRandom secureRandom) {
+		this.secureRandom = secureRandom;
+		this.base16 = new Base16Service();
+		this.base32 = new Base32Service();
+		this.base64 = new Base64Service();
+	}
+
 	/**
 	 * @see Random#genRandomInteger(BigInteger)
+	 * This implementation yields the same result as the specification's pseudo-code and we have a
+	 * corresponding unit test that asserts the equivalence of the two implementations.
 	 */
 	public BigInteger genRandomInteger(final BigInteger upperBound) {
 		checkNotNull(upperBound);
@@ -89,11 +99,8 @@ public class RandomService implements Random {
 		// Generate the random bytes, b.
 		final byte[] b = randomBytes(l_bytes);
 
-		// Encode to a Base16 String.
-		final String S = base16.base16Encode(b);
-
-		// Truncate to desired length.
-		return S.substring(0, l);
+		// Encode to a Base16 String and truncate to desired length.
+		return truncate(base16.base16Encode(b), l);
 	}
 
 	/**
@@ -109,11 +116,8 @@ public class RandomService implements Random {
 		// Generate the random bytes, b.
 		final byte[] b = randomBytes(l_bytes);
 
-		// Encode to a Base32 String.
-		final String S = base32.base32Encode(b);
-
-		// Truncate to desired length.
-		return S.substring(0, l);
+		// Encode to a Base32 String and truncate to desired length.
+		return truncate(base32.base32Encode(b), l);
 	}
 
 	/**
@@ -129,11 +133,8 @@ public class RandomService implements Random {
 		// Generate the random bytes
 		final byte[] b = randomBytes(l_bytes);
 
-		// Encode to a Base64 String
-		final String S = base64.base64Encode(b);
-
-		// Truncate to desired length
-		return S.substring(0, l);
+		// Encode to a Base64 String and truncate to desired length.
+		return truncate(base64.base64Encode(b), l);
 	}
 
 	/**
@@ -216,5 +217,36 @@ public class RandomService implements Random {
 
 		// This method is equivalent to the specification
 		return Strings.padStart(string, desiredStringLength, paddingCharacter);
+	}
+
+	/**
+	 * Implements the Truncate algorithm.
+	 *
+	 * @param string S, the string to be truncated. Must be non-null and non-empty.
+	 * @param length l, the desired length for the truncated string. Must be strictly positive.
+	 * @return S<sup>'</sup>, the truncated string.
+	 * @throws NullPointerException     if the input string is null.
+	 * @throws IllegalArgumentException if
+	 *                                  <ul>
+	 *                                      <li>the input string is empty.</li>
+	 *                                      <li>the input length is not strictly positive.</li>
+	 *                                      <li>the input string length is smaller than the input length.</li>
+	 *                                  </ul>
+	 */
+	@VisibleForTesting
+	String truncate(final String string, final int length) {
+
+		final String S = checkNotNull(string);
+		final int u = S.length();
+		final int l = length;
+
+		checkArgument(u > 0, "The input string must be non-empty. [u: %s]", u);
+		checkArgument(l > 0, "The input length must be strictly positive. [l: %s]", l);
+
+		// Require.
+		checkArgument(l <= u, "The input length must be smaller or equal to the input string length. [l: %s, u: %s]", l, u);
+
+		// Operation. This implementation yields the same result as the specification's pseudo-code and we have a corresponding unit test that asserts the equivalence of the two implementations.
+		return S.substring(0, l);
 	}
 }
