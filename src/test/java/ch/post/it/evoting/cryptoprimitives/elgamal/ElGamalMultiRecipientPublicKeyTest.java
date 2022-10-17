@@ -19,9 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -35,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientPublicKeys;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
+import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
@@ -51,24 +49,9 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 
 	// Provides parameters for the withInvalidParameters test.
 	static Stream<Arguments> createInvalidArgumentsProvider() {
-		final List<GqElement> keyElementsFirstNull = new LinkedList<>();
-		keyElementsFirstNull.add(null);
-		keyElementsFirstNull.add(gqGroupGenerator.genMember());
-
-		final List<GqElement> keyElementsSecondNull = new LinkedList<>();
-		keyElementsSecondNull.add(gqGroupGenerator.genMember());
-		keyElementsSecondNull.add(null);
-
-		final List<GqElement> keyElementsDifferentGroups = new LinkedList<>();
-		keyElementsDifferentGroups.add(gqGroupGenerator.genMember());
-		keyElementsDifferentGroups.add(otherGqGroupGenerator.genMember());
-
 		return Stream.of(
 				Arguments.of(null, NullPointerException.class, null),
-				Arguments.of(Collections.EMPTY_LIST, IllegalArgumentException.class, "An ElGamal public key must not be empty."),
-				Arguments.of(keyElementsFirstNull, IllegalArgumentException.class, "Elements must not contain nulls"),
-				Arguments.of(keyElementsSecondNull, IllegalArgumentException.class, "Elements must not contain nulls"),
-				Arguments.of(keyElementsDifferentGroups, IllegalArgumentException.class, "All elements must belong to the same group.")
+				Arguments.of(GroupVector.of(), IllegalArgumentException.class, "An ElGamal public key must not be empty.")
 		);
 	}
 
@@ -76,7 +59,7 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 	@MethodSource("createInvalidArgumentsProvider")
 	@DisplayName("created with invalid parameters")
 	void constructionWithInvalidParametersTest(
-			final List<GqElement> keyElements, final Class<? extends RuntimeException> exceptionClass, final String errorMsg) {
+			final GroupVector<GqElement, GqGroup> keyElements, final Class<? extends RuntimeException> exceptionClass, final String errorMsg) {
 		final Exception exception = assertThrows(exceptionClass, () -> new ElGamalMultiRecipientPublicKey(keyElements));
 		assertEquals(errorMsg, exception.getMessage());
 	}
@@ -97,7 +80,7 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 
 		final GqElement expectedPKElement1 = pk1.get(0).multiply(pk2.get(0));
 		final GqElement expectedPKElement2 = pk1.get(1).multiply(pk2.get(1));
-		final ElGamalMultiRecipientPublicKey expectedCombinedKey = new ElGamalMultiRecipientPublicKey(Arrays.asList(expectedPKElement1, expectedPKElement2));
+		final ElGamalMultiRecipientPublicKey expectedCombinedKey = new ElGamalMultiRecipientPublicKey(GroupVector.of(expectedPKElement1, expectedPKElement2));
 		assertEquals(expectedCombinedKey, resultingCombinedKey);
 	}
 }

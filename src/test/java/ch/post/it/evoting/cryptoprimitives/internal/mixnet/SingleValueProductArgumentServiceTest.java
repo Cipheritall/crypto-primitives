@@ -218,13 +218,13 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			final List<GqElement> pkElements = new ArrayList<>(2);
 			pkElements.add(GqElementFactory.fromValue(BigInteger.valueOf(8), specificGqGroup));
 			pkElements.add(GqElementFactory.fromValue(BigInteger.valueOf(16), specificGqGroup));
-			final ElGamalMultiRecipientPublicKey pk = new ElGamalMultiRecipientPublicKey(pkElements);
+			final ElGamalMultiRecipientPublicKey pk = new ElGamalMultiRecipientPublicKey(GroupVector.from(pkElements));
 			// ck = (2, 3, 4)
 			final List<GqElement> gElements = new ArrayList<>(2);
 			final GqElement h = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(3), specificGqGroup));
 			gElements.add(GqElementFactory.fromValue(BigInteger.valueOf(4), specificGqGroup));
-			final CommitmentKey ck = new CommitmentKey(h, gElements);
+			final CommitmentKey ck = new CommitmentKey(h, GroupVector.from(gElements));
 			// expected = (16, 2, 3, (1, 8), (1, 2), 5, 7)
 			final GqElement cd = GqElementFactory.fromValue(BigInteger.valueOf(16), specificGqGroup);
 			final GqElement cdelta = GqElementFactory.fromValue(BigInteger.valueOf(2), specificGqGroup);
@@ -301,7 +301,7 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			final VerificationResult verificationResult = argumentService.verifySingleValueProductArgument(statement, argument).verify();
 			assertTrue(verificationResult.isVerified());
 		}
-		
+
 		@Test
 		@DisplayName("with an incorrect statement returns false")
 		void verifySingleValueProductArgumentWithIncorrectStatement() {
@@ -330,7 +330,8 @@ class SingleValueProductArgumentServiceTest extends TestGroupSetup {
 			final ZqElement product = localStatement.get_b();
 			localStatement = new SingleValueProductStatement(commitment, product);
 
-			final VerificationResult verificationResult = localArgumentService.verifySingleValueProductArgument(localStatement, localArgument).verify();
+			final VerificationResult verificationResult = localArgumentService.verifySingleValueProductArgument(localStatement, localArgument)
+					.verify();
 			assertFalse(verificationResult.isVerified());
 		}
 

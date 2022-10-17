@@ -19,7 +19,6 @@ import static ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiR
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,13 +48,13 @@ import org.mockito.MockedStatic;
 import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientCiphertexts;
 import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientMessages;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupMatrix;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
-import ch.post.it.evoting.cryptoprimitives.internal.securitylevel.SecurityLevelConfig;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.data.GroupTestData;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.ElGamalGenerator;
@@ -327,7 +326,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		GqElement element2 = generator.genMember();
 
 		// Create first ciphertext.
-		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(Arrays.asList(element1, element2));
+		ElGamalMultiRecipientMessage message = new ElGamalMultiRecipientMessage(GroupVector.of(element1, element2));
 		ZqElement exponent = ZqElement.create(randomService.genRandomInteger(group.getQ()), ZqGroup.sameOrderAs(group));
 		ElGamalMultiRecipientPublicKey publicKey = ElGamalMultiRecipientKeyPair.genKeyPair(group, 2, randomService).getPublicKey();
 		final ElGamalMultiRecipientCiphertext ciphertextA = ElGamalMultiRecipientCiphertexts.getCiphertext(message, exponent, publicKey);
@@ -385,9 +384,9 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		ElGamalMultiRecipientMessage decryptedExponentiatedCipherText = ElGamalMultiRecipientMessages
 				.getMessage(exponentiatedCiphertext, keyPair.getPrivateKey());
 
-		List<GqElement> exponentiatedOriginalMessageElements = originalMessage.stream()
+		GroupVector<GqElement, GqGroup> exponentiatedOriginalMessageElements = originalMessage.stream()
 				.map(e -> e.exponentiate(exponent))
-				.toList();
+				.collect(GroupVector.toGroupVector());
 
 		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = new ElGamalMultiRecipientMessage(exponentiatedOriginalMessageElements);
 
@@ -433,7 +432,7 @@ class ElGamalMultiRecipientCiphertextTest extends TestGroupSetup {
 		ElGamalMultiRecipientMessage exponentiatedOriginalMessage = matrix.columnStream()
 				.map(col -> col.stream()
 						.reduce(gqGroup.getIdentity(), GqElement::multiply))
-				.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
+				.collect(collectingAndThen(GroupVector.toGroupVector(), ElGamalMultiRecipientMessage::new));
 
 		assertEquals(exponentiatedOriginalMessage, decryptedExponentiatedCipherText);
 	}

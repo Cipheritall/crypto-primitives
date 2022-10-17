@@ -44,6 +44,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ByteArrays;
 
 class ConversionsTest {
 
@@ -91,6 +92,29 @@ class ConversionsTest {
 			BigInteger value = BigInteger.valueOf(-1);
 			assertThrows(IllegalArgumentException.class, () -> integerToByteArray(value));
 		}
+
+		@RepeatedTest(10)
+		void testIntegerToByteArrayIsEquivalentToSpecification() {
+			final BigInteger bigInteger = BigInteger.valueOf(random.nextInt(0, Integer.MAX_VALUE));
+
+			assertArrayEquals(integerToByteArraySpec(bigInteger), integerToByteArray(bigInteger));
+		}
+
+		/*
+		 * This implementation is faithful to the specification.
+		 */
+		private byte[] integerToByteArraySpec(final BigInteger integer) {
+			final BigInteger TWOHUNDRED_FIFTY_SIX = BigInteger.valueOf(256);
+			BigInteger x = integer;
+			int n = ByteArrays.byteLength(x);
+			n = Math.max(n, 1);
+			final byte[] B = new byte[n];
+			for (int i = 0; i < n; i++) {
+				B[n-i-1] = x.mod(TWOHUNDRED_FIFTY_SIX).byteValue();
+				x = x.divide(TWOHUNDRED_FIFTY_SIX);
+			}
+			return B;
+		}
 	}
 
 	@Nested
@@ -130,6 +154,28 @@ class ConversionsTest {
 			BigInteger value = new BigInteger(size, random);
 			BigInteger cycledValue = byteArrayToInteger(integerToByteArray(value));
 			assertEquals(value, cycledValue);
+		}
+
+		@RepeatedTest(10)
+		void testByteArrayToIntegerIsEquivalentToSpec() {
+			byte[] byteArray = new byte[32];
+			random.nextBytes(byteArray);
+
+			assertEquals(byteArrayToIntegerSpec(byteArray), byteArrayToInteger(byteArray));
+		}
+
+		/*
+		 * This implementation is faithful to the specification.
+		 */
+		private BigInteger byteArrayToIntegerSpec(final byte[] byteArray) {
+			final byte[] B = byteArray.clone();
+			final int n = byteArray.length;
+
+			BigInteger x = BigInteger.ZERO;
+			for (int i = 0; i < n; i++) {
+				x = BigInteger.valueOf(256).multiply(x).add(BigInteger.valueOf(Byte.toUnsignedInt(B[i])));
+			}
+			return x;
 		}
 	}
 

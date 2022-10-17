@@ -15,23 +15,38 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doAnswer;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.base.Throwables;
 
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ByteArrays;
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 
 class RandomServiceTest {
@@ -58,6 +73,64 @@ class RandomServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(BigInteger.ZERO));
 		final BigInteger minusOne = BigInteger.ONE.negate();
 		assertThrows(IllegalArgumentException.class, () -> randomService.genRandomInteger(minusOne));
+	}
+
+	@RepeatedTest(1000)
+	void genRandomIntegerIsEquivalentToSpecification() {
+		final BigInteger upperBound = BigInteger.valueOf(1_000_000);
+		final List<byte[]> randomBytesList = new ArrayList<>(3);
+		for (int i=0; i < 3; i++) {
+			randomBytesList.add(randomService.randomBytes(ByteArrays.byteLength(upperBound)));
+		}
+		try (MockedConstruction<SecureRandom> mockedSecureRandom = Mockito.mockConstruction(SecureRandom.class,
+				this.prepareSecureRandom(randomBytesList))) {
+			final SecureRandom secureRandom1 = new SecureRandom();
+			final RandomService randomService1 = new RandomService(secureRandom1);
+			final BigInteger result = randomService1.genRandomInteger(upperBound);
+
+			final SecureRandom secureRandom2 = new SecureRandom();
+			final RandomService randomService2 = new RandomService(secureRandom2);
+			final BigInteger expectedResult = genRandomIntegerSpec(upperBound, randomService2);
+
+			assertEquals(0, expectedResult.compareTo(result));
+			assertEquals(2, mockedSecureRandom.constructed().size());
+		}
+	}
+
+	private MockedConstruction.MockInitializer<SecureRandom> prepareSecureRandom(final List<byte[]> randomBytesList) {
+		checkArgument(randomBytesList.size() >= 3);
+		return (SecureRandom mockSecureRandom, MockedConstruction.Context context) -> {
+			doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(0), 0, byteArray, 0, byteArray.length);
+				return null;
+			}).doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(1), 0, byteArray, 0, byteArray.length);
+				return null;
+			}).doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(2), 0, byteArray, 0, byteArray.length);
+				return null;
+			}).doAnswer(invocation -> {
+				byte[] byteArray = invocation.getArgument(0, byte[].class);
+				System.arraycopy(randomBytesList.get(0), 1, byteArray, 1, byteArray.length - 1);
+				return null;
+			}).when(mockSecureRandom).nextBytes(Mockito.any());
+		};
+	}
+
+	private BigInteger genRandomIntegerSpec(final BigInteger upperBound, final RandomService randomService) {
+		final BigInteger m = checkNotNull(upperBound);
+		final BigInteger m_minus_one = upperBound.subtract(BigInteger.ONE);
+		final int length = ByteArrays.byteLength(m_minus_one);
+		final int bitLength = m_minus_one.bitLength();
+		BigInteger r;
+		do {
+			final byte[] rBytes = ByteArrays.cutToBitLength(randomService.randomBytes(length), bitLength);
+			r = ConversionsInternal.byteArrayToInteger(rBytes);
+		} while (r.compareTo(m) >= 0);
+		return r;
 	}
 
 	@Test
@@ -252,11 +325,104 @@ class RandomServiceTest {
 		final char paddingCharacter = '&';
 		final String paddedString = randomService.leftPad(string, desiredStringLength, paddingCharacter);
 
-		for (int i=0; i < paddingSize; i++) {
+		for (int i = 0; i < paddingSize; i++) {
 			assertEquals(paddingCharacter, paddedString.charAt(i));
 		}
 
 		assertTrue(paddedString.contains(string));
 		assertEquals(desiredStringLength, paddedString.length());
+	}
+
+	@Test
+	@DisplayName("truncate with a null input String throws a NullPointerException.")
+	void truncateNullInputThrows() {
+		final String string = null;
+		final int length = 1;
+
+		assertThrows(NullPointerException.class, () -> randomService.truncate(string, length));
+	}
+
+	@Test
+	@DisplayName("truncate with an empty input String throws an IllegalArgumentException.")
+	void truncateEmptyInputThrows() {
+		final String string = "";
+		final int length = 1;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input string must be non-empty. [u: %s]", string.length()),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("truncate with an input length of zero throws an IllegalArgumentException.")
+	void truncateZeroLengthThrows() {
+		final String string = "string";
+		final int length = 0;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input length must be strictly positive. [l: %s]", length),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("truncate with an input length negative throws an IllegalArgumentException.")
+	void truncateNegativeLengthThrows() {
+		final String string = "string";
+		final int length = -1;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input length must be strictly positive. [l: %s]", length),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@Test
+	@DisplayName("truncate with inputs unsatisfying the requirements throws an IllegalArgumentException.")
+	void truncateUnsatisfiedRequirementThrows() {
+		final String string = "string";
+		final int length = string.length() + 1;
+
+		final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+				() -> randomService.truncate(string, length));
+		assertEquals(String.format("The input length must be smaller or equal to the input string length. [l: %s, u: %s]", length, string.length()),
+				Throwables.getRootCause(illegalArgumentException).getMessage());
+	}
+
+	@RepeatedTest(1000)
+	@DisplayName("truncate implementation is equivalent to specification.")
+	void truncateEnsureEqualityOfImplementation() {
+		final int stringLength = secureRandom.nextInt(1, 10000);
+		final String string = new String(randomService.randomBytes(stringLength));
+		final int length = stringLength == 1 ? 1 : secureRandom.nextInt(1, string.length());
+
+		assertEquals(truncateFromSpecification(string, length), randomService.truncate(string, length));
+	}
+
+	@ParameterizedTest
+	@MethodSource("happyPathArgumentProvider")
+	@DisplayName("truncate with valid inputs does not throw and behaves as expected.")
+	void truncateHappyPath(final String string, final int length, final String expectedTruncated) {
+
+		final String truncated = assertDoesNotThrow(() -> randomService.truncate(string, length));
+
+		assertEquals(expectedTruncated, truncated);
+	}
+
+	static Stream<Arguments> happyPathArgumentProvider() {
+
+		return Stream.of(
+				Arguments.of("string", 3, "str"),
+				Arguments.of("string", 1, "s"),
+				Arguments.of("string", 6, "string")
+		);
+	}
+
+	private String truncateFromSpecification(final String S, final int l) {
+		return IntStream.range(0, l)
+				.mapToObj(S::charAt)
+				.map(String::valueOf)
+				.collect(Collectors.joining());
 	}
 }

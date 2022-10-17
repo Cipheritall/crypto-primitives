@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.zeroknowledgeproofs;
+package ch.post.it.evoting.cryptoprimitives.internal.math;
 
-import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorAddition;
-import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorExponentiation;
-import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorMultiplication;
-import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorScalarMultiplication;
+import static ch.post.it.evoting.cryptoprimitives.internal.math.Vectors.vectorAddition;
+import static ch.post.it.evoting.cryptoprimitives.internal.math.Vectors.vectorExponentiation;
+import static ch.post.it.evoting.cryptoprimitives.internal.math.Vectors.vectorMultiplication;
+import static ch.post.it.evoting.cryptoprimitives.internal.math.Vectors.vectorScalarMultiplication;
 import static ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,7 +45,7 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
 import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 import ch.post.it.evoting.cryptoprimitives.test.tools.TestGroupSetup;
 
-class VectorUtilsTest extends TestGroupSetup {
+class VectorsTest extends TestGroupSetup {
 
 	private static final int MAX_LENGTH = 10;
 	private static final SecureRandom random = new SecureRandom();

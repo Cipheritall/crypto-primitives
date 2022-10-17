@@ -17,12 +17,11 @@ package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
 
 public class TestCommitmentKeyGenerator {
@@ -43,7 +42,9 @@ public class TestCommitmentKeyGenerator {
 	 */
 	CommitmentKey genCommitmentKey(final int nu) {
 		final GqElement h = generator.genNonIdentityNonGeneratorMember();
-		final List<GqElement> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember).limit(nu).collect(Collectors.toList());
+		final GroupVector<GqElement, GqGroup> gList = Stream.generate(generator::genNonIdentityNonGeneratorMember)
+				.limit(nu)
+				.collect(GroupVector.toGroupVector());
 		return new CommitmentKey(h, gList);
 	}
 }

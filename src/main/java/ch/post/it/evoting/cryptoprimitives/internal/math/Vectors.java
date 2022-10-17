@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ch.post.it.evoting.cryptoprimitives.internal.utils;
+package ch.post.it.evoting.cryptoprimitives.internal.math;
 
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -30,9 +30,9 @@ import ch.post.it.evoting.cryptoprimitives.math.ZqGroup;
 /**
  * Provides methods to perform operations on {@link GroupVector}s of {@link ZqElement}s.
  */
-public class VectorUtils {
+public class Vectors {
 
-	private VectorUtils() {
+	private Vectors() {
 		// Intentionally left blank.
 	}
 

@@ -120,8 +120,9 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@Test
 	@DisplayName("with too few public key elements throws IllegalArgumentException")
 	void getDiagonalProductsTooFewKeyElements() {
-		final List<GqElement> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember).limit(KEY_SIZE + 1)
-				.collect(Collectors.toList());
+		final GroupVector<GqElement, GqGroup> pkElements = Stream.generate(gqGroupGenerator::genNonIdentityNonGeneratorMember)
+				.limit(KEY_SIZE + 1)
+				.collect(GroupVector.toGroupVector());
 		final ElGamalMultiRecipientPublicKey otherPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 		final List<List<ElGamalMultiRecipientCiphertext>> randomCiphertexts = Stream.generate(
 						() -> elGamalGenerator.genRandomCiphertexts(otherPublicKey, KEY_SIZE + 1, n))
@@ -139,8 +140,9 @@ class DiagonalProductsTest extends TestGroupSetup {
 	@DisplayName("with public key and ciphertexts of different group throws IllegalArgumentException")
 	void getDiagonalProductsDifferentGroupKeyAndCiphertexts() {
 		// Generate ciphertexts from different group (a new key is also needed).
-		final List<GqElement> pkElements = Stream.generate(otherGqGroupGenerator::genNonIdentityNonGeneratorMember).limit(l)
-				.collect(Collectors.toList());
+		final GroupVector<GqElement, GqGroup> pkElements = Stream.generate(otherGqGroupGenerator::genNonIdentityNonGeneratorMember)
+				.limit(l)
+				.collect(GroupVector.toGroupVector());
 		final ElGamalMultiRecipientPublicKey differentGroupPublicKey = new ElGamalMultiRecipientPublicKey(pkElements);
 		final ElGamalGenerator elGamalGenerator = new ElGamalGenerator(otherGqGroup);
 		final List<List<ElGamalMultiRecipientCiphertext>> otherGroupRandomCiphertexts = Stream.generate(

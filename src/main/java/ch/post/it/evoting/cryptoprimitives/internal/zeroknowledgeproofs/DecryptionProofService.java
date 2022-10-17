@@ -15,9 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.zeroknowledgeproofs;
 
+import static ch.post.it.evoting.cryptoprimitives.internal.math.Vectors.vectorAddition;
+import static ch.post.it.evoting.cryptoprimitives.internal.math.Vectors.vectorScalarMultiplication;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.byteArrayToInteger;
-import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorAddition;
-import static ch.post.it.evoting.cryptoprimitives.internal.utils.VectorUtils.vectorScalarMultiplication;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static ch.post.it.evoting.cryptoprimitives.utils.Validations.allEqual;
 import static com.google.common.base.Preconditions.checkArgument;

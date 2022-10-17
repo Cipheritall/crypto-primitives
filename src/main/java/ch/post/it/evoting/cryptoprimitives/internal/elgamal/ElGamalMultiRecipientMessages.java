@@ -19,11 +19,8 @@ package ch.post.it.evoting.cryptoprimitives.internal.elgamal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
 
 import java.math.BigInteger;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -34,6 +31,7 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPrivateK
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement.GqElementFactory;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
+import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 
 public class ElGamalMultiRecipientMessages {
 
@@ -64,7 +62,7 @@ public class ElGamalMultiRecipientMessages {
 
 		return Stream.generate(() -> constant)
 				.limit(size)
-				.collect(collectingAndThen(toList(), ElGamalMultiRecipientMessage::new));
+				.collect(collectingAndThen(GroupVector.toGroupVector(), ElGamalMultiRecipientMessage::new));
 	}
 
 	/**
@@ -91,9 +89,9 @@ public class ElGamalMultiRecipientMessages {
 		}
 
 		// Algorithm.
-		final LinkedList<GqElement> messageElements = indices
+		final GroupVector<GqElement, GqGroup> messageElements = indices
 				.mapToObj(i -> c.get(i).multiply(gamma.exponentiate(sk.get(i).negate())))
-				.collect(Collectors.toCollection(LinkedList::new));
+				.collect(GroupVector.toGroupVector());
 
 		return new ElGamalMultiRecipientMessage(messageElements);
 	}

@@ -122,7 +122,7 @@ public class KDFService implements KeyDerivation {
 
 		checkArgument(l_straight >= L, "The pseudo random key length must be greater than the hash function output length.");
 
-		final int l_curved = (int) Math.ceil(q.bitLength() / 8.0);
+		final int l_curved = ByteArrays.byteLength(q);
 		checkArgument(l_curved >= L);
 
 		byte[] h = KDF(PRK, info, l_curved);

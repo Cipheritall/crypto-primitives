@@ -79,6 +79,8 @@ public class GroupMatrix<E extends GroupVectorElement<G> & Hashable, G extends M
 	 *             <ul>
 	 *             	<li>the list must be non-null</li>
 	 *             	<li>the list must not contain any nulls</li>
+	 *             	<li>the list must not be empty</li>
+	 *              <li>the list must not contain empty elements</li>
 	 *             	<li>all rows must have the same size</li>
 	 *             	<li>all elements must be from the same {@link MathematicalGroup} </li>
 	 *             	<li>all elements must be the same size</li>

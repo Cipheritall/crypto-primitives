@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.elgamal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,9 +39,15 @@ public final class ElGamalMultiRecipientMessage implements ElGamalMultiRecipient
 
 	private final GroupVector<GqElement, GqGroup> messageElements;
 
-	public ElGamalMultiRecipientMessage(final List<GqElement> messageElements) {
-		this.messageElements = GroupVector.from(messageElements);
+	/**
+	 * Creates an {@link ElGamalMultiRecipientMessage} object.
+	 *
+	 * @param messageElements the group vector of Gq group message elements. Must be non-null, non-empty and not contain null elements.
+	 */
+	public ElGamalMultiRecipientMessage(final GroupVector<GqElement, GqGroup> messageElements) {
+		this.messageElements = checkNotNull(messageElements);
 		checkArgument(!this.messageElements.isEmpty(), "An ElGamal message must not be empty.");
+		checkArgument(this.messageElements.stream().noneMatch(Objects::isNull), "An ElGamal message cannot contain null elements");
 	}
 
 	@Override
