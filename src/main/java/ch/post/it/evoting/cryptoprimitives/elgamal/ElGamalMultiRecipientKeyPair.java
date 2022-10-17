@@ -21,11 +21,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import ch.post.it.evoting.cryptoprimitives.hashing.Hashable;
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableList;
-import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientKeyPairs;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
@@ -53,26 +52,42 @@ public class ElGamalMultiRecipientKeyPair implements HashableList {
 	/**
 	 * See {@link ElGamal#genKeyPair}
 	 */
+	@SuppressWarnings("java:S117")
 	public static ElGamalMultiRecipientKeyPair genKeyPair(final GqGroup group, final int numElements, final Random random) {
 		checkNotNull(random);
 		checkNotNull(group);
 		checkArgument(numElements > 0, "Cannot generate a ElGamalMultiRecipient key pair with %s elements.", numElements);
+
 		final int N = numElements;
-
-		final GqElement g = group.getGenerator();
-		final ZqGroup privateKeyGroup = ZqGroup.sameOrderAs(group);
+		final ZqGroup secretKeyGroup = ZqGroup.sameOrderAs(group);
 		final BigInteger q = group.getQ();
+		final GqElement g = group.getGenerator();
 
-		// Generate the private key as a group vector of random exponents
-		final GroupVector<ZqElement, ZqGroup> privateKeyElements =
-				Stream.generate(() -> random.genRandomInteger(q))
-						.parallel()
-						.map(value -> ZqElement.create(value, privateKeyGroup))
-						.limit(N)
-						.collect(GroupVector.toGroupVector());
+		record KeyPairI(ZqElement sk_i, GqElement pk_i) {
+		}
 
-		final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(privateKeyElements);
-		final ElGamalMultiRecipientPublicKey pk = ElGamalMultiRecipientKeyPairs.derivePublicKey(sk, g);
+		// Operation.
+		final List<KeyPairI> keyPairElements = IntStream.range(0, N) // Stream equivalent to for-loop.
+				.parallel()
+				.mapToObj(i -> {
+					final ZqElement sk_i = ZqElement.create(random.genRandomInteger(q), secretKeyGroup);
+					final GqElement pk_i = g.exponentiate(sk_i);
+
+					return new KeyPairI(sk_i, pk_i);
+				})
+				.toList();
+
+		// Collect secret and public elements separately.
+		final GroupVector<ZqElement, ZqGroup> secretKeyElements = keyPairElements.stream()
+				.map(KeyPairI::sk_i)
+				.collect(GroupVector.toGroupVector());
+		final GroupVector<GqElement, GqGroup> publicKeyElements = keyPairElements.stream()
+				.map(KeyPairI::pk_i)
+				.collect(GroupVector.toGroupVector());
+
+		// Construct key pair.
+		final ElGamalMultiRecipientPrivateKey sk = new ElGamalMultiRecipientPrivateKey(secretKeyElements);
+		final ElGamalMultiRecipientPublicKey pk = new ElGamalMultiRecipientPublicKey(publicKeyElements);
 
 		return new ElGamalMultiRecipientKeyPair(sk, pk);
 	}
