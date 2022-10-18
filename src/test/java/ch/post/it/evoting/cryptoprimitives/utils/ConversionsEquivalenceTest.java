@@ -17,10 +17,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.utils;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.byteArrayToInteger;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import ch.post.it.evoting.cryptoprimitives.internal.utils.ByteArrays;
 import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 
 class ConversionsEquivalenceTest {
@@ -49,15 +49,12 @@ class ConversionsEquivalenceTest {
 		assertArrayEquals(expected, result);
 	}
 
-	@Test
-	void testThrowsForNullValue() {
-		assertThrows(NullPointerException.class, () -> ConversionsInternal.integerToByteArray((BigInteger) null));
-	}
+	@RepeatedTest(1000)
+	void testByteArrayToIntegerIsEquivalentToSpec() {
+		byte[] byteArray = new byte[32];
+		secureRandom.nextBytes(byteArray);
 
-	@Test
-	void throwsForNegativeValue() {
-		final BigInteger value = BigInteger.valueOf(-1);
-		assertThrows(IllegalArgumentException.class, () -> ConversionsInternal.integerToByteArray(value));
+		assertEquals(byteArrayToIntegerSpec(byteArray), byteArrayToInteger(byteArray));
 	}
 
 	@Test
@@ -69,30 +66,42 @@ class ConversionsEquivalenceTest {
 	}
 
 	/**
+	 * Implements the specification ByteArrayToInteger algorithm. It is used in tests to show that it is equivalent to the more performant method used
+	 * which is implemented in {@link ConversionsInternal#byteArrayToInteger}.
+	 *
+	 * @param byteArray B, the byte array to convert.
+	 * @return the BigInteger representation of this byte array.
+	 **/
+	private BigInteger byteArrayToIntegerSpec(final byte[] byteArray) {
+		final byte[] B = byteArray.clone();
+		final int n = byteArray.length;
+
+		BigInteger x = BigInteger.ZERO;
+		for (int i = 0; i < n; i++) {
+			x = BigInteger.valueOf(256).multiply(x).add(BigInteger.valueOf(Byte.toUnsignedInt(B[i])));
+		}
+		return x;
+	}
+
+	/**
 	 * Implements the specification IntegerToByteArray algorithm. It is used in tests to show that it is equivalent to the more performant method used
 	 * which is implemented in {@link ConversionsInternal#integerToByteArray}.
 	 *
-	 * @param x the positive BigInteger to convert.
+	 * @param integer x, the positive BigInteger to convert.
 	 * @return the byte array representation of this BigInteger.
 	 **/
-	static byte[] integerToByteArraySpec(final BigInteger x) {
-		checkNotNull(x);
-		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
+	static byte[] integerToByteArraySpec(final BigInteger integer) {
+		final BigInteger TWOHUNDRED_FIFTY_SIX = BigInteger.valueOf(256);
+		BigInteger x = integer;
 
-		if (x.compareTo(BigInteger.ZERO) == 0) {
-			return new byte[1];
+		// Operation
+		int n = ByteArrays.byteLength(x);
+		n = Math.max(n, 1);
+		final byte[] B = new byte[n];
+		for (int i = 0; i < n; i++) {
+			B[n-i-1] = x.mod(TWOHUNDRED_FIFTY_SIX).byteValue();
+			x = x.divide(TWOHUNDRED_FIFTY_SIX);
 		}
-
-		final int bitLength = x.bitLength();
-		final int n = (bitLength + Byte.SIZE - 1) / Byte.SIZE;
-
-		final byte[] output = new byte[n];
-		BigInteger current = x;
-		for (int i = 1; i <= n; i++) {
-			output[n - i] = current.byteValue();
-			current = current.shiftRight(Byte.SIZE);
-		}
-
-		return output;
+		return B;
 	}
 }
