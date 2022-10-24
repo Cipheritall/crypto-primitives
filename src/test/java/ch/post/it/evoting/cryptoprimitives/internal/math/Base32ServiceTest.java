@@ -15,7 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 
@@ -25,8 +27,6 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import com.google.common.base.Throwables;
 
 class Base32ServiceTest {
 
@@ -74,7 +74,7 @@ class Base32ServiceTest {
 	}
 
 	static Stream<String> getInvalidStrings() {
-		return Stream.of("A=", "ABCDEFGh", "ABCDEFG", "01======", "ABC=====");
+		return Stream.of("A=", "ABCDEFGh", "01======", "ABC=====");
 	}
 
 	@ParameterizedTest
@@ -84,7 +84,7 @@ class Base32ServiceTest {
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> base32Service.base32Decode(invalidString));
 		final String expectedErrorMessage = "The given string is not a valid Base32 string.";
-		assertEquals(expectedErrorMessage, Throwables.getRootCause(exception).getMessage());
+		assertEquals(expectedErrorMessage, exception.getMessage());
 	}
 
 	@RepeatedTest(10)

@@ -15,12 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.common.io.BaseEncoding;
 
@@ -28,9 +25,6 @@ import ch.post.it.evoting.cryptoprimitives.math.Base32;
 
 @SuppressWarnings("java:S117")
 public final class Base32Service implements Base32 {
-
-	private static final String BASE32_REGEX = "^([A-Z2-7]{8})*(([A-Z2-7]{8})*|[A-Z2-7]{7}=|[A-Z2-7]{5}={3}|[A-Z2-7]{4}={4}|[A-Z2-7]{2}={6})$";
-	private static final Pattern BASE32_PATTERN = Pattern.compile(BASE32_REGEX);
 
 	@Override
 	public String base32Encode(final byte[] byteArray) {
@@ -42,12 +36,11 @@ public final class Base32Service implements Base32 {
 	@Override
 	public byte[] base32Decode(final String string) {
 		final String S = checkNotNull(string);
-		checkArgument(isBase32(S), "The given string is not a valid Base32 string.");
-		return BaseEncoding.base32().decode(S);
-	}
-
-	private boolean isBase32(final String string) {
-		final Matcher matcher = BASE32_PATTERN.matcher(string);
-		return matcher.matches();
+		try {
+			// The method decode checks the given string is a valid Base32 string.
+			return BaseEncoding.base32().decode(S);
+		} catch (final IllegalArgumentException e) {
+			throw new IllegalArgumentException("The given string is not a valid Base32 string.", e);
+		}
 	}
 }

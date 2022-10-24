@@ -87,7 +87,8 @@ class CommitmentKeyServiceTest {
 
 	@Test
 	void constructionWithEmptyListTest() {
-		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, GroupVector.of()));
+		final GroupVector<GqElement, GqGroup> empty = GroupVector.of();
+		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, empty));
 	}
 
 	@Test
@@ -102,17 +103,19 @@ class CommitmentKeyServiceTest {
 	@Test
 	void constructionWithIdentityTest() {
 		final GqElement identity = h.getGroup().getIdentity();
+		final GroupVector<GqElement, GqGroup> identityVector = GroupVector.of(identity);
 
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(identity, gs));
-		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, GroupVector.of(identity)));
+		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, identityVector));
 	}
 
 	@Test
 	void constructionWithGeneratorTest() {
 		final GqElement generator = h.getGroup().getGenerator();
+		final GroupVector<GqElement, GqGroup> generatorVector = GroupVector.of(generator);
 
 		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(generator, gs));
-		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, GroupVector.of(generator)));
+		assertThrows(IllegalArgumentException.class, () -> new CommitmentKey(h, generatorVector));
 	}
 
 	static Stream<Arguments> getVerifiableCommitmentKeyArgumentProvider() {
