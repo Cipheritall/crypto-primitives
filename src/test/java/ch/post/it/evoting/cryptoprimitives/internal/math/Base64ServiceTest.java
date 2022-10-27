@@ -15,7 +15,9 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 
@@ -25,8 +27,6 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import com.google.common.base.Throwables;
 
 class Base64ServiceTest {
 
@@ -74,7 +74,7 @@ class Base64ServiceTest {
 	}
 
 	static Stream<String> getInvalidStrings() {
-		return Stream.of("A=", "?sss", "abcdefg", "Inv=====", "x-y.");
+		return Stream.of("A=", "?sss", "Inv=====", "x-y.");
 	}
 
 	@ParameterizedTest
@@ -84,7 +84,7 @@ class Base64ServiceTest {
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> base64Service.base64Decode(invalidString));
 		final String expectedErrorMessage = "The given string is not a valid Base64 string.";
-		assertEquals(expectedErrorMessage, Throwables.getRootCause(exception).getMessage());
+		assertEquals(expectedErrorMessage, exception.getMessage());
 	}
 
 	@RepeatedTest(10)

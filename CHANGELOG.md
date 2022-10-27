@@ -1,5 +1,28 @@
 # Changelog
 
+## Release 1.1
+
+Release 1.1 includes some feedback from the Federal Chancellery's mandated experts.
+We want to thank the experts for their high-quality, constructive remarks:
+
+* Vanessa Teague (Thinking Cybersecurity), Olivier Pereira (Université catholique Louvain), Thomas Edmund Haines (Australian National University)
+* Aleksander Essex (Western University Canada)
+* Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis (Bern University of Applied Sciences)
+
+The following functionalities and improvements are included in release 1.1:
+* [Code] Implemented the BaseXEncode and BaseXDecode wrapper methods (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Implemented the Truncate (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the immutability of objects (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the package structure (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Improved the specification of the method ByteLength and implemented it faithfully (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Simplified and moved the section on probabilistic primality tests (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the alignment of the method GenRandomInteger (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the alignment of the method GenKeyPair (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the alignment of the method VerifyDecryptions (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the input validation of the method GetCommitmentVector (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+
+---
+
 ## Release 1.0
 
 The following functionalities and improvements are included in release 1.0:

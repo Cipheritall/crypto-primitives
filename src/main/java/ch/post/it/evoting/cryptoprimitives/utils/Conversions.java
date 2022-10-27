@@ -24,6 +24,26 @@ import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 public interface Conversions {
 
 	/**
+	 * Converts a byte array to its BigInteger equivalent.
+	 *
+	 * @param bytes B, the byte array to convert. Must be non-null and non-empty.
+	 * @return a BigInteger corresponding to the provided byte array representation.
+	 */
+	static BigInteger byteArrayToInteger(final byte[] bytes) {
+		return ConversionsInternal.byteArrayToInteger(bytes);
+	}
+
+	/**
+	 * Converts a BigInteger to a byte array representation.
+	 *
+	 * @param x the positive BigInteger to convert.
+	 * @return the byte array representation of this BigInteger.
+	 */
+	static byte[] integerToByteArray(final BigInteger x) {
+		return ConversionsInternal.integerToByteArray(x);
+	}
+
+	/**
 	 * Converts a string to a byte array representation.
 	 *
 	 * @param s S, the string to convert.
@@ -42,32 +62,6 @@ public interface Conversions {
 	 */
 	static String byteArrayToString(final byte[] b) {
 		return ConversionsInternal.byteArrayToString(b);
-	}
-
-	/**
-	 * Converts a BigInteger to a byte array representation.
-	 * <p>
-	 * NOTE: our implementation slightly deviates from the specifications for performance reasons. Benchmarks show that our implementation is orders
-	 * of magnitude faster than the pseudo-code implementation integerToByteArraySpec. Both implementations provide the same result.
-	 *
-	 * @param x the positive BigInteger to convert.
-	 * @return the byte array representation of this BigInteger.
-	 */
-	static byte[] integerToByteArray(final BigInteger x) {
-		return ConversionsInternal.integerToByteArray(x);
-	}
-
-	/**
-	 * Converts a byte array to its BigInteger equivalent.
-	 * <p>
-	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation, which is equivalent to the specification of
-	 * ByteArrayToInteger.
-	 *
-	 * @param bytes B, the byte array to convert. Must be non-null and non-empty.
-	 * @return a BigInteger corresponding to the provided byte array representation.
-	 */
-	static BigInteger byteArrayToInteger(final byte[] bytes) {
-		return ConversionsInternal.byteArrayToInteger(bytes);
 	}
 
 	/**

@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 
-import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientKeyPairs;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GroupVector;
 import ch.post.it.evoting.cryptoprimitives.math.ZqElement;
@@ -84,8 +83,7 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 		@NullSource
 		@DisplayName("with a null generator throws a NullPointerException.")
 		void nullCheckTest(final GqElement nullGenerator) {
-			assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientKeyPairs.derivePublicKey(elGamalMultiRecipientPrivateKey,
-					nullGenerator));
+			assertThrows(NullPointerException.class, () -> elGamalMultiRecipientPrivateKey.derivePublicKey(nullGenerator));
 		}
 
 		@Test
@@ -94,8 +92,7 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 			final GqElement generatorFromDifferentGroup = GroupTestData.getDifferentGqGroup(gqGroup).getGenerator();
 
 			final IllegalArgumentException illegalArgumentException =
-					assertThrows(IllegalArgumentException.class, () -> ElGamalMultiRecipientKeyPairs.derivePublicKey(
-							elGamalMultiRecipientPrivateKey, generatorFromDifferentGroup));
+					assertThrows(IllegalArgumentException.class, () -> elGamalMultiRecipientPrivateKey.derivePublicKey(generatorFromDifferentGroup));
 
 			assertEquals("The private key and the generator must belong to groups of the same order.", illegalArgumentException.getMessage());
 		}
@@ -112,7 +109,7 @@ class ElGamalMultiRecipientPrivateKeyTest extends TestGroupSetup {
 									.map(generator::exponentiate)
 									.collect(GroupVector.toGroupVector()));
 
-			assertEquals(elGamalMultiRecipientPublicKey, ElGamalMultiRecipientKeyPairs.derivePublicKey(elGamalMultiRecipientPrivateKey, generator));
+			assertEquals(elGamalMultiRecipientPublicKey, elGamalMultiRecipientPrivateKey.derivePublicKey(generator));
 		}
 
 	}

@@ -15,20 +15,14 @@
  */
 package ch.post.it.evoting.cryptoprimitives.internal.math;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ch.post.it.evoting.cryptoprimitives.math.Base64;
 
 @SuppressWarnings("java:S117")
 public final class Base64Service implements Base64 {
-
-	private static final String BASE64_REGEX = "^([A-Za-z0-9+/]{4})*(([A-Za-z0-9+/]{4})*|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
-	private static final Pattern BASE64_PATTERN = Pattern.compile(BASE64_REGEX);
 
 	@Override
 	public String base64Encode(final byte[] byteArray) {
@@ -40,12 +34,11 @@ public final class Base64Service implements Base64 {
 	@Override
 	public byte[] base64Decode(final String string) {
 		final String S = checkNotNull(string);
-		checkArgument(isBase64(S), "The given string is not a valid Base64 string.");
-		return java.util.Base64.getDecoder().decode(S);
-	}
-
-	private boolean isBase64(final String string) {
-		final Matcher matcher = BASE64_PATTERN.matcher(string);
-		return matcher.matches();
+		try {
+			// The method decode checks the given string is a valid Base64 string.
+			return java.util.Base64.getDecoder().decode(S);
+		} catch (final IllegalArgumentException e) {
+			throw new IllegalArgumentException("The given string is not a valid Base64 string.", e);
+		}
 	}
 }
