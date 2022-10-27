@@ -24,43 +24,38 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 /**
  * <p>This class is thread safe.</p>
  */
 public final class ConversionsInternal {
 
+	private static final Pattern DECIMAL_PATTERN = Pattern.compile("^\\d+");
+
 	private ConversionsInternal() {
 		//Intentionally left blank
 	}
 
 	/**
-	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#stringToByteArray}
+	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#byteArrayToInteger}.
+	 * <p>
+	 * Uses the {@link BigInteger} implementation of the byte array to integer transformation, which is equivalent to the specification of
+	 * ByteArrayToInteger. We prefer this implementation due to its conciseness.
+	 * </p>
 	 */
-	public static byte[] stringToByteArray(final String s) {
-		checkNotNull(s);
-		return s.getBytes(StandardCharsets.UTF_8);
-	}
-
-	/**
-	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#byteArrayToString}
-	 */
-	public static String byteArrayToString(final byte[] b) {
-		checkNotNull(b);
-		checkArgument(b.length > 0, "The length of the byte array must be strictly positive.");
-
-		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
-		try {
-			return decoder.decode(ByteBuffer.wrap(b)).toString();
-		} catch (CharacterCodingException ex) {
-			throw new IllegalArgumentException("The byte array does not correspond to a valid sequence of UTF-8 encoding.");
-		}
+	public static BigInteger byteArrayToInteger(final byte[] bytes) {
+		checkNotNull(bytes);
+		checkArgument(bytes.length > 0, "The byte array to convert must be non-empty.");
+		return new BigInteger(1, bytes);
 	}
 
 	/**
 	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#integerToByteArray}.
 	 * <p>
-	 *     The implementation is equivalent to the specification.
+	 * NOTE: our implementation slightly deviates from the specifications for performance reasons. Benchmarks show that our implementation is orders
+	 * of magnitude faster than the pseudo-code implementation integerToByteArraySpec. Both implementations are equivalent, and we have a unit test
+	 * ensuring it.
 	 * </p>
 	 */
 	public static byte[] integerToByteArray(final BigInteger x) {
@@ -82,15 +77,30 @@ public final class ConversionsInternal {
 	}
 
 	/**
-	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#byteArrayToInteger}.
-	 * <p>
-	 *     The implementation is equivalent to the specification.
-	 * </p>
+	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#stringToByteArray}
 	 */
-	public static BigInteger byteArrayToInteger(final byte[] bytes) {
-		checkNotNull(bytes);
-		checkArgument(bytes.length > 0, "The byte array to convert must be non-empty.");
-		return new BigInteger(1, bytes);
+	public static byte[] stringToByteArray(final String s) {
+		checkNotNull(s);
+
+		// Corresponds to UTF-8(S)
+		return s.getBytes(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * See {@link ch.post.it.evoting.cryptoprimitives.utils.Conversions#byteArrayToString}
+	 */
+	public static String byteArrayToString(final byte[] b) {
+		checkNotNull(b);
+		checkArgument(b.length > 0, "The length of the byte array must be strictly positive.");
+
+		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+		// The try-catch clause implements the pseudo-code's if statement
+		try {
+			// Corresponds to UTF-8^-1(B)
+			return decoder.decode(ByteBuffer.wrap(b)).toString();
+		} catch (CharacterCodingException ex) {
+			throw new IllegalArgumentException("The byte array does not correspond to a valid sequence of UTF-8 encoding.");
+		}
 	}
 
 	/**
@@ -99,10 +109,12 @@ public final class ConversionsInternal {
 	public static BigInteger stringToInteger(final String s) {
 		checkNotNull(s);
 		checkArgument(s.length() > 0, "The string to convert cannot be empty.");
-		checkArgument(Character.isDigit(s.charAt(0)),
+		checkArgument(DECIMAL_PATTERN.matcher(s).matches(),
 				String.format("The string to convert \"%s\" is not a valid decimal representation of a BigInteger.", s));
 
+		// The try-catch clause implements the pseudo-code's if statement
 		try {
+			// Corresponds to Decimal(S)
 			return new BigInteger(s, 10);
 		} catch (final NumberFormatException e) {
 			throw new IllegalArgumentException(
@@ -117,6 +129,7 @@ public final class ConversionsInternal {
 		checkNotNull(x);
 		checkArgument(x.compareTo(BigInteger.ZERO) >= 0);
 
+		// Corresponds to Decimal^-1(x)
 		return x.toString(10);
 	}
 
@@ -127,6 +140,7 @@ public final class ConversionsInternal {
 		checkNotNull(x);
 		checkArgument(x >= 0);
 
+		// Corresponds to Decimal^-1(x)
 		return Integer.toString(x, 10);
 	}
 }
