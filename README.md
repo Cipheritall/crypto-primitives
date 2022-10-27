@@ -33,20 +33,17 @@ We strive for excellent code quality to minimize the risk of bugs and vulnerabil
 
 ### SonarQube Analysis
 
-We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 7 code smells.
+We parametrize SonarQube with the built-in Sonar way quality profile. The SonarQube analysis of the crypto-primitives code reveals 0 bugs, 0 vulnerabilities, 0 security hotspots, and 6 code smells.
 
 ![SonarQube](SonarQube.jpg)
 
-Out of the 7 code smells:
-
-* 6 code smells concern duplicated blocks in the argument and proof classes. We left the code blocks as is since removing them reduces the code's readability.
-* 1 code smells concern a misalignment with the Java standard variable naming convention.
+The 6 code smells concern duplicated blocks in the argument and proof classes. We left the code blocks as is since removing them reduces the code's readability.
 
 Moreover, a high test coverage illustrates the fact that we extensively test the crypto-primitives library.
 
 ### Fortify Analysis
 
-The Fortify analysis showed 0 critical, 0 high, 0 medium, and 62 low criticality issues. We manually reviewed all 62 low-criticality issues and assessed them as false positives.
+The Fortify analysis showed 0 critical, 1 high, 0 medium, and 62 low criticality issues. We manually reviewed all 63 issues and assessed them as false positives.
 
 ### JFrog X-Ray Analysis
 
@@ -107,7 +104,6 @@ An overview of all major changes within the published releases is available [her
 
 We plan for the following improvements to the crypto-primitives library:
 
-* Implementing methods for probabilistic primality testing.
 * Provide expanded information in test vectors (including the expected challenge).
 
 ## Additional Documentation
