@@ -42,8 +42,7 @@ public class PrimesInternal {
 					return false;
 				}
 			}
+			return true;
 		}
-
-		return true;
 	}
 }
