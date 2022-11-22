@@ -17,8 +17,6 @@ package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.function.LongFunction;
-
 public class MatrixUtils {
 
 	private MatrixUtils() {
@@ -36,11 +34,9 @@ public class MatrixUtils {
 		final int N = vectorSize;
 		checkArgument(N >= 2, "The size to decompose must be greater than or equal to 2.");
 
-		final LongFunction<Integer> floorSquareRoot = x -> (int) Math.floor(Math.sqrt(x));
-
 		int m = 1;
 		int n = N;
-		for (int i = floorSquareRoot.apply(N); i > 1; i--) {
+		for (int i = (int) Math.floor(Math.sqrt(N)); i > 1; i--) {
 			if (N % i == 0) {
 				m = i;
 				n = N / i;
