@@ -40,11 +40,11 @@ public class AuthorityInformation {
 			final String state,
 			final String locality,
 			final String organisation) {
-		this.commonName = checkNotNull(commonName);
-		this.country = checkNotNull(country);
-		this.state = checkNotNull(state);
-		this.locality = checkNotNull(locality);
-		this.organisation = checkNotNull(organisation);
+		this.commonName = commonName;
+		this.country = country;
+		this.state = state;
+		this.locality = locality;
+		this.organisation = organisation;
 	}
 
 	public String getCommonName() {
@@ -79,17 +79,17 @@ public class AuthorityInformation {
 		private String organisation;
 
 		public Builder setCommonName(final String commonName) {
-			this.commonName = checkNotNull(commonName);
+			this.commonName = commonName;
 			return this;
 		}
 
 		public Builder setCountry(final String country) {
-			this.country = checkNotNull(country);
+			this.country = country;
 			return this;
 		}
 
 		public Builder setState(final String state) {
-			this.state = checkNotNull(state);
+			this.state = state;
 			return this;
 		}
 
@@ -104,6 +104,12 @@ public class AuthorityInformation {
 		}
 
 		public AuthorityInformation build() {
+			checkNotNull(commonName);
+			checkNotNull(country);
+			checkNotNull(state);
+			checkNotNull(locality);
+			checkNotNull(organisation);
+
 			return new AuthorityInformation(commonName, country, state, locality, organisation);
 		}
 	}

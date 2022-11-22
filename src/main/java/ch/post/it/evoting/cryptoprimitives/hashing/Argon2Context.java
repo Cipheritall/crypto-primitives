@@ -30,7 +30,7 @@ public record Argon2Context(int m, int p, int i) {
 				"memory outside of expected range: %d is not in [14, 24]", m);
 		checkArgument(1 <= p && p <= 16,
 				"parallelism outside of expected range: %d is not in [1, 16]", p);
-		checkArgument(2 <= i && i <= 256,
-				"iterationCount outside of expected range: %d is not in [2, 256]", i);
+		checkArgument(1 <= i && i <= 256,
+				"iterationCount outside of expected range: %d is not in [1, 256]", i);
 	}
 }

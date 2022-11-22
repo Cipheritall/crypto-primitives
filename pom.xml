@@ -4,7 +4,7 @@
 
 	<groupId>ch.post.it.evoting.cryptoprimitives</groupId>
 	<artifactId>crypto-primitives</artifactId>
-	<version>1.1.0.0</version>
+	<version>1.1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>Crypto Primitives</name>
@@ -13,7 +13,7 @@
 		<!-- Dependencies versions -->
 		<guava.version>31.1-jre</guava.version>
 		<bouncycastle.version>1.71.1</bouncycastle.version>
-		<jackson.version>2.13.4</jackson.version>
+		<jackson.version>2.13.4.20221013</jackson.version>
 		<jmh.version>1.35</jmh.version>
 		<junit-jupiter.version>5.9.1</junit-jupiter.version>
 		<junit-platform-launcher.version>1.9.1</junit-platform-launcher.version>
@@ -39,10 +39,10 @@
 
 		<!-- Project settings -->
 		<maven.compiler.release>17</maven.compiler.release>
-		<maven-enforcer-plugin.requiredJavaVersion>[17.0.3]</maven-enforcer-plugin.requiredJavaVersion>
+		<maven-enforcer-plugin.requiredJavaVersion>[17.0.5]</maven-enforcer-plugin.requiredJavaVersion>
 		<maven-enforcer-plugin.requiredMavenVersion>3.8.6</maven-enforcer-plugin.requiredMavenVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.build.outputTimestamp>2022-10-27T16:10:48+02:00</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2022-11-22T07:05:58+02:00</project.build.outputTimestamp>
 
 		<!--  Sonar  -->
 		<sonar.scm.disabled>true</sonar.scm.disabled>
@@ -111,16 +111,16 @@
 				<artifactId>mockito-inline</artifactId>
 				<version>${mockito.version}</version>
 			</dependency>
+
+			<!-- com.fasterxml.jackson -->
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
 				<version>${jackson.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
+
 			<dependency>
 				<groupId>org.openjdk.jmh</groupId>
 				<artifactId>jmh-core</artifactId>
