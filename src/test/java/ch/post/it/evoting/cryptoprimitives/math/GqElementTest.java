@@ -22,8 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigInteger;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import ch.post.it.evoting.cryptoprimitives.test.tools.generator.GqGroupGenerator;
@@ -172,6 +174,40 @@ class GqElementTest {
 		GqElement element = GqElementFactory.fromValue(BigInteger.ONE, group);
 
 		assertThrows(NullPointerException.class, () -> element.exponentiate(null));
+	}
+
+	@Test
+	void testDivideByNullArgumentThrows() {
+		GqElement element = GqElementFactory.fromValue(BigInteger.ONE, group);
+
+		assertThrows(NullPointerException.class, () -> element.divide(null));
+	}
+
+	@Test
+	void testDivideWithDivisorFromDifferentGroupThrows() {
+		GqElement element = GqElementFactory.fromValue(BigInteger.ONE, group);
+		GqElement element2 = GqElementFactory.fromValue(BigInteger.ONE, new GqGroup(BigInteger.valueOf(7), BigInteger.valueOf(3), g));
+		assertThrows(IllegalArgumentException.class, () -> element.divide(element2));
+	}
+
+	@Test
+	void testDivideElementByItselfGivesOne() {
+		final GroupVector<GqElement, GqGroup> gqElements = groupGenerator.genRandomGqElementVector(10);
+		final GqElement identity = group.getIdentity();
+		gqElements.forEach(e -> assertEquals(identity, e.divide(e)));
+	}
+
+	@Test
+	void givenTwoElementsWhenDivideThenSuccess() {
+		final GqElement two = GqElementFactory.fromValue(BigInteger.valueOf(2), group);
+		final GqElement three = GqElementFactory.fromValue(BigInteger.valueOf(3), group);
+		final GqElement four = GqElementFactory.fromValue(BigInteger.valueOf(4), group);
+		final GqElement nine = GqElementFactory.fromValue(BigInteger.valueOf(9), group);
+		final GqElement twelve = GqElementFactory.fromValue(BigInteger.valueOf(12), group);
+
+		assertEquals(two, four.divide(two));
+		assertEquals(four, twelve.divide(three));
+		assertEquals(nine, four.divide(three));
 	}
 
 	//Equals
