@@ -149,9 +149,7 @@ public class SchnorrProofService {
 		// Operation.
 		final GqElement x = computePhiSchnorr(z, g);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g);
-
-		final GqElement y_minus_e = y.exponentiate(e.negate());
-		final GqElement c_prime = x.multiply(y_minus_e);
+		final GqElement c_prime = x.multiply(y.exponentiate(e.negate()));
 
 		final HashableList h_aux;
 		if (!i_aux.isEmpty()) {
