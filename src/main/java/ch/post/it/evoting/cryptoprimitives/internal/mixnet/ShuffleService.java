@@ -97,17 +97,16 @@ public class ShuffleService {
 
 		final List<ElGamalMultiRecipientCiphertext> C_prime =
 				IntStream.range(0, N)
-						.boxed()
 						.parallel()
-						.flatMap(i -> Stream.of(i)
-								.map(__ -> r.get(i))
-								.map(r_i -> getCiphertext(one, r_i, pk))
-								.map(e -> {
-									final int pi_i = pi.get(i);
-									final ElGamalMultiRecipientCiphertext C_pi_i = C.get(pi_i);
-									return e.getCiphertextProduct(C_pi_i);
-								})
-						).toList();
+						.mapToObj(i -> {
+							final ZqElement r_i = r.get(i);
+
+							final ElGamalMultiRecipientCiphertext e = getCiphertext(one, r_i, pk);
+
+							final int pi_i = pi.get(i);
+							final ElGamalMultiRecipientCiphertext C_pi_i = C.get(pi_i);
+							return e.getCiphertextProduct(C_pi_i);
+						}).toList();
 
 		return new Shuffle(C_prime, pi, r);
 	}
