@@ -16,6 +16,7 @@
 package ch.post.it.evoting.cryptoprimitives.internal.mixnet;
 
 import static ch.post.it.evoting.cryptoprimitives.internal.mixnet.CommitmentService.getCommitment;
+import static ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal.byteArrayToInteger;
 import static ch.post.it.evoting.cryptoprimitives.internal.utils.Verifiable.create;
 import static ch.post.it.evoting.cryptoprimitives.math.GroupVector.toGroupVector;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -30,7 +31,6 @@ import ch.post.it.evoting.cryptoprimitives.elgamal.ElGamalMultiRecipientPublicKe
 import ch.post.it.evoting.cryptoprimitives.hashing.HashableBigInteger;
 import ch.post.it.evoting.cryptoprimitives.internal.hashing.HashService;
 import ch.post.it.evoting.cryptoprimitives.internal.math.RandomService;
-import ch.post.it.evoting.cryptoprimitives.internal.utils.ConversionsInternal;
 import ch.post.it.evoting.cryptoprimitives.internal.utils.Verifiable;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
 import ch.post.it.evoting.cryptoprimitives.math.GqGroup;
@@ -166,7 +166,8 @@ class SingleValueProductArgumentService {
 				b,
 				c_a);
 
-		final ZqElement x = ZqElement.create(ConversionsInternal.byteArrayToInteger(x_bytes), zqGroup);
+		// The constructor ensures that the hash value is smaller than q.
+		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
 		// Calculate aTilde, bTilde, rTilde and sTilde
 		final GroupVector<ZqElement, ZqGroup> a_tilde = IntStream.range(0, n)
@@ -232,7 +233,9 @@ class SingleValueProductArgumentService {
 				c_d,
 				b,
 				c_a);
-		final ZqElement x = ZqElement.create(ConversionsInternal.byteArrayToInteger(x_bytes), zqGroup);
+
+		// The constructor ensures that the hash value is smaller than q.
+		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
 		// Verify A
 		final GqElement prodCa = c_a.exponentiate(x).multiply(c_d);

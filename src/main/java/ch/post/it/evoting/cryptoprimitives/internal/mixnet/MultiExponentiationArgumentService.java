@@ -222,6 +222,8 @@ final class MultiExponentiationArgumentService {
 				c_B,
 				E
 		);
+
+		// The constructor ensures that the hash value is smaller than q.
 		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
 		//Compute as, r, b, s, tau
@@ -372,6 +374,7 @@ final class MultiExponentiationArgumentService {
 	 * Verifies the correctness of a {@link MultiExponentiationArgument} with respect to a given {@link MultiExponentiationStatement}.
 	 * <p>
 	 * The statement and the argument must be non null and have compatible groups.
+	 * </p>
 	 *
 	 * @param statement the statement for which the argument is to be verified.
 	 * @param argument  the argument to be verified.
@@ -419,7 +422,7 @@ final class MultiExponentiationArgumentService {
 				c_B,
 				E);
 
-		//Hash value is guaranteed to be smaller than q
+		// The constructor ensures that the hash value is smaller than q.
 		final ZqElement x = ZqElement.create(byteArrayToInteger(x_bytes), zqGroup);
 
 		final Verifiable verifCbm = create(() -> c_B.get(m).equals(gqGroup.getIdentity()), "cB_m must equal one.");
