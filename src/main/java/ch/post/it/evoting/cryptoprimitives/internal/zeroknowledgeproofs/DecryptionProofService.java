@@ -149,7 +149,7 @@ public class DecryptionProofService {
 		final GroupVector<GqElement, GqGroup> phi = C.getPhis();
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
 						pk.stream().limit(l),
-						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
+						IntStream.range(0, l).mapToObj(i -> phi.get(i).divide(m.get(i))))
 				.collect(toGroupVector());
 		final HashableList h_aux;
 		if (!i_aux.isEmpty()) {
@@ -232,7 +232,7 @@ public class DecryptionProofService {
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, gamma);
 		final GroupVector<GqElement, GqGroup> y = Stream.concat(
 						pk.stream().limit(l),
-						IntStream.range(0, l).mapToObj(i -> phi.get(i).multiply(m.get(i).invert())))
+						IntStream.range(0, l).mapToObj(i -> phi.get(i).divide(m.get(i))))
 				.collect(toGroupVector());
 		final GroupVector<GqElement, GqGroup> c_prime = IntStream.range(0, 2 * l)
 				.mapToObj(i -> x.get(i).multiply(y.get(i).exponentiate(e.negate())))

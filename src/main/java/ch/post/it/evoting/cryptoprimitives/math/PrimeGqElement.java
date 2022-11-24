@@ -139,8 +139,7 @@ public final class PrimeGqElement extends MultiplicativeGroupElement {
 			final ArrayList<PrimeGqElement> p_vector = new ArrayList<>(r);
 			int count = 0;
 			while (count < r && current.compareTo(gqGroup.getP()) < 0 && current.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) < 0) {
-				if (gqGroup.isGroupMember(current) && PrimesInternal.isSmallPrime(current.intValueExact())
-						&& !current.equals(gqGroup.getGenerator().value)) {
+				if (gqGroup.isGroupMember(current) && PrimesInternal.isSmallPrime(current.intValueExact())) {
 					p_vector.add(new PrimeGqElement(current.intValueExact(), gqGroup));
 					count++;
 				}

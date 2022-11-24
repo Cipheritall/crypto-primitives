@@ -36,6 +36,9 @@ public final class GqElement extends MultiplicativeGroupElement {
 		super(value, group);
 	}
 
+	/**
+	 * @see MultiplicativeGroupElement#multiply(MultiplicativeGroupElement)
+	 */
 	@Override
 	public GqElement multiply(final MultiplicativeGroupElement other) {
 		checkNotNull(other);
@@ -45,6 +48,9 @@ public final class GqElement extends MultiplicativeGroupElement {
 		return new GqElement(resultValue, this.group);
 	}
 
+	/**
+	 * @see MultiplicativeGroupElement#exponentiate(ZqElement)
+	 */
 	@Override
 	public GqElement exponentiate(final ZqElement exponent) {
 		checkNotNull(exponent);
@@ -58,9 +64,33 @@ public final class GqElement extends MultiplicativeGroupElement {
 		return this.group.hasSameOrderAs(exponent.getGroup());
 	}
 
+	/**
+	 * Inverts the calling instance.
+	 * <p>
+	 * The inverse of a {@link GqElement} <i>a</i> is the element <i>a<sup>-1</sup></i> such that <i>a</i> * <i>a<sup>-1</sup></i> = 1 mod <i>p</i>.
+	 * </p>
+	 *
+	 * @return
+	 */
 	public GqElement invert() {
 		final BigInteger invertedValue = BigIntegerOperationsService.modInvert(this.getValue(), this.group.getP());
 		return new GqElement(invertedValue, this.group);
+	}
+
+	/**
+	 * Divides the calling instance by the given {@link GqElement}.
+	 * <p>
+	 * The division is done by multiplying with the inverted divisor.
+	 * </p>
+	 *
+	 * @param divisor the element by which to divide
+	 * @return the result of the division
+	 */
+	public GqElement divide(final GqElement divisor) {
+		checkNotNull(divisor);
+		checkArgument(this.group.equals(divisor.group));
+
+		return this.multiply(divisor.invert());
 	}
 
 	@Override

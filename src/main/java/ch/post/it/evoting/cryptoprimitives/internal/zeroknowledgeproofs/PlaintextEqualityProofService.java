@@ -89,7 +89,7 @@ public class PlaintextEqualityProofService {
 		final GqElement h = firstPublicKey;
 		final GqElement h_prime = secondPublicKey;
 
-		return GroupVector.of(g.exponentiate(x), g.exponentiate(x_prime), h.exponentiate(x).multiply(h_prime.exponentiate(x_prime).invert()));
+		return GroupVector.of(g.exponentiate(x), g.exponentiate(x_prime), h.exponentiate(x).divide(h_prime.exponentiate(x_prime)));
 	}
 
 	/**
@@ -141,7 +141,7 @@ public class PlaintextEqualityProofService {
 		final GroupVector<ZqElement, ZqGroup> b = randomService.genRandomVector(q, 2);
 		final GroupVector<GqElement, GqGroup> c = computePhiPlaintextEquality(b, h, h_prime);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, h, h_prime);
-		final GroupVector<GqElement, GqGroup> y = GroupVector.of(c_0, c_0_prime, c_1.multiply(c_1_prime.invert()));
+		final GroupVector<GqElement, GqGroup> y = GroupVector.of(c_0, c_0_prime, c_1.divide(c_1_prime));
 
 		final HashableList h_aux;
 		if (!i_aux.isEmpty()) {
@@ -211,10 +211,8 @@ public class PlaintextEqualityProofService {
 		// Operation.
 		final GroupVector<GqElement, GqGroup> x = computePhiPlaintextEquality(z, h, h_prime);
 		final HashableList f = HashableList.of(HashableBigInteger.from(p), HashableBigInteger.from(q), g, h, h_prime);
-		final GroupVector<GqElement, GqGroup> y = GroupVector.of(c_0, c_0_prime, c_1.multiply(c_1_prime.invert()));
-
-		final GroupVector<GqElement, GqGroup> y_minus_e = vectorExponentiation(y, e.negate());
-		final GroupVector<GqElement, GqGroup> c_prime = vectorMultiplication(x, y_minus_e);
+		final GroupVector<GqElement, GqGroup> y = GroupVector.of(c_0, c_0_prime, c_1.divide(c_1_prime));
+		final GroupVector<GqElement, GqGroup> c_prime = vectorMultiplication(x, vectorExponentiation(y, e.negate()));
 
 		final HashableList h_aux;
 		if (!i_aux.isEmpty()) {
