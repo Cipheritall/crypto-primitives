@@ -18,8 +18,9 @@ package ch.post.it.evoting.cryptoprimitives.elgamal;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -29,6 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import com.google.common.base.Throwables;
 
 import ch.post.it.evoting.cryptoprimitives.internal.elgamal.ElGamalMultiRecipientPublicKeys;
 import ch.post.it.evoting.cryptoprimitives.math.GqElement;
@@ -70,17 +73,41 @@ class ElGamalMultiRecipientPublicKeyTest extends TestGroupSetup {
 		assertThrows(NullPointerException.class, () -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(null));
 	}
 
+	@Test
+	@DisplayName("obtained by combining empty list of public keys")
+	void combinePublicKeysWithEmptyList() {
+		final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> emptyPkList = GroupVector.of();
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(emptyPkList));
+
+		assertEquals("There must be at least one key.", Throwables.getRootCause(exception).getMessage());
+	}
+
+	@Test
+	@DisplayName("obtained by combining list of empty elements public keys")
+	void combinePublicKeysWithEmptyPk() {
+		final ElGamalMultiRecipientPublicKey pk1 = elGamalGenerator.genRandomPublicKey(2);
+		final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> emptyPkElements = spy(GroupVector.of(pk1));
+		doReturn(0).when(emptyPkElements).getElementSize();
+		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(emptyPkElements));
+
+		assertEquals("There must be at least one element in each multi-recipient key.", Throwables.getRootCause(exception).getMessage());
+	}
+
 	@RepeatedTest(10)
 	@DisplayName("obtained by combining valid public keys")
 	void combinePublicKeysWithValidInput() {
 		final ElGamalMultiRecipientPublicKey pk1 = elGamalGenerator.genRandomPublicKey(2);
 		final ElGamalMultiRecipientPublicKey pk2 = elGamalGenerator.genRandomPublicKey(2);
+		final ElGamalMultiRecipientPublicKey pk3 = elGamalGenerator.genRandomPublicKey(2);
 		final ElGamalMultiRecipientPublicKey resultingCombinedKey = assertDoesNotThrow(
-				() -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(GroupVector.of(pk1, pk2)));
+				() -> ElGamalMultiRecipientPublicKeys.combinePublicKeys(GroupVector.of(pk1, pk2, pk3)));
 
-		final GqElement expectedPKElement1 = pk1.get(0).multiply(pk2.get(0));
-		final GqElement expectedPKElement2 = pk1.get(1).multiply(pk2.get(1));
-		final ElGamalMultiRecipientPublicKey expectedCombinedKey = new ElGamalMultiRecipientPublicKey(GroupVector.of(expectedPKElement1, expectedPKElement2));
+		final GqElement expectedPKElement1 = pk1.get(0).multiply(pk2.get(0)).multiply(pk3.get(0));
+		final GqElement expectedPKElement2 = pk1.get(1).multiply(pk2.get(1)).multiply(pk3.get(1));
+		final ElGamalMultiRecipientPublicKey expectedCombinedKey = new ElGamalMultiRecipientPublicKey(
+				GroupVector.of(expectedPKElement1, expectedPKElement2));
 		assertEquals(expectedCombinedKey, resultingCombinedKey);
 	}
 }

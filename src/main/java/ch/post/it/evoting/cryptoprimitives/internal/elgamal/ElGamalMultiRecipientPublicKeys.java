@@ -16,6 +16,7 @@
 
 package ch.post.it.evoting.cryptoprimitives.internal.elgamal;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.stream.Collectors;
@@ -34,14 +35,18 @@ public class ElGamalMultiRecipientPublicKeys {
 	}
 
 	/**
-	 * @see	ElGamal#combinePublicKeys(GroupVector)
+	 * @see ElGamal#combinePublicKeys(GroupVector)
 	 */
 	public static ElGamalMultiRecipientPublicKey combinePublicKeys(final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> publicKeyList) {
 		checkNotNull(publicKeyList);
 
 		final GroupVector<ElGamalMultiRecipientPublicKey, GqGroup> pk = publicKeyList;
-		final int N = publicKeyList.getElementSize();
 		final int s = publicKeyList.size();
+		final int N = publicKeyList.getElementSize();
+
+		checkArgument(s > 0, "There must be at least one key.");
+		checkArgument(N > 0, "There must be at least one element in each multi-recipient key.");
+
 		final GqGroup group = publicKeyList.getGroup();
 
 		return IntStream.range(0, N)
