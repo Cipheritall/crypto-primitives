@@ -260,8 +260,13 @@ final class ZeroArgumentService {
 
 		final GroupMatrix<ZqElement, ZqGroup> A = firstMatrix;
 		final GroupMatrix<ZqElement, ZqGroup> B = secondMatrix;
+		final int n = A.numRows();
 		final int m = A.numColumns() - 1;
 		final ZqGroup group = y.getGroup();
+
+		// Require.
+		checkArgument(n > 0, "The value of n must be strictly positive.");
+		checkArgument(m > 0, "The value of m must be strictly positive.");
 
 		// Computing the d vector.
 		final LinkedList<ZqElement> d = new LinkedList<>();
