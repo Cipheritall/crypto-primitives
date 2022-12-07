@@ -66,23 +66,22 @@ public final class EncryptionParameters {
 
 		int i = 0;
 		BigInteger q;
+		BigInteger p;
 		do {
 			final byte[] message = Bytes.concat(seedBytes, integerToByteArray(BigInteger.valueOf(i)));
 			final byte[] q_b_hat = shake128(message, pBitLength / Byte.SIZE);
 			final byte[] q_b = Bytes.concat(new byte[] { 0x01 }, q_b_hat);
 			q = byteArrayToInteger(q_b).shiftRight(2); // The BigInteger is positive so shiftRight is equivalent to a logical right shift.
 			q = q.add(ONE).subtract(q.mod(TWO));
+			p = TWO.multiply(q).add(ONE);
 			i++;
-		} while (!q.isProbablePrime(certaintyLevel) || !TWO.multiply(q).add(ONE).isProbablePrime(certaintyLevel));
+		} while (!q.isProbablePrime(certaintyLevel) || !p.isProbablePrime(certaintyLevel));
 
-		final BigInteger p = TWO.multiply(q).add(ONE);
-
-		BigInteger g = null;
-		for (int j = 2; j <= 4; j++) {
-			if (isGroupMember(BigInteger.valueOf(j), p)) {
-				g = BigInteger.valueOf(j);
-				break;
-			}
+		final BigInteger g;
+		if (isGroupMember(BigInteger.valueOf(2), p)) {
+			g = BigInteger.valueOf(2);
+		} else {
+			g = BigInteger.valueOf(3);
 		}
 
 		return new GqGroup(p, q, g);

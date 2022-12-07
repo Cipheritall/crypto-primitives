@@ -81,7 +81,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	private static final SecureRandom secureRandom = new SecureRandom();
 
 	private static int k;
-	private static int mu;
+	private static int nu;
 	private static HashService hashService;
 	private static ElGamalMultiRecipientPublicKey publicKey;
 	private static CommitmentKey commitmentKey;
@@ -89,12 +89,12 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 	@BeforeAll
 	static void setupAll() {
 		k = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 1) + 1;
-		mu = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
+		nu = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
 
 		hashService = TestHashService.create(gqGroup.getQ());
 		publicKey = new ElGamalGenerator(gqGroup).genRandomPublicKey(k);
 
-		commitmentKey = new TestCommitmentKeyGenerator(gqGroup).genCommitmentKey(mu);
+		commitmentKey = new TestCommitmentKeyGenerator(gqGroup).genCommitmentKey(nu);
 	}
 
 	@Nested
@@ -146,7 +146,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setup() {
-			n = secureRandom.nextInt(mu - 1) + 2;
+			n = secureRandom.nextInt(nu - 1) + 2;
 			m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS) + 1;
 
 			witness = genProductWitness(n, m, zqGroupGenerator);
@@ -185,7 +185,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with witness having a size incompatible with the commitment key throws an IllegalArgumentException")
 		void getProductArgumentWithWitnessSizeIncompatibleWithCommitmentKeySize() {
 			// Create a matrix with too many rows
-			final GroupMatrix<ZqElement, ZqGroup> otherMatrixA = zqGroupGenerator.genRandomZqElementMatrix(mu + 1, m);
+			final GroupMatrix<ZqElement, ZqGroup> otherMatrixA = zqGroupGenerator.genRandomZqElementMatrix(nu + 1, m);
 			final ProductWitness otherWitness = new ProductWitness(otherMatrixA, exponentsR);
 			final Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.getProductArgument(statement, otherWitness));
@@ -207,7 +207,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		@DisplayName("with commitments and commitment key from different group throws IllegalArgumentException")
 		void getProductArgumentWithCommitmentsAndCommitmentKeyFromDifferentGroups() {
 			final ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
-			final CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(mu);
+			final CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(nu);
 			final ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
 			final Exception exception = assertThrows(IllegalArgumentException.class,
 					() -> productArgumentService.getProductArgument(otherStatement, otherWitness));
@@ -387,11 +387,11 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 
 		@BeforeEach
 		void setup() {
-			n = secureRandom.nextInt(mu - 1) + 2;
+			n = secureRandom.nextInt(nu - 1) + 2;
 		}
 
 		Stream<Arguments> statementArgumentProvider() {
-			final int n = secureRandom.nextInt(mu - 1) + 2;
+			final int n = secureRandom.nextInt(nu - 1) + 2;
 
 			// Create ProductStatement and ProductArgument for testing with m > 1
 			final int m = secureRandom.nextInt(BOUND_FOR_RANDOM_ELEMENTS - 2) + 2;
@@ -454,7 +454,7 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 		void verifyProductArgumentWithStatementAndArgumentFromDifferentGroups(final ProductStatement statement, final ProductArgument argument) {
 			final int m = argument.get_m();
 			final ProductWitness otherWitness = genProductWitness(n, m, otherZqGroupGenerator);
-			final CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(mu);
+			final CommitmentKey otherCommitmentKey = new TestCommitmentKeyGenerator(otherGqGroup).genCommitmentKey(nu);
 			final ProductStatement otherStatement = getProductStatement(otherWitness, otherCommitmentKey);
 
 			final Exception exception = assertThrows(IllegalArgumentException.class,
@@ -553,6 +553,48 @@ class ProductArgumentServiceTest extends TestGroupSetup {
 			final VerificationResult verificationResult = productArgumentService.verifyProductArgument(statement, badArgument).verify();
 			assertFalse(verificationResult.isVerified());
 			assertEquals("Failed to verify Single Value Product Argument.", verificationResult.getErrorMessages().element());
+		}
+
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
+		@DisplayName("with m = 0 throws an IllegalArgumentException")
+		void verifyProductArgumentWithMEqualsOneThrows(final ProductStatement statement, final ProductArgument argument) {
+
+			// ProductStatement and ProductArgument with m = 0
+			final ProductStatement zeroMStatement = spy(statement);
+			doReturn(0).when(zeroMStatement).get_m();
+			final ProductArgument zeroMArgument = spy(argument);
+			doReturn(0).when(zeroMArgument).get_m();
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.verifyProductArgument(zeroMStatement, zeroMArgument));
+			assertEquals("The number of columns m must be strictly positive.", exception.getMessage());
+		}
+
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
+		@DisplayName("with n < 2 throws an IllegalArgumentException")
+		void verifyProductArgumentWithNSmallerTwoThrows(final ProductStatement statement, final ProductArgument argument) {
+			// ProductArgument with n = 1
+			final ProductArgument oneNArgument = spy(argument);
+			doReturn(1).when(oneNArgument).get_n();
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.verifyProductArgument(statement, oneNArgument));
+			assertEquals("The number of rows n must be greater than or equal to 2.", exception.getMessage());
+		}
+
+		@ParameterizedTest
+		@MethodSource("statementArgumentProvider")
+		@DisplayName("with n > nu throws an IllegalArgumentException")
+		void verifyProductArgumentWithNGreaterNuThrows(final ProductStatement statement, final ProductArgument argument) {
+			// ProductArgument with n = nu + 1
+			final ProductArgument tooBigNArgument = spy(argument);
+			doReturn(nu + 1).when(tooBigNArgument).get_n();
+
+			final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+					() -> productArgumentService.verifyProductArgument(statement, tooBigNArgument));
+			assertEquals("The matrix' number of rows cannot be greater than the commitment key size.", exception.getMessage());
 		}
 
 		@ParameterizedTest(name = "{5}")

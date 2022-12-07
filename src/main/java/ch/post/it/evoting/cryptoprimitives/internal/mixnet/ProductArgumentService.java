@@ -116,19 +116,20 @@ final class ProductArgumentService {
 		final GroupVector<ZqElement, ZqGroup> r = witness.get_r();
 
 		// Dimension check
+		final int n = A.numRows();
+		final int m = A.numColumns();
+		final int nu = ck.size();
 		checkArgument(c_A.size() == r.size(), "The commitments A and the exponents r must have the same size.");
-		checkArgument(0 < A.numColumns(), "The number of columns m must be strictly positive.");
-		checkArgument(1 < A.numRows(), "The number of rows n must be greater than or equal to 2.");
-		checkArgument(A.numRows() <= ck.size(),
+		checkArgument(2 <= n, "The number of rows n must be greater than or equal to 2.");
+		checkArgument(n <= nu,
 				"The matrix' number of rows cannot be greater than the commitment key size.");
+		checkArgument(m > 0, "The number of columns m must be strictly positive.");
 
 		// Group check
 		checkArgument(b.getGroup().equals(A.getGroup()), "The product b and the matrix A must belong to the same group.");
 		checkArgument(ck.getGroup().equals(c_A.getGroup()), "The commitment key and the commitments must have the same group.");
 
 		// Ensure that the statement and the witness are compatible
-		final int n = A.numRows();
-		final int m = A.numColumns();
 		checkArgument(c_A.equals(getCommitmentMatrix(A, r, ck)),
 				"The commitment to matrix A with exponents r using the given commitment key must yield the commitments cA.");
 		final ZqGroup zqGroup = A.getGroup();
@@ -192,7 +193,6 @@ final class ProductArgumentService {
 
 		final GroupVector<GqElement, GqGroup> c_A = statement.get_c_A();
 		final ZqElement b = statement.get_b();
-		final int m = statement.get_m();
 		final SingleValueProductArgument singleValueProductArg = argument.getSingleValueProductArgument();
 
 		// cross-check groups and dimensions
@@ -201,6 +201,16 @@ final class ProductArgumentService {
 		checkArgument(statement.get_m() == argument.get_m(),
 				"The statement and the argument must have the same m.");
 
+		// Require.
+		final int n = argument.get_n();
+		final int m = argument.get_m();
+		final int nu = ck.size();
+		checkArgument(2 <= n, "The number of rows n must be greater than or equal to 2.");
+		checkArgument(n <= nu,
+				"The matrix' number of rows cannot be greater than the commitment key size.");
+		checkArgument(m > 0, "The number of columns m must be strictly positive.");
+
+		// Operation
 		if (m > 1) {
 			final GqElement c_b = argument.get_c_b()
 					.orElseThrow(() -> new IllegalArgumentException("The product argument must contain a commitment b for m > 1."));
