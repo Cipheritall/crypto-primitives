@@ -1,15 +1,45 @@
 # Changelog
 
-## Release 1.1
+## Release 1.2
 
-Release 1.1 includes some feedback from the Federal Chancellery's mandated experts.
+Release 1.2 includes some feedback from the Federal Chancellery's mandated experts and other experts of the community.
 We want to thank the experts for their high-quality, constructive remarks:
 
 * Vanessa Teague (Thinking Cybersecurity), Olivier Pereira (Université catholique Louvain), Thomas Edmund Haines (Australian National University)
 * Aleksander Essex (Western University Canada)
 * Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis (Bern University of Applied Sciences)
 
+The following functionalities and improvements are included in release 1.2:
+
+* [Specification] Justified the use-case dependent parametrization of Argon2 (feedback from Aleksander Essex).
+* [Specification] Simplified the specification of the GetCiphertextVectorExponentiation and GetVerifiableCommitmentKey algorithms.
+* [Specification] Improved the specification of the LeftPad algorithm (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Specified the output value of the truncate method (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Fixed the assignment symbol in the GetUniqueDecimalStrings algorithm (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Improved the definition of the HashAndSquare algorithm's inputs (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Improved the GetEncryptionParameters algorithm (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Optimized the isSmallPrime method using the optimized school method (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Improved the input validation in the algorithms GenVerifiableDecryptions, VerifyProductArgument, and ComputeDVector (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code, Specification] Fixed the requirements and indices in the CombinePublicKeys method (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Fixed the domain of the GenPermutation method (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Improved the definition of the neutral element in the GetDiagonalProducts algorithm (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Specification] Fixed wrong fonts in various algorithms (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Introduced a divide method for the division of GqElements (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the alignment of the GetSmallPrimeGroupMembers algorithm (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Simplified the stream in the GenShuffle algorithm (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Streamlined the GetMatrixDimensions method (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the alignment of the VerifySchnorr and VerifyProcessPlaintext algorithms (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
+* [Code] Improved the input validation in the setters of the AuthorityInformation class (corresponds to GitLab issue [#14](https://gitlab.com/swisspost-evoting/crypto-primitives/crypto-primitives/-/issues/14 )).
+* [Code] Updated dependencies and third-party libraries.
+
+---
+
+## Release 1.1
+
+Release 1.1 includes some feedback from the Federal Chancellery's mandated experts (see above)
+
 The following functionalities and improvements are included in release 1.1:
+
 * [Code] Implemented the BaseXEncode and BaseXDecode wrapper methods (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
 * [Code] Implemented the Truncate (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
 * [Code] Improved the immutability of objects (feedback from Rolf Haenni, Reto Koenig, Philipp Locher, and Eric Dubuis).
@@ -41,12 +71,7 @@ The following functionalities and improvements are included in release 1.0:
 
 ## Release 0.15
 
-Release 0.15 includes some feedback from the Federal Chancellery's mandated experts.
-We want to thank the experts for their high-quality, constructive remarks:
-
-* Vanessa Teague (Thinking Cybersecurity), Olivier Pereira (Université catholique Louvain), Thomas Edmund Haines (Australian National University)
-* Aleksander Essex (Western University Canada)
-* Rolf Haenni, Reto Koenig, Philipp Locher, Eric Dubuis (Bern University of Applied Sciences)
+Release 0.15 includes some feedback from the Federal Chancellery's mandated experts (see above)
 
 The following functionalities and improvements are included in release 0.15:
 
